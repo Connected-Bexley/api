@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Emails\Email;
 use App\Http\Requests\Service\UpdateRequest as UpdateServiceRequest;
-use App\Models\IndexConfigurators\ServicesIndexConfigurator;
 use App\Models\Mutators\ServiceMutators;
 use App\Models\Relationships\ServiceRelationships;
 use App\Models\Scopes\ServiceScopes;
@@ -18,7 +17,9 @@ use App\TaxonomyRelationships\UpdateTaxonomyRelationships;
 use App\UpdateRequest\AppliesUpdateRequests;
 use App\UpdateRequest\UpdateRequests;
 use Carbon\CarbonImmutable;
+use ElasticScoutDriverPlus\Searchable;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\Response;
@@ -27,10 +28,10 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator as ValidatorFacade;
 use Illuminate\Support\Str;
-use ScoutElastic\Searchable;
 
 class Service extends Model implements AppliesUpdateRequests, Notifiable, HasTaxonomyRelationships
 {
+    use HasFactory;
     use DispatchesJobs;
     use Notifications;
     use Searchable;
@@ -94,72 +95,6 @@ class Service extends Model implements AppliesUpdateRequests, Notifiable, HasTax
     ];
 
     /**
-     * The Elasticsearch index configuration class.
-     *
-     * @var string
-     */
-    protected $indexConfigurator = ServicesIndexConfigurator::class;
-
-    /**
-     * Allows you to set different search algorithms.
-     *
-     * @var array
-     */
-    protected $searchRules = [
-        //
-    ];
-
-    /**
-     * The mapping for the fields.
-     *
-     * @var array
-     */
-    protected $mapping = [
-        'properties' => [
-            'id' => ['type' => 'keyword'],
-            'name' => [
-                'type' => 'text',
-                'fields' => [
-                    'keyword' => ['type' => 'keyword'],
-                ],
-            ],
-            'intro' => ['type' => 'text'],
-            'description' => ['type' => 'text'],
-            'wait_time' => ['type' => 'keyword'],
-            'is_free' => ['type' => 'boolean'],
-            'status' => ['type' => 'keyword'],
-            'score' => ['type' => 'integer'],
-            'organisation_name' => [
-                'type' => 'text',
-                'fields' => [
-                    'keyword' => ['type' => 'keyword'],
-                ],
-            ],
-            'taxonomy_categories' => [
-                'type' => 'text',
-                'fields' => [
-                    'keyword' => ['type' => 'keyword'],
-                ],
-            ],
-            'collection_categories' => ['type' => 'keyword'],
-            'collection_personas' => ['type' => 'keyword'],
-            'service_locations' => [
-                'type' => 'nested',
-                'properties' => [
-                    'id' => ['type' => 'keyword'],
-                    'location' => ['type' => 'geo_point'],
-                ],
-            ],
-            'service_eligibilities' => [
-                'type' => 'text',
-                'fields' => [
-                    'keyword' => ['type' => 'keyword'],
-                ],
-            ],
-        ],
-    ];
-
-    /**
      * Get the indexable data array for the model.
      *
      * @return array
@@ -178,14 +113,14 @@ class Service extends Model implements AppliesUpdateRequests, Notifiable, HasTax
 
         return [
             'id' => $this->id,
-            'name' => $this->name,
-            'intro' => $this->intro,
-            'description' => $this->description,
+            'name' => $this->onlyAlphaNumeric($this->name),
+            'intro' => $this->onlyAlphaNumeric($this->intro),
+            'description' => $this->onlyAlphaNumeric($this->description),
             'wait_time' => $this->wait_time,
             'is_free' => $this->is_free,
             'status' => $this->status,
             'score' => $this->score,
-            'organisation_name' => $this->organisation->name,
+            'organisation_name' => $this->onlyAlphaNumeric($this->organisation->name),
             'taxonomy_categories' => $this->taxonomies()->pluck('name')->toArray(),
             'collection_categories' => static::collections($this)->where('type', Collection::TYPE_CATEGORY)->pluck('name')->toArray(),
             'collection_personas' => static::collections($this)->where('type', Collection::TYPE_PERSONA)->pluck('name')->toArray(),

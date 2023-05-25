@@ -30,8 +30,8 @@ class UsersTest extends TestCase
 
     public function test_service_worker_can_list_them()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
         Passport::actingAs($user);
 
         $response = $this->json('GET', '/core/v1/users', ['include' => 'user-roles']);
@@ -56,8 +56,8 @@ class UsersTest extends TestCase
     {
         $this->fakeEvents();
 
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
         Passport::actingAs($user);
 
         $this->json('GET', '/core/v1/users');
@@ -70,9 +70,9 @@ class UsersTest extends TestCase
 
     public function test_service_worker_can_filter_by_highest_role_name()
     {
-        $service = factory(Service::class)->create();
-        $serviceAdmin = factory(User::class)->create()->makeServiceAdmin($service);
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $serviceAdmin = User::factory()->create()->makeServiceAdmin($service);
+        $user = User::factory()->create()->makeServiceWorker($service);
         Passport::actingAs($user);
 
         $serviceAdminRoleName = Role::serviceAdmin()->name;
@@ -88,9 +88,9 @@ class UsersTest extends TestCase
 
     public function test_service_worker_can_sort_by_highest_role()
     {
-        $service = factory(Service::class)->create();
-        $serviceAdmin = factory(User::class)->create()->makeServiceAdmin($service);
-        $serviceWorker = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $serviceAdmin = User::factory()->create()->makeServiceAdmin($service);
+        $serviceWorker = User::factory()->create()->makeServiceWorker($service);
         Passport::actingAs($serviceWorker);
 
         $response = $this->json('GET', '/core/v1/users?sort=-highest_role');
@@ -104,10 +104,10 @@ class UsersTest extends TestCase
 
     public function test_service_worker_can_sort_by_at_organisation()
     {
-        $organisation = factory(Organisation::class)->create();
-        $organisationAdmin = factory(User::class)->create()->makeOrganisationAdmin($organisation);
-        $user = factory(User::class)->create()->makeServiceWorker(
-            factory(Service::class)->create()
+        $organisation = Organisation::factory()->create();
+        $organisationAdmin = User::factory()->create()->makeOrganisationAdmin($organisation);
+        $user = User::factory()->create()->makeServiceWorker(
+            Service::factory()->create()
         );
         Passport::actingAs($user);
 
@@ -122,10 +122,10 @@ class UsersTest extends TestCase
 
     public function test_service_worker_can_sort_by_at_service()
     {
-        $service = factory(Service::class)->create();
-        $serviceAdmin = factory(User::class)->create()->makeServiceAdmin($service);
-        $user = factory(User::class)->create()->makeServiceWorker(
-            factory(Service::class)->create()
+        $service = Service::factory()->create();
+        $serviceAdmin = User::factory()->create()->makeServiceAdmin($service);
+        $user = User::factory()->create()->makeServiceWorker(
+            Service::factory()->create()
         );
         Passport::actingAs($user);
 
@@ -140,10 +140,10 @@ class UsersTest extends TestCase
 
     public function test_service_worker_can_sort_by_at_organisation_and_includes_service_workers()
     {
-        $service = factory(Service::class)->create();
-        $serviceWorker = factory(User::class)->create()->makeServiceWorker($service);
-        $user = factory(User::class)->create()->makeServiceWorker(
-            factory(Service::class)->create()
+        $service = Service::factory()->create();
+        $serviceWorker = User::factory()->create()->makeServiceWorker($service);
+        $user = User::factory()->create()->makeServiceWorker(
+            Service::factory()->create()
         );
         Passport::actingAs($user);
 
@@ -158,12 +158,12 @@ class UsersTest extends TestCase
 
     public function test_service_worker_can_sort_by_at_organisation_and_excludes_global_admins()
     {
-        $organisation = factory(Organisation::class)->create();
-        $organisationAdmin = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $organisationAdmin = User::factory()->create()->makeOrganisationAdmin($organisation);
         // This user shouldn't show up in the results.
-        factory(User::class)->create()->makeGlobalAdmin();
-        $user = factory(User::class)->create()->makeServiceWorker(
-            factory(Service::class)->create()
+        User::factory()->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeServiceWorker(
+            Service::factory()->create()
         );
         Passport::actingAs($user);
 
@@ -199,8 +199,8 @@ class UsersTest extends TestCase
      */
     public function test_service_worker_cannot_create_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
@@ -215,14 +215,14 @@ class UsersTest extends TestCase
      */
     public function test_service_admin_cannot_create_service_worker_for_another_service()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
             [
                 'role' => Role::NAME_SERVICE_WORKER,
-                'service_id' => factory(Service::class)->create()->id,
+                'service_id' => Service::factory()->create()->id,
             ],
         ]));
 
@@ -231,8 +231,8 @@ class UsersTest extends TestCase
 
     public function test_service_admin_can_create_service_worker_for_their_service()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
@@ -251,14 +251,14 @@ class UsersTest extends TestCase
 
     public function test_service_admin_cannot_create_service_admin_for_another_service()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
             [
                 'role' => Role::NAME_SERVICE_ADMIN,
-                'service_id' => factory(Service::class)->create()->id,
+                'service_id' => Service::factory()->create()->id,
             ],
         ]));
 
@@ -267,8 +267,8 @@ class UsersTest extends TestCase
 
     public function test_service_admin_can_create_service_admin_for_their_service()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
@@ -288,8 +288,8 @@ class UsersTest extends TestCase
 
     public function test_service_admin_cannot_create_organisation_admin()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
@@ -307,14 +307,14 @@ class UsersTest extends TestCase
      */
     public function test_organisation_admin_cannot_create_service_worker_for_another_service()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
             [
                 'role' => Role::NAME_SERVICE_WORKER,
-                'service_id' => factory(Service::class)->create()->id,
+                'service_id' => Service::factory()->create()->id,
             ],
         ]));
 
@@ -323,8 +323,8 @@ class UsersTest extends TestCase
 
     public function test_organisation_admin_can_create_service_worker_for_their_service()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
@@ -343,14 +343,14 @@ class UsersTest extends TestCase
 
     public function test_organisation_admin_cannot_create_service_admin_for_another_service()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
             [
                 'role' => Role::NAME_SERVICE_ADMIN,
-                'service_id' => factory(Service::class)->create()->id,
+                'service_id' => Service::factory()->create()->id,
             ],
         ]));
 
@@ -359,8 +359,8 @@ class UsersTest extends TestCase
 
     public function test_organisation_admin_can_create_service_admin_for_their_service()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
@@ -380,14 +380,14 @@ class UsersTest extends TestCase
 
     public function test_organisation_admin_cannot_create_organisation_admin_for_another_organisation()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
             [
                 'role' => Role::NAME_ORGANISATION_ADMIN,
-                'organisation_id' => factory(Organisation::class)->create()->id,
+                'organisation_id' => Organisation::factory()->create()->id,
             ],
         ]));
 
@@ -396,8 +396,8 @@ class UsersTest extends TestCase
 
     public function test_organisation_admin_can_create_organisation_admin_for_their_organisation()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
@@ -418,8 +418,8 @@ class UsersTest extends TestCase
 
     public function test_organisation_admin_cannot_create_global_admin()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
@@ -434,8 +434,8 @@ class UsersTest extends TestCase
      */
     public function test_global_admin_can_create_service_worker()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
@@ -454,8 +454,8 @@ class UsersTest extends TestCase
 
     public function test_global_admin_can_create_service_admin()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
@@ -475,8 +475,8 @@ class UsersTest extends TestCase
 
     public function test_global_admin_can_create_organisation_admin()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
@@ -497,8 +497,8 @@ class UsersTest extends TestCase
 
     public function test_global_admin_can_create_global_admin()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
@@ -517,7 +517,7 @@ class UsersTest extends TestCase
 
     public function test_global_admin_cannot_create_super_admin()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
@@ -533,8 +533,8 @@ class UsersTest extends TestCase
 
     public function test_super_admin_can_create_service_worker()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
@@ -553,8 +553,8 @@ class UsersTest extends TestCase
 
     public function test_super_admin_can_create_service_admin()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
@@ -574,8 +574,8 @@ class UsersTest extends TestCase
 
     public function test_super_admin_can_create_organisation_admin()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
@@ -596,8 +596,8 @@ class UsersTest extends TestCase
 
     public function test_super_admin_can_create_global_admin()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
@@ -616,8 +616,8 @@ class UsersTest extends TestCase
 
     public function test_super_admin_can_create_super_admin()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
@@ -637,15 +637,15 @@ class UsersTest extends TestCase
 
     public function test_super_admin_can_create_super_admin_with_soft_deleted_users_email()
     {
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
 
-        $deletedUser = factory(User::class)->create(['email' => 'test@example.com'])->makeSuperAdmin();
+        $deletedUser = User::factory()->create(['email' => 'test@example.com'])->makeSuperAdmin();
         $deletedUser->delete();
 
         $response = $this->json('POST', '/core/v1/users', [
-            'first_name' => $this->faker->firstName,
-            'last_name' => $this->faker->lastName,
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
             'email' => 'test@example.com',
             'phone' => random_uk_phone(),
             'password' => 'Pa$$w0rd',
@@ -678,7 +678,7 @@ class UsersTest extends TestCase
     {
         $this->fakeEvents();
 
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
@@ -700,8 +700,8 @@ class UsersTest extends TestCase
 
     public function test_guest_cannot_view_one()
     {
-        factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        Service::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         $response = $this->json('GET', "/core/v1/users/{$user->id}");
 
@@ -710,8 +710,8 @@ class UsersTest extends TestCase
 
     public function test_service_worker_can_view_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
         Passport::actingAs($user);
 
         $response = $this->json('GET', "/core/v1/users/{$user->id}", ['include' => 'user-roles']);
@@ -736,8 +736,8 @@ class UsersTest extends TestCase
     {
         $this->fakeEvents();
 
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
         Passport::actingAs($user);
 
         $this->json('GET', "/core/v1/users/{$user->id}");
@@ -757,7 +757,7 @@ class UsersTest extends TestCase
 
     public function test_guest_cannot_view_logged_in_user()
     {
-        factory(Service::class)->create();
+        Service::factory()->create();
 
         $response = $this->json('GET', '/core/v1/users/users');
 
@@ -766,8 +766,8 @@ class UsersTest extends TestCase
 
     public function test_service_worker_can_view_logged_in_user()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
         Passport::actingAs($user);
 
         $response = $this->json('GET', '/core/v1/users/user', ['include' => 'user-roles']);
@@ -792,8 +792,8 @@ class UsersTest extends TestCase
     {
         $this->fakeEvents();
 
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
         Passport::actingAs($user);
 
         $this->json('GET', '/core/v1/users/user');
@@ -816,8 +816,8 @@ class UsersTest extends TestCase
      */
     public function test_guest_cannot_update_one()
     {
-        factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        Service::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         $response = $this->json('PUT', "/core/v1/users/{$user->id}", $this->getCreateUserPayload([
             ['role' => Role::NAME_SERVICE_ADMIN],
@@ -831,11 +831,11 @@ class UsersTest extends TestCase
      */
     public function test_service_worker_cannot_update_one()
     {
-        $service = factory(Service::class)->create();
-        $invoker = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeServiceWorker($service);
         Passport::actingAs($invoker);
 
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         $response = $this->json('PUT', "/core/v1/users/{$user->id}", $this->getCreateUserPayload([
             ['role' => Role::NAME_SUPER_ADMIN],
@@ -846,8 +846,8 @@ class UsersTest extends TestCase
 
     public function test_service_worker_can_update_their_own()
     {
-        $service = factory(Service::class)->create();
-        $invoker = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeServiceWorker($service);
         Passport::actingAs($invoker);
 
         $response = $this->json('PUT', "/core/v1/users/{$invoker->id}", $this->getCreateUserPayload([
@@ -865,11 +865,11 @@ class UsersTest extends TestCase
      */
     public function test_service_admin_can_update_service_worker()
     {
-        $invoker = factory(User::class)->create()->makeServiceAdmin(factory(Service::class)->create());
+        $invoker = User::factory()->create()->makeServiceAdmin(Service::factory()->create());
         Passport::actingAs($invoker);
 
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
 
         $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
             'first_name' => $user->first_name,
@@ -902,11 +902,11 @@ class UsersTest extends TestCase
 
     public function test_service_admin_can_update_service_admin()
     {
-        $service = factory(Service::class)->create();
-        $invoker = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeServiceAdmin($service);
         Passport::actingAs($invoker);
 
-        $subject = factory(User::class)->create()->makeServiceAdmin($service);
+        $subject = User::factory()->create()->makeServiceAdmin($service);
 
         $response = $this->json('PUT', "/core/v1/users/{$subject->id}", [
             'first_name' => $subject->first_name,
@@ -947,11 +947,11 @@ class UsersTest extends TestCase
 
     public function test_service_admin_cannot_update_organisation_admin()
     {
-        $service = factory(Service::class)->create();
-        $invoker = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeServiceAdmin($service);
         Passport::actingAs($invoker);
 
-        $subject = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
+        $subject = User::factory()->create()->makeOrganisationAdmin($service->organisation);
 
         $response = $this->json('PUT', "/core/v1/users/{$subject->id}", [
             'first_name' => $subject->first_name,
@@ -983,11 +983,11 @@ class UsersTest extends TestCase
      */
     public function test_organisation_admin_can_update_service_worker()
     {
-        $service = factory(Service::class)->create();
-        $invoker = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeOrganisationAdmin($service->organisation);
         Passport::actingAs($invoker);
 
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $user = User::factory()->create()->makeServiceWorker($service);
 
         $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
             'first_name' => $user->first_name,
@@ -1020,11 +1020,11 @@ class UsersTest extends TestCase
 
     public function test_organisation_admin_can_update_service_admin()
     {
-        $service = factory(Service::class)->create();
-        $invoker = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeOrganisationAdmin($service->organisation);
         Passport::actingAs($invoker);
 
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
             'first_name' => $user->first_name,
@@ -1065,11 +1065,11 @@ class UsersTest extends TestCase
 
     public function test_organisation_admin_can_update_organisation_admin()
     {
-        $service = factory(Service::class)->create();
-        $invoker = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeOrganisationAdmin($service->organisation);
         Passport::actingAs($invoker);
 
-        $user = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
+        $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
 
         $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
             'first_name' => $user->first_name,
@@ -1122,11 +1122,11 @@ class UsersTest extends TestCase
 
     public function test_organisation_admin_cannot_update_global_admin()
     {
-        $service = factory(Service::class)->create();
-        $invoker = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeOrganisationAdmin($service->organisation);
         Passport::actingAs($invoker);
 
-        $user = factory(User::class)->create()->makeGlobalAdmin($service->organisation);
+        $user = User::factory()->create()->makeGlobalAdmin($service->organisation);
 
         $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
             'first_name' => $user->first_name,
@@ -1162,11 +1162,11 @@ class UsersTest extends TestCase
 
     public function test_global_admin_can_update_service_worker()
     {
-        $invoker = factory(User::class)->create()->makeGlobalAdmin();
+        $invoker = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($invoker);
 
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
 
         $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
             'first_name' => $user->first_name,
@@ -1199,11 +1199,11 @@ class UsersTest extends TestCase
 
     public function test_global_admin_can_update_service_admin()
     {
-        $invoker = factory(User::class)->create()->makeGlobalAdmin();
+        $invoker = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($invoker);
 
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
             'first_name' => $user->first_name,
@@ -1244,11 +1244,11 @@ class UsersTest extends TestCase
 
     public function test_global_admin_can_update_organisation_admin()
     {
-        $invoker = factory(User::class)->create()->makeGlobalAdmin();
+        $invoker = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($invoker);
 
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
 
         $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
             'first_name' => $user->first_name,
@@ -1301,11 +1301,11 @@ class UsersTest extends TestCase
 
     public function test_global_admin_can_update_global_admin()
     {
-        $invoker = factory(User::class)->create()->makeGlobalAdmin();
+        $invoker = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($invoker);
 
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
             'first_name' => $user->first_name,
@@ -1362,12 +1362,12 @@ class UsersTest extends TestCase
 
     public function test_service_and_organisation_permissions_are_applied_when_updating_to_global_admin()
     {
-        $invoker = factory(User::class)->create()->makeGlobalAdmin();
+        $invoker = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($invoker);
 
-        $service1 = factory(Service::class)->create();
-        $service2 = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($service1->organisation);
+        $service1 = Service::factory()->create();
+        $service2 = Service::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($service1->organisation);
 
         $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
             'first_name' => $user->first_name,
@@ -1397,11 +1397,11 @@ class UsersTest extends TestCase
 
     public function test_global_admin_cannot_update_super_admin()
     {
-        $invoker = factory(User::class)->create()->makeGlobalAdmin();
+        $invoker = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($invoker);
 
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
             'first_name' => $user->first_name,
@@ -1436,11 +1436,11 @@ class UsersTest extends TestCase
 
     public function test_super_admin_can_update_service_worker()
     {
-        $invoker = factory(User::class)->create()->makeSuperAdmin();
+        $invoker = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($invoker);
 
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
 
         $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
             'first_name' => $user->first_name,
@@ -1473,11 +1473,11 @@ class UsersTest extends TestCase
 
     public function test_super_admin_can_update_service_admin()
     {
-        $invoker = factory(User::class)->create()->makeSuperAdmin();
+        $invoker = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($invoker);
 
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
             'first_name' => $user->first_name,
@@ -1518,11 +1518,11 @@ class UsersTest extends TestCase
 
     public function test_super_admin_can_update_organisation_admin()
     {
-        $invoker = factory(User::class)->create()->makeSuperAdmin();
+        $invoker = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($invoker);
 
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
 
         $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
             'first_name' => $user->first_name,
@@ -1575,11 +1575,11 @@ class UsersTest extends TestCase
 
     public function test_super_admin_can_update_global_admin()
     {
-        $invoker = factory(User::class)->create()->makeSuperAdmin();
+        $invoker = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($invoker);
 
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
             'first_name' => $user->first_name,
@@ -1636,11 +1636,11 @@ class UsersTest extends TestCase
 
     public function test_super_admin_can_update_super_admin()
     {
-        $invoker = factory(User::class)->create()->makeSuperAdmin();
+        $invoker = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($invoker);
 
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
             'first_name' => $user->first_name,
@@ -1707,11 +1707,11 @@ class UsersTest extends TestCase
     {
         $this->fakeEvents();
 
-        $invoker = factory(User::class)->create()->makeSuperAdmin();
+        $invoker = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($invoker);
 
-        $service = factory(Service::class)->create();
-        $subject = factory(User::class)->create()->makeSuperAdmin();
+        $service = Service::factory()->create();
+        $subject = User::factory()->create()->makeSuperAdmin();
 
         $this->json('PUT', "/core/v1/users/{$subject->id}", [
             'first_name' => $subject->first_name,
@@ -1752,8 +1752,8 @@ class UsersTest extends TestCase
 
     public function test_guest_cannot_delete_service_worker()
     {
-        $service = factory(Service::class)->create();
-        $subject = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $subject = User::factory()->create()->makeServiceWorker($service);
 
         $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
 
@@ -1762,9 +1762,9 @@ class UsersTest extends TestCase
 
     public function test_service_worker_cannot_delete_service_worker()
     {
-        $service = factory(Service::class)->create();
-        $invoker = factory(User::class)->create()->makeServiceWorker($service);
-        $subject = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeServiceWorker($service);
+        $subject = User::factory()->create()->makeServiceWorker($service);
         Passport::actingAs($invoker);
 
         $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
@@ -1774,9 +1774,9 @@ class UsersTest extends TestCase
 
     public function test_service_admin_can_delete_service_worker()
     {
-        $service = factory(Service::class)->create();
-        $invoker = factory(User::class)->create()->makeServiceAdmin($service);
-        $subject = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeServiceAdmin($service);
+        $subject = User::factory()->create()->makeServiceWorker($service);
         Passport::actingAs($invoker);
 
         $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
@@ -1787,8 +1787,8 @@ class UsersTest extends TestCase
 
     public function test_guest_cannot_delete_service_admin()
     {
-        $service = factory(Service::class)->create();
-        $subject = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $subject = User::factory()->create()->makeServiceAdmin($service);
 
         $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
 
@@ -1797,9 +1797,9 @@ class UsersTest extends TestCase
 
     public function test_service_worker_cannot_delete_service_admin()
     {
-        $service = factory(Service::class)->create();
-        $invoker = factory(User::class)->create()->makeServiceWorker($service);
-        $subject = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeServiceWorker($service);
+        $subject = User::factory()->create()->makeServiceAdmin($service);
         Passport::actingAs($invoker);
 
         $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
@@ -1809,9 +1809,9 @@ class UsersTest extends TestCase
 
     public function test_service_admin_can_delete_service_admin()
     {
-        $service = factory(Service::class)->create();
-        $invoker = factory(User::class)->create()->makeServiceAdmin($service);
-        $subject = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeServiceAdmin($service);
+        $subject = User::factory()->create()->makeServiceAdmin($service);
         Passport::actingAs($invoker);
 
         $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
@@ -1822,8 +1822,8 @@ class UsersTest extends TestCase
 
     public function test_guest_cannot_delete_organisation_admin()
     {
-        $service = factory(Service::class)->create();
-        $subject = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
+        $service = Service::factory()->create();
+        $subject = User::factory()->create()->makeOrganisationAdmin($service->organisation);
 
         $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
 
@@ -1832,9 +1832,9 @@ class UsersTest extends TestCase
 
     public function test_service_worker_cannot_delete_organisation_admin()
     {
-        $service = factory(Service::class)->create();
-        $invoker = factory(User::class)->create()->makeServiceWorker($service);
-        $subject = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeServiceWorker($service);
+        $subject = User::factory()->create()->makeOrganisationAdmin($service->organisation);
         Passport::actingAs($invoker);
 
         $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
@@ -1844,9 +1844,9 @@ class UsersTest extends TestCase
 
     public function test_service_admin_cannot_delete_organisation_admin()
     {
-        $service = factory(Service::class)->create();
-        $invoker = factory(User::class)->create()->makeServiceAdmin($service);
-        $subject = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeServiceAdmin($service);
+        $subject = User::factory()->create()->makeOrganisationAdmin($service->organisation);
         Passport::actingAs($invoker);
 
         $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
@@ -1856,9 +1856,9 @@ class UsersTest extends TestCase
 
     public function test_organisation_admin_can_delete_organisation_admin()
     {
-        $service = factory(Service::class)->create();
-        $invoker = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
-        $subject = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeOrganisationAdmin($service->organisation);
+        $subject = User::factory()->create()->makeOrganisationAdmin($service->organisation);
         Passport::actingAs($invoker);
 
         $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
@@ -1869,7 +1869,7 @@ class UsersTest extends TestCase
 
     public function test_guest_cannot_delete_global_admin()
     {
-        $subject = factory(User::class)->create()->makeGlobalAdmin();
+        $subject = User::factory()->create()->makeGlobalAdmin();
 
         $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
 
@@ -1878,9 +1878,9 @@ class UsersTest extends TestCase
 
     public function test_service_worker_cannot_delete_global_admin()
     {
-        $service = factory(Service::class)->create();
-        $invoker = factory(User::class)->create()->makeServiceWorker($service);
-        $subject = factory(User::class)->create()->makeGlobalAdmin();
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeServiceWorker($service);
+        $subject = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($invoker);
 
         $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
@@ -1890,9 +1890,9 @@ class UsersTest extends TestCase
 
     public function test_service_admin_cannot_delete_global_admin()
     {
-        $service = factory(Service::class)->create();
-        $invoker = factory(User::class)->create()->makeServiceAdmin($service);
-        $subject = factory(User::class)->create()->makeGlobalAdmin();
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeServiceAdmin($service);
+        $subject = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($invoker);
 
         $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
@@ -1902,9 +1902,9 @@ class UsersTest extends TestCase
 
     public function test_organisation_admin_can_delete_global_admin()
     {
-        $service = factory(Service::class)->create();
-        $invoker = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
-        $subject = factory(User::class)->create()->makeGlobalAdmin();
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeOrganisationAdmin($service->organisation);
+        $subject = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($invoker);
 
         $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
@@ -1914,8 +1914,8 @@ class UsersTest extends TestCase
 
     public function test_global_admin_can_delete_global_admin()
     {
-        $invoker = factory(User::class)->create()->makeGlobalAdmin();
-        $subject = factory(User::class)->create()->makeGlobalAdmin();
+        $invoker = User::factory()->create()->makeGlobalAdmin();
+        $subject = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($invoker);
 
         $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
@@ -1926,7 +1926,7 @@ class UsersTest extends TestCase
 
     public function test_guest_cannot_delete_super_admin()
     {
-        $subject = factory(User::class)->create()->makeGlobalAdmin();
+        $subject = User::factory()->create()->makeGlobalAdmin();
 
         $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
 
@@ -1935,9 +1935,9 @@ class UsersTest extends TestCase
 
     public function test_service_worker_cannot_delete_super_admin()
     {
-        $service = factory(Service::class)->create();
-        $invoker = factory(User::class)->create()->makeServiceWorker($service);
-        $subject = factory(User::class)->create()->makeSuperAdmin();
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeServiceWorker($service);
+        $subject = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($invoker);
 
         $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
@@ -1947,9 +1947,9 @@ class UsersTest extends TestCase
 
     public function test_service_admin_cannot_delete_super_admin()
     {
-        $service = factory(Service::class)->create();
-        $invoker = factory(User::class)->create()->makeServiceAdmin($service);
-        $subject = factory(User::class)->create()->makeSuperAdmin();
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeServiceAdmin($service);
+        $subject = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($invoker);
 
         $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
@@ -1959,9 +1959,9 @@ class UsersTest extends TestCase
 
     public function test_organisation_admin_can_delete_super_admin()
     {
-        $service = factory(Service::class)->create();
-        $invoker = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
-        $subject = factory(User::class)->create()->makeSuperAdmin();
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeOrganisationAdmin($service->organisation);
+        $subject = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($invoker);
 
         $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
@@ -1971,8 +1971,8 @@ class UsersTest extends TestCase
 
     public function test_global_admin_cannot_delete_super_admin()
     {
-        $invoker = factory(User::class)->create()->makeGlobalAdmin();
-        $subject = factory(User::class)->create()->makeSuperAdmin();
+        $invoker = User::factory()->create()->makeGlobalAdmin();
+        $subject = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($invoker);
 
         $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
@@ -1982,8 +1982,8 @@ class UsersTest extends TestCase
 
     public function test_super_admin_can_delete_super_admin()
     {
-        $invoker = factory(User::class)->create()->makeSuperAdmin();
-        $subject = factory(User::class)->create()->makeSuperAdmin();
+        $invoker = User::factory()->create()->makeSuperAdmin();
+        $subject = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($invoker);
 
         $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
@@ -1996,8 +1996,8 @@ class UsersTest extends TestCase
     {
         $this->fakeEvents();
 
-        $invoker = factory(User::class)->create()->makeSuperAdmin();
-        $subject = factory(User::class)->create()->makeSuperAdmin();
+        $invoker = User::factory()->create()->makeSuperAdmin();
+        $subject = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($invoker);
 
         $this->json('DELETE', "/core/v1/users/{$subject->id}");
@@ -2016,15 +2016,15 @@ class UsersTest extends TestCase
      */
 
     /**
-     * @param array $roles
+     * @param  array  $roles
      * @return array
      */
     protected function getCreateUserPayload(array $roles): array
     {
         return [
-            'first_name' => $this->faker->firstName,
-            'last_name' => $this->faker->lastName,
-            'email' => $this->faker->safeEmail,
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
+            'email' => $this->faker->safeEmail(),
             'phone' => random_uk_phone(),
             'password' => 'Pa$$w0rd',
             'roles' => $roles,
@@ -2032,15 +2032,15 @@ class UsersTest extends TestCase
     }
 
     /**
-     * @param array $roles
+     * @param  array  $roles
      * @return array
      */
     protected function getUpdateUserPayload(array $roles): array
     {
         return [
-            'first_name' => $this->faker->firstName,
-            'last_name' => $this->faker->lastName,
-            'email' => $this->faker->safeEmail,
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
+            'email' => $this->faker->safeEmail(),
             'phone' => random_uk_phone(),
             'roles' => $roles,
         ];

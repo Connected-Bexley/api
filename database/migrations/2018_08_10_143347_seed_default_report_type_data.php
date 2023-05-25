@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 
-class SeedDefaultReportTypeData extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -28,4 +27,4 @@ class SeedDefaultReportTypeData extends Migration
     {
         DB::table('report_types')->truncate();
     }
-}
+};

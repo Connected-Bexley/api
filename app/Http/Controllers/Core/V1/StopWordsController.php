@@ -34,7 +34,7 @@ class StopWordsController extends Controller
     public function index(IndexRequest $request)
     {
         $stopWords = cache()->rememberForever(static::CACHE_KEY, function (): array {
-            $content = Storage::cloud()->get('elasticsearch/stop-words.csv');
+            $content = Storage::disk(config('filesystems.cloud'))->get('elasticsearch/stop-words.csv');
             $stopWords = csv_to_array($content);
 
             $stopWords = collect($stopWords)->map(function (array $stopWord) {
@@ -70,7 +70,7 @@ class StopWordsController extends Controller
         );
 
         // Save the string to the stop words.
-        Storage::cloud()->put('elasticsearch/stop-words.csv', $stopWordsCsv);
+        Storage::disk(config('filesystems.cloud'))->put('elasticsearch/stop-words.csv', $stopWordsCsv);
 
         // Clear the cache.
         cache()->forget(static::CACHE_KEY);

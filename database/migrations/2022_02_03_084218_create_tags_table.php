@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTagsTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -19,8 +18,8 @@ class CreateTagsTable extends Migration
         });
 
         Schema::create('service_tag', function (Blueprint $table) {
-            $table->foreignUuid('service_id', 'services');
-            $table->foreignUuid('tag_id', 'tags');
+            $table->foreignUuidKeyColumn('service_id', 'services');
+            $table->foreignUuidKeyColumn('tag_id', 'tags');
             $table->unique(['service_id', 'tag_id']);
             $table->timestamps();
         });
@@ -34,4 +33,4 @@ class CreateTagsTable extends Migration
         Schema::dropIfExists('service_tag');
         Schema::dropIfExists('tags');
     }
-}
+};

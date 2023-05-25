@@ -17,7 +17,7 @@ class ShowRequest extends ImageFormRequest
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     protected function extraRules(): array
     {

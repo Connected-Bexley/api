@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddIndexesToCollectionsTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -29,4 +28,4 @@ class AddIndexesToCollectionsTable extends Migration
             $table->dropIndex(['created_at']);
         });
     }
-}
+};

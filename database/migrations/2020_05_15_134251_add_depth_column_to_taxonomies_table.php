@@ -6,8 +6,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-class AddDepthColumnToTaxonomiesTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -69,4 +68,4 @@ class AddDepthColumnToTaxonomiesTable extends Migration
             $table->dropColumn('depth');
         });
     }
-}
+};

@@ -46,7 +46,7 @@ class TaxonomyOrganisationsTest extends TestCase
         $this->json('GET', '/core/v1/taxonomies/organisations');
 
         Event::assertDispatched(EndpointHit::class, function (EndpointHit $event) {
-            return ($event->getAction() === Audit::ACTION_READ);
+            return $event->getAction() === Audit::ACTION_READ;
         });
     }
 
@@ -63,8 +63,8 @@ class TaxonomyOrganisationsTest extends TestCase
 
     public function test_service_worker_cannot_create_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
 
         Passport::actingAs($user);
 
@@ -75,8 +75,8 @@ class TaxonomyOrganisationsTest extends TestCase
 
     public function test_service_admin_cannot_create_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
@@ -87,8 +87,8 @@ class TaxonomyOrganisationsTest extends TestCase
 
     public function test_organisation_admin_cannot_create_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -99,7 +99,7 @@ class TaxonomyOrganisationsTest extends TestCase
 
     public function test_global_admin_can_create_one()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         $siblingCount = Taxonomy::organisation()->children()->count();
         $payload = [
             'name' => 'PHPUnit Taxonomy Organisation Test',
@@ -119,7 +119,7 @@ class TaxonomyOrganisationsTest extends TestCase
         $this->createTaxonomyOrganisation(['slug' => 'org-1']);
         $this->createTaxonomyOrganisation(['slug' => 'org-2']);
 
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         $taxonomyOrganisation = Taxonomy::organisation()->children()->orderBy('order')->get();
         $payload = [
             'name' => 'PHPUnit Taxonomy Organisation Test',
@@ -145,7 +145,7 @@ class TaxonomyOrganisationsTest extends TestCase
         $this->createTaxonomyOrganisation(['slug' => 'org-1']);
         $this->createTaxonomyOrganisation(['slug' => 'org-2']);
 
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         $taxonomyOrganisations = Taxonomy::organisation()->children()->orderBy('order')->get();
         $payload = [
             'name' => 'PHPUnit Taxonomy Organisation Test',
@@ -178,7 +178,7 @@ class TaxonomyOrganisationsTest extends TestCase
         $this->createTaxonomyOrganisation(['slug' => 'org-1']);
         $this->createTaxonomyOrganisation(['slug' => 'org-2']);
 
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         $taxonomyOrganisations = Taxonomy::organisation()->children()->orderBy('order')->get();
         $payload = [
             'name' => 'PHPUnit Taxonomy Organisation Test',
@@ -200,7 +200,7 @@ class TaxonomyOrganisationsTest extends TestCase
 
     public function test_order_cannot_be_less_than_1_when_created()
     {
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         $payload = [
             'name' => 'PHPUnit Taxonomy Organisation Test',
             'order' => 0,
@@ -214,7 +214,7 @@ class TaxonomyOrganisationsTest extends TestCase
 
     public function test_order_cannot_be_greater_than_count_plus_1_when_created()
     {
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         $siblingCount = Taxonomy::organisation()->children()->count();
         $payload = [
             'name' => 'PHPUnit Taxonomy Organisation Test',
@@ -231,7 +231,7 @@ class TaxonomyOrganisationsTest extends TestCase
     {
         $this->fakeEvents();
 
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         $siblingCount = Taxonomy::organisation()->children()->count();
 
         Passport::actingAs($user);
@@ -299,8 +299,8 @@ class TaxonomyOrganisationsTest extends TestCase
 
     public function test_service_worker_cannot_update_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
         $organisation = $this->createTaxonomyOrganisation();
 
         Passport::actingAs($user);
@@ -311,8 +311,8 @@ class TaxonomyOrganisationsTest extends TestCase
 
     public function test_service_admin_cannot_update_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
         $organisation = $this->createTaxonomyOrganisation();
 
         Passport::actingAs($user);
@@ -323,8 +323,8 @@ class TaxonomyOrganisationsTest extends TestCase
 
     public function test_organisation_admin_cannot_update_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
         $organisation = $this->createTaxonomyOrganisation();
 
         Passport::actingAs($user);
@@ -335,7 +335,7 @@ class TaxonomyOrganisationsTest extends TestCase
 
     public function test_global_admin_can_update_one()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         $organisation = $this->createTaxonomyOrganisation();
         $payload = [
             'name' => 'PHPUnit Test Organisation',
@@ -351,7 +351,7 @@ class TaxonomyOrganisationsTest extends TestCase
 
     public function test_order_is_updated_when_updated_to_beginning()
     {
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
 
         $organisationOne = $this->createTaxonomyOrganisation(['slug' => 'one', 'name' => 'One', 'order' => 1]);
@@ -371,7 +371,7 @@ class TaxonomyOrganisationsTest extends TestCase
 
     public function test_order_is_updated_when_updated_to_middle()
     {
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
 
         $organisationOne = $this->createTaxonomyOrganisation(['slug' => 'one', 'name' => 'One', 'order' => 1]);
@@ -391,7 +391,7 @@ class TaxonomyOrganisationsTest extends TestCase
 
     public function test_order_is_updated_when_updated_to_end()
     {
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
 
         $organisationOne = $this->createTaxonomyOrganisation(['slug' => 'one', 'name' => 'One', 'order' => 1]);
@@ -411,7 +411,7 @@ class TaxonomyOrganisationsTest extends TestCase
 
     public function test_order_cannot_be_less_than_1_when_updated()
     {
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
 
         $organisation = $this->createTaxonomyOrganisation();
@@ -426,7 +426,7 @@ class TaxonomyOrganisationsTest extends TestCase
 
     public function test_order_cannot_be_greater_than_count_plus_1_when_updated()
     {
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
 
         $organisation = $this->createTaxonomyOrganisation(['slug' => 'one', 'name' => 'One', 'order' => 1]);
@@ -445,7 +445,7 @@ class TaxonomyOrganisationsTest extends TestCase
     {
         $this->fakeEvents();
 
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         $organisation = $this->createTaxonomyOrganisation();
 
         Passport::actingAs($user);
@@ -476,8 +476,8 @@ class TaxonomyOrganisationsTest extends TestCase
 
     public function test_service_worker_cannot_delete_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
         $organisation = $this->createTaxonomyOrganisation();
 
         Passport::actingAs($user);
@@ -488,8 +488,8 @@ class TaxonomyOrganisationsTest extends TestCase
 
     public function test_service_admin_cannot_delete_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
         $organisation = $this->createTaxonomyOrganisation();
 
         Passport::actingAs($user);
@@ -500,8 +500,8 @@ class TaxonomyOrganisationsTest extends TestCase
 
     public function test_organisation_admin_cannot_delete_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
         $organisation = $this->createTaxonomyOrganisation();
 
         Passport::actingAs($user);
@@ -512,7 +512,7 @@ class TaxonomyOrganisationsTest extends TestCase
 
     public function test_global_admin_can_delete_one()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         $organisation = $this->createTaxonomyOrganisation();
 
         Passport::actingAs($user);
@@ -526,7 +526,7 @@ class TaxonomyOrganisationsTest extends TestCase
     {
         $this->fakeEvents();
 
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         $organisation = $this->createTaxonomyOrganisation();
 
         Passport::actingAs($user);

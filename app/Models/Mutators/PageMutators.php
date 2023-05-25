@@ -6,6 +6,7 @@ trait PageMutators
 {
     /**
      * Specify parent id attribute mutator.
+     *
      * @param mixed $value
      */
     public function setParentAttribute($value)
@@ -26,6 +27,7 @@ trait PageMutators
 
     /**
      * Specify content attribute mutator.
+     *
      * @param mixed $value
      */
     public function setContentAttribute($value)

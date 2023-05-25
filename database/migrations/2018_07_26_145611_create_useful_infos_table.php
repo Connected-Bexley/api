@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateUsefulInfosTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,7 +12,7 @@ class CreateUsefulInfosTable extends Migration
     {
         Schema::create('useful_infos', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('service_id', 'services');
+            $table->foreignUuidKeyColumn('service_id', 'services');
             $table->string('title');
             $table->text('description');
             $table->unsignedInteger('order');
@@ -28,4 +27,4 @@ class CreateUsefulInfosTable extends Migration
     {
         Schema::dropIfExists('useful_infos');
     }
-}
+};

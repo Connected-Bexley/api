@@ -30,10 +30,10 @@ class CollectionOrganisationEventsTest extends TestCase
     {
         parent::setUp();
 
-        $organisationEventCollection1 = factory(Collection::class)->states('typeOrganisationEvent')->create();
-        $organisationEventCollection2 = factory(Collection::class)->states('typeOrganisationEvent')->create();
-        $organisationEvent1 = factory(OrganisationEvent::class)->create();
-        $organisationEvent2 = factory(OrganisationEvent::class)->create();
+        $organisationEventCollection1 = Collection::factory()->typeOrganisationEvent()->create();
+        $organisationEventCollection2 = Collection::factory()->typeOrganisationEvent()->create();
+        $organisationEvent1 = OrganisationEvent::factory()->create();
+        $organisationEvent2 = OrganisationEvent::factory()->create();
         $taxonomys1 = Taxonomy::category()->children()->inRandomOrder()->limit(5)->get();
         $taxonomys2 = Taxonomy::category()->children()->inRandomOrder()->limit(5)->get();
         $organisationEventCollection1->syncCollectionTaxonomies($taxonomys1);
@@ -176,7 +176,7 @@ class CollectionOrganisationEventsTest extends TestCase
         $this->json('GET', '/core/v1/collections/organisation-events');
 
         Event::assertDispatched(EndpointHit::class, function (EndpointHit $event) {
-            return ($event->getAction() === Audit::ACTION_READ);
+            return $event->getAction() === Audit::ACTION_READ;
         });
     }
 
@@ -197,8 +197,8 @@ class CollectionOrganisationEventsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceWorker($service);
 
         Passport::actingAs($user);
@@ -214,8 +214,8 @@ class CollectionOrganisationEventsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
 
         Passport::actingAs($user);
@@ -231,8 +231,8 @@ class CollectionOrganisationEventsTest extends TestCase
          * @var \App\Models\Organisation $organisation
          * @var \App\Models\User $user
          */
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create();
         $user->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
@@ -247,7 +247,7 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
 
         Passport::actingAs($user);
@@ -262,16 +262,16 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -335,16 +335,16 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -386,10 +386,10 @@ class CollectionOrganisationEventsTest extends TestCase
         // Delete the existing seeded personas.
         $this->truncateCollectionOrganisationEvents();
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
@@ -398,7 +398,7 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_ORGANISATION_EVENT,
@@ -458,10 +458,10 @@ class CollectionOrganisationEventsTest extends TestCase
         // Delete the existing seeded personas.
         $this->truncateCollectionOrganisationEvents();
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
@@ -470,7 +470,7 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_ORGANISATION_EVENT,
@@ -530,10 +530,10 @@ class CollectionOrganisationEventsTest extends TestCase
         // Delete the existing seeded personas.
         $this->truncateCollectionOrganisationEvents();
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
@@ -542,7 +542,7 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_ORGANISATION_EVENT,
@@ -602,10 +602,10 @@ class CollectionOrganisationEventsTest extends TestCase
         // Delete the existing seeded personas.
         $this->truncateCollectionOrganisationEvents();
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
@@ -614,7 +614,7 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
 
         Passport::actingAs($user);
@@ -637,10 +637,10 @@ class CollectionOrganisationEventsTest extends TestCase
         // Delete the existing seeded personas.
         $this->truncateCollectionOrganisationEvents();
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
@@ -649,7 +649,7 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         Collection::create([
             'type' => Collection::TYPE_ORGANISATION_EVENT,
@@ -696,14 +696,14 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
@@ -855,8 +855,8 @@ class CollectionOrganisationEventsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceWorker($service);
         $organisationEvent = Collection::organisationEvents()->inRandomOrder()->firstOrFail();
 
@@ -873,8 +873,8 @@ class CollectionOrganisationEventsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
         $organisationEvent = Collection::organisationEvents()->inRandomOrder()->firstOrFail();
 
@@ -891,8 +891,8 @@ class CollectionOrganisationEventsTest extends TestCase
          * @var \App\Models\Organisation $organisation
          * @var \App\Models\User $user
          */
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create();
         $user->makeOrganisationAdmin($organisation);
         $organisationEvent = Collection::organisationEvents()->inRandomOrder()->firstOrFail();
 
@@ -908,15 +908,15 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $organisationEvent = Collection::organisationEvents()->inRandomOrder()->firstOrFail();
         $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
@@ -977,7 +977,7 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $organisationEvent = Collection::organisationEvents()->inRandomOrder()->firstOrFail();
         $organisationEvent->enable()->save();
@@ -1002,7 +1002,7 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $organisationEvent = Collection::organisationEvents()->inRandomOrder()->firstOrFail();
         $organisationEvent->enable()->save();
@@ -1066,7 +1066,7 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_ORGANISATION_EVENT,
@@ -1131,7 +1131,7 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_ORGANISATION_EVENT,
@@ -1196,7 +1196,7 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_ORGANISATION_EVENT,
@@ -1261,7 +1261,7 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $organisationEvent = Collection::create([
             'type' => Collection::TYPE_ORGANISATION_EVENT,
@@ -1299,7 +1299,7 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $organisationEvent = Collection::create([
             'type' => Collection::TYPE_ORGANISATION_EVENT,
@@ -1336,7 +1336,7 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $organisationEvent = Collection::organisationEvents()->inRandomOrder()->firstOrFail();
         $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
@@ -1379,8 +1379,8 @@ class CollectionOrganisationEventsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceWorker($service);
         $organisationEvent = Collection::organisationEvents()->inRandomOrder()->firstOrFail();
 
@@ -1397,8 +1397,8 @@ class CollectionOrganisationEventsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
         $organisationEvent = Collection::organisationEvents()->inRandomOrder()->firstOrFail();
 
@@ -1415,8 +1415,8 @@ class CollectionOrganisationEventsTest extends TestCase
          * @var \App\Models\Organisation $organisation
          * @var \App\Models\User $user
          */
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create();
         $user->makeOrganisationAdmin($organisation);
         $organisationEvent = Collection::organisationEvents()->inRandomOrder()->firstOrFail();
 
@@ -1432,7 +1432,7 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $organisationEvent = Collection::organisationEvents()->inRandomOrder()->firstOrFail();
 
@@ -1448,7 +1448,7 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $organisationEvent = Collection::organisationEvents()->inRandomOrder()->firstOrFail();
 
@@ -1469,7 +1469,7 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_ORGANISATION_EVENT,
@@ -1523,7 +1523,7 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_ORGANISATION_EVENT,
@@ -1577,7 +1577,7 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_ORGANISATION_EVENT,
@@ -1630,7 +1630,7 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $organisationEventCollection = Collection::organisationEvents()->inRandomOrder()->firstOrFail();
 
@@ -1682,7 +1682,7 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
         $image = Storage::disk('local')->get('/test-data/image.png');
@@ -1692,7 +1692,7 @@ class CollectionOrganisationEventsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
+            'file' => 'data:image/png;base64,'.base64_encode($image),
         ]);
 
         $response = $this->json('POST', '/core/v1/collections/organisation-events', [
@@ -1720,11 +1720,11 @@ class CollectionOrganisationEventsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $organisationEventCollection = Collection::organisationEvents()->inRandomOrder()->firstOrFail();
         $meta = $organisationEventCollection->meta;
-        $meta['image_file_id'] = factory(File::class)->create()->id;
+        $meta['image_file_id'] = File::factory()->create()->id;
         $organisationEventCollection->meta = $meta;
         $organisationEventCollection->save();
 

@@ -142,7 +142,6 @@ class ImportController extends Controller
      * Find exisiting Orgaisations that match rows in the spreadsheet.
      *
      * @param array $rowIndex
-     *
      * @return array
      */
     public function rowsExist(array $rowIndex)
@@ -211,12 +210,12 @@ class ImportController extends Controller
      * @param array $duplicates
      * @param array $headers
      * @param array $nameIndex
+     *
      * @throws App\Exceptions\DuplicateContentException
      */
     public function formatDuplicates(array $duplicates, array $headers, array $nameIndex)
     {
         foreach ($duplicates as $duplicate) {
-
             /**
              * Get the IDs of the duplicate Organisations.
              */

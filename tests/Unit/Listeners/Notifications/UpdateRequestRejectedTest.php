@@ -18,9 +18,9 @@ class UpdateRequestRejectedTest extends TestCase
     {
         Queue::fake();
 
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
         $updateRequest = $organisation->updateRequests()->create([
-            'user_id' => factory(User::class)->create()->id,
+            'user_id' => User::factory()->create()->id,
             'data' => [
                 'slug' => 'test-org',
                 'name' => 'Test Org',
@@ -32,7 +32,7 @@ class UpdateRequestRejectedTest extends TestCase
         ]);
 
         $request = Request::create('')->setUserResolver(function () {
-            return factory(User::class)->create();
+            return User::factory()->create();
         });
         $event = EndpointHit::onDelete($request, '', $updateRequest);
         $listener = new UpdateRequestRejected();
@@ -55,6 +55,7 @@ class UpdateRequestRejectedTest extends TestCase
                 $this->assertArrayHasKey('RESOURCE_NAME', $email->values);
                 $this->assertArrayHasKey('RESOURCE_TYPE', $email->values);
                 $this->assertArrayHasKey('REQUEST_DATE', $email->values);
+
                 return true;
             }
         );
@@ -68,9 +69,9 @@ class UpdateRequestRejectedTest extends TestCase
             'updateable_type' => UpdateRequest::NEW_TYPE_ORGANISATION_SIGN_UP_FORM,
             'data' => [
                 'user' => [
-                    'first_name' => $this->faker->firstName,
-                    'last_name' => $this->faker->lastName,
-                    'email' => $this->faker->safeEmail,
+                    'first_name' => $this->faker->firstName(),
+                    'last_name' => $this->faker->lastName(),
+                    'email' => $this->faker->safeEmail(),
                     'phone' => random_uk_phone(),
                 ],
                 'organisation' => [
@@ -93,10 +94,10 @@ class UpdateRequestRejectedTest extends TestCase
                     'fees_url' => null,
                     'testimonial' => null,
                     'video_embed' => null,
-                    'url' => $this->faker->url,
-                    'contact_name' => $this->faker->name,
+                    'url' => $this->faker->url(),
+                    'contact_name' => $this->faker->name(),
                     'contact_phone' => random_uk_phone(),
-                    'contact_email' => $this->faker->safeEmail,
+                    'contact_email' => $this->faker->safeEmail(),
                     'useful_infos' => [],
                     'offerings' => [],
                 ],
@@ -124,6 +125,7 @@ class UpdateRequestRejectedTest extends TestCase
                 $this->assertArrayHasKey('SUBMITTER_NAME', $email->values);
                 $this->assertArrayHasKey('ORGANISATION_NAME', $email->values);
                 $this->assertArrayHasKey('REQUEST_DATE', $email->values);
+
                 return true;
             }
         );

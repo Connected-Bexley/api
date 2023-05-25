@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateSocialMediasTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,7 +12,7 @@ class CreateSocialMediasTable extends Migration
     {
         Schema::create('social_medias', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('service_id', 'services');
+            $table->foreignUuidKeyColumn('service_id', 'services');
             $table->enum('type', ['twitter', 'facebook', 'instagram', 'youtube', 'other']);
             $table->string('url');
             $table->timestamps();
@@ -27,4 +26,4 @@ class CreateSocialMediasTable extends Migration
     {
         Schema::dropIfExists('social_medias');
     }
-}
+};

@@ -3,7 +3,6 @@
 namespace Tests\Unit\Listeners\Notifications;
 
 use App\Emails\PageFeedbackReceived\NotifyGlobalAdminEmail;
-use App\EmailSenders\MailgunEmailSender;
 use App\Events\EndpointHit;
 use App\Listeners\Notifications\PageFeedbackReceived;
 use App\Models\PageFeedback;
@@ -19,7 +18,7 @@ class PageFeedbackReceivedTest extends TestCase
         Queue::fake();
 
         $request = Request::create('')->setUserResolver(function () {
-            return factory(User::class)->create();
+            return User::factory()->create();
         });
         $pageFeedback = PageFeedback::create([
             'url' => 'https://example.com',
@@ -33,7 +32,7 @@ class PageFeedbackReceivedTest extends TestCase
         Queue::assertPushedOn('notifications', NotifyGlobalAdminEmail::class);
         Queue::assertPushed(
             NotifyGlobalAdminEmail::class,
-            function (NotifyGlobalAdminEmail $email) use ($pageFeedback) {
+            function (NotifyGlobalAdminEmail $email) {
                 $this->assertEquals(config('local.global_admin.email'), $email->to);
                 $this->assertEquals(
                     config('gov_uk_notify.notifications_template_ids.page_feedback_received.notify_global_admin.email'),
@@ -43,6 +42,7 @@ class PageFeedbackReceivedTest extends TestCase
                 $this->assertEquals('emails.page_feedback.received.notify_global_admin.content', $email->getContent());
                 $this->assertArrayHasKey('FEEDBACK_URL', $email->values);
                 $this->assertArrayHasKey('FEEDBACK_CONTENT', $email->values);
+
                 return true;
             }
         );

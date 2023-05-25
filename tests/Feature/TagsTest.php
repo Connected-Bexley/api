@@ -14,7 +14,7 @@ class TagsTest extends TestCase
      */
     public function indexTagsAsGuest200()
     {
-        $tags = factory(Tag::class, 5)->create();
+        $tags = Tag::factory()->count(5)->create();
 
         $response = $this->json('GET', '/core/v1/tags');
 

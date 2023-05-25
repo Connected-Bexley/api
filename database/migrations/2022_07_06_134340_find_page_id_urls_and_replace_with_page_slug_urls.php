@@ -8,8 +8,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-class FindPageIdUrlsAndReplaceWithPageSlugUrls extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -78,4 +77,4 @@ class FindPageIdUrlsAndReplaceWithPageSlugUrls extends Migration
             //
         });
     }
-}
+};

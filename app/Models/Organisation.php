@@ -12,6 +12,7 @@ use App\TaxonomyRelationships\UpdateTaxonomyRelationships;
 use App\UpdateRequest\AppliesUpdateRequests;
 use App\UpdateRequest\UpdateRequests;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
@@ -20,6 +21,7 @@ use Illuminate\Support\Facades\Validator as ValidatorFacade;
 
 class Organisation extends Model implements AppliesUpdateRequests, HasTaxonomyRelationships
 {
+    use HasFactory;
     use OrganisationMutators;
     use OrganisationRelationships;
     use OrganisationScopes;

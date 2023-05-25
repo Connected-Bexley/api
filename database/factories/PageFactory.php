@@ -1,116 +1,141 @@
 <?php
 
-/** @var \Illuminate\Database\Eloquent\Factory $factory */
+namespace Database\Factories;
 
 use App\Models\Collection;
 use App\Models\File;
 use App\Models\Page;
-use Faker\Generator as Faker;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
-$factory->define(Page::class, function (Faker $faker) {
-    $title = $faker->unique()->words(3, true);
+class PageFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition()
+    {
+        $title = $this->faker->unique()->words(3, true);
 
-    return [
-        'title' => $title,
-        'slug' => Str::slug($title),
-        'content' => [
-            'introduction' => [
-                'content' => [
-                    [
-                        'type' => 'copy',
-                        'value' => $this->faker->realText(),
+        return [
+            'title' => $title,
+            'slug' => Str::slug($title),
+            'content' => [
+                'introduction' => [
+                    'content' => [
+                        [
+                            'type' => 'copy',
+                            'value' => $this->faker->realText(),
+                        ],
                     ],
                 ],
             ],
-        ],
-        'enabled' => Page::ENABLED,
-        'page_type' => Page::PAGE_TYPE_INFORMATION,
-    ];
-});
+            'enabled' => Page::ENABLED,
+            'page_type' => Page::PAGE_TYPE_INFORMATION,
+        ];
+    }
 
-$factory->state(Page::class, 'withImage', [
-    'image_file_id' => function () {
-        return factory(File::class)->create([
-            'filename' => Str::random() . '.png',
-            'mime_type' => 'image/png',
-        ]);
-    },
-]);
+    public function withImage()
+    {
+        return $this->state(function () {
+            return [
+                'image_file_id' => File::factory()->create(
+                    ['filename' => Str::random() . '.png', 'mime_type' => 'image/png']
+                ),
+            ];
+        });
+    }
 
-$factory->state(Page::class, 'disabled', [
-    'enabled' => Page::DISABLED,
-]);
+    public function disabled()
+    {
+        return $this->state(function () {
+            return ['enabled' => Page::DISABLED];
+        });
+    }
 
-$factory->state(Page::class, 'landingPage', [
-    'page_type' => Page::PAGE_TYPE_LANDING,
-    'content' => [
-        'introduction' => [
-            'content' => [
-                [
-                    'type' => 'copy',
-                    'value' => $this->faker->realText(),
+    public function landingPage()
+    {
+        return $this->state(function () {
+            return [
+                'page_type' => Page::PAGE_TYPE_LANDING,
+                'content' => [
+                    'introduction' => [
+                        'content' => [
+                            [
+                                'type' => 'copy',
+                                'value' => $this->faker->realText(),
+                            ],
+                            [
+                                'type' => 'cta',
+                                'title' => $this->faker->sentence(),
+                                'description' => $this->faker->realText(),
+                                'url' => $this->faker->url(),
+                                'buttonText' => $this->faker->words(3, true),
+                            ],
+                        ],
+                    ],
+                    'about' => [
+                        'content' => [
+                            [
+                                'type' => 'copy',
+                                'value' => $this->faker->realText(),
+                            ],
+                            [
+                                'type' => 'cta',
+                                'title' => $this->faker->sentence(),
+                                'description' => $this->faker->realText(),
+                                'url' => $this->faker->url(),
+                                'buttonText' => $this->faker->words(3, true),
+                            ],
+                            [
+                                'type' => 'copy',
+                                'value' => $this->faker->realText(),
+                            ],
+                        ],
+                    ],
+                    'info-pages' => [
+                        'title' => $this->faker->sentence(),
+                        'content' => [
+                            [
+                                'type' => 'copy',
+                                'value' => $this->faker->realText(), ], ], ],
+                    'collections' => [
+                        'title' => $this->faker->sentence(),
+                        'content' => [
+                            [
+                                'type' => 'copy',
+                                'value' => $this->faker->realText(),
+                            ],
+                        ],
+                    ],
                 ],
-                [
-                    'type' => 'cta',
-                    'title' => $this->faker->sentence,
-                    'description' => $this->faker->realText(),
-                    'url' => $this->faker->url(),
-                    'buttonText' => $this->faker->words(3, true),
-                ],
-            ],
-        ],
-        'about' => [
-            'content' => [
-                [
-                    'type' => 'copy',
-                    'value' => $this->faker->realText(),
-                ],
-                [
-                    'type' => 'cta',
-                    'title' => $this->faker->sentence,
-                    'description' => $this->faker->realText(),
-                    'url' => $this->faker->url(),
-                    'buttonText' => $this->faker->words(3, true),
-                ],
-                [
-                    'type' => 'copy',
-                    'value' => $this->faker->realText(),
-                ],
-            ],
-        ],
-        'info-pages' => [
-            'title' => $this->faker->sentence(),
-            'content' => [
-                [
-                    'type' => 'copy',
-                    'value' => $this->faker->realText(),
-                ],
-            ],
-        ],
-        'collections' => [
-            'title' => $this->faker->sentence(),
-            'content' => [
-                [
-                    'type' => 'copy',
-                    'value' => $this->faker->realText(),
-                ],
-            ],
-        ],
-    ],
-]);
+            ];
+        });
+    }
 
-$factory->afterCreatingState(Page::class, 'withParent', function (Page $page, Faker $faker) {
-    factory(Page::class)->create()->appendNode($page);
-});
+    public function withCollections()
+    {
+        return $this->afterCreating(function (Page $page) {
+            $page->collections()->attach(Collection::factory()->count(3)->create()->pluck('id')->all());
+            $page->save();
+        })->state([]);
+    }
 
-$factory->afterCreatingState(Page::class, 'withChildren', function (Page $page, Faker $faker) {
-    factory(Page::class, 3)->create()->each(function (Page $child) use ($page) {
-        $page->appendNode($child);
-    });
-});
+    public function withChildren()
+    {
+        return $this->afterCreating(function (Page $page) {
+            Page::factory()->count(3)->create()->each(function (Page $child) use ($page) {
+                $page->appendNode($child);
+            });
+        })->state([]);
+    }
 
-$factory->afterCreatingState(Page::class, 'withCollections', function (Page $page, Faker $faker) {
-    $page->collections()->attach(factory(Collection::class, 3)->create()->pluck('id')->all());
-    $page->save();
-});
+    public function withParent()
+    {
+        return $this->afterCreating(function (Page $page) {
+            Page::factory()->create()->appendNode($page);
+        })->state([]);
+    }
+}

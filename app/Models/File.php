@@ -7,11 +7,13 @@ use App\Models\Mutators\FileMutators;
 use App\Models\Relationships\FileRelationships;
 use App\Models\Scopes\FileScopes;
 use Illuminate\Contracts\Support\Responsable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 
 class File extends Model implements Responsable
 {
+    use HasFactory;
     use FileMutators;
     use FileRelationships;
     use FileScopes;
@@ -80,7 +82,7 @@ class File extends Model implements Responsable
      */
     public function getContent(): string
     {
-        return Storage::cloud()->get($this->path());
+        return Storage::disk(config('filesystems.cloud'))->get($this->path());
     }
 
     /**
@@ -107,7 +109,7 @@ class File extends Model implements Responsable
      */
     public function upload(string $content): File
     {
-        Storage::cloud()->put($this->path(), $content, $this->visibility());
+        Storage::disk(config('filesystems.cloud'))->put($this->path(), $content, $this->visibility());
 
         return $this;
     }
@@ -117,7 +119,7 @@ class File extends Model implements Responsable
      */
     public function url(): string
     {
-        return Storage::cloud()->url($this->path());
+        return Storage::disk(config('filesystems.cloud'))->url($this->path());
     }
 
     /**
@@ -125,7 +127,7 @@ class File extends Model implements Responsable
      */
     public function deleteFromDisk()
     {
-        Storage::cloud()->delete($this->path());
+        Storage::disk(config('filesystems.cloud'))->delete($this->path());
     }
 
     /**
@@ -142,6 +144,7 @@ class File extends Model implements Responsable
 
     /**
      * @deprecated you should now use the uploadBase64EncodedFile() method instead
+     *
      * @param string $content
      * @return \App\Models\File
      */

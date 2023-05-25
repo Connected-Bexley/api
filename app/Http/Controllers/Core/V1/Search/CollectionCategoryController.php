@@ -26,12 +26,21 @@ class CollectionCategoryController extends Controller
     ): AnonymousResourceCollection {
         $criteria->setCategories([$request->input('category')]);
 
-        $query = $builder->build(
+        // Get the pagination values
+        $page = page($request->input('page'));
+        $perPage = per_page($request->input('per_page'));
+
+        // Create the query
+        $esQuery = $builder->build(
             $criteria,
-            $request->input('page'),
-            $request->input('per_page')
+            $page,
+            $perPage
         );
 
-        return $mapper->paginate($query);
+        return $mapper->paginate(
+            $esQuery,
+            $page,
+            $perPage
+        );
     }
 }

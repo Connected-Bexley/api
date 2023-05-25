@@ -13,6 +13,7 @@ use App\Notifications\Notifications;
 use App\Sms\Sms;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -22,6 +23,7 @@ use Laravel\Passport\HasApiTokens;
 
 class User extends Authenticatable implements Notifiable
 {
+    use HasFactory;
     use DispatchesJobs;
     use HasApiTokens;
     use Notifications;
@@ -29,6 +31,20 @@ class User extends Authenticatable implements Notifiable
     use UserMutators;
     use UserRelationships;
     use UserScopes;
+
+    /**
+     * The "type" of the primary key ID.
+     *
+     * @var string
+     */
+    protected $keyType = 'string';
+
+    /**
+     * Determines if the primary key is a UUID.
+     *
+     * @var bool
+     */
+    protected $keyIsUuid = true;
 
     /**
      * Indicates if the IDs are auto-incrementing.

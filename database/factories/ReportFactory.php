@@ -1,12 +1,23 @@
 <?php
 
-use Faker\Generator as Faker;
+namespace Database\Factories;
 
-$factory->define(App\Models\Report::class, function (Faker $faker) {
-    return [
-        'report_type_id' => \App\Models\ReportType::usersExport()->id,
-        'file_id' => function () {
-            return factory(\App\Models\File::class)->create()->id;
-        },
-    ];
-});
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class ReportFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition()
+    {
+        return [
+            'report_type_id' => \App\Models\ReportType::usersExport()->id,
+            'file_id' => function () {
+                return \App\Models\File::factory()->create()->id;
+            },
+        ];
+    }
+}

@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateUpdateRequestsTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,8 +12,8 @@ class CreateUpdateRequestsTable extends Migration
     {
         Schema::create('update_requests', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('user_id', 'users');
-            $table->morphsUuid('updateable');
+            $table->foreignUuidKeyColumn('user_id', 'users');
+            $table->uuidMorphs('updateable');
             $table->json('data');
             $table->timestamps();
             $table->timestamp('approved_at')->nullable();
@@ -29,4 +28,4 @@ class CreateUpdateRequestsTable extends Migration
     {
         Schema::dropIfExists('update_requests');
     }
-}
+};

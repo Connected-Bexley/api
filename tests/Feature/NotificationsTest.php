@@ -34,8 +34,8 @@ class NotificationsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceWorker($service);
 
         Passport::actingAs($user);
@@ -51,8 +51,8 @@ class NotificationsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
 
         Passport::actingAs($user);
@@ -68,8 +68,8 @@ class NotificationsTest extends TestCase
          * @var \App\Models\Organisation $organisation
          * @var \App\Models\User $user
          */
-        $service = factory(Organisation::class)->create();
-        $user = factory(User::class)->create();
+        $service = Organisation::factory()->create();
+        $user = User::factory()->create();
         $user->makeOrganisationAdmin($service);
 
         Passport::actingAs($user);
@@ -84,7 +84,7 @@ class NotificationsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $notification = $user->notifications()->create([
             'channel' => Notification::CHANNEL_EMAIL,
@@ -116,7 +116,7 @@ class NotificationsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $notification = $user->notifications()->create([
             'channel' => Notification::CHANNEL_EMAIL,
@@ -147,9 +147,9 @@ class NotificationsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
-        $referral = factory(Referral::class)->create();
+        $referral = Referral::factory()->create();
         $notification = $referral->notifications()->create([
             'channel' => Notification::CHANNEL_EMAIL,
             'recipient' => 'test@example.com',
@@ -179,9 +179,9 @@ class NotificationsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
         $notification = $service->notifications()->create([
             'channel' => Notification::CHANNEL_EMAIL,
             'recipient' => 'test@example.com',
@@ -213,7 +213,7 @@ class NotificationsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $notification = $user->notifications()->create([
             'channel' => Notification::CHANNEL_EMAIL,
@@ -227,7 +227,7 @@ class NotificationsTest extends TestCase
 
         $this->json('GET', '/core/v1/notifications');
 
-        Event::assertDispatched(EndpointHit::class, function (EndpointHit $event) use ($user, $notification) {
+        Event::assertDispatched(EndpointHit::class, function (EndpointHit $event) use ($user) {
             return ($event->getAction() === Audit::ACTION_READ) &&
                 ($event->getUser()->id === $user->id);
         });
@@ -258,8 +258,8 @@ class NotificationsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceWorker($service);
         $notification = Notification::create([
             'channel' => Notification::CHANNEL_EMAIL,
@@ -282,8 +282,8 @@ class NotificationsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
         $notification = Notification::create([
             'channel' => Notification::CHANNEL_EMAIL,
@@ -306,8 +306,8 @@ class NotificationsTest extends TestCase
          * @var \App\Models\Organisation $organisation
          * @var \App\Models\User $user
          */
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create();
         $user->makeOrganisationAdmin($organisation);
         $notification = Notification::create([
             'channel' => Notification::CHANNEL_EMAIL,
@@ -329,7 +329,7 @@ class NotificationsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $notification = Notification::create([
             'channel' => Notification::CHANNEL_EMAIL,
@@ -363,7 +363,7 @@ class NotificationsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $notification = Notification::create([
             'channel' => Notification::CHANNEL_EMAIL,

@@ -17,12 +17,12 @@ class UnactionedReferralsCommandTest extends TestCase
     {
         Queue::fake();
 
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'referral_method' => Service::REFERRAL_METHOD_INTERNAL,
-            'referral_email' => $this->faker->safeEmail,
+            'referral_email' => $this->faker->safeEmail(),
         ]);
 
-        factory(Referral::class)->create([
+        Referral::factory()->create([
             'service_id' => $service->id,
             'email' => 'test@example.com',
             'referee_email' => 'test@example.com',
@@ -41,6 +41,7 @@ class UnactionedReferralsCommandTest extends TestCase
             $this->assertArrayHasKey('REFERRAL_TYPE', $email->values);
             $this->assertArrayHasKey('REFERRAL_CONTACT_METHOD', $email->values);
             $this->assertArrayHasKey('REFERRAL_DAYS_LEFT', $email->values);
+
             return true;
         });
     }

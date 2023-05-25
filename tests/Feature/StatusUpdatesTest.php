@@ -20,7 +20,7 @@ class StatusUpdatesTest extends TestCase
 
     public function test_guest_cannot_list_them()
     {
-        $referral = factory(Referral::class)->create();
+        $referral = Referral::factory()->create();
 
         $response = $this->json('GET', "/core/v1/status-updates?filter[referral_id]={$referral->id}");
 
@@ -29,9 +29,9 @@ class StatusUpdatesTest extends TestCase
 
     public function test_service_worker_can_list_them()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
-        $referral = factory(Referral::class)->create(['service_id' => $service->id]);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
+        $referral = Referral::factory()->create(['service_id' => $service->id]);
         $referral->statusUpdates()->create([
             'user_id' => $user->id,
             'from' => $referral->status,
@@ -57,9 +57,9 @@ class StatusUpdatesTest extends TestCase
     {
         $this->fakeEvents();
 
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
-        $referral = factory(Referral::class)->create(['service_id' => $service->id]);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
+        $referral = Referral::factory()->create(['service_id' => $service->id]);
 
         Passport::actingAs($user);
 

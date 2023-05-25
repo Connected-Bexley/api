@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 
-class SeedDefaultCollectionData extends Migration
-{
+return new class() extends Migration {
     /**
      * @var \Carbon\CarbonImmutable
      */
@@ -283,4 +282,4 @@ class SeedDefaultCollectionData extends Migration
         // Use recursion for the remaining array items.
         $this->linkToCategoryTaxonomy($collectionId, $taxonomyPath, $taxonomy->id);
     }
-}
+};

@@ -78,4 +78,16 @@ abstract class Model extends BaseModel
     {
         return in_array($name, $this->appends);
     }
+
+    /**
+     * Strips all non alpha numeric characters from a string.
+     *
+     * @param string $string
+     * @return string
+     * @author
+     */
+    public function onlyAlphaNumeric($string)
+    {
+        return preg_replace('/[^\w\d\s]+/i', '', $string);
+    }
 }

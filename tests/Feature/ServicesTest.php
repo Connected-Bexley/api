@@ -2,43 +2,43 @@
 
 namespace Tests\Feature;
 
-use Carbon\Carbon;
-use Tests\TestCase;
-use App\Models\File;
-use App\Models\Role;
-use App\Models\User;
+use App\Events\EndpointHit;
 use App\Models\Audit;
+use App\Models\File;
+use App\Models\HolidayOpeningHour;
+use App\Models\Organisation;
+use App\Models\RegularOpeningHour;
+use App\Models\Role;
 use App\Models\Service;
+use App\Models\ServiceLocation;
+use App\Models\ServiceRefreshToken;
+use App\Models\ServiceTaxonomy;
+use App\Models\SocialMedia;
 use App\Models\Tag;
 use App\Models\Taxonomy;
+use App\Models\UpdateRequest;
+use App\Models\User;
 use App\Models\UserRole;
-use App\Events\EndpointHit;
-use App\Models\SocialMedia;
+use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Faker\Factory as Faker;
-use Illuminate\Support\Arr;
-use App\Models\Organisation;
-use App\Models\UpdateRequest;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Response;
-use Laravel\Passport\Passport;
-use App\Models\ServiceLocation;
-use App\Models\ServiceTaxonomy;
 use Illuminate\Http\UploadedFile;
-use App\Models\HolidayOpeningHour;
-use App\Models\RegularOpeningHour;
-use App\Models\ServiceRefreshToken;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Eloquent\Collection;
+use Laravel\Passport\Passport;
+use Tests\TestCase;
 
 class ServicesTest extends TestCase
 {
     /**
      * Create spreadsheets of services
      *
-     * @param Illuminate\Support\Collection $services
-     * @param array $serviceEligibilities
+     * @param  Illuminate\Support\Collection  $services
+     * @param  array  $serviceEligibilities
      * @return null
      **/
     public function createServiceSpreadsheets(\Illuminate\Support\Collection $services, $serviceEligibilities = null)
@@ -81,13 +81,14 @@ class ServicesTest extends TestCase
             'eligibility_taxonomies',
         ];
 
-        $services = $services->map(function ($service) use ($faker, $serviceEligibilities) {
+        $services = $services->map(function ($service) use ($serviceEligibilities) {
             $serviceAttributes = $service->getAttributes();
             $serviceAttributes['id'] = $service->id ?: uuid();
 
-            if (is_array($serviceEligibilities) && !empty($serviceEligibilities[$serviceAttributes['id']])) {
+            if (is_array($serviceEligibilities) && ! empty($serviceEligibilities[$serviceAttributes['id']])) {
                 $serviceAttributes['eligibility_taxonomies'] = implode(',', $serviceEligibilities[$serviceAttributes['id']]);
             }
+
             return $serviceAttributes;
         });
 
@@ -102,7 +103,7 @@ class ServicesTest extends TestCase
     public function test_guest_can_list_them()
     {
         /** @var \App\Models\Service $service */
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
         $service->usefulInfos()->create([
             'title' => 'Did You Know?',
             'description' => 'This is a test description',
@@ -182,8 +183,8 @@ class ServicesTest extends TestCase
 
     public function test_guest_can_filter_by_organisation_id()
     {
-        $anotherService = factory(Service::class)->create();
-        $service = factory(Service::class)->create();
+        $anotherService = Service::factory()->create();
+        $service = Service::factory()->create();
         $service->usefulInfos()->create([
             'title' => 'Did You Know?',
             'description' => 'This is a test description',
@@ -210,11 +211,11 @@ class ServicesTest extends TestCase
 
     public function test_guest_can_filter_by_organisation_name()
     {
-        $anotherService = factory(Service::class)->create([
-            'organisation_id' => factory(Organisation::class)->create(['name' => 'Amazing Place']),
+        $anotherService = Service::factory()->create([
+            'organisation_id' => Organisation::factory()->create(['name' => 'Amazing Place']),
         ]);
-        $service = factory(Service::class)->create([
-            'organisation_id' => factory(Organisation::class)->create(['name' => 'Interesting House']),
+        $service = Service::factory()->create([
+            'organisation_id' => Organisation::factory()->create(['name' => 'Interesting House']),
         ]);
         $service->usefulInfos()->create([
             'title' => 'Did You Know?',
@@ -242,25 +243,22 @@ class ServicesTest extends TestCase
 
     public function test_guest_can_filter_by_tag()
     {
-        $tag1 = factory(Tag::class)->create();
-        $tag2 = factory(Tag::class)->create();
-        $tag3 = factory(Tag::class)->create();
-        $service1 = factory(Service::class)
-            ->states('withUsefulInfo', 'withOfferings', 'withSocialMedia', 'withCategoryTaxonomies')
+        $tag1 = Tag::factory()->create();
+        $tag2 = Tag::factory()->create();
+        $tag3 = Tag::factory()->create();
+        $service1 = Service::factory()->withUsefulInfo()->withOfferings()->withSocialMedia()->withCategoryTaxonomies()
             ->create();
         $service1->tags()->attach([
             $tag1->id,
             $tag2->id,
         ]);
-        $service2 = factory(Service::class)
-            ->states('withUsefulInfo', 'withOfferings', 'withSocialMedia', 'withCategoryTaxonomies')
+        $service2 = Service::factory()->withUsefulInfo()->withOfferings()->withSocialMedia()->withCategoryTaxonomies()
             ->create();
         $service2->tags()->attach([
             $tag2->id,
             $tag3->id,
         ]);
-        $service3 = factory(Service::class)
-            ->states('withUsefulInfo', 'withOfferings', 'withSocialMedia', 'withCategoryTaxonomies')
+        $service3 = Service::factory()->withUsefulInfo()->withOfferings()->withSocialMedia()->withCategoryTaxonomies()
             ->create();
         $service3->tags()->attach([
             $tag1->id,
@@ -290,14 +288,14 @@ class ServicesTest extends TestCase
         $this->json('GET', '/core/v1/services');
 
         Event::assertDispatched(EndpointHit::class, function (EndpointHit $event) {
-            return ($event->getAction() === Audit::ACTION_READ);
+            return $event->getAction() === Audit::ACTION_READ;
         });
     }
 
     public function test_guest_can_sort_by_service_name()
     {
-        $serviceOne = factory(Service::class)->create(['name' => 'Service A']);
-        $serviceTwo = factory(Service::class)->create(['name' => 'Service B']);
+        $serviceOne = Service::factory()->create(['name' => 'Service A']);
+        $serviceTwo = Service::factory()->create(['name' => 'Service B']);
 
         $response = $this->json('GET', '/core/v1/services?sort=-name');
         $data = $this->getResponseContent($response);
@@ -308,13 +306,13 @@ class ServicesTest extends TestCase
 
     public function test_guest_can_sort_by_organisation_name()
     {
-        $serviceOne = factory(Service::class)->create([
-            'organisation_id' => factory(Organisation::class)
+        $serviceOne = Service::factory()->create([
+            'organisation_id' => Organisation::factory()
                 ->create(['name' => 'Organisation A'])
                 ->id,
         ]);
-        $serviceTwo = factory(Service::class)->create([
-            'organisation_id' => factory(Organisation::class)
+        $serviceTwo = Service::factory()->create([
+            'organisation_id' => Organisation::factory()
                 ->create(['name' => 'Organisation B'])
                 ->id,
         ]);
@@ -328,11 +326,11 @@ class ServicesTest extends TestCase
 
     public function test_guest_can_sort_by_last_modified_at()
     {
-        $serviceOne = factory(Service::class)->create([
-            'last_modified_at' => '2020-01-01 13:00:00'
+        $serviceOne = Service::factory()->create([
+            'last_modified_at' => '2020-01-01 13:00:00',
         ]);
-        $serviceTwo = factory(Service::class)->create([
-            'last_modified_at' => '2020-01-01 20:00:00'
+        $serviceTwo = Service::factory()->create([
+            'last_modified_at' => '2020-01-01 20:00:00',
         ]);
 
         $response = $this->json('GET', '/core/v1/services?sort=-last_modified_at');
@@ -344,12 +342,12 @@ class ServicesTest extends TestCase
 
     public function test_guest_can_sort_by_score()
     {
-        $service1 = factory(Service::class)->create(['score' => 0]);
-        $service2 = factory(Service::class)->create(['score' => 5]);
-        $service3 = factory(Service::class)->create(['score' => 3]);
-        $service4 = factory(Service::class)->create(['score' => 1]);
-        $service5 = factory(Service::class)->create(['score' => 4]);
-        $service6 = factory(Service::class)->create(['score' => 2]);
+        $service1 = Service::factory()->create(['score' => 0]);
+        $service2 = Service::factory()->create(['score' => 5]);
+        $service3 = Service::factory()->create(['score' => 3]);
+        $service4 = Service::factory()->create(['score' => 1]);
+        $service5 = Service::factory()->create(['score' => 4]);
+        $service6 = Service::factory()->create(['score' => 2]);
 
         $response = $this->json('GET', '/core/v1/services?sort=-score');
         $response->assertStatus(Response::HTTP_OK);
@@ -376,8 +374,8 @@ class ServicesTest extends TestCase
 
     public function test_service_worker_cannot_create_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
 
         Passport::actingAs($user);
 
@@ -388,8 +386,8 @@ class ServicesTest extends TestCase
 
     public function test_service_admin_cannot_create_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
@@ -400,8 +398,8 @@ class ServicesTest extends TestCase
 
     public function test_organisation_admin_can_create_an_inactive_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -419,10 +417,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -456,7 +454,7 @@ class ServicesTest extends TestCase
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonFragment($payload);
 
-        $globalAdminUser = factory(User::class)->create()->makeGlobalAdmin();
+        $globalAdminUser = User::factory()->create()->makeGlobalAdmin();
 
         $this->assertDatabaseHas((new UpdateRequest())->getTable(), [
             'user_id' => $user->id,
@@ -490,8 +488,8 @@ class ServicesTest extends TestCase
 
     public function test_global_admin_does_not_create_update_request_when_creating_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         //Given that a global admin is logged in
         Passport::actingAs($user);
@@ -510,17 +508,17 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
             'referral_email' => null,
             'referral_url' => null,
             'cqc_location_id' => $this->faker->numerify('#-#########'),
-            'ends_at' => Carbon::now()->addMonths(6)->toDateString() . 'T00:00:00+0000',
+            'ends_at' => Carbon::now()->addMonths(6)->toDateString().'T00:00:00+0000',
             'useful_infos' => [
                 [
                     'title' => 'Did you know?',
@@ -555,8 +553,8 @@ class ServicesTest extends TestCase
 
     public function test_organisation_admin_creates_update_request_when_creating_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         //Given an organisation admin is logged in
         Passport::actingAs($user);
@@ -575,17 +573,17 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
             'referral_email' => null,
             'referral_url' => null,
             'cqc_location_id' => $this->faker->numerify('#-#########'),
-            'ends_at' => Carbon::now()->addMonths(6)->toDateString() . 'T00:00:00+0000',
+            'ends_at' => Carbon::now()->addMonths(6)->toDateString().'T00:00:00+0000',
             'useful_infos' => [
                 [
                     'title' => 'Did you know?',
@@ -627,7 +625,7 @@ class ServicesTest extends TestCase
         // Simulate frontend check by making call with UpdateRequest ID.
         $updateRequestId = $responseData->id;
 
-        Passport::actingAs(factory(User::class)->create()->makeGlobalAdmin());
+        Passport::actingAs(User::factory()->create()->makeGlobalAdmin());
 
         $updateRequestCheckResponse = $this->get(
             route(
@@ -646,8 +644,8 @@ class ServicesTest extends TestCase
 
     public function test_organisation_admin_can_create_one_with_single_form_of_contact()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -665,10 +663,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => null,
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -702,8 +700,8 @@ class ServicesTest extends TestCase
     public function test_organisation_admin_can_create_one_without_cqc_field_if_cqc_flag_is_false()
     {
         config(['flags.cqc_location' => false]);
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -721,10 +719,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => null,
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -757,8 +755,8 @@ class ServicesTest extends TestCase
     public function test_organisation_admin_can_create_one_without_tags_field_if_tags_flag_is_false()
     {
         config(['flags.service_tags' => true]);
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -776,10 +774,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => null,
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -817,8 +815,8 @@ class ServicesTest extends TestCase
 
     public function test_organisation_admin_cannot_create_an_active_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -836,10 +834,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => true,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -871,8 +869,8 @@ class ServicesTest extends TestCase
 
     public function test_global_admin_cannot_create_with_non_numeric_phone()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -890,10 +888,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => 'Tel 01234 567890',
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => true,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -925,12 +923,12 @@ class ServicesTest extends TestCase
 
     public function test_organisation_admin_cannot_create_one_with_tags()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
-        $tag1 = factory(Tag::class)->create();
-        $tag2 = factory(Tag::class)->create();
-        $tag3 = factory(Tag::class)->create();
+        $tag1 = Tag::factory()->create();
+        $tag2 = Tag::factory()->create();
+        $tag3 = Tag::factory()->create();
 
         Passport::actingAs($user);
 
@@ -948,10 +946,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => true,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -994,10 +992,10 @@ class ServicesTest extends TestCase
 
     public function test_taxonomy_hierarchy_works_when_creating()
     {
-        $taxonomy = factory(Taxonomy::class)->states('lga-standards')->create();
+        $taxonomy = Taxonomy::factory()->lgaStandards()->create();
 
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -1015,14 +1013,14 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => true,
             'referral_method' => Service::REFERRAL_METHOD_INTERNAL,
             'referral_button_text' => null,
-            'referral_email' => $this->faker->safeEmail,
+            'referral_email' => $this->faker->safeEmail(),
             'referral_url' => null,
             'cqc_location_id' => $this->faker->numerify('#-#########'),
             'ends_at' => null,
@@ -1059,9 +1057,9 @@ class ServicesTest extends TestCase
 
     public function test_organisation_admin_for_another_organisation_cannot_create_one()
     {
-        $anotherOrganisation = factory(Organisation::class)->create();
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $anotherOrganisation = Organisation::factory()->create();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -1079,14 +1077,14 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => true,
             'referral_method' => Service::REFERRAL_METHOD_INTERNAL,
             'referral_button_text' => null,
-            'referral_email' => $this->faker->safeEmail,
+            'referral_email' => $this->faker->safeEmail(),
             'referral_url' => null,
             'cqc_location_id' => $this->faker->numerify('#-#########'),
             'ends_at' => null,
@@ -1105,8 +1103,8 @@ class ServicesTest extends TestCase
     {
         $this->fakeEvents();
 
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -1124,14 +1122,14 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => true,
             'referral_method' => Service::REFERRAL_METHOD_INTERNAL,
             'referral_button_text' => null,
-            'referral_email' => $this->faker->safeEmail,
+            'referral_email' => $this->faker->safeEmail(),
             'referral_url' => null,
             'cqc_location_id' => $this->faker->numerify('#-#########'),
             'ends_at' => null,
@@ -1162,8 +1160,8 @@ class ServicesTest extends TestCase
 
     public function test_global_admin_can_create_an_active_one_with_taxonomies()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -1181,10 +1179,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -1228,9 +1226,9 @@ class ServicesTest extends TestCase
 
     public function test_global_admin_can_create_one_accepting_referrals()
     {
-        $organisation = factory(Organisation::class)->create();
-        $taxonomy = factory(Taxonomy::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $taxonomy = Taxonomy::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -1248,14 +1246,14 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => true,
             'referral_method' => Service::REFERRAL_METHOD_INTERNAL,
             'referral_button_text' => null,
-            'referral_email' => $this->faker->safeEmail,
+            'referral_email' => $this->faker->safeEmail(),
             'referral_url' => null,
             'cqc_location_id' => $this->faker->numerify('#-#########'),
             'ends_at' => null,
@@ -1294,8 +1292,8 @@ class ServicesTest extends TestCase
 
     public function test_global_admin_cannot_create_one_with_referral_disclaimer_showing()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -1313,10 +1311,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => true,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -1348,11 +1346,11 @@ class ServicesTest extends TestCase
 
     public function test_global_admin_can_create_one_with_tags()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
-        $taxonomy = factory(Taxonomy::class)->create();
-        $tag1 = factory(Tag::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
+        $tag1 = Tag::factory()->create();
 
         Passport::actingAs($user);
 
@@ -1370,10 +1368,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -1402,7 +1400,7 @@ class ServicesTest extends TestCase
             ],
             'gallery_items' => [],
             'category_taxonomies' => [
-                $taxonomy->id
+                $taxonomy->id,
             ],
         ];
         $response = $this->json('POST', '/core/v1/services', $payload);
@@ -1417,10 +1415,10 @@ class ServicesTest extends TestCase
 
     public function test_global_admin_can_create_tags_when_creating_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
 
         Passport::actingAs($user);
 
@@ -1438,10 +1436,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -1470,7 +1468,7 @@ class ServicesTest extends TestCase
             ],
             'gallery_items' => [],
             'category_taxonomies' => [
-                $taxonomy->id
+                $taxonomy->id,
             ],
         ];
         $response = $this->json('POST', '/core/v1/services', $payload);
@@ -1490,12 +1488,12 @@ class ServicesTest extends TestCase
 
     public function test_super_admin_can_create_one_with_referral_disclaimer_showing()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($user);
 
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
 
         $payload = [
             'organisation_id' => $organisation->id,
@@ -1511,10 +1509,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => true,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -1548,12 +1546,12 @@ class ServicesTest extends TestCase
 
     public function test_slug_is_incremented_when_creating_one_with_duplicate_slug()
     {
-        $organisation1 = factory(Organisation::class)->create();
-        $organisation2 = factory(Organisation::class)->create();
-        $organisation3 = factory(Organisation::class)->create();
-        $organisation4 = factory(Organisation::class)->create();
-        $taxonomy = factory(Taxonomy::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation1 = Organisation::factory()->create();
+        $organisation2 = Organisation::factory()->create();
+        $organisation3 = Organisation::factory()->create();
+        $organisation4 = Organisation::factory()->create();
+        $taxonomy = Taxonomy::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         //Given that a global admin is logged in
         Passport::actingAs($user);
@@ -1572,10 +1570,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -1648,7 +1646,7 @@ class ServicesTest extends TestCase
             'slug' => 'test-service-2',
         ]);
 
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'demo-service-1',
         ]);
 
@@ -1675,9 +1673,9 @@ class ServicesTest extends TestCase
      */
     public function global_admin_is_added_as_service_admin_when_organisation_admin_creates_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $globalAdmin = factory(User::class)->create()->makeGlobalAdmin();
-        $orgAdmin = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $globalAdmin = User::factory()->create()->makeGlobalAdmin();
+        $orgAdmin = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         //Given an organisation admin is logged in
         Passport::actingAs($orgAdmin);
@@ -1696,10 +1694,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -1765,10 +1763,10 @@ class ServicesTest extends TestCase
      */
     public function global_admin_is_added_as_service_admin_when_other_global_admin_creates_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $taxonomy = factory(Taxonomy::class)->create();
-        $globalAdmin1 = factory(User::class)->create()->makeGlobalAdmin();
-        $globalAdmin2 = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $taxonomy = Taxonomy::factory()->create();
+        $globalAdmin1 = User::factory()->create()->makeGlobalAdmin();
+        $globalAdmin2 = User::factory()->create()->makeGlobalAdmin();
 
         //Given an global admin is logged in
         Passport::actingAs($globalAdmin1);
@@ -1787,10 +1785,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -1866,9 +1864,9 @@ class ServicesTest extends TestCase
 
     public function test_guest_can_view_one()
     {
-        $service = factory(Service::class)->create();
-        $taxonomy = factory(Taxonomy::class)->create();
-        $tag1 = factory(Tag::class)->create();
+        $service = Service::factory()->create();
+        $taxonomy = Taxonomy::factory()->create();
+        $tag1 = Tag::factory()->create();
 
         $service->usefulInfos()->create([
             'title' => 'Did You Know?',
@@ -1961,8 +1959,8 @@ class ServicesTest extends TestCase
 
     public function test_guest_can_view_one_by_slug()
     {
-        $service = factory(Service::class)->create();
-        $taxonomy = factory(Taxonomy::class)->create();
+        $service = Service::factory()->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->usefulInfos()->create([
             'title' => 'Did You Know?',
             'description' => 'This is a test description',
@@ -2043,7 +2041,7 @@ class ServicesTest extends TestCase
     {
         $this->fakeEvents();
 
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
         $service->usefulInfos()->create([
             'title' => 'Did You Know?',
             'description' => 'This is a test description',
@@ -2058,7 +2056,7 @@ class ServicesTest extends TestCase
             'url' => 'https://www.instagram.com/ayupdigital/',
         ]);
         $service->serviceTaxonomies()->create([
-            'taxonomy_id' => factory(Taxonomy::class)->create()->id,
+            'taxonomy_id' => Taxonomy::factory()->create()->id,
         ]);
 
         $this->json('GET', "/core/v1/services/{$service->id}");
@@ -2075,7 +2073,7 @@ class ServicesTest extends TestCase
 
     public function test_guest_cannot_update_one()
     {
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
 
         $response = $this->json('PUT', "/core/v1/services/{$service->id}");
 
@@ -2084,8 +2082,8 @@ class ServicesTest extends TestCase
 
     public function test_service_worker_cannot_update_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
 
         Passport::actingAs($user);
 
@@ -2096,13 +2094,13 @@ class ServicesTest extends TestCase
 
     public function test_service_admin_can_update_one()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
@@ -2119,10 +2117,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -2161,13 +2159,13 @@ class ServicesTest extends TestCase
 
     public function test_service_admin_can_update_one_with_single_form_of_contact()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
@@ -2184,10 +2182,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => null,
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -2226,13 +2224,13 @@ class ServicesTest extends TestCase
 
     public function test_service_admin_cannot_update_one_with_tags()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
@@ -2249,10 +2247,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => null,
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -2293,14 +2291,14 @@ class ServicesTest extends TestCase
 
     public function test_global_admin_can_update_most_fields_for_one()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $tag1 = factory(Tag::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $tag1 = Tag::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -2317,10 +2315,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => $service->referral_method,
             'referral_button_text' => $service->referral_button_text,
@@ -2364,13 +2362,13 @@ class ServicesTest extends TestCase
 
     public function test_global_admin_cannot_update_with_non_numeric_phone()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -2387,10 +2385,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => 'Tel 01234 567890',
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => $service->referral_method,
             'referral_button_text' => $service->referral_button_text,
@@ -2427,13 +2425,13 @@ class ServicesTest extends TestCase
 
     public function test_global_admin_cannot_update_show_referral_disclaimer_for_one()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -2450,10 +2448,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => true,
             'referral_method' => $service->referral_method,
             'referral_button_text' => $service->referral_button_text,
@@ -2487,13 +2485,13 @@ class ServicesTest extends TestCase
     {
         $this->fakeEvents();
 
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
@@ -2510,10 +2508,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => $service->show_referral_disclaimer,
             'referral_method' => $service->referral_method,
             'referral_button_text' => $service->referral_button_text,
@@ -2549,10 +2547,10 @@ class ServicesTest extends TestCase
 
     public function test_service_admin_cannot_update_taxonomies()
     {
-        $service = factory(Service::class)->create();
-        $taxonomy = factory(Taxonomy::class)->create();
+        $service = Service::factory()->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
@@ -2573,14 +2571,14 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => true,
             'referral_method' => Service::REFERRAL_METHOD_INTERNAL,
             'referral_button_text' => null,
-            'referral_email' => $this->faker->safeEmail,
+            'referral_email' => $this->faker->safeEmail(),
             'referral_url' => null,
             'cqc_location_id' => $this->faker->numerify('#-#########'),
             'ends_at' => null,
@@ -2610,10 +2608,10 @@ class ServicesTest extends TestCase
 
     public function test_global_admin_can_update_taxonomies()
     {
-        $service = factory(Service::class)->create();
-        $taxonomy = factory(Taxonomy::class)->create();
+        $service = Service::factory()->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -2634,14 +2632,14 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => true,
             'referral_method' => Service::REFERRAL_METHOD_INTERNAL,
             'referral_button_text' => null,
-            'referral_email' => $this->faker->safeEmail,
+            'referral_email' => $this->faker->safeEmail(),
             'referral_url' => null,
             'cqc_location_id' => $this->faker->numerify('#-#########'),
             'ends_at' => null,
@@ -2671,14 +2669,14 @@ class ServicesTest extends TestCase
 
     public function test_service_admin_can_update_cqc_location_id()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
             'cqc_location_id' => null,
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
@@ -2697,10 +2695,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -2728,13 +2726,13 @@ class ServicesTest extends TestCase
 
     public function test_service_admin_cannot_update_status()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
@@ -2751,14 +2749,14 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => true,
             'referral_method' => Service::REFERRAL_METHOD_INTERNAL,
             'referral_button_text' => null,
-            'referral_email' => $this->faker->safeEmail,
+            'referral_email' => $this->faker->safeEmail(),
             'referral_url' => null,
             'cqc_location_id' => $this->faker->numerify('#-#########'),
             'ends_at' => null,
@@ -2776,13 +2774,13 @@ class ServicesTest extends TestCase
 
     public function test_service_admin_cannot_update_slug()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
@@ -2799,14 +2797,14 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => true,
             'referral_method' => Service::REFERRAL_METHOD_INTERNAL,
             'referral_button_text' => null,
-            'referral_email' => $this->faker->safeEmail,
+            'referral_email' => $this->faker->safeEmail(),
             'referral_url' => null,
             'cqc_location_id' => $this->faker->numerify('#-#########'),
             'ends_at' => null,
@@ -2824,13 +2822,13 @@ class ServicesTest extends TestCase
 
     public function test_global_admin_can_update_status()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -2847,14 +2845,14 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => true,
             'referral_method' => Service::REFERRAL_METHOD_INTERNAL,
             'referral_button_text' => null,
-            'referral_email' => $this->faker->safeEmail,
+            'referral_email' => $this->faker->safeEmail(),
             'referral_url' => null,
             'cqc_location_id' => $this->faker->numerify('#-#########'),
             'ends_at' => null,
@@ -2872,13 +2870,13 @@ class ServicesTest extends TestCase
 
     public function test_global_admin_cannot_update_slug()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -2895,14 +2893,14 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => true,
             'referral_method' => Service::REFERRAL_METHOD_INTERNAL,
             'referral_button_text' => null,
-            'referral_email' => $this->faker->safeEmail,
+            'referral_email' => $this->faker->safeEmail(),
             'referral_url' => null,
             'cqc_location_id' => $this->faker->numerify('#-#########'),
             'ends_at' => null,
@@ -2920,13 +2918,13 @@ class ServicesTest extends TestCase
 
     public function test_global_admin_can_create_tags_when_updating()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -2943,10 +2941,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => $service->referral_method,
             'referral_button_text' => $service->referral_button_text,
@@ -2998,13 +2996,13 @@ class ServicesTest extends TestCase
 
     public function test_referral_email_must_be_provided_when_referral_type_is_internal()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -3021,10 +3019,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => true,
             'referral_method' => Service::REFERRAL_METHOD_INTERNAL,
             'referral_button_text' => null,
@@ -3047,14 +3045,14 @@ class ServicesTest extends TestCase
 
     public function test_service_admin_cannot_update_referral_details()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
             'referral_method' => Service::REFERRAL_METHOD_INTERNAL,
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
@@ -3071,10 +3069,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -3099,15 +3097,15 @@ class ServicesTest extends TestCase
 
     public function test_global_admin_can_update_referral_details()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
             'referral_method' => Service::REFERRAL_METHOD_INTERNAL,
-            'referral_email' => $this->faker->safeEmail,
+            'referral_email' => $this->faker->safeEmail(),
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -3124,10 +3122,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => $service->show_referral_disclaimer,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -3156,9 +3154,9 @@ class ServicesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
-        $service = factory(Service::class)->create([
-            'logo_file_id' => factory(File::class)->create()->id,
+        $user = User::factory()->create();
+        $service = Service::factory()->create([
+            'logo_file_id' => File::factory()->create()->id,
         ]);
         $user->makeServiceAdmin($service);
         $payload = [
@@ -3201,15 +3199,15 @@ class ServicesTest extends TestCase
 
     public function test_service_admin_can_update_gallery_items()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
             'referral_method' => Service::REFERRAL_METHOD_INTERNAL,
-            'referral_email' => $this->faker->safeEmail,
+            'referral_email' => $this->faker->safeEmail(),
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         $image = Storage::disk('local')->get('/test-data/image.png');
 
         Passport::actingAs($user);
@@ -3217,7 +3215,7 @@ class ServicesTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
+            'file' => 'data:image/png;base64,'.base64_encode($image),
         ]);
 
         $response = $this->json('PUT', "/core/v1/services/{$service->id}", [
@@ -3233,13 +3231,13 @@ class ServicesTest extends TestCase
 
     public function test_only_partial_fields_can_be_updated()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -3254,13 +3252,13 @@ class ServicesTest extends TestCase
 
     public function test_fields_removed_for_existing_update_requests()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
@@ -3307,15 +3305,15 @@ class ServicesTest extends TestCase
 
     public function test_referral_url_required_when_referral_method_not_updated_with_it()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
             'referral_method' => Service::REFERRAL_METHOD_EXTERNAL,
-            'referral_url' => $this->faker->url,
+            'referral_url' => $this->faker->url(),
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -3328,18 +3326,18 @@ class ServicesTest extends TestCase
 
     public function test_organisation_admin_cannot_update_organisation_id()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
+        $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
 
         Passport::actingAs($user);
 
         $response = $this->json('PUT', "/core/v1/services/{$service->id}", [
-            'organisation_id' => factory(Organisation::class)->create()->id,
+            'organisation_id' => Organisation::factory()->create()->id,
         ]);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -3347,22 +3345,22 @@ class ServicesTest extends TestCase
 
     public function test_global_admin_can_update_organisation_id()
     {
-        $originalOrganisation = factory(Organisation::class)->create([
+        $originalOrganisation = Organisation::factory()->create([
             'name' => 'Original Organisation',
         ]);
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'organisation_id' => $originalOrganisation->id,
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $newOrganisation = factory(Organisation::class)->create([
+        $newOrganisation = Organisation::factory()->create([
             'name' => 'New Organisation',
         ]);
-        $globalAdmin = factory(User::class)->create()->makeGlobalAdmin();
-        $originalOrganisationAdmin = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
-        $newOrganisationAdmin = factory(User::class)->create()->makeOrganisationAdmin($newOrganisation);
+        $globalAdmin = User::factory()->create()->makeGlobalAdmin();
+        $originalOrganisationAdmin = User::factory()->create()->makeOrganisationAdmin($service->organisation);
+        $newOrganisationAdmin = User::factory()->create()->makeOrganisationAdmin($newOrganisation);
 
         $this->assertFalse($newOrganisationAdmin->isServiceAdmin($service));
         $this->assertTrue($originalOrganisationAdmin->isServiceAdmin($service));
@@ -3386,18 +3384,18 @@ class ServicesTest extends TestCase
 
     public function test_global_admin_can_update_organisation_id_with_preview_only()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
         $payload = [
-            'organisation_id' => factory(Organisation::class)->create()->id,
+            'organisation_id' => Organisation::factory()->create()->id,
         ];
 
         $response = $this->json('PUT', "/core/v1/services/{$service->id}", array_merge(
@@ -3411,18 +3409,18 @@ class ServicesTest extends TestCase
 
     public function test_global_admin_can_update_one_with_auto_approval()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
         ]);
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
         $payload = [
-            'organisation_id' => factory(Organisation::class)->create()->id,
+            'organisation_id' => Organisation::factory()->create()->id,
         ];
         $response = $this->json('PUT', "/core/v1/services/{$service->id}", $payload);
 
@@ -3459,7 +3457,7 @@ class ServicesTest extends TestCase
 
     public function test_guest_cannot_delete_one()
     {
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
 
         $response = $this->json('DELETE', "/core/v1/services/{$service->id}");
 
@@ -3468,8 +3466,8 @@ class ServicesTest extends TestCase
 
     public function test_service_worker_cannot_delete_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
 
         Passport::actingAs($user);
 
@@ -3480,8 +3478,8 @@ class ServicesTest extends TestCase
 
     public function test_service_admin_cannot_delete_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
@@ -3492,8 +3490,8 @@ class ServicesTest extends TestCase
 
     public function test_organisation_admin_cannot_delete_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($service->organisation);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
 
         Passport::actingAs($user);
 
@@ -3504,8 +3502,8 @@ class ServicesTest extends TestCase
 
     public function test_global_admin_can_delete_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -3519,8 +3517,8 @@ class ServicesTest extends TestCase
     {
         $this->fakeEvents();
 
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($user);
 
@@ -3535,17 +3533,17 @@ class ServicesTest extends TestCase
 
     public function test_service_can_be_deleted_when_service_location_has_opening_hours()
     {
-        $service = factory(Service::class)->create();
-        $serviceLocation = factory(ServiceLocation::class)->create([
+        $service = Service::factory()->create();
+        $serviceLocation = ServiceLocation::factory()->create([
             'service_id' => $service->id,
         ]);
-        factory(RegularOpeningHour::class)->create([
+        RegularOpeningHour::factory()->create([
             'service_location_id' => $serviceLocation->id,
         ]);
-        factory(HolidayOpeningHour::class)->create([
+        HolidayOpeningHour::factory()->create([
             'service_location_id' => $serviceLocation->id,
         ]);
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($user);
 
@@ -3557,11 +3555,11 @@ class ServicesTest extends TestCase
 
     public function test_service_can_be_deleted_when_disabled()
     {
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'status' => Service::STATUS_INACTIVE,
         ]);
 
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($user);
 
@@ -3577,7 +3575,7 @@ class ServicesTest extends TestCase
 
     public function test_guest_without_token_cannot_refresh()
     {
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
 
         $response = $this->putJson("/core/v1/services/{$service->id}/refresh");
 
@@ -3586,7 +3584,7 @@ class ServicesTest extends TestCase
 
     public function test_guest_with_invalid_token_cannot_refresh()
     {
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
 
         $response = $this->putJson("/core/v1/services/{$service->id}/refresh", [
             'token' => 'invalid-token',
@@ -3600,12 +3598,12 @@ class ServicesTest extends TestCase
         $now = Date::now();
         Date::setTestNow($now);
 
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'last_modified_at' => Date::now()->subMonths(6),
         ]);
 
         $response = $this->putJson("/core/v1/services/{$service->id}/refresh", [
-            'token' => factory(ServiceRefreshToken::class)->create([
+            'token' => ServiceRefreshToken::factory()->create([
                 'service_id' => $service->id,
             ])->id,
         ]);
@@ -3618,9 +3616,9 @@ class ServicesTest extends TestCase
 
     public function test_service_worker_without_token_cannot_refresh()
     {
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
 
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $user = User::factory()->create()->makeServiceWorker($service);
 
         Passport::actingAs($user);
 
@@ -3634,11 +3632,11 @@ class ServicesTest extends TestCase
         $now = Date::now();
         Date::setTestNow($now);
 
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'last_modified_at' => Date::now()->subMonths(6),
         ]);
 
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
@@ -3656,16 +3654,16 @@ class ServicesTest extends TestCase
 
     public function test_guest_can_list_related()
     {
-        $taxonomyOne = factory(Taxonomy::class)->create();
-        $taxonomyTwo = factory(Taxonomy::class)->create();
-        $taxonomyThree = factory(Taxonomy::class)->create();
+        $taxonomyOne = Taxonomy::factory()->create();
+        $taxonomyTwo = Taxonomy::factory()->create();
+        $taxonomyThree = Taxonomy::factory()->create();
 
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
         $service->serviceTaxonomies()->create(['taxonomy_id' => $taxonomyOne->id]);
         $service->serviceTaxonomies()->create(['taxonomy_id' => $taxonomyTwo->id]);
         $service->serviceTaxonomies()->create(['taxonomy_id' => $taxonomyThree->id]);
 
-        $relatedService = factory(Service::class)->create();
+        $relatedService = Service::factory()->create();
         $relatedService->usefulInfos()->create([
             'title' => 'Did You Know?',
             'description' => 'This is a test description',
@@ -3676,17 +3674,17 @@ class ServicesTest extends TestCase
             'url' => 'https://www.instagram.com/ayupdigital/',
         ]);
         $relatedService->serviceGalleryItems()->create([
-            'file_id' => factory(File::class)->create()->id,
+            'file_id' => File::factory()->create()->id,
         ]);
         $relatedService->serviceTaxonomies()->create(['taxonomy_id' => $taxonomyOne->id]);
         $relatedService->serviceTaxonomies()->create(['taxonomy_id' => $taxonomyTwo->id]);
         $relatedService->serviceTaxonomies()->create(['taxonomy_id' => $taxonomyThree->id]);
 
-        $unrelatedService = factory(Service::class)->create();
+        $unrelatedService = Service::factory()->create();
         $unrelatedService->serviceTaxonomies()->create(['taxonomy_id' => $taxonomyOne->id]);
         $unrelatedService->serviceTaxonomies()->create(['taxonomy_id' => $taxonomyTwo->id]);
 
-        $inactiveService = factory(Service::class)->create([
+        $inactiveService = Service::factory()->create([
             'status' => Service::STATUS_INACTIVE,
         ]);
         $inactiveService->usefulInfos()->create([
@@ -3699,7 +3697,7 @@ class ServicesTest extends TestCase
             'url' => 'https://www.instagram.com/ayupdigital/',
         ]);
         $inactiveService->serviceGalleryItems()->create([
-            'file_id' => factory(File::class)->create()->id,
+            'file_id' => File::factory()->create()->id,
         ]);
         $inactiveService->serviceTaxonomies()->create(['taxonomy_id' => $taxonomyOne->id]);
         $inactiveService->serviceTaxonomies()->create(['taxonomy_id' => $taxonomyTwo->id]);
@@ -3790,7 +3788,7 @@ class ServicesTest extends TestCase
     public function test_related_services_order_by_taxonomy_depth()
     {
         // Create taxonomies.
-        $taxonomy = factory(Taxonomy::class)->create();
+        $taxonomy = Taxonomy::factory()->create();
         $taxonomyOneDepthOne = $taxonomy->children()->create([
             'slug' => 'taxonomy-one',
             'name' => 'Taxonomy One',
@@ -3817,14 +3815,14 @@ class ServicesTest extends TestCase
         ]);
 
         // Create service.
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
         $service->serviceTaxonomies()->create(['taxonomy_id' => $taxonomyOneDepthOne->id]);
         $service->serviceTaxonomies()->create(['taxonomy_id' => $taxonomyTwoDepthOne->id]);
         $service->serviceTaxonomies()->create(['taxonomy_id' => $taxonomyThreeDepthOne->id]);
         $service->serviceTaxonomies()->create(['taxonomy_id' => $taxonomyFourDepthTwo->id]);
 
         // Create closely related service.
-        $closelyRelatedService = factory(Service::class)->create([
+        $closelyRelatedService = Service::factory()->create([
             'name' => 'Beta',
         ]);
         $closelyRelatedService->serviceTaxonomies()->create(['taxonomy_id' => $taxonomyOneDepthOne->id]);
@@ -3832,7 +3830,7 @@ class ServicesTest extends TestCase
         $closelyRelatedService->serviceTaxonomies()->create(['taxonomy_id' => $taxonomyFourDepthTwo->id]);
 
         // Create distantly related service.
-        $distantlyRelatedService = factory(Service::class)->create([
+        $distantlyRelatedService = Service::factory()->create([
             'name' => 'Alpha',
         ]);
         $distantlyRelatedService->serviceTaxonomies()->create(['taxonomy_id' => $taxonomyOneDepthOne->id]);
@@ -3864,14 +3862,14 @@ class ServicesTest extends TestCase
 
     public function test_super_admin_can_disable_stale()
     {
-        $staleService = factory(Service::class)->create([
+        $staleService = Service::factory()->create([
             'last_modified_at' => '2020-02-01',
         ]);
-        $currentService = factory(Service::class)->create([
+        $currentService = Service::factory()->create([
             'last_modified_at' => '2020-05-01',
         ]);
 
-        Passport::actingAs(factory(User::class)->create()->makeSuperAdmin());
+        Passport::actingAs(User::factory()->create()->makeSuperAdmin());
 
         $response = $this->putJson('/core/v1/services/disable-stale', [
             'last_modified_at' => '2020-03-01',
@@ -3894,7 +3892,7 @@ class ServicesTest extends TestCase
 
     public function test_guest_can_view_logo()
     {
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
 
         $response = $this->get("/core/v1/services/{$service->id}/logo.png");
 
@@ -3906,7 +3904,7 @@ class ServicesTest extends TestCase
     {
         $this->fakeEvents();
 
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
 
         $this->get("/core/v1/services/{$service->id}/logo.png");
 
@@ -3922,8 +3920,8 @@ class ServicesTest extends TestCase
 
     public function test_organisation_admin_can_upload_logo()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create();
         $user->makeOrganisationAdmin($organisation);
         $image = Storage::disk('local')->get('/test-data/image.png');
 
@@ -3932,7 +3930,7 @@ class ServicesTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
+            'file' => 'data:image/png;base64,'.base64_encode($image),
         ]);
 
         $payload = [
@@ -3949,10 +3947,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -3983,16 +3981,15 @@ class ServicesTest extends TestCase
 
         $updateRequestId = $this->getResponseContent($response, 'id');
 
-
         $response->assertStatus(Response::HTTP_OK);
         $this->assertDatabaseHas(table(UpdateRequest::class), [
             'id' => $updateRequestId,
-            'updateable_id' => null
+            'updateable_id' => null,
         ]);
         $updateRequest = UpdateRequest::where('id', $updateRequestId)->firstOrFail();
         $this->assertEquals($this->getResponseContent($imageResponse, 'data.id'), $updateRequest->data['logo_file_id']);
 
-        $globalAdminUser = factory(User::class)->create()->makeGlobalAdmin();
+        $globalAdminUser = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($globalAdminUser);
 
         //And the organisation event should not yet be created
@@ -4028,7 +4025,7 @@ class ServicesTest extends TestCase
     public function test_guest_can_view_gallery_item()
     {
         /** @var \App\Models\File $file */
-        $file = factory(File::class)->create([
+        $file = File::factory()->create([
             'filename' => 'random-name.png',
             'mime_type' => 'image/png',
         ])->upload(
@@ -4036,7 +4033,7 @@ class ServicesTest extends TestCase
         );
 
         /** @var \App\Models\Service $service */
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
 
         /** @var \App\Models\ServiceGalleryItem $serviceGalleryItem */
         $serviceGalleryItem = $service->serviceGalleryItems()->create([
@@ -4052,22 +4049,21 @@ class ServicesTest extends TestCase
     /**
      * Bulk import services
      */
-
     public function test_guest_cannot_bulk_import()
     {
         Storage::fake('local');
 
-        $services = factory(Service::class, 2)->make([
+        $services = Service::factory()->count(2)->make([
             'status' => Service::STATUS_INACTIVE,
         ]);
 
         $this->createServiceSpreadsheets($services);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
@@ -4076,20 +4072,20 @@ class ServicesTest extends TestCase
     {
         Storage::fake('local');
 
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
 
         Passport::actingAs($user);
 
-        $services = factory(Service::class, 2)->make();
+        $services = Service::factory()->count(2)->make();
 
         $this->createServiceSpreadsheets($services);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
@@ -4098,22 +4094,22 @@ class ServicesTest extends TestCase
     {
         Storage::fake('local');
 
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
-        $services = factory(Service::class, 2)->make([
+        $services = Service::factory()->count(2)->make([
             'status' => Service::STATUS_INACTIVE,
         ]);
 
         $this->createServiceSpreadsheets($services);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
@@ -4122,13 +4118,13 @@ class ServicesTest extends TestCase
     {
         Storage::fake('local');
 
-        $organisation1 = factory(Organisation::class)->create();
-        $organisation2 = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation1);
+        $organisation1 = Organisation::factory()->create();
+        $organisation2 = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation1);
 
         Passport::actingAs($user);
 
-        $services = factory(Service::class, 2)->make([
+        $services = Service::factory()->count(2)->make([
             'status' => Service::STATUS_INACTIVE,
             'organisation_id' => $organisation2->id,
         ]);
@@ -4136,10 +4132,10 @@ class ServicesTest extends TestCase
         $this->createServiceSpreadsheets($services);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
         $response->assertJson([
@@ -4162,12 +4158,12 @@ class ServicesTest extends TestCase
     {
         Storage::fake('local');
 
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
-        $services = factory(Service::class, 2)->make([
+        $services = Service::factory()->count(2)->make([
             'status' => Service::STATUS_INACTIVE,
             'organisation_id' => $organisation->id,
         ]);
@@ -4175,10 +4171,10 @@ class ServicesTest extends TestCase
         $this->createServiceSpreadsheets($services, $organisation->id);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_CREATED);
     }
@@ -4187,19 +4183,19 @@ class ServicesTest extends TestCase
     {
         Storage::fake('local');
 
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
-        $services = factory(Service::class, 2)->make();
+        $services = Service::factory()->count(2)->make();
 
         $this->createServiceSpreadsheets($services);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_CREATED);
     }
@@ -4208,19 +4204,19 @@ class ServicesTest extends TestCase
     {
         Storage::fake('local');
 
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($user);
 
-        $services = factory(Service::class, 2)->make();
+        $services = Service::factory()->count(2)->make();
 
         $this->createServiceSpreadsheets($services);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_CREATED);
     }
@@ -4229,23 +4225,23 @@ class ServicesTest extends TestCase
     {
         Storage::fake('local');
 
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
-        $services = factory(Service::class, 2)->make();
+        $services = Service::factory()->count(2)->make();
 
         $this->createServiceSpreadsheets($services);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_CREATED);
 
-        $response = $this->json('GET', "/core/v1/services?include=organisation&filter=[has_permission]=true&page=1&sort=name");
+        $response = $this->json('GET', '/core/v1/services?include=organisation&filter=[has_permission]=true&page=1&sort=name');
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -4293,23 +4289,23 @@ class ServicesTest extends TestCase
     {
         Storage::fake('local');
 
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($user);
 
-        $services = factory(Service::class, 2)->make();
+        $services = Service::factory()->count(2)->make();
 
         $this->createServiceSpreadsheets($services);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_CREATED);
 
-        $response = $this->json('GET', "/core/v1/services?include=organisation&filter=[has_permission]=true&page=1&sort=name");
+        $response = $this->json('GET', '/core/v1/services?include=organisation&filter=[has_permission]=true&page=1&sort=name');
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -4357,7 +4353,7 @@ class ServicesTest extends TestCase
     {
         Storage::fake('local');
 
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
 
         $invalidFieldTypes = [
             ['spreadsheet' => 'This is a string'],
@@ -4368,28 +4364,28 @@ class ServicesTest extends TestCase
             ['spreadsheet' => UploadedFile::fake()->create('dummy.csv', 3000)],
         ];
 
-        $user = factory(User::class)->create()->makeSuperAdmin();
-        $organisation = factory(Organisation::class)->create();
+        $user = User::factory()->create()->makeSuperAdmin();
+        $organisation = Organisation::factory()->create();
 
         Passport::actingAs($user);
 
         foreach ($invalidFieldTypes as $data) {
             $data['organisation_id'] = $organisation->id;
-            $response = $this->json('POST', "/core/v1/services/import", $data);
+            $response = $this->json('POST', '/core/v1/services/import', $data);
             $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $services = factory(Service::class, 2)->make([
+        $services = Service::factory()->count(2)->make([
             'organisation_id' => $organisation->id,
         ]);
 
         $this->createServiceSpreadsheets($services);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
@@ -4398,17 +4394,17 @@ class ServicesTest extends TestCase
             ],
         ]);
 
-        $services = factory(Service::class, 2)->make([
+        $services = Service::factory()->count(2)->make([
             'organisation_id' => $organisation->id,
         ]);
 
         $this->createServiceSpreadsheets($services);
 
         $data = [
-            'spreadsheet' => 'data:application/octet-stream;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/octet-stream;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
@@ -4417,17 +4413,17 @@ class ServicesTest extends TestCase
             ],
         ]);
 
-        $services = factory(Service::class, 2)->make([
+        $services = Service::factory()->count(2)->make([
             'organisation_id' => $organisation->id,
         ]);
 
         $this->createServiceSpreadsheets($services);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx'))),
+            'spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
@@ -4442,12 +4438,12 @@ class ServicesTest extends TestCase
         Storage::fake('local');
         $faker = Faker::create('en_GB');
 
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
-        $services = factory(Service::class, 2)->make([
+        $services = Service::factory()->count(2)->make([
             'organisation_id' => uuid(),
             'name' => '',
             'type' => '',
@@ -4459,16 +4455,16 @@ class ServicesTest extends TestCase
         ]);
 
         foreach ($services as &$service) {
-            $service->id = $faker->word;
+            $service->id = $faker->word();
         }
 
         $this->createServiceSpreadsheets($services);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
         $response->assertJson([
@@ -4494,7 +4490,7 @@ class ServicesTest extends TestCase
             ],
         ]);
 
-        $services = factory(Service::class, 2)->make([
+        $services = Service::factory()->count(2)->make([
             'organisation_id' => uuid(),
             'name' => '',
             'type' => '',
@@ -4503,21 +4499,21 @@ class ServicesTest extends TestCase
             'description' => '',
             'url' => '',
             'referral_method' => '',
-            'referral_email' => $faker->word,
-            'referral_url' => $faker->word,
+            'referral_email' => $faker->word(),
+            'referral_url' => $faker->word(),
         ]);
 
         foreach ($services as &$service) {
-            $service->id = $faker->word;
+            $service->id = $faker->word();
         }
 
         $this->createServiceSpreadsheets($services);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx'))),
+            'spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
         $response->assertJson([
@@ -4545,8 +4541,8 @@ class ServicesTest extends TestCase
             ],
         ]);
 
-        $service = factory(Service::class)->make([
-            'id' => factory(Service::class)->create()->id,
+        $service = Service::factory()->make([
+            'id' => Service::factory()->create()->id,
             'status' => Service::STATUS_INACTIVE,
             'organisation_id' => $organisation->id,
         ]);
@@ -4554,10 +4550,10 @@ class ServicesTest extends TestCase
         $this->createServiceSpreadsheets(collect([$service]));
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
         $response->assertJson([
@@ -4576,10 +4572,10 @@ class ServicesTest extends TestCase
         ]);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx'))),
+            'spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
         $response->assertJson([
@@ -4605,28 +4601,28 @@ class ServicesTest extends TestCase
     {
         Storage::fake('local');
 
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         Passport::actingAs($user);
 
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
 
         $uuid = uuid();
 
         $services = collect([
             $service,
-            factory(Service::class)->make([
+            Service::factory()->make([
                 'id' => $uuid,
             ]),
-            factory(Service::class)->make([
+            Service::factory()->make([
                 'id' => $uuid,
             ]),
         ]);
 
         $this->createServiceSpreadsheets($services);
 
-        $response = $this->json('POST', "/core/v1/services/import", [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+        $response = $this->json('POST', '/core/v1/services/import', [
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ]);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -4673,25 +4669,25 @@ class ServicesTest extends TestCase
     {
         Storage::fake('local');
 
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         Passport::actingAs($user);
 
         $uuid = uuid();
 
         $services = collect([
-            factory(Service::class)->make([
+            Service::factory()->make([
                 'organisation_id' => 'foo',
             ]),
-            factory(Service::class)->make([
+            Service::factory()->make([
                 'organisation_id' => $uuid,
             ]),
         ]);
 
         $this->createServiceSpreadsheets($services);
 
-        $response = $this->json('POST', "/core/v1/services/import", [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+        $response = $this->json('POST', '/core/v1/services/import', [
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ]);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -4704,8 +4700,8 @@ class ServicesTest extends TestCase
                             'row' => [],
                             'errors' => [
                                 'organisation_id' => [
-                                    "validation.uuid",
-                            "The organisation id field must contain an ID for an organisation you are an organisation admin for."
+                                    __('validation.uuid', ['attribute' => 'organisation id']),
+                                    'The organisation id field must contain an ID for an organisation you are an organisation admin for.',
                                 ],
                             ],
                         ],
@@ -4713,8 +4709,8 @@ class ServicesTest extends TestCase
                             'row' => [],
                             'errors' => [
                                 'organisation_id' => [
-                                    "The selected organisation id is invalid.",
-                            "The organisation id field must contain an ID for an organisation you are an organisation admin for."
+                                    'The selected organisation id is invalid.',
+                                    'The organisation id field must contain an ID for an organisation you are an organisation admin for.',
                                 ],
                             ],
                         ],
@@ -4729,29 +4725,29 @@ class ServicesTest extends TestCase
         Storage::fake('local');
         $faker = Faker::create('en_GB');
 
-        $organisation = factory(Organisation::class)->create();
-        $organisationAdminUser = factory(User::class)->create()->makeOrganisationAdmin($organisation);
-        $globalAdminUser = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $organisationAdminUser = User::factory()->create()->makeOrganisationAdmin($organisation);
+        $globalAdminUser = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($organisationAdminUser);
 
-        $services = factory(Service::class, 2)->make([
+        $services = Service::factory()->count(2)->make([
             'status' => Service::STATUS_ACTIVE,
             'organisation_id' => $organisation->id,
             'referral_method' => Service::REFERRAL_METHOD_EXTERNAL,
-            'referral_button_text' => $faker->word,
-            'referral_email' => $faker->email,
-            'referral_url' => $faker->url,
+            'referral_button_text' => $faker->word(),
+            'referral_email' => $faker->email(),
+            'referral_url' => $faker->url(),
             'show_referral_disclaimer' => '1',
         ]);
 
         $this->createServiceSpreadsheets($services);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
         $response->assertJson([
@@ -4774,10 +4770,10 @@ class ServicesTest extends TestCase
         ]);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx'))),
+            'spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
         $response->assertJson([
@@ -4802,29 +4798,29 @@ class ServicesTest extends TestCase
         Passport::actingAs($globalAdminUser);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_CREATED);
 
-        $services = factory(Service::class, 2)->make([
+        $services = Service::factory()->count(2)->make([
             'status' => Service::STATUS_ACTIVE,
             'referral_method' => Service::REFERRAL_METHOD_EXTERNAL,
-            'referral_button_text' => $faker->word,
-            'referral_email' => $faker->email,
-            'referral_url' => $faker->url,
+            'referral_button_text' => $faker->word(),
+            'referral_email' => $faker->email(),
+            'referral_url' => $faker->url(),
             'show_referral_disclaimer' => '1',
         ]);
 
         $this->createServiceSpreadsheets($services);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx'))),
+            'spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_CREATED);
     }
@@ -4834,27 +4830,27 @@ class ServicesTest extends TestCase
         Storage::fake('local');
         $faker = Faker::create('en_GB');
 
-        $globalAdminUser = factory(User::class)->create()->makeGlobalAdmin();
-        $superAdminUser = factory(User::class)->create()->makeSuperAdmin();
+        $globalAdminUser = User::factory()->create()->makeGlobalAdmin();
+        $superAdminUser = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($globalAdminUser);
 
-        $services = factory(Service::class, 2)->make([
+        $services = Service::factory()->count(2)->make([
             'status' => Service::STATUS_ACTIVE,
             'referral_method' => Service::REFERRAL_METHOD_EXTERNAL,
-            'referral_button_text' => $faker->word,
-            'referral_email' => $faker->email,
-            'referral_url' => $faker->url,
+            'referral_button_text' => $faker->word(),
+            'referral_email' => $faker->email(),
+            'referral_url' => $faker->url(),
             'show_referral_disclaimer' => '0',
         ]);
 
         $this->createServiceSpreadsheets($services);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
         $response->assertJson([
@@ -4873,10 +4869,10 @@ class ServicesTest extends TestCase
         ]);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx'))),
+            'spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
         $response->assertJson([
@@ -4897,29 +4893,29 @@ class ServicesTest extends TestCase
         Passport::actingAs($superAdminUser);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_CREATED);
 
-        $services = factory(Service::class, 2)->make([
+        $services = Service::factory()->count(2)->make([
             'status' => Service::STATUS_ACTIVE,
             'referral_method' => Service::REFERRAL_METHOD_EXTERNAL,
-            'referral_button_text' => $faker->word,
-            'referral_email' => $faker->email,
-            'referral_url' => $faker->url,
+            'referral_button_text' => $faker->word(),
+            'referral_email' => $faker->email(),
+            'referral_url' => $faker->url(),
             'show_referral_disclaimer' => '0',
         ]);
 
         $this->createServiceSpreadsheets($services);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx'))),
+            'spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_CREATED);
     }
@@ -4931,13 +4927,13 @@ class ServicesTest extends TestCase
     {
         Storage::fake('local');
 
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
         $serviceId = uuid();
 
         Passport::actingAs($user);
 
-        $service = factory(Service::class)->states(['withCustomEligibilities'])->make([
+        $service = Service::factory()->withCustomEligibilities()->make([
             'id' => $serviceId,
             'status' => Service::STATUS_INACTIVE,
             'organisation_id' => $organisation->id,
@@ -4950,10 +4946,10 @@ class ServicesTest extends TestCase
         $this->createServiceSpreadsheets(collect([$service]), [$serviceId => $serviceEligibilityTaxonomyIds->all()]);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_CREATED);
 
@@ -4978,13 +4974,13 @@ class ServicesTest extends TestCase
     {
         Storage::fake('local');
 
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
         $serviceId = uuid();
 
         Passport::actingAs($user);
 
-        $service = factory(Service::class)->states(['withCustomEligibilities'])->make([
+        $service = Service::factory()->withCustomEligibilities()->make([
             'id' => $serviceId,
             'status' => Service::STATUS_INACTIVE,
             'organisation_id' => $organisation->id,
@@ -4995,10 +4991,10 @@ class ServicesTest extends TestCase
         $this->createServiceSpreadsheets(collect([$service]), [$serviceId => $invalidServiceEligibilityTaxonomyIds]);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
         $response->assertJson([
@@ -5025,7 +5021,7 @@ class ServicesTest extends TestCase
 
         $categoryTaxonomyIds = [];
         foreach (Taxonomy::category()->children as $taxonomyCategory) {
-            if (!$taxonomyCategory->children->isEmpty()) {
+            if (! $taxonomyCategory->children->isEmpty()) {
                 $categoryTaxonomyIds[] = $taxonomyCategory->children->first()->id;
             }
         }
@@ -5033,10 +5029,10 @@ class ServicesTest extends TestCase
         $this->createServiceSpreadsheets(collect([$service]), [$serviceId => $categoryTaxonomyIds]);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
         $response->assertJson([
@@ -5072,12 +5068,12 @@ class ServicesTest extends TestCase
     {
         Storage::fake('local');
 
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
-        $services = factory(Service::class, 100)->make([
+        $services = Service::factory()->count(100)->make([
             'status' => Service::STATUS_INACTIVE,
             'organisation_id' => $organisation->id,
         ]);
@@ -5085,10 +5081,10 @@ class ServicesTest extends TestCase
         $this->createServiceSpreadsheets($services);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
@@ -5097,7 +5093,7 @@ class ServicesTest extends TestCase
             ],
         ]);
 
-        $services = factory(Service::class, 100)->make([
+        $services = Service::factory()->count(100)->make([
             'status' => Service::STATUS_INACTIVE,
             'organisation_id' => $organisation->id,
         ]);
@@ -5105,10 +5101,10 @@ class ServicesTest extends TestCase
         $this->createServiceSpreadsheets($services);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx'))),
+            'spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
@@ -5125,12 +5121,12 @@ class ServicesTest extends TestCase
     {
         Storage::fake('local');
 
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
-        $services = factory(Service::class, 5000)->make([
+        $services = Service::factory()->count(5000)->make([
             'status' => Service::STATUS_INACTIVE,
             'organisation_id' => $organisation->id,
         ]);
@@ -5138,10 +5134,10 @@ class ServicesTest extends TestCase
         $this->createServiceSpreadsheets($services);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
@@ -5150,7 +5146,7 @@ class ServicesTest extends TestCase
             ],
         ]);
 
-        $services = factory(Service::class, 5000)->make([
+        $services = Service::factory()->count(5000)->make([
             'status' => Service::STATUS_INACTIVE,
             'organisation_id' => $organisation->id,
         ]);
@@ -5158,10 +5154,10 @@ class ServicesTest extends TestCase
         $this->createServiceSpreadsheets($services);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx'))),
+            'spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx'))),
         ];
 
-        $response = $this->json('POST', "/core/v1/services/import", $data);
+        $response = $this->json('POST', '/core/v1/services/import', $data);
 
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
@@ -5173,14 +5169,7 @@ class ServicesTest extends TestCase
 
     public function test_service_eligiblity_custom_fields_schema_on_index()
     {
-        $service = factory(Service::class)
-            ->states(
-                'withOfferings',
-                'withUsefulInfo',
-                'withSocialMedia',
-                'withCustomEligibilities',
-                'withCategoryTaxonomies'
-            )
+        $service = Service::factory()->withOfferings()->withUsefulInfo()->withSocialMedia()->withCustomEligibilities()->withCategoryTaxonomies()
             ->create();
 
         $service->save();
@@ -5207,17 +5196,9 @@ class ServicesTest extends TestCase
     /**
      * Service Eligibilities
      */
-
     public function test_service_eligiblity_taxonomy_id_schema_on_index()
     {
-        $service = factory(Service::class)
-            ->states(
-                'withOfferings',
-                'withUsefulInfo',
-                'withSocialMedia',
-                'withEligibilityTaxonomies',
-                'withCategoryTaxonomies'
-            )
+        $service = Service::factory()->withOfferings()->withUsefulInfo()->withSocialMedia()->withEligibilityTaxonomies()->withCategoryTaxonomies()
             ->create();
 
         $taxonomyIds = $service->serviceEligibilities()->pluck('taxonomy_id')->all();
@@ -5243,15 +5224,7 @@ class ServicesTest extends TestCase
 
     public function test_service_eligibility_taxonomy_and_custom_fields_schema_on_index()
     {
-        $service = factory(Service::class)
-            ->states(
-                'withOfferings',
-                'withUsefulInfo',
-                'withSocialMedia',
-                'withCustomEligibilities',
-                'withCategoryTaxonomies',
-                'withEligibilityTaxonomies'
-            )
+        $service = Service::factory()->withOfferings()->withUsefulInfo()->withSocialMedia()->withCustomEligibilities()->withCategoryTaxonomies()->withEligibilityTaxonomies()
             ->create();
 
         $taxonomyIds = $service->serviceEligibilities()->pluck('taxonomy_id')->all();
@@ -5278,14 +5251,7 @@ class ServicesTest extends TestCase
 
     public function test_service_eligiblity_custom_fields_schema_on_show()
     {
-        $service = factory(Service::class)
-            ->states(
-                'withOfferings',
-                'withUsefulInfo',
-                'withSocialMedia',
-                'withCustomEligibilities',
-                'withCategoryTaxonomies'
-            )
+        $service = Service::factory()->withOfferings()->withUsefulInfo()->withSocialMedia()->withCustomEligibilities()->withCategoryTaxonomies()
             ->create();
 
         $response = $this->get(route('core.v1.services.show', $service->id));
@@ -5309,14 +5275,7 @@ class ServicesTest extends TestCase
 
     public function test_service_eligiblity_taxonomy_id_schema_on_show()
     {
-        $service = factory(Service::class)
-            ->states(
-                'withOfferings',
-                'withUsefulInfo',
-                'withSocialMedia',
-                'withCategoryTaxonomies',
-                'withEligibilityTaxonomies'
-            )
+        $service = Service::factory()->withOfferings()->withUsefulInfo()->withSocialMedia()->withCategoryTaxonomies()->withEligibilityTaxonomies()
             ->create();
 
         $taxonomyIds = $service->serviceEligibilities()->pluck('taxonomy_id')->all();
@@ -5342,15 +5301,7 @@ class ServicesTest extends TestCase
 
     public function test_service_eligibility_taxonomy_and_custom_fields_schema_on_show()
     {
-        $service = factory(Service::class)
-            ->states(
-                'withOfferings',
-                'withUsefulInfo',
-                'withSocialMedia',
-                'withCustomEligibilities',
-                'withCategoryTaxonomies',
-                'withEligibilityTaxonomies'
-            )
+        $service = Service::factory()->withOfferings()->withUsefulInfo()->withSocialMedia()->withCustomEligibilities()->withCategoryTaxonomies()->withEligibilityTaxonomies()
             ->create();
 
         $taxonomyIds = $service->serviceEligibilities()->pluck('taxonomy_id')->all();
@@ -5376,8 +5327,8 @@ class ServicesTest extends TestCase
 
     public function test_create_service_with_eligibility_taxonomies()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         $taxonomyIds = Taxonomy::serviceEligibility()
             ->children
@@ -5407,10 +5358,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -5461,8 +5412,8 @@ class ServicesTest extends TestCase
 
     public function test_create_service_with_custom_eligibility_fields()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -5480,10 +5431,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -5534,8 +5485,8 @@ class ServicesTest extends TestCase
 
     public function test_create_service_with_custom_fields_and_eligibility_taxonomy_ids()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         $taxonomyIds = Taxonomy::serviceEligibility()
             ->children
@@ -5566,10 +5517,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -5620,16 +5571,8 @@ class ServicesTest extends TestCase
 
     public function test_update_service_with_eligibility_taxonomies()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
-        $service = factory(Service::class)
-            ->states(
-                'withOfferings',
-                'withUsefulInfo',
-                'withSocialMedia',
-                'withCustomEligibilities',
-                'withEligibilityTaxonomies',
-                'withCategoryTaxonomies'
-            )
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $service = Service::factory()->withOfferings()->withUsefulInfo()->withSocialMedia()->withCustomEligibilities()->withEligibilityTaxonomies()->withCategoryTaxonomies()
             ->create();
 
         $taxonomyIds = Taxonomy::serviceEligibility()->children->map(function ($taxonomy) {
@@ -5664,16 +5607,8 @@ class ServicesTest extends TestCase
 
     public function test_update_service_with_custom_eligibility_fields()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
-        $service = factory(Service::class)
-            ->states(
-                'withOfferings',
-                'withUsefulInfo',
-                'withSocialMedia',
-                'withCustomEligibilities',
-                'withEligibilityTaxonomies',
-                'withCategoryTaxonomies'
-            )
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $service = Service::factory()->withOfferings()->withUsefulInfo()->withSocialMedia()->withCustomEligibilities()->withEligibilityTaxonomies()->withCategoryTaxonomies()
             ->create();
 
         Passport::actingAs($user);
@@ -5701,22 +5636,14 @@ class ServicesTest extends TestCase
         $service = $service->fresh()->load('serviceEligibilities');
 
         foreach ($payload['eligibility_types']['custom'] as $customFieldName => $customFieldValue) {
-            $this->assertEquals($customFieldValue, $service->{'eligibility_' . $customFieldName . '_custom'});
+            $this->assertEquals($customFieldValue, $service->{'eligibility_'.$customFieldName.'_custom'});
         }
     }
 
     public function test_update_service_with_custom_fields_and_eligibility_taxonomies()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
-        $service = factory(Service::class)
-            ->states(
-                'withOfferings',
-                'withUsefulInfo',
-                'withSocialMedia',
-                'withCustomEligibilities',
-                'withEligibilityTaxonomies',
-                'withCategoryTaxonomies'
-            )
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $service = Service::factory()->withOfferings()->withUsefulInfo()->withSocialMedia()->withCustomEligibilities()->withEligibilityTaxonomies()->withCategoryTaxonomies()
             ->create();
 
         $taxonomyIds = Taxonomy::serviceEligibility()->children->map(function ($taxonomy) {
@@ -5760,22 +5687,14 @@ class ServicesTest extends TestCase
         }
 
         foreach ($payload['eligibility_types']['custom'] as $customFieldName => $customFieldValue) {
-            $this->assertEquals($customFieldValue, $service->{'eligibility_' . $customFieldName . '_custom'});
+            $this->assertEquals($customFieldValue, $service->{'eligibility_'.$customFieldName.'_custom'});
         }
     }
 
     public function test_delete_custom_eligibility_fields_from_service()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
-        $service = factory(Service::class)
-            ->states(
-                'withOfferings',
-                'withUsefulInfo',
-                'withSocialMedia',
-                'withCustomEligibilities',
-                'withEligibilityTaxonomies',
-                'withCategoryTaxonomies'
-            )
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $service = Service::factory()->withOfferings()->withUsefulInfo()->withSocialMedia()->withCustomEligibilities()->withEligibilityTaxonomies()->withCategoryTaxonomies()
             ->create();
 
         Passport::actingAs($user);
@@ -5802,16 +5721,8 @@ class ServicesTest extends TestCase
 
     public function test_delete_eligibility_taxonomy_ids_from_service()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
-        $service = factory(Service::class)
-            ->states(
-                'withOfferings',
-                'withUsefulInfo',
-                'withSocialMedia',
-                'withCustomEligibilities',
-                'withEligibilityTaxonomies',
-                'withCategoryTaxonomies'
-            )
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $service = Service::factory()->withOfferings()->withUsefulInfo()->withSocialMedia()->withCustomEligibilities()->withEligibilityTaxonomies()->withCategoryTaxonomies()
             ->create();
 
         Passport::actingAs($user);
@@ -5828,16 +5739,8 @@ class ServicesTest extends TestCase
 
     public function test_delete_eligibility_taxonomy_ids_and_custom_fields_from_service()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
-        $service = factory(Service::class)
-            ->states(
-                'withOfferings',
-                'withUsefulInfo',
-                'withSocialMedia',
-                'withCustomEligibilities',
-                'withEligibilityTaxonomies',
-                'withCategoryTaxonomies'
-            )
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $service = Service::factory()->withOfferings()->withUsefulInfo()->withSocialMedia()->withCustomEligibilities()->withEligibilityTaxonomies()->withCategoryTaxonomies()
             ->create();
 
         Passport::actingAs($user);
@@ -5866,16 +5769,8 @@ class ServicesTest extends TestCase
 
     public function test_eligibility_taxonomy_can_not_be_added_if_top_level_child_of_incorrect_parent_taxonomy()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
-        $service = factory(Service::class)
-            ->states(
-                'withOfferings',
-                'withUsefulInfo',
-                'withSocialMedia',
-                'withCustomEligibilities',
-                'withEligibilityTaxonomies',
-                'withCategoryTaxonomies'
-            )
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $service = Service::factory()->withOfferings()->withUsefulInfo()->withSocialMedia()->withCustomEligibilities()->withEligibilityTaxonomies()->withCategoryTaxonomies()
             ->create();
 
         // When I try to associate a taxonomy that is NOT a child of Service Eligibility
@@ -5898,17 +5793,17 @@ class ServicesTest extends TestCase
     public function test_service_update_rejected_if_social_medias_field_is_populated()
     {
         // Given a global admin is logged in
-        $globalAdmin = factory(User::class)->create()->makeGlobalAdmin();
+        $globalAdmin = User::factory()->create()->makeGlobalAdmin();
 
         // And a pending update request exists for a service with changes to the social medias
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
         ]);
 
         $taxonomy = Taxonomy::category()->children()->firstOrFail();
         $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
-        $serviceAdmin = factory(User::class)->create()->makeServiceAdmin($service);
+        $serviceAdmin = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($serviceAdmin);
         $payload = [
@@ -5928,8 +5823,8 @@ class ServicesTest extends TestCase
 
     public function test_service_creation_rejected_if_social_medias_field_is_populated()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -5947,10 +5842,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url,
-            'contact_name' => $this->faker->name,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
             'contact_phone' => random_uk_phone(),
-            'contact_email' => $this->faker->safeEmail,
+            'contact_email' => $this->faker->safeEmail(),
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -5990,15 +5885,15 @@ class ServicesTest extends TestCase
         $now = Date::now();
         Date::setTestNow($now);
 
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($user);
 
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
         $service->serviceTaxonomies()->create([
             'taxonomy_id' => Taxonomy::category()->children()->firstOrFail()->id,
         ]);
         $updateRequest = $service->updateRequests()->create([
-            'user_id' => factory(User::class)->create()->id,
+            'user_id' => User::factory()->create()->id,
             'data' => [
                 'slug' => $service->slug,
                 'name' => 'Test Name',

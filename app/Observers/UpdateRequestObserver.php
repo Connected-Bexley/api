@@ -19,6 +19,7 @@ class UpdateRequestObserver
      * Handle to the update request "created" event.
      *
      * @param \App\Models\UpdateRequest $updateRequest
+     *
      * @throws \Exception
      */
     public function created(UpdateRequest $updateRequest)
@@ -113,6 +114,7 @@ class UpdateRequestObserver
 
     /**
      * @param \App\Models\UpdateRequest $updateRequest
+     *
      * @throws \Exception
      */
     protected function sendCreatedNotificationsForExisting(UpdateRequest $updateRequest)
@@ -164,6 +166,7 @@ class UpdateRequestObserver
 
     /**
      * @param \App\Models\UpdateRequest $updateRequest
+     *
      * @throws \Exception
      */
     protected function sendCreatedNotificationsForNew(UpdateRequest $updateRequest)

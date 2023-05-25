@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateOrganisationEventsTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -32,9 +31,9 @@ class CreateOrganisationEventsTable extends Migration
             $table->string('booking_url')->nullable();
             $table->string('booking_cta')->nullable();
             $table->boolean('is_virtual')->default(true);
-            $table->nullableForeignUuid('location_id', 'locations');
-            $table->nullableForeignUuid('image_file_id', 'files');
-            $table->foreignUuid('organisation_id', 'organisations');
+            $table->nullableForeignUuidKeyColumn('location_id', 'locations');
+            $table->nullableForeignUuidKeyColumn('image_file_id', 'files');
+            $table->foreignUuidKeyColumn('organisation_id', 'organisations');
             $table->timestamps();
         });
     }
@@ -46,4 +45,4 @@ class CreateOrganisationEventsTable extends Migration
     {
         Schema::dropIfExists('organisation_events');
     }
-}
+};

@@ -2,7 +2,7 @@
 
 $redis = [
 
-    'client' => env('REDIS_CLIENT', 'predis'),
+    'client' => env('REDIS_CLIENT', 'phpredis'),
 
     // For single node setup.
     'default' => [

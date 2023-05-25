@@ -88,9 +88,7 @@ class LoginController extends Controller
         $subject = rawurlencode($subject);
         $body = <<<EOT
 {$user->full_name}:
-
 Requires a new phone number for their account on $appName.
-
 New number: xxxx-xxx-xxxx
 EOT;
         $body = rawurlencode($body);
@@ -144,6 +142,7 @@ EOT;
      * Redirect the user after determining they are locked out.
      *
      * @param \Illuminate\Http\Request $request
+     *
      * @throws \Illuminate\Validation\ValidationException
      */
     protected function sendOtpLockoutResponse(Request $request)

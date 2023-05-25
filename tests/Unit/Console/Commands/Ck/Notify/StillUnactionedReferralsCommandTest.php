@@ -16,7 +16,7 @@ class StillUnactionedReferralsCommandTest extends TestCase
     {
         Queue::fake();
 
-        factory(Referral::class)->create([
+        Referral::factory()->create([
             'email' => 'test@example.com',
             'referee_email' => 'test@example.com',
             'status' => Referral::STATUS_NEW,
@@ -36,6 +36,7 @@ class StillUnactionedReferralsCommandTest extends TestCase
             $this->assertArrayHasKey('SERVICE_WORKERS', $email->values);
             $this->assertArrayHasKey('SERVICE_ADMINS', $email->values);
             $this->assertArrayHasKey('ORGANISATION_ADMINS', $email->values);
+
             return true;
         });
     }

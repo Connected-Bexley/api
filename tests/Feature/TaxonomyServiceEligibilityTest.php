@@ -21,7 +21,7 @@ class TaxonomyServiceEligibilityTest extends TestCase
     {
         parent::setUp();
 
-        $this->testserviceEligibilityType = factory(Taxonomy::class)->create([
+        $this->testserviceEligibilityType = Taxonomy::factory()->create([
             'name' => 'Test Service Eligibility Type',
             'parent_id' => function () {
                 return Taxonomy::serviceEligibility()->id;
@@ -64,7 +64,7 @@ class TaxonomyServiceEligibilityTest extends TestCase
         $this->json('GET', '/core/v1/taxonomies/service-eligibilities');
 
         Event::assertDispatched(EndpointHit::class, function (EndpointHit $event) {
-            return ($event->getAction() === Audit::ACTION_READ);
+            return $event->getAction() === Audit::ACTION_READ;
         });
     }
 
@@ -81,8 +81,8 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_service_worker_cannot_create_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
 
         Passport::actingAs($user);
 
@@ -93,8 +93,8 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_service_admin_cannot_create_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
@@ -105,8 +105,8 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_organisation_admin_cannot_create_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -117,7 +117,7 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_global_admin_can_create_one()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         $siblingCount = Taxonomy::serviceEligibility()->children()->count();
         $payload = [
             'parent_id' => null,
@@ -138,11 +138,11 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_order_is_updated_when_created_at_beginning()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         $testEligibilityTypeTaxonomies = [];
         for ($i = 1; $i < 6; $i++) {
-            $testEligibilityTypeTaxonomies[] = factory(Taxonomy::class)->create([
+            $testEligibilityTypeTaxonomies[] = Taxonomy::factory()->create([
                 'parent_id' => $this->testserviceEligibilityType->id,
                 'order' => $i,
             ]);
@@ -169,11 +169,11 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_order_is_updated_when_created_at_middle()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         $testEligibilityTypeTaxonomies = [];
         for ($i = 1; $i < 6; $i++) {
-            $testEligibilityTypeTaxonomies[] = factory(Taxonomy::class)->create([
+            $testEligibilityTypeTaxonomies[] = Taxonomy::factory()->create([
                 'parent_id' => $this->testserviceEligibilityType->id,
                 'order' => $i,
             ]);
@@ -207,11 +207,11 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_order_is_updated_when_created_at_end()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         $testEligibilityTypeTaxonomies = [];
         for ($i = 1; $i < 6; $i++) {
-            $testEligibilityTypeTaxonomies[] = factory(Taxonomy::class)->create([
+            $testEligibilityTypeTaxonomies[] = Taxonomy::factory()->create([
                 'parent_id' => $this->testserviceEligibilityType->id,
                 'order' => $i,
             ]);
@@ -238,7 +238,7 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_order_cannot_be_less_than_1_when_created()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         $payload = [
             'parent_id' => null,
             'name' => 'PHPUnit Service Eligibility Test',
@@ -253,7 +253,7 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_order_cannot_be_greater_than_count_plus_1_when_created()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         $siblingCount = Taxonomy::serviceEligibility()->children()->count();
         $payload = [
             'parent_id' => null,
@@ -271,7 +271,7 @@ class TaxonomyServiceEligibilityTest extends TestCase
     {
         $this->fakeEvents();
 
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         $siblingCount = Taxonomy::serviceEligibility()->children()->count();
 
         Passport::actingAs($user);
@@ -294,7 +294,7 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_guest_can_view_one()
     {
-        $testEligibilityTypeTaxonomy = factory(Taxonomy::class)->create([
+        $testEligibilityTypeTaxonomy = Taxonomy::factory()->create([
             'parent_id' => $this->testserviceEligibilityType->id,
         ]);
 
@@ -317,7 +317,7 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_guest_can_view_one_by_slug()
     {
-        $testEligibilityTypeTaxonomy = factory(Taxonomy::class)->create([
+        $testEligibilityTypeTaxonomy = Taxonomy::factory()->create([
             'parent_id' => $this->testserviceEligibilityType->id,
         ]);
 
@@ -342,7 +342,7 @@ class TaxonomyServiceEligibilityTest extends TestCase
     {
         $this->fakeEvents();
 
-        $testEligibilityTypeTaxonomy = factory(Taxonomy::class)->create([
+        $testEligibilityTypeTaxonomy = Taxonomy::factory()->create([
             'parent_id' => $this->testserviceEligibilityType->id,
         ]);
 
@@ -360,7 +360,7 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_guest_cannot_update_one()
     {
-        $testEligibilityTypeTaxonomy = factory(Taxonomy::class)->create([
+        $testEligibilityTypeTaxonomy = Taxonomy::factory()->create([
             'parent_id' => $this->testserviceEligibilityType->id,
         ]);
 
@@ -371,9 +371,9 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_service_worker_cannot_update_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
-        $testEligibilityTypeTaxonomy = factory(Taxonomy::class)->create([
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
+        $testEligibilityTypeTaxonomy = Taxonomy::factory()->create([
             'parent_id' => $this->testserviceEligibilityType->id,
         ]);
 
@@ -385,9 +385,9 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_service_admin_cannot_update_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
-        $testEligibilityTypeTaxonomy = factory(Taxonomy::class)->create([
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
+        $testEligibilityTypeTaxonomy = Taxonomy::factory()->create([
             'parent_id' => $this->testserviceEligibilityType->id,
         ]);
 
@@ -399,9 +399,9 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_organisation_admin_cannot_update_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
-        $testEligibilityTypeTaxonomy = factory(Taxonomy::class)->create([
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
+        $testEligibilityTypeTaxonomy = Taxonomy::factory()->create([
             'parent_id' => $this->testserviceEligibilityType->id,
         ]);
 
@@ -413,8 +413,8 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_global_admin_can_update_one()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
-        $testEligibilityTypeTaxonomy = factory(Taxonomy::class)->create([
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $testEligibilityTypeTaxonomy = Taxonomy::factory()->create([
             'parent_id' => $this->testserviceEligibilityType->id,
         ]);
         $payload = [
@@ -432,7 +432,7 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_order_is_updated_when_updated_to_beginning()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($user);
 
         $eligibilityOne = $this->testserviceEligibilityType->children()->create([
@@ -468,7 +468,7 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_order_is_updated_when_updated_to_middle()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($user);
 
         $eligibilityOne = $this->testserviceEligibilityType->children()->create([
@@ -504,7 +504,7 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_order_is_updated_when_updated_to_end()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($user);
 
         $eligibilityOne = $this->testserviceEligibilityType->children()->create([
@@ -540,7 +540,7 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_order_is_updated_when_updated_to_beginning_of_another_parent()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($user);
 
         $oldEligibilityOne = $this->testserviceEligibilityType->children()->create([
@@ -562,7 +562,7 @@ class TaxonomyServiceEligibilityTest extends TestCase
             'depth' => 1,
         ]);
 
-        $newParentEligibility = factory(Taxonomy::class)->create([
+        $newParentEligibility = Taxonomy::factory()->create([
             'name' => 'New Service Eligibility Type',
             'parent_id' => function () {
                 return Taxonomy::serviceEligibility()->id;
@@ -636,7 +636,7 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_order_is_updated_when_updated_to_middle_of_another_parent()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($user);
 
         $oldEligibilityOne = $this->testserviceEligibilityType->children()->create([
@@ -658,7 +658,7 @@ class TaxonomyServiceEligibilityTest extends TestCase
             'depth' => 1,
         ]);
 
-        $newParentEligibility = factory(Taxonomy::class)->create([
+        $newParentEligibility = Taxonomy::factory()->create([
             'name' => 'New Service Eligibility Type',
             'parent_id' => function () {
                 return Taxonomy::serviceEligibility()->id;
@@ -732,7 +732,7 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_order_is_updated_when_updated_to_end_of_another_parent()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($user);
 
         $oldEligibilityOne = $this->testserviceEligibilityType->children()->create([
@@ -754,7 +754,7 @@ class TaxonomyServiceEligibilityTest extends TestCase
             'depth' => 1,
         ]);
 
-        $newParentEligibility = factory(Taxonomy::class)->create([
+        $newParentEligibility = Taxonomy::factory()->create([
             'name' => 'New Service Eligibility Type',
             'parent_id' => function () {
                 return Taxonomy::serviceEligibility()->id;
@@ -828,10 +828,10 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_order_cannot_be_less_than_1_when_updated()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($user);
 
-        $testEligibilityTypeTaxonomy = factory(Taxonomy::class)->create([
+        $testEligibilityTypeTaxonomy = Taxonomy::factory()->create([
             'parent_id' => $this->testserviceEligibilityType->id,
         ]);
 
@@ -846,10 +846,10 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_order_cannot_be_greater_than_count_plus_1_when_updated()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($user);
 
-        $testEligibilityTypeTaxonomies = factory(Taxonomy::class, 5)->create([
+        $testEligibilityTypeTaxonomies = Taxonomy::factory()->count(5)->create([
             'parent_id' => $this->testserviceEligibilityType->id,
         ]);
 
@@ -866,8 +866,8 @@ class TaxonomyServiceEligibilityTest extends TestCase
     {
         $this->fakeEvents();
 
-        $user = factory(User::class)->create()->makeGlobalAdmin();
-        $testEligibilityTypeTaxonomy = factory(Taxonomy::class)->create([
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $testEligibilityTypeTaxonomy = Taxonomy::factory()->create([
             'parent_id' => $this->testserviceEligibilityType->id,
         ]);
 
@@ -893,7 +893,7 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_guest_cannot_delete_one()
     {
-        $testEligibilityTypeTaxonomy = factory(Taxonomy::class)->create([
+        $testEligibilityTypeTaxonomy = Taxonomy::factory()->create([
             'parent_id' => $this->testserviceEligibilityType->id,
         ]);
 
@@ -904,9 +904,9 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_service_worker_cannot_delete_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
-        $testEligibilityTypeTaxonomy = factory(Taxonomy::class)->create([
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
+        $testEligibilityTypeTaxonomy = Taxonomy::factory()->create([
             'parent_id' => $this->testserviceEligibilityType->id,
         ]);
 
@@ -918,9 +918,9 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_service_admin_cannot_delete_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
-        $testEligibilityTypeTaxonomy = factory(Taxonomy::class)->create([
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
+        $testEligibilityTypeTaxonomy = Taxonomy::factory()->create([
             'parent_id' => $this->testserviceEligibilityType->id,
         ]);
 
@@ -932,9 +932,9 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_organisation_admin_cannot_delete_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
-        $testEligibilityTypeTaxonomy = factory(Taxonomy::class)->create([
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
+        $testEligibilityTypeTaxonomy = Taxonomy::factory()->create([
             'parent_id' => $this->testserviceEligibilityType->id,
         ]);
 
@@ -946,14 +946,14 @@ class TaxonomyServiceEligibilityTest extends TestCase
 
     public function test_global_admin_can_delete_one()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
-        $newParentEligibility = factory(Taxonomy::class)->create([
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $newParentEligibility = Taxonomy::factory()->create([
             'name' => 'New Service Eligibility Type',
             'parent_id' => function () {
                 return Taxonomy::serviceEligibility()->id;
             },
         ]);
-        $childEligibilities = factory(Taxonomy::class, 5)->create([
+        $childEligibilities = Taxonomy::factory()->count(5)->create([
             'parent_id' => $newParentEligibility->id,
         ]);
 
@@ -971,14 +971,14 @@ class TaxonomyServiceEligibilityTest extends TestCase
     {
         $this->fakeEvents();
 
-        $user = factory(User::class)->create()->makeGlobalAdmin();
-        $newParentEligibility = factory(Taxonomy::class)->create([
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $newParentEligibility = Taxonomy::factory()->create([
             'name' => 'New Service Eligibility Type',
             'parent_id' => function () {
                 return Taxonomy::serviceEligibility()->id;
             },
         ]);
-        factory(Taxonomy::class)->create([
+        Taxonomy::factory()->create([
             'parent_id' => $newParentEligibility->id,
         ]);
 
@@ -997,9 +997,9 @@ class TaxonomyServiceEligibilityTest extends TestCase
      */
     public function service_eligibility_relationships_are_destroyed_when_deleted()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
-        $service = factory(Service::class)->create();
-        $testEligibilityTypeTaxonomy = factory(Taxonomy::class)->create([
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $service = Service::factory()->create();
+        $testEligibilityTypeTaxonomy = Taxonomy::factory()->create([
             'parent_id' => $this->testserviceEligibilityType->id,
         ]);
 

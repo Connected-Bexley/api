@@ -1,89 +1,121 @@
 <?php
 
+namespace Database\Factories;
+
 use App\Models\Service;
 use App\Models\SocialMedia;
 use App\Models\Taxonomy;
-use Faker\Generator as Faker;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
 
-$factory->define(Service::class, function (Faker $faker) {
-    $name = $faker->company . ' ' . $faker->word() . ' ' . mt_rand(1, 100000);
+class ServiceFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition()
+    {
+        $name = $this->faker->company() . ' ' . $this->faker->word() . ' ' . mt_rand(1, 100000);
 
-    return [
-        'organisation_id' => function () {
-            return factory(\App\Models\Organisation::class)->create()->id;
-        },
-        'slug' => Str::slug($name) . '-' . mt_rand(1, 1000),
-        'name' => $name,
-        'type' => Service::TYPE_SERVICE,
-        'status' => Service::STATUS_ACTIVE,
-        'intro' => $faker->sentence,
-        'description' => $faker->sentence,
-        'is_free' => true,
-        'url' => $faker->url,
-        'contact_name' => $faker->name,
-        'contact_phone' => random_uk_phone(),
-        'contact_email' => $faker->safeEmail,
-        'show_referral_disclaimer' => false,
-        'referral_method' => Service::REFERRAL_METHOD_NONE,
-        'cqc_location_id' => $faker->numerify('#-#########'),
-        'score' => 1,
-        'ends_at' => null,
-        'last_modified_at' => Date::now(),
-    ];
-});
+        return [
+            'organisation_id' => function () {
+                return \App\Models\Organisation::factory()->create()->id;
+            },
+            'slug' => Str::slug($name) . '-' . mt_rand(1, 1000),
+            'name' => $name,
+            'type' => Service::TYPE_SERVICE,
+            'status' => Service::STATUS_ACTIVE,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->sentence(),
+            'is_free' => true,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
+            'contact_phone' => random_uk_phone(),
+            'contact_email' => $this->faker->safeEmail(),
+            'show_referral_disclaimer' => false,
+            'referral_method' => Service::REFERRAL_METHOD_NONE,
+            'cqc_location_id' => $this->faker->numerify('#-#########'),
+            'score' => 1,
+            'ends_at' => null,
+            'last_modified_at' => Date::now(),
+        ];
+    }
 
-$factory->afterCreatingState(Service::class, 'withOfferings', function (Service $service, Faker $faker) {
-    $service->offerings()->create([
-        'offering' => 'Weekly club',
-        'order' => 1,
-    ]);
-});
+    public function score()
+    {
+        return $this->state(function () {
+            return [
+                'score' => $this->faker->numberBetween(1, 5),
+            ];
+        });
+    }
 
-$factory->afterCreatingState(Service::class, 'withUsefulInfo', function (Service $service, Faker $faker) {
-    $service->usefulInfos()->create([
-        'title' => 'Did You Know?',
-        'description' => 'This is a test description',
-        'order' => 1,
-    ]);
-});
+    public function withCategoryTaxonomies()
+    {
+        return $this->afterCreating(function (Service $service) {
+            $service->syncTaxonomyRelationships(collect([Taxonomy::factory()->create()]));
+        })->state([]);
+    }
 
-$factory->afterCreatingState(Service::class, 'withSocialMedia', function (Service $service, Faker $faker) {
-    $service->socialMedias()->create([
-        'type' => SocialMedia::TYPE_INSTAGRAM,
-        'url' => 'https://www.instagram.com/ayupdigital/',
-    ]);
-});
+    public function withEligibilityTaxonomies()
+    {
+        return $this->afterCreating(function (Service $service) {
+            // Loop through each top level child of service eligibility taxonomy
+            Taxonomy::serviceEligibility()->children->each((function ($topLevelChild) use ($service) {
+                // And for each top level child, attach one of its children to the service
+                $service->serviceEligibilities()->create([
+                    'taxonomy_id' => $topLevelChild->children->first()->id,
+                ]);
+            }));
+        })->state([]);
+    }
 
-$factory->afterCreatingState(Service::class, 'withCustomEligibilities', function (Service $service, Faker $faker) {
-    $service->eligibility_age_group_custom = 'custom age group';
-    $service->eligibility_disability_custom = 'custom disability';
-    $service->eligibility_gender_custom = 'custom gender';
-    $service->eligibility_income_custom = 'custom income';
-    $service->eligibility_language_custom = 'custom language';
-    $service->eligibility_ethnicity_custom = 'custom ethnicity';
-    $service->eligibility_housing_custom = 'custom housing';
-    $service->eligibility_other_custom = 'custom other';
-    $service->save();
-});
+    public function withCustomEligibilities()
+    {
+        return $this->afterCreating(function (Service $service) {
+            $service->eligibility_age_group_custom = 'custom age group';
+            $service->eligibility_disability_custom = 'custom disability';
+            $service->eligibility_gender_custom = 'custom gender';
+            $service->eligibility_income_custom = 'custom income';
+            $service->eligibility_language_custom = 'custom language';
+            $service->eligibility_ethnicity_custom = 'custom ethnicity';
+            $service->eligibility_housing_custom = 'custom housing';
+            $service->eligibility_other_custom = 'custom other';
+            $service->save();
+        })->state([]);
+    }
 
-$factory->afterCreatingState(Service::class, 'withEligibilityTaxonomies', function (Service $service) {
-    // Loop through each top level child of service eligibility taxonomy
-    Taxonomy::serviceEligibility()->children->each((function ($topLevelChild) use ($service) {
-        // And for each top level child, attach one of its children to the service
-        $service->serviceEligibilities()->create([
-            'taxonomy_id' => $topLevelChild->children->first()->id,
-        ]);
-    }));
-});
+    public function withSocialMedia()
+    {
+        return $this->afterCreating(function (Service $service) {
+            $service->socialMedias()->create([
+                'type' => SocialMedia::TYPE_INSTAGRAM,
+                'url' => 'https://www.instagram.com/ayupdigital/',
+            ]);
+        })->state([]);
+    }
 
-$factory->afterCreatingState(Service::class, 'withCategoryTaxonomies', function (Service $service) {
-    $service->syncTaxonomyRelationships(collect([factory(Taxonomy::class)->create()]));
-});
+    public function withUsefulInfo()
+    {
+        return $this->afterCreating(function (Service $service) {
+            $service->usefulInfos()->create([
+                'title' => 'Did You Know?',
+                'description' => 'This is a test description',
+                'order' => 1,
+            ]);
+        })->state([]);
+    }
 
-$factory->state(Service::class, 'score', function (Faker $faker) {
-    return [
-        'score' => $faker->numberBetween(1, 5),
-    ];
-});
+    public function withOfferings()
+    {
+        return $this->afterCreating(function (Service $service) {
+            $service->offerings()->create([
+                'offering' => 'Weekly club',
+                'order' => 1,
+            ]);
+        })->state([]);
+    }
+}

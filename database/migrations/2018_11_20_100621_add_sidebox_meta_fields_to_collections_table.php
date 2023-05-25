@@ -3,8 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-class AddSideboxMetaFieldsToCollectionsTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -24,4 +23,4 @@ class AddSideboxMetaFieldsToCollectionsTable extends Migration
             'meta' => DB::raw('JSON_REMOVE(`meta`, "$.sidebox_title", "$.sidebox_content")'),
         ]);
     }
-}
+};

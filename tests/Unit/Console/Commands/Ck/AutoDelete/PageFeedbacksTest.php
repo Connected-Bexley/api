@@ -12,12 +12,12 @@ class PageFeedbacksTest extends TestCase
 {
     public function test_auto_delete_works()
     {
-        $newPageFeedback = factory(PageFeedback::class)->create([
+        $newPageFeedback = PageFeedback::factory()->create([
             'created_at' => Date::today(),
             'updated_at' => Date::today(),
         ]);
 
-        $dueForDeletionPageFeedback = factory(PageFeedback::class)->create([
+        $dueForDeletionPageFeedback = PageFeedback::factory()->create([
             'created_at' => Date::today()->subMonths(PageFeedback::AUTO_DELETE_MONTHS),
             'updated_at' => Date::today()->subMonths(PageFeedback::AUTO_DELETE_MONTHS),
         ]);

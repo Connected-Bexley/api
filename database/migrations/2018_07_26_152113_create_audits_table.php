@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAuditsTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,7 +12,7 @@ class CreateAuditsTable extends Migration
     {
         Schema::create('audits', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->nullableForeignUuid('user_id', 'users');
+            $table->nullableForeignUuidKeyColumn('user_id', 'users');
             $table->enum('action', ['create', 'read', 'update', 'delete']);
             $table->string('description', 1000);
             $table->ipAddress('ip_address');
@@ -29,4 +28,4 @@ class CreateAuditsTable extends Migration
     {
         Schema::dropIfExists('audits');
     }
-}
+};

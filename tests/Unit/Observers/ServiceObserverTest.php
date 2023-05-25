@@ -18,11 +18,11 @@ class ServiceObserverTest extends TestCase
 
         $oldNow = Date::now()->subMonths(13);
 
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($user);
 
         /** @var \App\Models\Service $service */
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'status' => Service::STATUS_ACTIVE,
             'last_modified_at' => $oldNow,
             'created_at' => $oldNow,
@@ -31,7 +31,7 @@ class ServiceObserverTest extends TestCase
 
         /** @var \App\Models\UpdateRequest $updateRequest */
         $updateRequest = $service->updateRequests()->create([
-            'user_id' => factory(User::class)->create()->id,
+            'user_id' => User::factory()->create()->id,
             'data' => [
                 'status' => Service::STATUS_INACTIVE,
             ],
@@ -42,6 +42,7 @@ class ServiceObserverTest extends TestCase
         Queue::assertPushedOn('notifications', NotifyGlobalAdminEmail::class);
         Queue::assertPushed(NotifyGlobalAdminEmail::class, function (NotifyGlobalAdminEmail $email): bool {
             $this->assertArrayHasKey('SERVICE_NAME', $email->values);
+
             return true;
         });
     }

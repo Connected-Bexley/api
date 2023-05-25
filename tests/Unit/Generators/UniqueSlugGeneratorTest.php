@@ -11,8 +11,9 @@ class UniqueSlugGeneratorTest extends TestCase
 {
     /**
      * @test
-     * @param string $string
-     * @param string $expected
+     *
+     * @param  string  $string
+     * @param  string  $expected
      * @dataProvider generateDataProvider
      */
     public function generate_works(string $string, string $expected)
@@ -39,9 +40,10 @@ class UniqueSlugGeneratorTest extends TestCase
 
     /**
      * @test
-     * @param string $string
-     * @param string $expected
-     * @param int $usedCount
+     *
+     * @param  string  $string
+     * @param  string  $expected
+     * @param  int  $usedCount
      * @dataProvider generateUsedDataProvider
      */
     public function test_generate_works_with_used_slug(string $string, string $expected, int $usedCount)
@@ -72,9 +74,10 @@ class UniqueSlugGeneratorTest extends TestCase
 
     /**
      * @test
-     * @param string $string
-     * @param string $slug
-     * @param bool $expected
+     *
+     * @param  string  $string
+     * @param  string  $slug
+     * @param  bool  $expected
      * @dataProvider compareEqualsDataProvider
      */
     public function compareEquals_works(string $string, string $slug, bool $expected)

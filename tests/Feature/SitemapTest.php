@@ -13,11 +13,11 @@ use Tests\TestCase;
 
 class SitemapTest extends TestCase
 {
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
-        if (!Storage::disk('local')->exists('test-data/sitemap.xsd')) {
+        if (! Storage::disk('local')->exists('test-data/sitemap.xsd')) {
             Storage::disk('local')->put('test-data/sitemap.xsd', file_get_contents('http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd'));
         }
     }
@@ -25,8 +25,8 @@ class SitemapTest extends TestCase
     /**
      * Create a frontend url for the given environment
      *
-     * @param String $path
-     * @return String
+     * @param  string  $path
+     * @return string
      **/
     public function frontendUrl($path = '')
     {
@@ -114,7 +114,7 @@ class SitemapTest extends TestCase
     public function getSitemapIncludesServices200()
     {
         /** @var \App\Models\Service $service */
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
         $included = false;
 
         $response = $this->get('/sitemap');
@@ -128,7 +128,7 @@ class SitemapTest extends TestCase
         $locTags = $xml->getElementsByTagName('loc');
 
         foreach ($locTags as $tag) {
-            if ($this->frontendUrl('services/' . $service->slug) === $tag->textContent) {
+            if ($this->frontendUrl('services/'.$service->slug) === $tag->textContent) {
                 $included = true;
             }
         }
@@ -142,7 +142,7 @@ class SitemapTest extends TestCase
     public function getSitemapIncludesOrganisations200()
     {
         /** @var \App\Models\Organisation $organisation */
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
         $included = false;
 
         $response = $this->get('/sitemap');
@@ -156,7 +156,7 @@ class SitemapTest extends TestCase
         $locTags = $xml->getElementsByTagName('loc');
 
         foreach ($locTags as $tag) {
-            if ($this->frontendUrl('organisations/' . $organisation->slug) === $tag->textContent) {
+            if ($this->frontendUrl('organisations/'.$organisation->slug) === $tag->textContent) {
                 $included = true;
             }
         }
@@ -184,7 +184,7 @@ class SitemapTest extends TestCase
         $locTags = $xml->getElementsByTagName('loc');
 
         foreach ($locTags as $tag) {
-            if ($this->frontendUrl('results?category=' . $collection->id) === $tag->textContent) {
+            if ($this->frontendUrl('results?category='.$collection->id) === $tag->textContent) {
                 $included = true;
             }
         }
@@ -212,7 +212,7 @@ class SitemapTest extends TestCase
         $locTags = $xml->getElementsByTagName('loc');
 
         foreach ($locTags as $tag) {
-            if ($this->frontendUrl('results?persona=' . $collection->id) === $tag->textContent) {
+            if ($this->frontendUrl('results?persona='.$collection->id) === $tag->textContent) {
                 $included = true;
             }
         }
@@ -226,7 +226,7 @@ class SitemapTest extends TestCase
     public function getSitemapIncludesPages200()
     {
         /** @var \App\Models\Page $page */
-        $page = factory(Page::class)->create();
+        $page = Page::factory()->create();
         $included = false;
 
         $response = $this->get('/sitemap');
@@ -240,7 +240,7 @@ class SitemapTest extends TestCase
         $locTags = $xml->getElementsByTagName('loc');
 
         foreach ($locTags as $tag) {
-            if ($this->frontendUrl('pages/' . $page->slug) === $tag->textContent) {
+            if ($this->frontendUrl('pages/'.$page->slug) === $tag->textContent) {
                 $included = true;
             }
         }

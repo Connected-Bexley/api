@@ -3,8 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-class IncreaseCharacterLimitForIntroColumnOnServicesTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -20,4 +19,4 @@ class IncreaseCharacterLimitForIntroColumnOnServicesTable extends Migration
     {
         DB::statement('ALTER TABLE `services` MODIFY `intro` VARCHAR(255)');
     }
-}
+};

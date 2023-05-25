@@ -1,28 +1,39 @@
 <?php
 
-use App\Models\Organisation;
+namespace Database\Factories;
+
 use App\Models\SocialMedia;
-use Faker\Generator as Faker;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
-$factory->define(Organisation::class, function (Faker $faker) {
-    $name = $faker->company . ' ' . $faker->word() . ' ' . mt_rand(1, 100000);
+class OrganisationFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition()
+    {
+        $name = $this->faker->company() . ' ' . $this->faker->word() . ' ' . mt_rand(1, 100000);
 
-    return [
-        'slug' => Str::slug($name) . '-' . mt_rand(1, 1000),
-        'name' => $name,
-        'description' => 'This organisation provides x service.',
-        'url' => $faker->url,
-        'email' => $faker->safeEmail,
-        'phone' => random_uk_phone(),
-    ];
-});
+        return [
+            'slug' => Str::slug($name) . '-' . mt_rand(1, 1000),
+            'name' => $name,
+            'description' => 'This organisation provides x service.',
+            'url' => $this->faker->url(),
+            'email' => $this->faker->safeEmail(),
+            'phone' => random_uk_phone(),
+        ];
+    }
 
-$factory->state(Organisation::class, 'social-media', []);
-
-$factory->afterCreatingState(Organisation::class, 'social-media', function ($organisation, $faker) {
-    $organisation->socialMedias()->create([
-        'type' => SocialMedia::TYPE_TWITTER,
-        'url' => "https://twitter.com/{$faker->domainWord()}/",
-    ]);
-});
+    public function socialMedia()
+    {
+        return $this->afterCreating(function ($organisation) {
+            $organisation->socialMedias()->create([
+                'type' => SocialMedia::TYPE_TWITTER,
+                'url' => "https://twitter.com/{$this->faker->domainWord()}/",
+            ]);
+        })->state([]);
+    }
+}

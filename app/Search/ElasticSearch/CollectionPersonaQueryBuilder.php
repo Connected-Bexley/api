@@ -9,48 +9,48 @@ use App\Models\Collection;
 use App\Models\Service;
 use App\Models\Taxonomy;
 use App\Search\SearchCriteriaQuery;
+use ElasticScoutDriverPlus\Builders\SearchRequestBuilder;
+use Illuminate\Support\Arr;
 
 class CollectionPersonaQueryBuilder extends ElasticsearchQueryBuilder implements QueryBuilder
 {
     public function __construct()
     {
         $this->esQuery = [
-            'query' => [
-                'function_score' => [
-                    'query' => [
-                        'bool' => [
-                            'should' => [],
-                            'filter' => [],
-                        ],
+            'function_score' => [
+                'query' => [
+                    'bool' => [
+                        'should' => [],
+                        'filter' => [],
                     ],
-                    'functions' => [
-                        [
-                            'field_value_factor' => [
-                                'field' => 'score',
-                                'missing' => 1,
-                                'modifier' => 'ln1p',
-                            ],
-                        ],
-                    ],
-                    'boost_mode' => 'multiply',
                 ],
+                'functions' => [
+                    [
+                        'field_value_factor' => [
+                            'field' => 'score',
+                            'missing' => 1,
+                            'modifier' => 'ln1p',
+                        ],
+                    ],
+                ],
+                'boost_mode' => 'multiply',
             ],
         ];
 
-        $this->filterPath = 'query.function_score.query.bool.filter';
+        $this->filterPath = 'function_score.query.bool.filter';
     }
 
-    public function build(SearchCriteriaQuery $query, int $page = null, int $perPage = null): array
+    public function build(SearchCriteriaQuery $query, int $page = null, int $perPage = null): SearchRequestBuilder
     {
         $page = page($page);
         $perPage = per_page($perPage);
 
-        $this->applyFrom($page, $perPage);
-        $this->applySize($perPage);
         $this->applyStatus(Service::STATUS_ACTIVE);
         $this->applyPersona($query->getPersonas()[0]);
 
-        return $this->esQuery;
+        return Service::searchQuery($this->esQuery)
+            ->size($perPage)
+            ->from(($page - 1) * $perPage);
     }
 
     protected function applyStatus(string $status): void
@@ -67,12 +67,15 @@ class CollectionPersonaQueryBuilder extends ElasticsearchQueryBuilder implements
 
         $this->addFilter('collection_personas', $persona->getAttribute('name'));
 
-        $persona->taxonomies->each(function (Taxonomy $taxonomy): void {
-            $this->esQuery['query']['function_score']['query']['bool']['should'][] = [
+        $should = Arr::get($this->esQuery, 'function_score.query.bool.should');
+
+        $persona->taxonomies->each(function (Taxonomy $taxonomy) use ($should): void {
+            $should[] = [
                 'term' => [
                     'taxonomy_categories.keyword' => $taxonomy->getAttribute('name'),
                 ],
             ];
         });
+        Arr::set($this->esQuery, 'function_score.query.bool.should', $should);
     }
 }

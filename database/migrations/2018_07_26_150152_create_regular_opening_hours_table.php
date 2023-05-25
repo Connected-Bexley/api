@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateRegularOpeningHoursTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,7 +12,7 @@ class CreateRegularOpeningHoursTable extends Migration
     {
         Schema::create('regular_opening_hours', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('service_location_id', 'service_locations');
+            $table->foreignUuidKeyColumn('service_location_id', 'service_locations');
             $table->enum('frequency', ['weekly', 'monthly', 'fortnightly', 'nth_occurrence_of_month']);
             $table->unsignedTinyInteger('weekday')->nullable();
             $table->unsignedTinyInteger('day_of_month')->nullable();
@@ -32,4 +31,4 @@ class CreateRegularOpeningHoursTable extends Migration
     {
         Schema::dropIfExists('regular_opening_hours');
     }
-}
+};

@@ -3,7 +3,6 @@
 namespace App\Exceptions;
 
 use App\Geocode\AddressNotFoundException;
-use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 
 class Handler extends ExceptionHandler
@@ -23,37 +22,22 @@ class Handler extends ExceptionHandler
      * @var array
      */
     protected $dontFlash = [
+        'current_password',
         'password',
         'password_confirmation',
     ];
 
     /**
-     * Report or log an exception.
-     *
-     * @param \Exception $exception
+     * Register the exception handling callbacks for the application.
      */
-    public function report(Exception $exception)
+    public function register()
     {
-        parent::report($exception);
-    }
-
-    /**
-     * Render an exception into an HTTP response.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param \Exception $exception
-     * @return \Illuminate\Http\Response
-     */
-    public function render($request, Exception $exception)
-    {
-        if ($exception instanceof AddressNotFoundException) {
+        $this->renderable(function (AddressNotFoundException $e) {
             return response()->json([
                 'errors' => [
-                    'address_not_found' => [__('validation.custom.address.not_found', ['address' => $exception->getMessage()])],
+                    'address_not_found' => [__('validation.custom.address.not_found', ['address' => $e->getMessage()])],
                 ],
             ], 422);
-        }
-
-        return parent::render($request, $exception);
+        });
     }
 }

@@ -5,8 +5,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
 
-class UploadThesaurus extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      *
@@ -29,4 +28,4 @@ class UploadThesaurus extends Migration
 
         Artisan::call(ReindexElasticsearchCommand::class);
     }
-}
+};

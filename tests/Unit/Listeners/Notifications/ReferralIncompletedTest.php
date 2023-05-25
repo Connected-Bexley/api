@@ -20,19 +20,19 @@ class ReferralIncompletedTest extends TestCase
     {
         Queue::fake();
 
-        $referral = factory(Referral::class)->create([
+        $referral = Referral::factory()->create([
             'email' => 'test@example.com',
             'referee_email' => 'test@example.com',
             'status' => Referral::STATUS_INCOMPLETED,
         ]);
         $referral->statusUpdates()->create([
-            'user_id' => factory(User::class)->create()->id,
+            'user_id' => User::factory()->create()->id,
             'from' => Referral::STATUS_NEW,
             'to' => Referral::STATUS_INCOMPLETED,
         ]);
 
         $request = Request::create('')->setUserResolver(function () {
-            return factory(User::class)->create();
+            return User::factory()->create();
         });
         $event = EndpointHit::onUpdate($request, '', $referral);
         $listener = new ReferralIncompleted();
@@ -50,6 +50,7 @@ class ReferralIncompletedTest extends TestCase
             $this->assertArrayHasKey('SERVICE_NAME', $email->values);
             $this->assertArrayHasKey('REFERRAL_STATUS', $email->values);
             $this->assertArrayHasKey('REFERRAL_ID', $email->values);
+
             return true;
         });
 
@@ -64,6 +65,7 @@ class ReferralIncompletedTest extends TestCase
             $this->assertArrayHasKey('REFERRAL_ID', $email->values);
             $this->assertArrayHasKey('SERVICE_NAME', $email->values);
             $this->assertArrayHasKey('REFERRAL_STATUS', $email->values);
+
             return true;
         });
     }
@@ -72,19 +74,19 @@ class ReferralIncompletedTest extends TestCase
     {
         Queue::fake();
 
-        $referral = factory(Referral::class)->create([
+        $referral = Referral::factory()->create([
             'phone' => 'test@example.com',
             'referee_phone' => '07700000000',
             'status' => Referral::STATUS_INCOMPLETED,
         ]);
         $referral->statusUpdates()->create([
-            'user_id' => factory(User::class)->create()->id,
+            'user_id' => User::factory()->create()->id,
             'from' => Referral::STATUS_NEW,
             'to' => Referral::STATUS_INCOMPLETED,
         ]);
 
         $request = Request::create('')->setUserResolver(function () {
-            return factory(User::class)->create();
+            return User::factory()->create();
         });
         $event = EndpointHit::onUpdate($request, '', $referral);
         $listener = new ReferralIncompleted();
@@ -94,6 +96,7 @@ class ReferralIncompletedTest extends TestCase
         Queue::assertPushed(NotifyRefereeSms::class, function (NotifyRefereeSms $sms) {
             $this->assertArrayHasKey('REFEREE_NAME', $sms->values);
             $this->assertArrayHasKey('REFERRAL_ID', $sms->values);
+
             return true;
         });
 
@@ -101,6 +104,7 @@ class ReferralIncompletedTest extends TestCase
         Queue::assertPushed(NotifyClientSms::class, function (NotifyClientSms $sms) {
             $this->assertArrayHasKey('CLIENT_INITIALS', $sms->values);
             $this->assertArrayHasKey('REFERRAL_ID', $sms->values);
+
             return true;
         });
     }
@@ -109,20 +113,20 @@ class ReferralIncompletedTest extends TestCase
     {
         Queue::fake();
 
-        $referral = factory(Referral::class)->create([
+        $referral = Referral::factory()->create([
             'email' => 'test@example.com',
             'phone' => '07700000000',
             'referee_email' => 'test@example.com',
             'status' => Referral::STATUS_INCOMPLETED,
         ]);
         $referral->statusUpdates()->create([
-            'user_id' => factory(User::class)->create()->id,
+            'user_id' => User::factory()->create()->id,
             'from' => Referral::STATUS_NEW,
             'to' => Referral::STATUS_INCOMPLETED,
         ]);
 
         $request = Request::create('')->setUserResolver(function () {
-            return factory(User::class)->create();
+            return User::factory()->create();
         });
         $event = EndpointHit::onUpdate($request, '', $referral);
         $listener = new ReferralIncompleted();
@@ -133,6 +137,7 @@ class ReferralIncompletedTest extends TestCase
             $this->assertArrayHasKey('REFERRAL_ID', $email->values);
             $this->assertArrayHasKey('SERVICE_NAME', $email->values);
             $this->assertArrayHasKey('REFERRAL_STATUS', $email->values);
+
             return true;
         });
 
@@ -140,6 +145,7 @@ class ReferralIncompletedTest extends TestCase
         Queue::assertPushed(NotifyClientSms::class, function (NotifyClientSms $sms) {
             $this->assertArrayHasKey('CLIENT_INITIALS', $sms->values);
             $this->assertArrayHasKey('REFERRAL_ID', $sms->values);
+
             return true;
         });
     }

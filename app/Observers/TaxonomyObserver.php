@@ -10,6 +10,7 @@ class TaxonomyObserver
      * Handle the taxonomy "created" event.
      *
      * @param \App\Models\Taxonomy $taxonomy
+     *
      * @throws \Exception
      */
     public function created(Taxonomy $taxonomy)
@@ -26,6 +27,7 @@ class TaxonomyObserver
      * Handle the taxonomy "updating" event.
      *
      * @param \App\Models\Taxonomy $taxonomy
+     *
      * @throws \Exception
      */
     public function updating(Taxonomy $taxonomy)
@@ -121,6 +123,7 @@ class TaxonomyObserver
      * Handle the taxonomy "deleted" event.
      *
      * @param \App\Models\Taxonomy $taxonomy
+     *
      * @throws \Exception
      */
     public function deleted(Taxonomy $taxonomy)

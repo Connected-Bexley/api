@@ -23,7 +23,7 @@ class TwilioSmsSender implements SmsSender
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function send(Sms $sms)
     {

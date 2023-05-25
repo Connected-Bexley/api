@@ -18,14 +18,14 @@ class ServiceCreatedTest extends TestCase
     {
         Queue::fake();
 
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         $request = Request::create('')->setUserResolver(function () use ($user) {
             return $user;
         });
 
-        $service = factory(Service::class)->create(['organisation_id' => $organisation->id]);
+        $service = Service::factory()->create(['organisation_id' => $organisation->id]);
 
         $event = EndpointHit::onCreate($request, "Created service [{$service->id}]", $service);
         $listener = new ServiceCreated();
@@ -59,14 +59,14 @@ class ServiceCreatedTest extends TestCase
     {
         Queue::fake();
 
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         $request = Request::create('')->setUserResolver(function () use ($user) {
             return $user;
         });
 
-        $service = factory(Service::class)->create(['organisation_id' => $organisation->id]);
+        $service = Service::factory()->create(['organisation_id' => $organisation->id]);
 
         $event = EndpointHit::onCreate($request, "Created service [{$service->id}]", $service);
         $listener = new ServiceCreated();

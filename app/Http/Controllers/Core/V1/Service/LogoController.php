@@ -39,7 +39,7 @@ class LogoController extends Controller
         }
 
         // Return the file, or placeholder if the file is null.
-        return optional($file)->resizedVersion($request->max_dimension)
+        return $file?->resizedVersion($request->max_dimension)
             ?? Service::placeholderLogo($request->max_dimension);
     }
 
@@ -64,7 +64,7 @@ class LogoController extends Controller
         }
 
         // Return the file, or placeholder if the file is null.
-        return optional($file)->resizedVersion($request->max_dimension)
+        return $file?->resizedVersion($request->max_dimension)
             ?? Service::placeholderLogo($request->max_dimension);
     }
 }

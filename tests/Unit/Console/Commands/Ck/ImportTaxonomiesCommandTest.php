@@ -11,7 +11,7 @@ class ImportTaxonomiesCommandTest extends TestCase
 {
     public $taxonomyRecords = [];
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -160,10 +160,11 @@ class ImportTaxonomiesCommandTest extends TestCase
 
         $currentTaxonomyCount = count($cmd->getDescendantTaxonomyIds([Taxonomy::category()->id]));
 
-        $rootTaxonomies = factory(Taxonomy::class, 3)->create();
+
+        $rootTaxonomies = Taxonomy::factory()->count(3)->create();
 
         $rootTaxonomies->each(function ($taxonomy) {
-            factory(Taxonomy::class, 5)->create([
+            Taxonomy::factory()->count(5)->create([
                 'parent_id' => $taxonomy->id,
                 'depth' => 2,
             ]);

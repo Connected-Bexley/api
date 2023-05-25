@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\Auth;
+use App\Http\Controllers\DocsController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,27 +17,25 @@ use Illuminate\Support\Facades\Route;
 |
  */
 
-Route::namespace('Auth')->group(function () {
-    // Authentication Routes.
-    Route::get('login', 'LoginController@showLoginForm')->name('login');
-    Route::post('login', 'LoginController@login');
-    Route::get('login/code', 'LoginController@showOtpForm')->name('login.code');
-    Route::post('login/code', 'LoginController@otp');
-    Route::post('logout', 'LoginController@logout')->name('logout');
+// Authentication Routes.
+Route::get('login', [Auth\LoginController::class, 'showLoginForm'])->name('login');
+Route::post('login', [Auth\LoginController::class, 'login']);
+Route::get('login/code', [Auth\LoginController::class, 'showOtpForm'])->name('login.code');
+Route::post('login/code', [Auth\LoginController::class, 'otp']);
+Route::post('logout', [Auth\LoginController::class, 'logout'])->name('logout');
 
-    // Password Reset Routes.
-    Route::get('password/reset', 'ForgotPasswordController@showLinkRequestForm')->name('password.request');
-    Route::post('password/email', 'ForgotPasswordController@sendResetLinkEmail')->name('password.email');
-    Route::get('password/reset/{token}', 'ResetPasswordController@showResetForm')->name('password.reset');
-    Route::post('password/reset', 'ResetPasswordController@reset')->name('password.update');
-});
+// Password Reset Routes.
+Route::get('password/reset', [Auth\ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('password/email', [Auth\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('password/reset/{token}', [Auth\ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('password/reset', [Auth\ResetPasswordController::class, 'reset'])->name('password.update');
 
-Route::get('/', 'HomeController')->name('home');
+Route::get('/', HomeController::class)->name('home');
 
-Route::get('/docs', 'DocsController@index')
+Route::get('/docs', [DocsController::class, 'index'])
     ->name('docs.index');
 
-Route::get('/docs/openapi.json', 'DocsController@show')
+Route::get('/docs/openapi.json', [DocsController::class, 'show'])
     ->name('docs.show');
 
-Route::get('/sitemap', 'SitemapController')->name('sitemap');
+Route::get('/sitemap', SitemapController::class)->name('sitemap');

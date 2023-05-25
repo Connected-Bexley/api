@@ -5,8 +5,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
 
-class UploadStopWords extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      *
@@ -29,4 +28,4 @@ class UploadStopWords extends Migration
 
         Artisan::call(ReindexElasticsearchCommand::class);
     }
-}
+};

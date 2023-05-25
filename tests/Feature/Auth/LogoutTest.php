@@ -14,7 +14,7 @@ class LogoutTest extends TestCase
     {
         Config::set('local.otp_enabled', false);
 
-        $user = factory(User::class)->create(['password' => bcrypt('secret')]);
+        $user = User::factory()->create(['password' => bcrypt('secret')]);
 
         $this->post('/login', [
             '_token' => csrf_token(),

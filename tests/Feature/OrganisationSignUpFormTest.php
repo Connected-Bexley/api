@@ -22,9 +22,9 @@ class OrganisationSignUpFormTest extends TestCase
     {
         $response = $this->json('POST', '/core/v1/organisation-sign-up-forms', [
             'user' => [
-                'first_name' => $this->faker->firstName,
-                'last_name' => $this->faker->lastName,
-                'email' => $this->faker->safeEmail,
+                'first_name' => $this->faker->firstName(),
+                'last_name' => $this->faker->lastName(),
+                'email' => $this->faker->safeEmail(),
                 'phone' => random_uk_phone(),
                 'password' => 'P@55w0rd.',
             ],
@@ -48,10 +48,10 @@ class OrganisationSignUpFormTest extends TestCase
                 'fees_url' => null,
                 'testimonial' => null,
                 'video_embed' => null,
-                'url' => $this->faker->url,
-                'contact_name' => $this->faker->name,
+                'url' => $this->faker->url(),
+                'contact_name' => $this->faker->name(),
                 'contact_phone' => random_uk_phone(),
-                'contact_email' => $this->faker->safeEmail,
+                'contact_email' => $this->faker->safeEmail(),
                 'useful_infos' => [
                     [
                         'title' => 'Did you know?',
@@ -81,9 +81,9 @@ class OrganisationSignUpFormTest extends TestCase
     {
         $response = $this->json('POST', '/core/v1/organisation-sign-up-forms', [
             'user' => [
-                'first_name' => $this->faker->firstName,
-                'last_name' => $this->faker->lastName,
-                'email' => $this->faker->safeEmail,
+                'first_name' => $this->faker->firstName(),
+                'last_name' => $this->faker->lastName(),
+                'email' => $this->faker->safeEmail(),
                 'phone' => random_uk_phone(),
                 'password' => 'P@55w0rd.',
             ],
@@ -107,8 +107,8 @@ class OrganisationSignUpFormTest extends TestCase
                 'fees_url' => null,
                 'testimonial' => null,
                 'video_embed' => null,
-                'url' => $this->faker->url,
-                'contact_name' => $this->faker->name,
+                'url' => $this->faker->url(),
+                'contact_name' => $this->faker->name(),
                 'contact_phone' => random_uk_phone(),
                 'contact_email' => null,
                 'useful_infos' => [
@@ -143,12 +143,12 @@ class OrganisationSignUpFormTest extends TestCase
     {
         $this->fakeEvents();
 
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
 
         $userSubmission = [
-            'first_name' => $this->faker->firstName,
-            'last_name' => $this->faker->lastName,
-            'email' => $this->faker->safeEmail,
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
+            'email' => $this->faker->safeEmail(),
             'phone' => random_uk_phone(),
             'password' => 'P@55w0rd.',
         ];
@@ -190,15 +190,15 @@ class OrganisationSignUpFormTest extends TestCase
     {
         $this->fakeEvents();
 
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
 
-        factory(User::class)->create([
-            'email' => 'admin@organisation.org'
+        User::factory()->create([
+            'email' => 'admin@organisation.org',
         ])->makeOrganisationAdmin($organisation);
 
         $userSubmission = [
-            'first_name' => $this->faker->firstName,
-            'last_name' => $this->faker->lastName,
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
             'email' => 'admin@organisation.org',
             'phone' => random_uk_phone(),
             'password' => 'P@55w0rd.',
@@ -221,11 +221,11 @@ class OrganisationSignUpFormTest extends TestCase
     {
         $this->fakeEvents();
 
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
 
         $user1Submission = [
-            'first_name' => $this->faker->firstName,
-            'last_name' => $this->faker->lastName,
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
             'email' => 'admin@organisation.org',
             'phone' => random_uk_phone(),
             'password' => 'P@55w0rd.',
@@ -241,8 +241,8 @@ class OrganisationSignUpFormTest extends TestCase
         $response->assertStatus(Response::HTTP_CREATED);
 
         $user2Submission = [
-            'first_name' => $this->faker->firstName,
-            'last_name' => $this->faker->lastName,
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
             'email' => 'admin@organisation.org',
             'phone' => random_uk_phone(),
             'password' => 'P@55w0rd.',
@@ -264,9 +264,9 @@ class OrganisationSignUpFormTest extends TestCase
     public function guest_cannot_sign_up_to_non_existing_organisation()
     {
         $userSubmission = [
-            'first_name' => $this->faker->firstName,
-            'last_name' => $this->faker->lastName,
-            'email' => $this->faker->safeEmail,
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
+            'email' => $this->faker->safeEmail(),
             'phone' => random_uk_phone(),
             'password' => 'P@55w0rd.',
         ];
@@ -288,9 +288,9 @@ class OrganisationSignUpFormTest extends TestCase
         $this->fakeEvents();
 
         $userSubmission = [
-            'first_name' => $this->faker->firstName,
-            'last_name' => $this->faker->lastName,
-            'email' => $this->faker->safeEmail,
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
+            'email' => $this->faker->safeEmail(),
             'phone' => random_uk_phone(),
             'password' => 'P@55w0rd.',
         ];
@@ -329,12 +329,12 @@ class OrganisationSignUpFormTest extends TestCase
      */
     public function guest_cannot_sign_up_with_new_organisation_which_matches_existing_organisation()
     {
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
 
         $userSubmission = [
-            'first_name' => $this->faker->firstName,
-            'last_name' => $this->faker->lastName,
-            'email' => $this->faker->safeEmail,
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
+            'email' => $this->faker->safeEmail(),
             'phone' => random_uk_phone(),
             'password' => 'P@55w0rd.',
         ];
@@ -357,9 +357,9 @@ class OrganisationSignUpFormTest extends TestCase
     public function test_service_worker_cannot_create_one()
     {
         /** @var \App\Models\Service $service */
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
         /** @var \App\Models\User $user */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeServiceWorker($service);
 
         Passport::actingAs($user);
@@ -372,9 +372,9 @@ class OrganisationSignUpFormTest extends TestCase
     public function test_service_admin_cannot_create_one()
     {
         /** @var \App\Models\Service $service */
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
         /** @var \App\Models\User $user */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
 
         Passport::actingAs($user);
@@ -387,9 +387,9 @@ class OrganisationSignUpFormTest extends TestCase
     public function test_organisation_admin_cannot_create_one()
     {
         /** @var \App\Models\Organisation $organisation */
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
         /** @var \App\Models\User $user */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
@@ -404,7 +404,7 @@ class OrganisationSignUpFormTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
 
         Passport::actingAs($user);
@@ -419,7 +419,7 @@ class OrganisationSignUpFormTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
 
         Passport::actingAs($user);
@@ -435,9 +435,9 @@ class OrganisationSignUpFormTest extends TestCase
 
         $response = $this->json('POST', '/core/v1/organisation-sign-up-forms', [
             'user' => [
-                'first_name' => $this->faker->firstName,
-                'last_name' => $this->faker->lastName,
-                'email' => $this->faker->safeEmail,
+                'first_name' => $this->faker->firstName(),
+                'last_name' => $this->faker->lastName(),
+                'email' => $this->faker->safeEmail(),
                 'phone' => random_uk_phone(),
                 'password' => 'P@55w0rd.',
             ],
@@ -461,10 +461,10 @@ class OrganisationSignUpFormTest extends TestCase
                 'fees_url' => null,
                 'testimonial' => null,
                 'video_embed' => null,
-                'url' => $this->faker->url,
-                'contact_name' => $this->faker->name,
+                'url' => $this->faker->url(),
+                'contact_name' => $this->faker->name(),
                 'contact_phone' => random_uk_phone(),
-                'contact_email' => $this->faker->safeEmail,
+                'contact_email' => $this->faker->safeEmail(),
                 'useful_infos' => [
                     [
                         'title' => 'Did you know?',

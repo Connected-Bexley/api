@@ -13,7 +13,7 @@ class EndActiveServicesCommandTest extends TestCase
     public function test_active_services_past_there_end_date_are_made_inactive()
     {
         /** @var \App\Models\Service $service */
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'status' => Service::STATUS_ACTIVE,
             'ends_at' => Date::now()->subDay(),
         ]);
@@ -28,7 +28,7 @@ class EndActiveServicesCommandTest extends TestCase
     public function test_active_services_with_future_end_date_are_not_made_inactive()
     {
         /** @var \App\Models\Service $service */
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'status' => Service::STATUS_ACTIVE,
             'ends_at' => Date::now()->addDay(),
         ]);
@@ -43,7 +43,7 @@ class EndActiveServicesCommandTest extends TestCase
     public function test_active_services_with_null_end_date_are_not_made_inactive()
     {
         /** @var \App\Models\Service $service */
-        $service = factory(Service::class)->create([
+        $service = Service::factory()->create([
             'status' => Service::STATUS_ACTIVE,
             'ends_at' => null,
         ]);

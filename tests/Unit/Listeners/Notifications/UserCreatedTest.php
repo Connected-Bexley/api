@@ -16,10 +16,10 @@ class UserCreatedTest extends TestCase
     {
         Queue::fake();
 
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
 
         $request = Request::create('')->setUserResolver(function () {
-            return factory(User::class)->create();
+            return User::factory()->create();
         });
         $event = EndpointHit::onCreate($request, '', $user);
         $listener = new UserCreated();
@@ -35,6 +35,7 @@ class UserCreatedTest extends TestCase
             $this->assertEquals('emails.user.created.notify_user.content', $email->getContent());
             $this->assertArrayHasKey('NAME', $email->values);
             $this->assertArrayHasKey('PERMISSIONS', $email->values);
+
             return true;
         });
     }

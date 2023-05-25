@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCachedGeocodeResultsTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -27,4 +26,4 @@ class CreateCachedGeocodeResultsTable extends Migration
     {
         Schema::dropIfExists('cached_geocode_results');
     }
-}
+};

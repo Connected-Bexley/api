@@ -27,7 +27,7 @@ class OpenActiveTaxonomyImporter
 
     public function __construct()
     {
-        $this->slugGenerator = resolve('App\Generators\UniqueSlugGenerator');
+        $this->slugGenerator = resolve(\App\Generators\UniqueSlugGenerator::class);
     }
 
     /**

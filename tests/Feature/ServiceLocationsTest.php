@@ -12,7 +12,6 @@ use App\Models\Service;
 use App\Models\ServiceLocation;
 use App\Models\UpdateRequest;
 use App\Models\User;
-use Illuminate\Support\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Date;
@@ -29,8 +28,8 @@ class ServiceLocationsTest extends TestCase
 
     public function test_guest_can_list_them()
     {
-        $location = factory(Location::class)->create();
-        $service = factory(Service::class)->create();
+        $location = Location::factory()->create();
+        $service = Service::factory()->create();
         $serviceLocation = $service->serviceLocations()->create(['location_id' => $location->id]);
 
         $response = $this->json('GET', '/core/v1/service-locations');
@@ -51,8 +50,8 @@ class ServiceLocationsTest extends TestCase
 
     public function test_guest_can_list_them_for_service()
     {
-        $serviceLocation = factory(ServiceLocation::class)->create();
-        $anotherServiceLocation = factory(ServiceLocation::class)->create();
+        $serviceLocation = ServiceLocation::factory()->create();
+        $anotherServiceLocation = ServiceLocation::factory()->create();
 
         $response = $this->json('GET', "/core/v1/service-locations?filter[service_id]={$serviceLocation->service_id}");
         $serviceLocation = $serviceLocation->fresh();
@@ -66,14 +65,14 @@ class ServiceLocationsTest extends TestCase
     {
         Date::setTestNow(Date::now()->setTime(18, 0));
 
-        $location = factory(Location::class)->create();
-        $service = factory(Service::class)->create();
+        $location = Location::factory()->create();
+        $service = Service::factory()->create();
         $serviceLocation = $service->serviceLocations()->create(['location_id' => $location->id]);
-        $regularOpeningHour = factory(RegularOpeningHour::class)->create([
+        $regularOpeningHour = RegularOpeningHour::factory()->create([
             'service_location_id' => $serviceLocation->id,
             'weekday' => Date::now()->addDay()->day,
         ]);
-        $holidayOpeningHour = factory(HolidayOpeningHour::class)->create([
+        $holidayOpeningHour = HolidayOpeningHour::factory()->create([
             'service_location_id' => $serviceLocation->id,
             'starts_at' => Date::now()->addMonth(),
             'ends_at' => Date::now()->addMonths(2),
@@ -117,7 +116,7 @@ class ServiceLocationsTest extends TestCase
         $this->json('GET', '/core/v1/service-locations');
 
         Event::assertDispatched(EndpointHit::class, function (EndpointHit $event) {
-            return ($event->getAction() === Audit::ACTION_READ);
+            return $event->getAction() === Audit::ACTION_READ;
         });
     }
 
@@ -134,8 +133,8 @@ class ServiceLocationsTest extends TestCase
 
     public function test_service_worker_cannot_create_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
 
         Passport::actingAs($user);
 
@@ -146,10 +145,10 @@ class ServiceLocationsTest extends TestCase
 
     public function test_service_admin_for_another_service_cannot_create_one()
     {
-        $location = factory(Location::class)->create();
-        $service = factory(Service::class)->create();
-        $anotherService = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($anotherService);
+        $location = Location::factory()->create();
+        $service = Service::factory()->create();
+        $anotherService = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($anotherService);
 
         Passport::actingAs($user);
 
@@ -166,9 +165,9 @@ class ServiceLocationsTest extends TestCase
 
     public function test_service_admin_can_create_one()
     {
-        $location = factory(Location::class)->create();
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $location = Location::factory()->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
@@ -193,9 +192,9 @@ class ServiceLocationsTest extends TestCase
 
     public function test_service_admin_can_create_one_with_opening_hours()
     {
-        $location = factory(Location::class)->create();
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $location = Location::factory()->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
@@ -250,9 +249,9 @@ class ServiceLocationsTest extends TestCase
 
     public function test_service_admin_can_create_one_with_an_image()
     {
-        $location = factory(Location::class)->create();
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $location = Location::factory()->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
         $image = Storage::disk('local')->get('/test-data/image.png');
 
         Passport::actingAs($user);
@@ -260,7 +259,7 @@ class ServiceLocationsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
+            'file' => 'data:image/png;base64,'.base64_encode($image),
         ]);
 
         $payload = [
@@ -269,7 +268,7 @@ class ServiceLocationsTest extends TestCase
             'name' => null,
             'regular_opening_hours' => [],
             'holiday_opening_hours' => [],
-            'image_file_id' => $this->getResponseContent($imageResponse, 'data.id')
+            'image_file_id' => $this->getResponseContent($imageResponse, 'data.id'),
         ];
 
         $response = $this->json('POST', '/core/v1/service-locations', $payload);
@@ -296,9 +295,9 @@ class ServiceLocationsTest extends TestCase
     {
         $this->fakeEvents();
 
-        $location = factory(Location::class)->create();
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $location = Location::factory()->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
@@ -323,8 +322,8 @@ class ServiceLocationsTest extends TestCase
 
     public function test_guest_can_view_one()
     {
-        $location = factory(Location::class)->create();
-        $service = factory(Service::class)->create();
+        $location = Location::factory()->create();
+        $service = Service::factory()->create();
         $serviceLocation = $service->serviceLocations()->create(['location_id' => $location->id]);
 
         $response = $this->json('GET', "/core/v1/service-locations/{$serviceLocation->id}");
@@ -347,14 +346,14 @@ class ServiceLocationsTest extends TestCase
     {
         Date::setTestNow(Date::now()->setTime(18, 0));
 
-        $location = factory(Location::class)->create();
-        $service = factory(Service::class)->create();
+        $location = Location::factory()->create();
+        $service = Service::factory()->create();
         $serviceLocation = $service->serviceLocations()->create(['location_id' => $location->id]);
-        $regularOpeningHour = factory(RegularOpeningHour::class)->create([
+        $regularOpeningHour = RegularOpeningHour::factory()->create([
             'service_location_id' => $serviceLocation->id,
             'weekday' => Date::now()->addDay()->day,
         ]);
-        $holidayOpeningHour = factory(HolidayOpeningHour::class)->create([
+        $holidayOpeningHour = HolidayOpeningHour::factory()->create([
             'service_location_id' => $serviceLocation->id,
             'starts_at' => Date::now()->addMonth(),
             'ends_at' => Date::now()->addMonths(2),
@@ -395,8 +394,8 @@ class ServiceLocationsTest extends TestCase
     {
         $this->fakeEvents();
 
-        $location = factory(Location::class)->create();
-        $service = factory(Service::class)->create();
+        $location = Location::factory()->create();
+        $service = Service::factory()->create();
         $serviceLocation = $service->serviceLocations()->create(['location_id' => $location->id]);
 
         $this->json('GET', "/core/v1/service-locations/{$serviceLocation->id}");
@@ -413,7 +412,7 @@ class ServiceLocationsTest extends TestCase
 
     public function test_guest_cannot_update_one()
     {
-        $serviceLocation = factory(ServiceLocation::class)->create();
+        $serviceLocation = ServiceLocation::factory()->create();
 
         $response = $this->json('PUT', "/core/v1/service-locations/{$serviceLocation->id}");
 
@@ -422,8 +421,8 @@ class ServiceLocationsTest extends TestCase
 
     public function test_service_worker_cannot_update_one()
     {
-        $serviceLocation = factory(ServiceLocation::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($serviceLocation->service);
+        $serviceLocation = ServiceLocation::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($serviceLocation->service);
 
         Passport::actingAs($user);
 
@@ -434,8 +433,8 @@ class ServiceLocationsTest extends TestCase
 
     public function test_service_admin_can_update_one()
     {
-        $serviceLocation = factory(ServiceLocation::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($serviceLocation->service);
+        $serviceLocation = ServiceLocation::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($serviceLocation->service);
 
         Passport::actingAs($user);
 
@@ -471,8 +470,8 @@ class ServiceLocationsTest extends TestCase
     {
         $this->fakeEvents();
 
-        $serviceLocation = factory(ServiceLocation::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($serviceLocation->service);
+        $serviceLocation = ServiceLocation::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($serviceLocation->service);
 
         Passport::actingAs($user);
 
@@ -491,8 +490,8 @@ class ServiceLocationsTest extends TestCase
 
     public function test_only_partial_fields_can_be_updated()
     {
-        $serviceLocation = factory(ServiceLocation::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($serviceLocation->service);
+        $serviceLocation = ServiceLocation::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($serviceLocation->service);
 
         Passport::actingAs($user);
 
@@ -509,8 +508,8 @@ class ServiceLocationsTest extends TestCase
 
     public function test_fields_removed_for_existing_update_requests()
     {
-        $serviceLocation = factory(ServiceLocation::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($serviceLocation->service);
+        $serviceLocation = ServiceLocation::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($serviceLocation->service);
 
         Passport::actingAs($user);
 
@@ -538,7 +537,7 @@ class ServiceLocationsTest extends TestCase
 
     public function test_guest_cannot_delete_one()
     {
-        $serviceLocation = factory(ServiceLocation::class)->create();
+        $serviceLocation = ServiceLocation::factory()->create();
 
         $response = $this->json('DELETE', "/core/v1/service-locations/{$serviceLocation->id}");
 
@@ -547,8 +546,8 @@ class ServiceLocationsTest extends TestCase
 
     public function test_service_worker_cannot_delete_one()
     {
-        $serviceLocation = factory(ServiceLocation::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($serviceLocation->service);
+        $serviceLocation = ServiceLocation::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($serviceLocation->service);
 
         Passport::actingAs($user);
 
@@ -559,8 +558,8 @@ class ServiceLocationsTest extends TestCase
 
     public function test_service_admin_cannot_delete_one()
     {
-        $serviceLocation = factory(ServiceLocation::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($serviceLocation->service);
+        $serviceLocation = ServiceLocation::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($serviceLocation->service);
 
         Passport::actingAs($user);
 
@@ -571,8 +570,8 @@ class ServiceLocationsTest extends TestCase
 
     public function test_organisation_admin_cannot_delete_one()
     {
-        $serviceLocation = factory(ServiceLocation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($serviceLocation->service->organisation);
+        $serviceLocation = ServiceLocation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($serviceLocation->service->organisation);
 
         Passport::actingAs($user);
 
@@ -583,8 +582,8 @@ class ServiceLocationsTest extends TestCase
 
     public function test_global_admin_cannot_delete_one()
     {
-        $serviceLocation = factory(ServiceLocation::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $serviceLocation = ServiceLocation::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -595,8 +594,8 @@ class ServiceLocationsTest extends TestCase
 
     public function test_super_admin_can_delete_one()
     {
-        $serviceLocation = factory(ServiceLocation::class)->create();
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $serviceLocation = ServiceLocation::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($user);
 
@@ -610,8 +609,8 @@ class ServiceLocationsTest extends TestCase
     {
         $this->fakeEvents();
 
-        $serviceLocation = factory(ServiceLocation::class)->create();
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $serviceLocation = ServiceLocation::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($user);
 
@@ -630,7 +629,7 @@ class ServiceLocationsTest extends TestCase
 
     public function test_guest_can_view_image()
     {
-        $serviceLocation = factory(ServiceLocation::class)->create();
+        $serviceLocation = ServiceLocation::factory()->create();
 
         $response = $this->get("/core/v1/service-locations/{$serviceLocation->id}/image.png");
 
@@ -642,7 +641,7 @@ class ServiceLocationsTest extends TestCase
     {
         $this->fakeEvents();
 
-        $serviceLocation = factory(ServiceLocation::class)->create();
+        $serviceLocation = ServiceLocation::factory()->create();
 
         $this->get("/core/v1/service-locations/{$serviceLocation->id}/image.png");
 
@@ -656,11 +655,10 @@ class ServiceLocationsTest extends TestCase
      * Upload a specific service location's image.
      */
 
-
     public function test_organisation_admin_can_upload_image()
     {
         /** @var \App\Models\User $user */
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         $image = Storage::disk('local')->get('/test-data/image.png');
 
         Passport::actingAs($user);
@@ -668,12 +666,12 @@ class ServiceLocationsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
+            'file' => 'data:image/png;base64,'.base64_encode($image),
         ]);
 
         $response = $this->json('POST', '/core/v1/service-locations', [
-            'service_id' => factory(Service::class)->create()->id,
-            'location_id' => factory(Location::class)->create()->id,
+            'service_id' => Service::factory()->create()->id,
+            'location_id' => Location::factory()->create()->id,
             'name' => null,
             'regular_opening_hours' => [],
             'holiday_opening_hours' => [],
@@ -700,10 +698,10 @@ class ServiceLocationsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
-        $serviceLocation = factory(ServiceLocation::class)->create([
-            'image_file_id' => factory(File::class)->create()->id,
+        $serviceLocation = ServiceLocation::factory()->create([
+            'image_file_id' => File::factory()->create()->id,
         ]);
         $payload = [
             'name' => null,
@@ -724,8 +722,8 @@ class ServiceLocationsTest extends TestCase
 
     public function test_global_admin_can_update_one_with_auto_approval()
     {
-        $serviceLocation = factory(ServiceLocation::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $serviceLocation = ServiceLocation::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 

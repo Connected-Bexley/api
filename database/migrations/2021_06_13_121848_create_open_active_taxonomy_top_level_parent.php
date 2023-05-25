@@ -8,8 +8,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
-class CreateOpenActiveTaxonomyTopLeveLParent extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -101,4 +100,4 @@ class CreateOpenActiveTaxonomyTopLeveLParent extends Migration
 
         return $taxonomyIds;
     }
-}
+};

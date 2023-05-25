@@ -55,7 +55,6 @@ EOT;
 
     /**
      * @param string $contents
-     *
      * @return bool
      */
     protected function saveToFile(string $contents): bool

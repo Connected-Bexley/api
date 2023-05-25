@@ -1,12 +1,22 @@
 <?php
 
-use Faker\Generator as Faker;
+namespace Database\Factories;
 
-/** @var \Illuminate\Database\Eloquent\Factory $factory */
-$factory->define(App\Models\ServiceRefreshToken::class, function (Faker $faker) {
-    return [
-        'service_id' => function () {
-            return factory(App\Models\Service::class)->create()->id;
-        },
-    ];
-});
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class ServiceRefreshTokenFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition()
+    {
+        return [
+            'service_id' => function () {
+                return \App\Models\Service::factory()->create()->id;
+            },
+        ];
+    }
+}

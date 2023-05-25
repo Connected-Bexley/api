@@ -12,12 +12,12 @@ class AuditsTest extends TestCase
 {
     public function test_auto_delete_works()
     {
-        $newAudit = factory(Audit::class)->create([
+        $newAudit = Audit::factory()->create([
             'created_at' => Date::today(),
             'updated_at' => Date::today(),
         ]);
 
-        $dueForDeletionAudit = factory(Audit::class)->create([
+        $dueForDeletionAudit = Audit::factory()->create([
             'created_at' => Date::today()->subMonths(Audit::AUTO_DELETE_MONTHS),
             'updated_at' => Date::today()->subMonths(Audit::AUTO_DELETE_MONTHS),
         ]);

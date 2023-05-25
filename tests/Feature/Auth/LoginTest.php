@@ -16,7 +16,7 @@ class LoginTest extends TestCase
 
         Queue::fake();
 
-        $user = factory(User::class)->create(['password' => bcrypt('password')]);
+        $user = User::factory()->create(['password' => bcrypt('password')]);
 
         $this->post(route('login'), [
             'email' => $user->email,
@@ -26,6 +26,7 @@ class LoginTest extends TestCase
         Queue::assertPushedOn('notifications', UserSms::class);
         Queue::assertPushed(UserSms::class, function (UserSms $sms) {
             $this->assertArrayHasKey('OTP_CODE', $sms->values);
+
             return true;
         });
     }

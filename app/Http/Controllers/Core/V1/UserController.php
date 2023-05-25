@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedInclude;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class UserController extends Controller
@@ -69,8 +70,8 @@ class UserController extends Controller
                 AllowedFilter::custom('at_service', new AtServiceFilter()),
             ])
             ->allowedIncludes([
-                'user-roles.organisation',
-                'user-roles.service',
+                AllowedInclude::relationship('user-roles.organisation', 'userRoles.organisation'),
+                AllowedInclude::relationship('user-roles.service', 'userRoles.service'),
             ])
             ->allowedSorts([
                 'first_name',
@@ -160,8 +161,8 @@ class UserController extends Controller
 
         $user = QueryBuilder::for($baseQuery)
             ->allowedIncludes([
-                'user-roles.organisation',
-                'user-roles.service',
+                AllowedInclude::relationship('user-roles.organisation', 'userRoles.organisation'),
+                AllowedInclude::relationship('user-roles.service', 'userRoles.service'),
             ])
             ->firstOrFail();
 

@@ -49,7 +49,7 @@ class ServiceController extends Controller
                 'serviceGalleryItems.file',
                 'taxonomies'
             )
-            ->when(auth('api')->guest(), function (Builder $query) use ($request) {
+            ->when(auth('api')->guest(), function (Builder $query) {
                 // Limit to active services if requesting user is not authenticated.
                 $query->where('status', '=', Service::STATUS_ACTIVE);
             });

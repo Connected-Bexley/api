@@ -15,7 +15,7 @@ class NotifyGlobalAdminEmail extends Email
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getContent(): string
     {
@@ -23,7 +23,7 @@ class NotifyGlobalAdminEmail extends Email
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getSubject(): string
     {

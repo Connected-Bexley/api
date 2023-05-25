@@ -54,7 +54,7 @@ class ImportTaxonomiesCommand extends Command
     {
         parent::__construct();
 
-        $this->slugGenerator = resolve('App\Generators\UniqueSlugGenerator');
+        $this->slugGenerator = resolve(\App\Generators\UniqueSlugGenerator::class);
     }
 
     /**
@@ -106,8 +106,9 @@ class ImportTaxonomiesCommand extends Command
      */
     public function deleteAllTaxonomies()
     {
-        DB::table((new ServiceTaxonomy())->getTable())->truncate();
-        DB::table((new CollectionTaxonomy())->getTable())->truncate();
+        $taxonomyIds = $this->getDescendantTaxonomyIds([Taxonomy::category()->id]);
+        DB::table((new ServiceTaxonomy())->getTable())->whereIn('taxonomy_id', $taxonomyIds)->delete();
+        DB::table((new CollectionTaxonomy())->getTable())->whereIn('taxonomy_id', $taxonomyIds)->delete();
         DB::table((new UpdateRequest())->getTable())->whereIn(
             'updateable_type',
             [
@@ -116,7 +117,6 @@ class ImportTaxonomiesCommand extends Command
             ]
         )->delete();
 
-        $taxonomyIds = $this->getDescendantTaxonomyIds([Taxonomy::category()->id]);
         Schema::disableForeignKeyConstraints();
         DB::table((new Taxonomy())->getTable())->whereIn('id', $taxonomyIds)->delete();
         Schema::enableForeignKeyConstraints();
@@ -288,7 +288,7 @@ class ImportTaxonomiesCommand extends Command
      */
     public function mapTaxonomyDepth(array $records): array
     {
-        $rootRecords = array_filter($records, function ($record) use ($records) {
+        $rootRecords = array_filter($records, function ($record) {
             return $record['parent_id'] == Taxonomy::category()->id;
         });
 

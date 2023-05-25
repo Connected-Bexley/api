@@ -66,7 +66,7 @@ class MailgunEmailSender implements EmailSender
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function send(Email $email)
     {

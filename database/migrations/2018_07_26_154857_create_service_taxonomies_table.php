@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateServiceTaxonomiesTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,8 +12,8 @@ class CreateServiceTaxonomiesTable extends Migration
     {
         Schema::create('service_taxonomies', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('service_id', 'services');
-            $table->foreignUuid('taxonomy_id', 'taxonomies');
+            $table->foreignUuidKeyColumn('service_id', 'services');
+            $table->foreignUuidKeyColumn('taxonomy_id', 'taxonomies');
             $table->timestamps();
         });
     }
@@ -26,4 +25,4 @@ class CreateServiceTaxonomiesTable extends Migration
     {
         Schema::dropIfExists('service_taxonomies');
     }
-}
+};

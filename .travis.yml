@@ -1,5 +1,5 @@
 os: linux
-dist: xenial
+dist: focal
 
 branches:
   only:
@@ -13,7 +13,7 @@ branches:
 language: python
 
 python:
-  - "3.6"
+  - "3.8"
 
 services:
   - docker

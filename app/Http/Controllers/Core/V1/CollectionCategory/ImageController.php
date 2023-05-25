@@ -26,6 +26,6 @@ class ImageController extends Controller
         $file = File::find($collection->meta['image_file_id'] ?? null);
 
         // Return the file, or placeholder if the file is null.
-        return optional($file)->resizedVersion($request->max_dimension) ?? Collection::categoryPlaceholderLogo($request->max_dimension);
+        return $file?->resizedVersion($request->max_dimension) ?? Collection::categoryPlaceholderLogo($request->max_dimension);
     }
 }

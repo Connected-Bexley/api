@@ -8,6 +8,7 @@ trait TagRelationships
 {
     /**
      * The services that belong to the tag.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function services()

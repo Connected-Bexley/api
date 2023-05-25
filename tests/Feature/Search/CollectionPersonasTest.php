@@ -39,6 +39,8 @@ class CollectionPersonasTest extends TestCase implements UsesElasticsearch
             'order' => 1,
         ]);
 
+        sleep(1);
+
         $response = $this->json('POST', '/core/v1/search/collections/personas', [
             'persona' => $collectionCategory->getAttribute('slug'),
         ]);
@@ -48,8 +50,8 @@ class CollectionPersonasTest extends TestCase implements UsesElasticsearch
 
     public function test_filter_by_personas_works()
     {
-        $service1 = factory(Service::class)->create();
-        $service2 = factory(Service::class)->create();
+        $service1 = Service::factory()->create();
+        $service2 = Service::factory()->create();
         $collection1 = Collection::create([
             'type' => Collection::TYPE_PERSONA,
             'slug' => 'refugees',
@@ -83,6 +85,8 @@ class CollectionPersonasTest extends TestCase implements UsesElasticsearch
         $collection2->collectionTaxonomies()->create(['taxonomy_id' => $taxonomy2->id]);
         $service2->serviceTaxonomies()->create(['taxonomy_id' => $taxonomy2->id]);
         $service2->save();
+
+        sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
             'persona' => $collection1->slug,
@@ -138,9 +142,9 @@ class CollectionPersonasTest extends TestCase implements UsesElasticsearch
         $collection->collectionTaxonomies()->create(['taxonomy_id' => $taxonomy3->id]);
 
         // Create 3 services
-        $service1 = factory(Service::class)->create(['name' => 'Gold Co.']);
-        $service2 = factory(Service::class)->create(['name' => 'Silver Co.']);
-        $service3 = factory(Service::class)->create(['name' => 'Bronze Co.']);
+        $service1 = Service::factory()->create(['name' => 'Gold Co.']);
+        $service2 = Service::factory()->create(['name' => 'Silver Co.']);
+        $service3 = Service::factory()->create(['name' => 'Bronze Co.']);
 
         // Link the services to 1, 2 and 3 taxonomies respectively.
         $service1->serviceTaxonomies()->create(['taxonomy_id' => $taxonomy1->id]);
@@ -154,6 +158,8 @@ class CollectionPersonasTest extends TestCase implements UsesElasticsearch
 
         $service3->serviceTaxonomies()->create(['taxonomy_id' => $taxonomy1->id]);
         $service3->save(); // Update the Elasticsearch index.
+
+        sleep(1);
 
         // Assert that when searching by collection, the services with more taxonomies are ranked higher.
         $response = $this->json('POST', '/core/v1/search/collections/personas', [

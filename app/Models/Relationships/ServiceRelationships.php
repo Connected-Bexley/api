@@ -150,6 +150,7 @@ trait ServiceRelationships
 
     /**
      * The tags that belong to the service.
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function tags()

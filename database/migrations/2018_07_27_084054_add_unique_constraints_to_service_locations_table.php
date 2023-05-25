@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddUniqueConstraintsToServiceLocationsTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -25,4 +24,4 @@ class AddUniqueConstraintsToServiceLocationsTable extends Migration
             $table->dropUnique(['service_id', 'location_id']);
         });
     }
-}
+};

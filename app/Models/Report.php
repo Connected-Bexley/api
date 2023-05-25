@@ -10,11 +10,13 @@ use Closure;
 use Exception;
 use Generator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
 
 class Report extends Model
 {
+    use HasFactory;
     use ReportMutators;
     use ReportRelationships;
     use ReportScopes;
@@ -272,7 +274,7 @@ class Report extends Model
                 (new CarbonImmutable($row->created_at))->format(CarbonImmutable::ISO8601),
                 $row->status === Referral::STATUS_COMPLETED ? (new CarbonImmutable($row->last_update))->format(CarbonImmutable::ISO8601) : '',
                 $row->referee_name === null ? 'Self' : 'Champion',
-                $row->organisation?? $row->taxonomy_name,
+                $row->organisation ?? $row->taxonomy_name,
                 $row->consented_at ? (new CarbonImmutable($row->consented_at))->format(CarbonImmutable::ISO8601) : null,
             ];
         })->all();
@@ -398,9 +400,8 @@ class Report extends Model
 
             if ($row->distance) {
                 $distance = json_decode($row->distance);
-                $lat = $distance->{'service_locations.location'}->lat;
-                $lon = $distance->{'service_locations.location'}->lon;
-                $coordinate = (!$lat !== null && $lon !== null) ? implode(',', [$lat, $lon]) : null;
+                $location = $distance->{'service_locations.location'}?? $distance->{'event_location.location'};
+                $coordinate = empty($location) ? null : implode(',', [$location->lat, $location->lon]);
             }
 
             return [

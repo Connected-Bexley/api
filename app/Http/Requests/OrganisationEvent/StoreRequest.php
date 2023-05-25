@@ -187,7 +187,7 @@ class StoreRequest extends FormRequest
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function messages()
     {

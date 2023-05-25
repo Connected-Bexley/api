@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddOauthClientIdColumnToAuditsTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -27,4 +26,4 @@ class AddOauthClientIdColumnToAuditsTable extends Migration
             $table->dropColumn('oauth_client_id');
         });
     }
-}
+};

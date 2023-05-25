@@ -73,7 +73,6 @@ class CreateUserCommand extends Command
 
     /**
      * @param string $password
-     *
      * @return \App\Models\User
      */
     protected function createUser(string $password): User

@@ -20,6 +20,8 @@ use App\Models\UpdateRequest;
 use App\Models\ServiceLocation;
 use App\Search\SearchCriteriaQuery;
 use Illuminate\Support\Facades\Date;
+use App\Search\ElasticSearch\PageQueryBuilder;
+use App\Search\ElasticSearch\EventQueryBuilder;
 use App\Search\ElasticSearch\ServiceQueryBuilder;
 use App\Search\ElasticSearch\ElasticsearchQueryBuilder;
 
@@ -32,7 +34,7 @@ class ReportTest extends TestCase
     public function test_users_export_works_with_super_admin()
     {
         // Create a single user.
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         // Generate the report.
         $report = Report::generate(ReportType::usersExport());
@@ -69,10 +71,10 @@ class ReportTest extends TestCase
     public function test_users_export_works_with_organisation_admin()
     {
         // Create an organisation.
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
 
         // Create a single user.
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         // Generate the report.
         $report = Report::generate(ReportType::usersExport());
@@ -109,10 +111,10 @@ class ReportTest extends TestCase
     public function test_users_export_works_with_service_admin()
     {
         // Create a service.
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
 
         // Create a single user.
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         // Generate the report.
         $report = Report::generate(ReportType::usersExport());
@@ -149,19 +151,19 @@ class ReportTest extends TestCase
     public function test_users_export_works_with_organisation_and_service_admin()
     {
         // Create an organisation.
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
 
         // Create an organisation admin user.
-        $orgAdmin = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $orgAdmin = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         // Create a service.
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
 
         // Create a service admin user.
-        $serviceAdmin = factory(User::class)->create()->makeServiceAdmin($service);
+        $serviceAdmin = User::factory()->create()->makeServiceAdmin($service);
 
         // Create an organisation and service admin
-        $orgServiceAdmin = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $orgServiceAdmin = User::factory()->create()->makeOrganisationAdmin($organisation);
         $orgServiceAdmin->makeServiceAdmin($service);
 
         // Generate the report.
@@ -223,7 +225,7 @@ class ReportTest extends TestCase
     public function test_services_export_works()
     {
         // Create a single service.
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
 
         // Generate the report.
         $report = Report::generate(ReportType::servicesExport());
@@ -278,11 +280,11 @@ class ReportTest extends TestCase
     public function test_organisations_export_works()
     {
         // Create a single organisation.
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
 
         // Create an admin and non-admin user.
-        factory(User::class)->create()->makeSuperAdmin();
-        factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        User::factory()->create()->makeSuperAdmin();
+        User::factory()->create()->makeOrganisationAdmin($organisation);
 
         $headings = [
             'Organisation Reference ID',
@@ -318,8 +320,8 @@ class ReportTest extends TestCase
         ], $csv[1]);
 
         // Create a service
-        $service = factory(Service::class)->create([
-            'organisation_id' => $organisation->id
+        $service = Service::factory()->create([
+            'organisation_id' => $organisation->id,
         ]);
 
         // Generate the report.
@@ -353,7 +355,7 @@ class ReportTest extends TestCase
     public function test_locations_export_works()
     {
         // Create a single location.
-        $location = factory(Location::class)->create();
+        $location = Location::factory()->create();
 
         $headings = [
             'Address Line 1',
@@ -391,11 +393,11 @@ class ReportTest extends TestCase
         ], $csv[1]);
 
         // Create a single service.
-        $service = factory(Service::class)->create();
+        $service = Service::factory()->create();
 
-        factory(ServiceLocation::class)->create([
+        ServiceLocation::factory()->create([
             'service_id' => $service->id,
-            'location_id' => $location->id
+            'location_id' => $location->id,
         ]);
 
         // Generate the report.
@@ -430,7 +432,7 @@ class ReportTest extends TestCase
     public function test_referrals_export_works()
     {
         // Create a single referral.
-        $referral = factory(Referral::class)->create(['referral_consented_at' => Date::now()]);
+        $referral = Referral::factory()->create(['referral_consented_at' => Date::now()]);
 
         // Generate the report.
         $report = Report::generate(ReportType::referralsExport());
@@ -470,10 +472,10 @@ class ReportTest extends TestCase
 
     public function test_referrals_export_works_when_completed()
     {
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         // Create a single referral.
-        $referral = factory(Referral::class)->create(['referral_consented_at' => Date::now()]);
+        $referral = Referral::factory()->create(['referral_consented_at' => Date::now()]);
 
         // Update the referral.
         Date::setTestNow(Date::now()->addHour());
@@ -518,12 +520,12 @@ class ReportTest extends TestCase
     public function test_referrals_export_works_with_date_range()
     {
         // Create an in range referral.
-        $referralInRange = factory(Referral::class)->create([
+        $referralInRange = Referral::factory()->create([
             'referral_consented_at' => Date::now(),
         ]);
 
         // Create an out of range referral.
-        factory(Referral::class)->create([
+        Referral::factory()->create([
             'referral_consented_at' => Date::now(),
             'created_at' => Date::today()->subMonths(2),
         ]);
@@ -571,12 +573,12 @@ class ReportTest extends TestCase
     public function test_referrals_export_works_with_organistion_name()
     {
         // Create a single referral.
-        $referral = factory(Referral::class)->create([
+        $referral = Referral::factory()->create([
             'referral_consented_at' => Date::now(),
-            'referee_name' => $this->faker->name,
-            'referee_email' => $this->faker->email,
+            'referee_name' => $this->faker->name(),
+            'referee_email' => $this->faker->email(),
             'referee_phone' => '07700000000',
-            'organisation' => $this->faker->company,
+            'organisation' => $this->faker->company(),
         ]);
 
         // Generate the report.
@@ -622,7 +624,7 @@ class ReportTest extends TestCase
     public function test_feedback_export_works()
     {
         // Create a single feedback.
-        $feedback = factory(PageFeedback::class)->create();
+        $feedback = PageFeedback::factory()->create();
 
         // Generate the report.
         $report = Report::generate(ReportType::feedbackExport());
@@ -651,8 +653,8 @@ class ReportTest extends TestCase
     public function test_feedback_export_works_with_date_range()
     {
         // Create a single feedback.
-        $feedbackWithinRange = factory(PageFeedback::class)->create();
-        factory(PageFeedback::class)->create(['created_at' => Date::today()->subMonths(2)]);
+        $feedbackWithinRange = PageFeedback::factory()->create();
+        PageFeedback::factory()->create(['created_at' => Date::today()->subMonths(2)]);
 
         // Generate the report.
         $report = Report::generate(
@@ -689,7 +691,7 @@ class ReportTest extends TestCase
     public function test_audit_logs_export_works()
     {
         // Create a single audit log.
-        $audit = factory(Audit::class)->create();
+        $audit = Audit::factory()->create();
 
         // Generate the report.
         $report = Report::generate(ReportType::auditLogsExport());
@@ -724,8 +726,8 @@ class ReportTest extends TestCase
     public function test_audit_logs_export_work_with_date_range()
     {
         // Create a single audit log.
-        $auditWithinRange = factory(Audit::class)->create();
-        factory(Audit::class)->create(['created_at' => Date::today()->subMonths(2)]);
+        $auditWithinRange = Audit::factory()->create();
+        Audit::factory()->create(['created_at' => Date::today()->subMonths(2)]);
 
         // Generate the report.
         $report = Report::generate(
@@ -775,7 +777,7 @@ class ReportTest extends TestCase
 
         // Create a single search history.
         $searchHistory = SearchHistory::create([
-            'query' => $esQuery['query']['function_score'],
+            'query' => $esQuery->buildSearchRequest()->toArray(),
             'count' => 1,
         ]);
 
@@ -815,12 +817,9 @@ class ReportTest extends TestCase
         $queryBuilder = new ServiceQueryBuilder();
         $esQuery = $queryBuilder->build($criteria);
 
-        $query = $esQuery['query']['function_score'];
-        $query['sort'] = $esQuery['sort'];
-
         // Create a single search history.
         $searchHistory = SearchHistory::create([
-            'query' => $query,
+            'query' => $esQuery->buildSearchRequest()->toArray(),
             'count' => 1,
         ]);
 
@@ -860,11 +859,11 @@ class ReportTest extends TestCase
 
         // Create a single search history.
         $searchHistoryWithinRange = SearchHistory::create([
-            'query' => $esQuery['query']['function_score'],
+            'query' => $esQuery->buildSearchRequest()->toArray(),
             'count' => 1,
         ]);
         SearchHistory::create([
-            'query' => $esQuery['query']['function_score'],
+            'query' => $esQuery->buildSearchRequest()->toArray(),
             'count' => 1,
             'created_at' => Date::today()->subMonths(2),
         ]);
@@ -909,7 +908,7 @@ class ReportTest extends TestCase
 
         // Create a single search history.
         SearchHistory::create([
-            'query' => $esQuery['query']['function_score'],
+            'query' => $esQuery->buildSearchRequest()->toArray(),
             'count' => 1,
         ]);
 
@@ -939,11 +938,11 @@ class ReportTest extends TestCase
     {
         // Create an admin user.
         /** @var \App\Models\User $user */
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         // Create an organisation.
         /** @var \App\Models\Organisation $organisation */
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
 
         // Create a single update request.
         /** @var \App\Models\UpdateRequest $updateRequest */
@@ -956,7 +955,7 @@ class ReportTest extends TestCase
 
         // Create an actioning user.
         /** @var \App\Models\User $user */
-        $actioningUser = factory(User::class)->create()->makeSuperAdmin();
+        $actioningUser = User::factory()->create()->makeSuperAdmin();
 
         // Apply the update request.
         $updateRequest->apply($actioningUser);

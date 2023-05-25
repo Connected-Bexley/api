@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class DropServiceCriteriaTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -25,7 +24,7 @@ class DropServiceCriteriaTable extends Migration
     {
         Schema::create('service_criteria', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('service_id', 'services');
+            $table->foreignUuidKeyColumn('service_id', 'services');
             $table->string('age_group')->nullable();
             $table->string('disability')->nullable();
             $table->string('employment')->nullable();
@@ -37,4 +36,4 @@ class DropServiceCriteriaTable extends Migration
             $table->timestamps();
         });
     }
-}
+};

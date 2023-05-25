@@ -7,8 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
-class UpdatePagesAddSlugColumn extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -47,4 +46,4 @@ class UpdatePagesAddSlugColumn extends Migration
             $table->dropColumn('slug');
         });
     }
-}
+};

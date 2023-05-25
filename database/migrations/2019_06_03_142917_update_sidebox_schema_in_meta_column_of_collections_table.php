@@ -3,8 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-class UpdateSideboxSchemaInMetaColumnOfCollectionsTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -59,4 +58,4 @@ EOT
                 'meta' => DB::raw('JSON_REMOVE(`meta`, "$.sideboxes")'),
             ]);
     }
-}
+};

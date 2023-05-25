@@ -33,8 +33,8 @@ class PageFeedbacksTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceWorker($service);
 
         Passport::actingAs($user);
@@ -50,8 +50,8 @@ class PageFeedbacksTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
 
         Passport::actingAs($user);
@@ -67,8 +67,8 @@ class PageFeedbacksTest extends TestCase
          * @var \App\Models\Organisation $organisation
          * @var \App\Models\User $user
          */
-        $service = factory(Organisation::class)->create();
-        $user = factory(User::class)->create();
+        $service = Organisation::factory()->create();
+        $user = User::factory()->create();
         $user->makeOrganisationAdmin($service);
 
         Passport::actingAs($user);
@@ -83,7 +83,7 @@ class PageFeedbacksTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $pageFeedback = PageFeedback::create([
             'url' => url('/test'),
@@ -120,7 +120,7 @@ class PageFeedbacksTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
 
         Passport::actingAs($user);
@@ -195,8 +195,8 @@ class PageFeedbacksTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceWorker($service);
         $pageFeedback = PageFeedback::create([
             'url' => url('/test'),
@@ -218,8 +218,8 @@ class PageFeedbacksTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
         $pageFeedback = PageFeedback::create([
             'url' => url('/test'),
@@ -241,8 +241,8 @@ class PageFeedbacksTest extends TestCase
          * @var \App\Models\Organisation $organisation
          * @var \App\Models\User $user
          */
-        $service = factory(Organisation::class)->create();
-        $user = factory(User::class)->create();
+        $service = Organisation::factory()->create();
+        $user = User::factory()->create();
         $user->makeOrganisationAdmin($service);
         $pageFeedback = PageFeedback::create([
             'url' => url('/test'),
@@ -263,7 +263,7 @@ class PageFeedbacksTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $pageFeedback = PageFeedback::create([
             'url' => url('/test'),
@@ -300,7 +300,7 @@ class PageFeedbacksTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $pageFeedback = PageFeedback::create([
             'url' => url('/test'),

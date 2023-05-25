@@ -13,6 +13,7 @@ class SpreadsheetParserTest extends TestCase
     private $spreadsheet;
 
     private $xlsFilepath = 'test-spreadsheet.xls';
+
     private $xlsxFilepath = 'test-spreadsheet.xlsx';
 
     protected function setUp(): void
@@ -21,7 +22,7 @@ class SpreadsheetParserTest extends TestCase
 
         Storage::fake('local');
 
-        $organisations = factory(Organisation::class, 20)->create();
+        $organisations = Organisation::factory()->count(20)->create();
 
         $headers = [
             'name',
@@ -43,14 +44,14 @@ class SpreadsheetParserTest extends TestCase
         $columns = [];
 
         foreach ($headers as $key => $value) {
-            $columns[] = $key < 26 ? chr($key + 65) : 'A' . chr(($key % 26) + 65);
+            $columns[] = $key < 26 ? chr($key + 65) : 'A'.chr(($key % 26) + 65);
         }
 
         /**
          * Create the headers in row 1
          */
         foreach ($headers as $i => $header) {
-            $spreadsheet->getActiveSheet()->setCellValue($columns[$i] . '1', $header);
+            $spreadsheet->getActiveSheet()->setCellValue($columns[$i].'1', $header);
         }
 
         /**
@@ -60,17 +61,17 @@ class SpreadsheetParserTest extends TestCase
         foreach ($rows as $row) {
             $rowCount++;
             foreach ($headers as $i => $header) {
-                $spreadsheet->getActiveSheet()->setCellValue($columns[$i] . $rowCount, $row[$header] ?? null);
+                $spreadsheet->getActiveSheet()->setCellValue($columns[$i].$rowCount, $row[$header] ?? null);
             }
         }
 
         return $spreadsheet;
     }
 
-    public static function writeSpreadsheetsToDisk(Spreadsheet $spreadsheet, String $xlsxFilepath, String $xlsFilepath)
+    public static function writeSpreadsheetsToDisk(Spreadsheet $spreadsheet, string $xlsxFilepath, string $xlsFilepath)
     {
-        $xlsxWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, "Xlsx");
-        $xlsWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, "Xls");
+        $xlsxWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $xlsWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xls');
 
         try {
             $xlsxWriter->save(Storage::disk('local')->path($xlsxFilepath));

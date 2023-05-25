@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,18 +13,22 @@ class RedirectIfAuthenticated
      * Handle an incoming request.
      *
      * @param \Illuminate\Http\Request $request
-     * @param \Closure $next
-     * @param string|null $guard
-     * @return mixed
+     * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
+     * @param string|null ...$guards
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
-    public function handle($request, Closure $next, $guard = null)
+    public function handle(Request $request, Closure $next, ...$guards)
     {
-        if (Auth::guard($guard)->check()) {
-            if ($request->expectsJson()) {
-                abort(Response::HTTP_FORBIDDEN, 'Only guests can access this endpoint.');
-            }
+        $guards = empty($guards) ? [null] : $guards;
 
-            return redirect('/');
+        foreach ($guards as $guard) {
+            if (Auth::guard($guard)->check()) {
+                if ($request->expectsJson()) {
+                    abort(Response::HTTP_FORBIDDEN, 'Only guests can access this endpoint.');
+                }
+
+                return redirect('/');
+            }
         }
 
         return $next($request);

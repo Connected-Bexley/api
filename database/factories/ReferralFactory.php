@@ -1,14 +1,25 @@
 <?php
 
-use App\Models\Referral;
-use Faker\Generator as Faker;
+namespace Database\Factories;
 
-$factory->define(Referral::class, function (Faker $faker) {
-    return [
-        'service_id' => function () {
-            return factory(\App\Models\Service::class)->create()->id;
-        },
-        'status' => Referral::STATUS_NEW,
-        'name' => $faker->name,
-    ];
-});
+use App\Models\Referral;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class ReferralFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition()
+    {
+        return [
+            'service_id' => function () {
+                return \App\Models\Service::factory()->create()->id;
+            },
+            'status' => Referral::STATUS_NEW,
+            'name' => $this->faker->name(),
+        ];
+    }
+}

@@ -29,7 +29,7 @@ class RegularOpeningHourResource extends JsonResource
             ),
             'day_of_month' => $this->when($this->frequency === RegularOpeningHour::FREQUENCY_MONTHLY, $this->day_of_month),
             'occurrence_of_month' => $this->when($this->frequency === RegularOpeningHour::FREQUENCY_NTH_OCCURRENCE_OF_MONTH, $this->occurrence_of_month),
-            'starts_at' => $this->when($this->frequency === RegularOpeningHour::FREQUENCY_FORTNIGHTLY, optional($this->starts_at)->toDateString()),
+            'starts_at' => $this->when($this->frequency === RegularOpeningHour::FREQUENCY_FORTNIGHTLY, $this->starts_at?->toDateString()),
             'opens_at' => $this->opens_at->toString(),
             'closes_at' => $this->closes_at->toString(),
         ];

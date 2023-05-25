@@ -158,7 +158,7 @@ class CollectionCategoriesTest extends TestCase
         $this->json('GET', '/core/v1/collections/categories');
 
         Event::assertDispatched(EndpointHit::class, function (EndpointHit $event) {
-            return ($event->getAction() === Audit::ACTION_READ);
+            return $event->getAction() === Audit::ACTION_READ;
         });
     }
 
@@ -179,8 +179,8 @@ class CollectionCategoriesTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceWorker($service);
 
         Passport::actingAs($user);
@@ -196,8 +196,8 @@ class CollectionCategoriesTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
 
         Passport::actingAs($user);
@@ -213,8 +213,8 @@ class CollectionCategoriesTest extends TestCase
          * @var \App\Models\Organisation $organisation
          * @var \App\Models\User $user
          */
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create();
         $user->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
@@ -229,7 +229,7 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
 
         Passport::actingAs($user);
@@ -244,16 +244,16 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -331,16 +331,16 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -384,16 +384,16 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -437,7 +437,7 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
@@ -502,16 +502,16 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
-        $image = factory(File::class)->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -541,16 +541,16 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -591,19 +591,19 @@ class CollectionCategoriesTest extends TestCase
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_CATEGORY,
@@ -667,19 +667,19 @@ class CollectionCategoriesTest extends TestCase
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_CATEGORY,
@@ -743,19 +743,19 @@ class CollectionCategoriesTest extends TestCase
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_CATEGORY,
@@ -819,19 +819,19 @@ class CollectionCategoriesTest extends TestCase
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
 
         Passport::actingAs($user);
@@ -855,19 +855,19 @@ class CollectionCategoriesTest extends TestCase
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         Collection::create([
             'type' => Collection::TYPE_CATEGORY,
@@ -914,19 +914,19 @@ class CollectionCategoriesTest extends TestCase
     {
         $this->fakeEvents();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
@@ -1071,12 +1071,12 @@ class CollectionCategoriesTest extends TestCase
     {
         $collectionCategory = Collection::categories()->inRandomOrder()->firstOrFail();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1096,12 +1096,12 @@ class CollectionCategoriesTest extends TestCase
     {
         $collectionCategory = Collection::categories()->inRandomOrder()->firstOrFail();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.png',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.png',
             'mime_type' => 'image/png',
         ]);
 
-        $base64Image = 'data:image/png;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.png'));
+        $base64Image = 'data:image/png;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.png'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1120,12 +1120,12 @@ class CollectionCategoriesTest extends TestCase
     {
         $collectionCategory = Collection::categories()->inRandomOrder()->firstOrFail();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.png',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.png',
             'mime_type' => 'image/jpeg',
         ]);
 
-        $base64Image = 'data:image/png;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.jpg'));
+        $base64Image = 'data:image/png;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.jpg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1146,12 +1146,12 @@ class CollectionCategoriesTest extends TestCase
 
         $collectionCategory = Collection::categories()->inRandomOrder()->firstOrFail();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1202,8 +1202,8 @@ class CollectionCategoriesTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceWorker($service);
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
 
@@ -1220,8 +1220,8 @@ class CollectionCategoriesTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
 
@@ -1238,8 +1238,8 @@ class CollectionCategoriesTest extends TestCase
          * @var \App\Models\Organisation $organisation
          * @var \App\Models\User $user
          */
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create();
         $user->makeOrganisationAdmin($organisation);
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
 
@@ -1255,17 +1255,17 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
         $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1335,18 +1335,18 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
         $category->enable()->save();
         $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1372,18 +1372,18 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
         $category->enable()->save();
         $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1422,18 +1422,18 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
         $category->enable()->save();
         $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
-        $image = factory(File::class)->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1459,17 +1459,17 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
         $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1509,7 +1509,7 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_CATEGORY,
@@ -1571,18 +1571,18 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
         $category->enable()->save();
         $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1645,18 +1645,18 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
         $category->addToHomepage()->save();
         $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1721,19 +1721,19 @@ class CollectionCategoriesTest extends TestCase
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_CATEGORY,
@@ -1796,19 +1796,19 @@ class CollectionCategoriesTest extends TestCase
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_CATEGORY,
@@ -1871,19 +1871,19 @@ class CollectionCategoriesTest extends TestCase
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_CATEGORY,
@@ -1946,19 +1946,19 @@ class CollectionCategoriesTest extends TestCase
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $category = Collection::create([
             'type' => Collection::TYPE_CATEGORY,
@@ -1994,19 +1994,19 @@ class CollectionCategoriesTest extends TestCase
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $category = Collection::create([
             'type' => Collection::TYPE_CATEGORY,
@@ -2044,17 +2044,17 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
         $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
-        $image = factory(File::class)->states('pending-assignment')->create([
-            'filename' => Str::random() . '.svg',
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random().'.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -2097,8 +2097,8 @@ class CollectionCategoriesTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceWorker($service);
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
 
@@ -2115,8 +2115,8 @@ class CollectionCategoriesTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
 
@@ -2133,8 +2133,8 @@ class CollectionCategoriesTest extends TestCase
          * @var \App\Models\Organisation $organisation
          * @var \App\Models\User $user
          */
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create();
         $user->makeOrganisationAdmin($organisation);
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
 
@@ -2150,7 +2150,7 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
 
@@ -2166,7 +2166,7 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
 
@@ -2188,11 +2188,11 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
         $meta = $category->meta;
-        $meta['image_file_id'] = factory(File::class)->create()->id;
+        $meta['image_file_id'] = File::factory()->create()->id;
         $category->meta = $meta;
         $category->save();
 
@@ -2222,7 +2222,7 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_CATEGORY,
@@ -2279,7 +2279,7 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_CATEGORY,
@@ -2336,7 +2336,7 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_CATEGORY,
@@ -2392,7 +2392,7 @@ class CollectionCategoriesTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
 

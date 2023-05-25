@@ -9,6 +9,7 @@ use Tests\TestCase;
 class ResizerTest extends TestCase
 {
     const WIDTH = 0;
+
     const HEIGHT = 1;
 
     public function test_resize_works()

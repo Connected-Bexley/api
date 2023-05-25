@@ -1,16 +1,24 @@
 <?php
 
-/** @var \Illuminate\Database\Eloquent\Factory $factory */
+namespace Database\Factories;
 
-use App\Models\Tag;
-use Faker\Generator as Faker;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
-$factory->define(Tag::class, function (Faker $faker) {
-    $label = $faker->unique()->words(2, true);
+class TagFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition()
+    {
+        $label = $this->faker->unique()->words(2, true);
 
-    return [
-        'slug' => Str::slug($label),
-        'label' => $label,
-    ];
-});
+        return [
+            'slug' => Str::slug($label),
+            'label' => $label,
+        ];
+    }
+}

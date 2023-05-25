@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateNotificationsTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,7 +12,9 @@ class CreateNotificationsTable extends Migration
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->nullableForeignUuid('user_id', 'users');
+            $table->foreignUuidKeyColumn('user_id', 'users', 'id', true);
+            // $table->uuid('user_id')->nullable();
+            // $table->foreign('user_id')->references('id')->on('users');
             $table->enum('channel', ['email', 'sms']);
             $table->text('recipient');
             $table->text('message');
@@ -28,4 +29,4 @@ class CreateNotificationsTable extends Migration
     {
         Schema::dropIfExists('notifications');
     }
-}
+};

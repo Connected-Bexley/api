@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateStatusUpdatesTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,8 +12,8 @@ class CreateStatusUpdatesTable extends Migration
     {
         Schema::create('status_updates', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('user_id', 'users');
-            $table->foreignUuid('referral_id', 'referrals');
+            $table->foreignUuidKeyColumn('user_id', 'users');
+            $table->foreignUuidKeyColumn('referral_id', 'referrals');
             $table->enum('from', ['new', 'in_progress', 'completed', 'incompleted']);
             $table->enum('to', ['new', 'in_progress', 'completed', 'incompleted']);
             $table->text('comments')->nullable();
@@ -29,4 +28,4 @@ class CreateStatusUpdatesTable extends Migration
     {
         Schema::dropIfExists('status_updates');
     }
-}
+};

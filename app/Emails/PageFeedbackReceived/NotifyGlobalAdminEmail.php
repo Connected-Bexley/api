@@ -7,7 +7,7 @@ use App\Emails\Email;
 class NotifyGlobalAdminEmail extends Email
 {
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     protected function getTemplateId(): string
     {
@@ -15,11 +15,11 @@ class NotifyGlobalAdminEmail extends Email
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getContent(): string
     {
-        if ($this->values['CONTACT_DETAILS_PROVIDED']?? null) {
+        if ($this->values['CONTACT_DETAILS_PROVIDED'] ?? null) {
             return 'emails.page_feedback.received_content.notify_global_admin.content';
         }
 
@@ -27,7 +27,7 @@ class NotifyGlobalAdminEmail extends Email
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getSubject(): string
     {

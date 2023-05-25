@@ -10,12 +10,12 @@ use App\Models\Taxonomy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
-use Illuminate\Foundation\Testing\TestResponse;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Testing\TestResponse;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -62,8 +62,9 @@ abstract class TestCase extends BaseTestCase
     /**
      * Clean up the testing environment before the next test.
      *
-     * @throws \Throwable
      * @return void
+     *
+     * @throws \Throwable
      */
     protected function tearDown(): void
     {
@@ -130,7 +131,7 @@ abstract class TestCase extends BaseTestCase
      */
     protected function clearLog()
     {
-        if (!static::$testLogCleared) {
+        if (! static::$testLogCleared) {
             file_put_contents(config('logging.channels.testing.path'), '');
             static::$testLogCleared = true;
         }
@@ -141,10 +142,11 @@ abstract class TestCase extends BaseTestCase
      */
     protected function setUpElasticsearch()
     {
-        if (!$this instanceof UsesElasticsearch) {
+        if (! $this instanceof UsesElasticsearch) {
             Service::disableSearchSyncing();
             OrganisationEvent::disableSearchSyncing();
             Page::disableSearchSyncing();
+
             return;
         } else {
             Service::enableSearchSyncing();
@@ -152,7 +154,7 @@ abstract class TestCase extends BaseTestCase
             Page::enableSearchSyncing();
         }
 
-        if (!static::$elasticsearchInitialised) {
+        if (! static::$elasticsearchInitialised) {
             $this->artisan('ck:reindex-elasticsearch');
             static::$elasticsearchInitialised = true;
         }
@@ -163,10 +165,11 @@ abstract class TestCase extends BaseTestCase
      */
     protected function tearDownElasticsearch()
     {
-        if (!$this instanceof UsesElasticsearch) {
+        if (! $this instanceof UsesElasticsearch) {
             Service::disableSearchSyncing();
             OrganisationEvent::disableSearchSyncing();
             Page::disableSearchSyncing();
+
             return;
         } else {
             Service::enableSearchSyncing();
@@ -184,7 +187,7 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
-     * @param \Illuminate\Foundation\Testing\TestResponse $response
+     * @param  \Illuminate\Testing\TestResponse  $response
      */
     protected function dumpResponse(TestResponse $response)
     {
@@ -192,8 +195,8 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
-     * @param \Illuminate\Foundation\Testing\TestResponse $response
-     * @param string|null $key
+     * @param  \Illuminate\Testing\TestResponse  $response
+     * @param  string|null  $key
      * @return array|string
      */
     protected function getResponseContent(TestResponse $response, string $key = null)

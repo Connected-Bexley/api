@@ -45,10 +45,10 @@ class IndexPageOperation extends Operation
                 FilterParameter::create(null, 'page_type')
                     ->description('Filter by page type')
                     ->schema(Schema::string('page_type')
-                    ->enum(
-                        Page::PAGE_TYPE_INFORMATION,
-                        Page::PAGE_TYPE_LANDING
-                    )),
+                        ->enum(
+                            Page::PAGE_TYPE_INFORMATION,
+                            Page::PAGE_TYPE_LANDING
+                        )),
                 SortParameter::create(null, ['title'], 'title'),
                 IncludeParameter::create(null, ['parent', 'children', 'landingPageAncestors'])
             )

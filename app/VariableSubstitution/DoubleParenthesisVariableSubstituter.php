@@ -9,7 +9,7 @@ use App\Contracts\VariableSubstituter;
 class DoubleParenthesisVariableSubstituter implements VariableSubstituter
 {
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function substitute(string $content, array $variables): ?string
     {

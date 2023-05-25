@@ -157,7 +157,7 @@ class CollectionPersonasTest extends TestCase
         $this->json('GET', '/core/v1/collections/personas');
 
         Event::assertDispatched(EndpointHit::class, function (EndpointHit $event) {
-            return ($event->getAction() === Audit::ACTION_READ);
+            return $event->getAction() === Audit::ACTION_READ;
         });
     }
 
@@ -178,8 +178,8 @@ class CollectionPersonasTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceWorker($service);
 
         Passport::actingAs($user);
@@ -195,8 +195,8 @@ class CollectionPersonasTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
 
         Passport::actingAs($user);
@@ -212,8 +212,8 @@ class CollectionPersonasTest extends TestCase
          * @var \App\Models\Organisation $organisation
          * @var \App\Models\User $user
          */
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create();
         $user->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
@@ -228,7 +228,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
 
         Passport::actingAs($user);
@@ -243,7 +243,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
@@ -307,7 +307,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
@@ -352,7 +352,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
@@ -400,7 +400,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_PERSONA,
@@ -470,7 +470,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_PERSONA,
@@ -540,7 +540,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_PERSONA,
@@ -610,7 +610,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
 
         Passport::actingAs($user);
@@ -637,7 +637,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         Collection::create([
             'type' => Collection::TYPE_PERSONA,
@@ -689,7 +689,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
@@ -848,8 +848,8 @@ class CollectionPersonasTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceWorker($service);
         $persona = Collection::personas()->inRandomOrder()->firstOrFail();
 
@@ -866,8 +866,8 @@ class CollectionPersonasTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
         $persona = Collection::personas()->inRandomOrder()->firstOrFail();
 
@@ -884,8 +884,8 @@ class CollectionPersonasTest extends TestCase
          * @var \App\Models\Organisation $organisation
          * @var \App\Models\User $user
          */
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create();
         $user->makeOrganisationAdmin($organisation);
         $persona = Collection::personas()->inRandomOrder()->firstOrFail();
 
@@ -901,7 +901,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $persona = Collection::personas()->inRandomOrder()->firstOrFail();
         $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
@@ -966,7 +966,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $persona = Collection::personas()->inRandomOrder()->firstOrFail();
         $persona->enable()->save();
@@ -993,7 +993,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $persona = Collection::personas()->inRandomOrder()->firstOrFail();
         $persona->enable()->save();
@@ -1059,7 +1059,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $persona = Collection::personas()->inRandomOrder()->firstOrFail();
         $persona->addToHomepage()->save();
@@ -1128,7 +1128,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_PERSONA,
@@ -1200,7 +1200,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_PERSONA,
@@ -1272,7 +1272,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_PERSONA,
@@ -1344,7 +1344,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $persona = Collection::create([
             'type' => Collection::TYPE_PERSONA,
@@ -1385,7 +1385,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $persona = Collection::create([
             'type' => Collection::TYPE_PERSONA,
@@ -1425,7 +1425,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $persona = Collection::personas()->inRandomOrder()->firstOrFail();
         $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
@@ -1469,8 +1469,8 @@ class CollectionPersonasTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceWorker($service);
         $persona = Collection::personas()->inRandomOrder()->firstOrFail();
 
@@ -1487,8 +1487,8 @@ class CollectionPersonasTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
         $persona = Collection::personas()->inRandomOrder()->firstOrFail();
 
@@ -1505,8 +1505,8 @@ class CollectionPersonasTest extends TestCase
          * @var \App\Models\Organisation $organisation
          * @var \App\Models\User $user
          */
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create();
         $user->makeOrganisationAdmin($organisation);
         $persona = Collection::personas()->inRandomOrder()->firstOrFail();
 
@@ -1522,7 +1522,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $persona = Collection::personas()->inRandomOrder()->firstOrFail();
 
@@ -1538,7 +1538,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $persona = Collection::personas()->inRandomOrder()->firstOrFail();
 
@@ -1559,7 +1559,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_PERSONA,
@@ -1619,7 +1619,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_PERSONA,
@@ -1679,7 +1679,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_PERSONA,
@@ -1738,7 +1738,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $persona = Collection::personas()->inRandomOrder()->firstOrFail();
 
@@ -1790,7 +1790,7 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
         $image = Storage::disk('local')->get('/test-data/image.png');
@@ -1800,7 +1800,7 @@ class CollectionPersonasTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
+            'file' => 'data:image/png;base64,'.base64_encode($image),
         ]);
 
         $response = $this->json('POST', '/core/v1/collections/personas', [
@@ -1830,11 +1830,11 @@ class CollectionPersonasTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         $persona = Collection::personas()->inRandomOrder()->firstOrFail();
         $meta = $persona->meta;
-        $meta['image_file_id'] = factory(File::class)->create()->id;
+        $meta['image_file_id'] = File::factory()->create()->id;
         $persona->meta = $meta;
         $persona->save();
 

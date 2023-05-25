@@ -117,6 +117,7 @@ trait StoresSpreadsheets
      * Get the mime type of a binary file string.
      *
      * @var string
+     *
      * @return string
      */
     protected function getFileStringMimeType(string $file_str)

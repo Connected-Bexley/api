@@ -12,11 +12,11 @@ class ServiceRefreshTokensTest extends TestCase
 {
     public function test_auto_delete_works()
     {
-        $newServiceRefreshToken = factory(ServiceRefreshToken::class)->create([
+        $newServiceRefreshToken = ServiceRefreshToken::factory()->create([
             'created_at' => Date::today(),
         ]);
 
-        $dueForDeletionServiceRefreshToken = factory(ServiceRefreshToken::class)->create([
+        $dueForDeletionServiceRefreshToken = ServiceRefreshToken::factory()->create([
             'created_at' => Date::today()->subMonths(ServiceRefreshToken::AUTO_DELETE_MONTHS),
         ]);
 

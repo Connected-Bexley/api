@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateServicesTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,8 +12,8 @@ class CreateServicesTable extends Migration
     {
         Schema::create('services', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('organisation_id', 'organisations');
-            $table->nullableForeignUuid('logo_file_id', 'files');
+            $table->foreignUuidKeyColumn('organisation_id', 'organisations');
+            $table->nullableForeignUuidKeyColumn('logo_file_id', 'files');
             $table->string('name');
             $table->enum('status', ['active', 'inactive']);
             $table->string('intro');
@@ -36,7 +35,7 @@ class CreateServicesTable extends Migration
             $table->string('referral_url')->nullable();
             $table->string('seo_title');
             $table->string('seo_description');
-            $table->nullableForeignUuid('seo_image_file_id', 'files');
+            $table->nullableForeignUuidKeyColumn('seo_image_file_id', 'files');
             $table->timestamps();
         });
     }
@@ -48,4 +47,4 @@ class CreateServicesTable extends Migration
     {
         Schema::dropIfExists('services');
     }
-}
+};

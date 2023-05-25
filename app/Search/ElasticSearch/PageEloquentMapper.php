@@ -6,53 +6,42 @@ namespace App\Search\ElasticSearch;
 
 use App\Contracts\EloquentMapper;
 use App\Http\Resources\PageResource;
-use App\Models\Page;
 use App\Models\SearchHistory;
+use ElasticScoutDriverPlus\Builders\SearchRequestBuilder;
+use ElasticScoutDriverPlus\Decorators\SearchResult;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 
 class PageEloquentMapper implements EloquentMapper
 {
-    public function paginate(array $esQuery): AnonymousResourceCollection
+    public function paginate(SearchRequestBuilder $esQuery, int $page = null, int $perPage = null): AnonymousResourceCollection
     {
-        $response = Page::searchRaw($esQuery);
+        $page = page($page);
+        $perPage = per_page($perPage);
 
-        $this->logMetrics($esQuery, $response);
+        $queryRequest = $esQuery->buildSearchRequest()->toArray();
+        $response = $esQuery->execute();
 
-        // Extract the hits from the array.
-        $hits = $response['hits']['hits'];
-
-        // Get all of the ID's for the pages from the hits.
-        $pageIds = collect($hits)->map->_id->toArray();
-
-        // Implode the service ID's so we can sort by them in database.
-        $pageIdsImploded = implode("','", $pageIds);
-        $pageIdsImploded = "'$pageIdsImploded'";
-
-        // Create the query to get the pages, and keep ordering from Elasticsearch.
-        $pages = Page::query()
-            ->whereIn('id', $pageIds)
-            ->orderByRaw("FIELD(id,$pageIdsImploded)")
-            ->get();
+        $this->logMetrics($queryRequest, $response);
 
         // If paginated, then create a new pagination instance.
         $pages = new LengthAwarePaginator(
-            $pages,
-            $response['hits']['total']['value'],
-            $esQuery['size'],
-            ($esQuery['from'] / $esQuery['size']) + 1,
+            $response->models(),
+            $response->total(),
+            $perPage,
+            $page,
             ['path' => Paginator::resolveCurrentPath()]
         );
 
         return PageResource::collection($pages);
     }
 
-    protected function logMetrics(array $esQuery, array $response): void
+    public function logMetrics(array $queryRequest, SearchResult $response): void
     {
         SearchHistory::create([
-            'query' => $esQuery,
-            'count' => $response['hits']['total']['value'],
+            'query' => $queryRequest,
+            'count' => $response->total(),
         ]);
     }
 }

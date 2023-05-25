@@ -25,7 +25,7 @@ class LocationsTest extends TestCase
 
     public function test_guest_can_list_them()
     {
-        $location = factory(Location::class)->create();
+        $location = Location::factory()->create();
 
         $response = $this->json('GET', '/core/v1/locations');
 
@@ -77,7 +77,7 @@ class LocationsTest extends TestCase
         $this->json('GET', '/core/v1/locations');
 
         Event::assertDispatched(EndpointHit::class, function (EndpointHit $event) {
-            return ($event->getAction() === Audit::ACTION_READ);
+            return $event->getAction() === Audit::ACTION_READ;
         });
     }
 
@@ -98,8 +98,8 @@ class LocationsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceWorker($service);
 
         Passport::actingAs($user);
@@ -115,8 +115,8 @@ class LocationsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
 
         Passport::actingAs($user);
@@ -158,8 +158,8 @@ class LocationsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
 
         Passport::actingAs($user);
@@ -194,8 +194,8 @@ class LocationsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
 
         Passport::actingAs($user);
@@ -227,7 +227,7 @@ class LocationsTest extends TestCase
 
     public function test_guest_can_view_one()
     {
-        $location = factory(Location::class)->create();
+        $location = Location::factory()->create();
 
         $response = $this->json('GET', "/core/v1/locations/{$location->id}");
 
@@ -257,7 +257,7 @@ class LocationsTest extends TestCase
     {
         $this->fakeEvents();
 
-        $location = factory(Location::class)->create();
+        $location = Location::factory()->create();
 
         $this->json('GET', "/core/v1/locations/{$location->id}");
 
@@ -273,7 +273,7 @@ class LocationsTest extends TestCase
 
     public function test_guest_cannot_update_one()
     {
-        $location = factory(Location::class)->create();
+        $location = Location::factory()->create();
 
         $response = $this->json('PUT', "/core/v1/locations/{$location->id}");
 
@@ -286,10 +286,10 @@ class LocationsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceWorker($service);
-        $location = factory(Location::class)->create();
+        $location = Location::factory()->create();
 
         Passport::actingAs($user);
 
@@ -304,10 +304,10 @@ class LocationsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
-        $location = factory(Location::class)->create();
+        $location = Location::factory()->create();
 
         Passport::actingAs($user);
 
@@ -349,10 +349,10 @@ class LocationsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
-        $location = factory(Location::class)->create();
+        $location = Location::factory()->create();
 
         Passport::actingAs($user);
 
@@ -383,10 +383,10 @@ class LocationsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
-        $location = factory(Location::class)->create();
+        $location = Location::factory()->create();
 
         Passport::actingAs($user);
 
@@ -416,10 +416,10 @@ class LocationsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
-        $location = factory(Location::class)->create();
+        $location = Location::factory()->create();
 
         Passport::actingAs($user);
 
@@ -449,7 +449,7 @@ class LocationsTest extends TestCase
 
     public function test_guest_cannot_delete_one()
     {
-        $location = factory(Location::class)->create();
+        $location = Location::factory()->create();
 
         $response = $this->json('DELETE', "/core/v1/locations/{$location->id}");
 
@@ -462,10 +462,10 @@ class LocationsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceWorker($service);
-        $location = factory(Location::class)->create();
+        $location = Location::factory()->create();
 
         Passport::actingAs($user);
 
@@ -480,10 +480,10 @@ class LocationsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
-        $location = factory(Location::class)->create();
+        $location = Location::factory()->create();
 
         Passport::actingAs($user);
 
@@ -498,10 +498,10 @@ class LocationsTest extends TestCase
          * @var \App\Models\Organisation $organisation
          * @var \App\Models\User $user
          */
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create();
         $user->makeOrganisationAdmin($organisation);
-        $location = factory(Location::class)->create();
+        $location = Location::factory()->create();
 
         Passport::actingAs($user);
 
@@ -515,9 +515,9 @@ class LocationsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
-        $location = factory(Location::class)->create();
+        $location = Location::factory()->create();
 
         Passport::actingAs($user);
 
@@ -534,9 +534,9 @@ class LocationsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
-        $location = factory(Location::class)->create();
+        $location = Location::factory()->create();
 
         Passport::actingAs($user);
 
@@ -555,7 +555,7 @@ class LocationsTest extends TestCase
 
     public function test_guest_can_view_image()
     {
-        $location = factory(Location::class)->create();
+        $location = Location::factory()->create();
 
         $response = $this->get("/core/v1/locations/{$location->id}/image.png");
 
@@ -567,7 +567,7 @@ class LocationsTest extends TestCase
     {
         $this->fakeEvents();
 
-        $location = factory(Location::class)->create();
+        $location = Location::factory()->create();
 
         $this->get("/core/v1/locations/{$location->id}/image.png");
 
@@ -584,7 +584,7 @@ class LocationsTest extends TestCase
     public function test_organisation_admin_can_upload_image()
     {
         /** @var \App\Models\User $user */
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         $image = Storage::disk('local')->get('/test-data/image.png');
 
         Passport::actingAs($user);
@@ -592,7 +592,7 @@ class LocationsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
+            'file' => 'data:image/png;base64,'.base64_encode($image),
         ]);
 
         $response = $this->json('POST', '/core/v1/locations', [
@@ -630,10 +630,10 @@ class LocationsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
-        $location = factory(Location::class)->create([
-            'image_file_id' => factory(File::class)->create()->id,
+        $location = Location::factory()->create([
+            'image_file_id' => File::factory()->create()->id,
         ]);
         $payload = [
             'address_line_1' => $location->address_line_1,
@@ -662,10 +662,10 @@ class LocationsTest extends TestCase
 
     public function test_global_admin_can_update_one_with_auto_approval()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
-        $location = factory(Location::class)->create();
+        $location = Location::factory()->create();
 
         Passport::actingAs($user);
 
@@ -703,8 +703,10 @@ class LocationsTest extends TestCase
         Passport::actingAs($user);
 
         $updateRequestCheckResponse = $this->get(
-            route('core.v1.update-requests.show',
-                ['update_request' => $updateRequestId])
+            route(
+                'core.v1.update-requests.show',
+                ['update_request' => $updateRequestId]
+            )
         );
 
         $updateRequestCheckResponse->assertSuccessful();

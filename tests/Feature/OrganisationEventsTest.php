@@ -33,7 +33,7 @@ class OrganisationEventsTest extends TestCase
      */
     public function getAllOrganisationEventsAsGuest200()
     {
-        $organisationEvent = factory(OrganisationEvent::class)->create();
+        $organisationEvent = OrganisationEvent::factory()->create();
 
         $response = $this->json('GET', '/core/v1/organisation-events');
 
@@ -100,8 +100,8 @@ class OrganisationEventsTest extends TestCase
      */
     public function getAllOrganisationEventsFilterByOrganisationAsGuest200()
     {
-        $organisationEvent1 = factory(OrganisationEvent::class)->create();
-        $organisationEvent2 = factory(OrganisationEvent::class)->create();
+        $organisationEvent1 = OrganisationEvent::factory()->create();
+        $organisationEvent2 = OrganisationEvent::factory()->create();
 
         $response = $this->json('GET', "/core/v1/organisation-events?filter[organisation_id]={$organisationEvent1->organisation_id}");
 
@@ -115,10 +115,10 @@ class OrganisationEventsTest extends TestCase
      */
     public function getAllOrganisationEventsFilterByHomepageAsGuest200()
     {
-        $organisationEvent1 = factory(OrganisationEvent::class)->states('homepage')->create();
-        $organisationEvent2 = factory(OrganisationEvent::class)->create();
+        $organisationEvent1 = OrganisationEvent::factory()->homepage()->create();
+        $organisationEvent2 = OrganisationEvent::factory()->create();
 
-        $response = $this->json('GET', "/core/v1/organisation-events?filter[homepage]=1");
+        $response = $this->json('GET', '/core/v1/organisation-events?filter[homepage]=1');
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonFragment(['id' => $organisationEvent1->id]);
@@ -136,26 +136,26 @@ class OrganisationEventsTest extends TestCase
         $endtime = $this->faker->time('H:i:s', '+1 hour');
         $starttime = $this->faker->time('H:i:s', 'now');
 
-        $organisationEvent1 = factory(OrganisationEvent::class)->create([
+        $organisationEvent1 = OrganisationEvent::factory()->create([
             'start_date' => $future,
             'end_date' => $future,
             'start_time' => $starttime,
             'end_time' => $endtime,
         ]);
-        $organisationEvent2 = factory(OrganisationEvent::class)->create([
+        $organisationEvent2 = OrganisationEvent::factory()->create([
             'start_date' => $past,
             'end_date' => $past,
             'start_time' => $starttime,
             'end_time' => $endtime,
         ]);
-        $organisationEvent3 = factory(OrganisationEvent::class)->create([
+        $organisationEvent3 = OrganisationEvent::factory()->create([
             'start_date' => $today,
             'end_date' => $today,
             'start_time' => $starttime,
             'end_time' => $endtime,
         ]);
 
-        $response = $this->json('GET', "/core/v1/organisation-events");
+        $response = $this->json('GET', '/core/v1/organisation-events');
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonFragment(['id' => $organisationEvent1->id]);
@@ -168,8 +168,8 @@ class OrganisationEventsTest extends TestCase
      */
     public function getAllOrganisationEventsOnlyPastEventsAsOrganisationAdmin200()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -178,26 +178,26 @@ class OrganisationEventsTest extends TestCase
         $today = (new DateTime('now'))->format('Y-m-d');
         $endtime = $this->faker->time('H:i:s', '+1 hour');
         $starttime = $this->faker->time('H:i:s', 'now');
-        $organisationEvent1 = factory(OrganisationEvent::class)->create([
+        $organisationEvent1 = OrganisationEvent::factory()->create([
             'start_date' => $future,
             'end_date' => $future,
             'start_time' => $starttime,
             'end_time' => $endtime,
         ]);
-        $organisationEvent2 = factory(OrganisationEvent::class)->create([
+        $organisationEvent2 = OrganisationEvent::factory()->create([
             'start_date' => $past,
             'end_date' => $past,
             'start_time' => $starttime,
             'end_time' => $endtime,
         ]);
-        $organisationEvent3 = factory(OrganisationEvent::class)->create([
+        $organisationEvent3 = OrganisationEvent::factory()->create([
             'start_date' => $today,
             'end_date' => $today,
             'start_time' => $starttime,
             'end_time' => $endtime,
         ]);
 
-        $response = $this->json('GET', "/core/v1/organisation-events");
+        $response = $this->json('GET', '/core/v1/organisation-events');
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonFragment(['id' => $organisationEvent1->id]);
@@ -216,26 +216,26 @@ class OrganisationEventsTest extends TestCase
         $endtime = $this->faker->time('H:i:s', '+1 hour');
         $starttime = $this->faker->time('H:i:s', 'now');
 
-        $organisationEvent1 = factory(OrganisationEvent::class)->create([
+        $organisationEvent1 = OrganisationEvent::factory()->create([
             'start_date' => $date1,
             'end_date' => $date1,
             'start_time' => $starttime,
             'end_time' => $endtime,
         ]);
-        $organisationEvent2 = factory(OrganisationEvent::class)->create([
+        $organisationEvent2 = OrganisationEvent::factory()->create([
             'start_date' => $date2,
             'end_date' => $date2,
             'start_time' => $starttime,
             'end_time' => $endtime,
         ]);
-        $organisationEvent3 = factory(OrganisationEvent::class)->create([
+        $organisationEvent3 = OrganisationEvent::factory()->create([
             'start_date' => $date3,
             'end_date' => $date3,
             'start_time' => $starttime,
             'end_time' => $endtime,
         ]);
 
-        $response = $this->json('GET', "/core/v1/organisation-events");
+        $response = $this->json('GET', '/core/v1/organisation-events');
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonFragment(['id' => $organisationEvent1->id]);
@@ -260,19 +260,19 @@ class OrganisationEventsTest extends TestCase
         $endtime = $this->faker->time('H:i:s', '+1 hour');
         $starttime = $this->faker->time('H:i:s', 'now');
 
-        $organisationEvent1 = factory(OrganisationEvent::class)->create([
+        $organisationEvent1 = OrganisationEvent::factory()->create([
             'start_date' => $date1->format('Y-m-d'),
             'end_date' => $date1->format('Y-m-d'),
             'start_time' => $starttime,
             'end_time' => $endtime,
         ]);
-        $organisationEvent2 = factory(OrganisationEvent::class)->create([
+        $organisationEvent2 = OrganisationEvent::factory()->create([
             'start_date' => $date2->format('Y-m-d'),
             'end_date' => $date2->format('Y-m-d'),
             'start_time' => $starttime,
             'end_time' => $endtime,
         ]);
-        $organisationEvent3 = factory(OrganisationEvent::class)->create([
+        $organisationEvent3 = OrganisationEvent::factory()->create([
             'start_date' => $date3->format('Y-m-d'),
             'end_date' => $date3->format('Y-m-d'),
             'start_time' => $starttime,
@@ -308,47 +308,47 @@ class OrganisationEventsTest extends TestCase
      */
     public function getAllOrganisationEventsFilterByAccessibilityAsGuest200()
     {
-        $organisationEvent1 = factory(OrganisationEvent::class)->create([
+        $organisationEvent1 = OrganisationEvent::factory()->create([
             'is_virtual' => false,
             'location_id' => function () {
-                return factory(Location::class)->create([
+                return Location::factory()->create([
                     'has_wheelchair_access' => false,
                     'has_induction_loop' => false,
                 ])->id;
             },
         ]);
-        $organisationEvent2 = factory(OrganisationEvent::class)->create([
+        $organisationEvent2 = OrganisationEvent::factory()->create([
             'is_virtual' => false,
             'location_id' => function () {
-                return factory(Location::class)->create([
+                return Location::factory()->create([
                     'has_wheelchair_access' => true,
                     'has_induction_loop' => false,
                 ])->id;
             },
         ]);
-        $organisationEvent3 = factory(OrganisationEvent::class)->create([
+        $organisationEvent3 = OrganisationEvent::factory()->create([
             'is_virtual' => false,
             'location_id' => function () {
-                return factory(Location::class)->create([
+                return Location::factory()->create([
                     'has_wheelchair_access' => false,
                     'has_induction_loop' => true,
                 ])->id;
             },
         ]);
-        $organisationEvent4 = factory(OrganisationEvent::class)->create([
+        $organisationEvent4 = OrganisationEvent::factory()->create([
             'is_virtual' => false,
             'location_id' => function () {
-                return factory(Location::class)->create([
+                return Location::factory()->create([
                     'has_wheelchair_access' => true,
                     'has_induction_loop' => true,
                 ])->id;
             },
         ]);
-        $organisationEvent5 = factory(OrganisationEvent::class)->create([
+        $organisationEvent5 = OrganisationEvent::factory()->create([
             'is_virtual' => true,
         ]);
 
-        $response = $this->json('GET', "/core/v1/organisation-events?filter[has_wheelchair_access]=1");
+        $response = $this->json('GET', '/core/v1/organisation-events?filter[has_wheelchair_access]=1');
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonFragment(['id' => $organisationEvent2->id]);
@@ -357,7 +357,7 @@ class OrganisationEventsTest extends TestCase
         $response->assertJsonMissing(['id' => $organisationEvent3->id]);
         $response->assertJsonMissing(['id' => $organisationEvent5->id]);
 
-        $response = $this->json('GET', "/core/v1/organisation-events?filter[has_induction_loop]=1");
+        $response = $this->json('GET', '/core/v1/organisation-events?filter[has_induction_loop]=1');
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonFragment(['id' => $organisationEvent3->id]);
@@ -366,7 +366,7 @@ class OrganisationEventsTest extends TestCase
         $response->assertJsonMissing(['id' => $organisationEvent2->id]);
         $response->assertJsonMissing(['id' => $organisationEvent5->id]);
 
-        $response = $this->json('GET', "/core/v1/organisation-events?filter[has_wheelchair_access]=1&filter[has_induction_loop]=1");
+        $response = $this->json('GET', '/core/v1/organisation-events?filter[has_wheelchair_access]=1&filter[has_induction_loop]=1');
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonFragment(['id' => $organisationEvent4->id]);
@@ -375,7 +375,7 @@ class OrganisationEventsTest extends TestCase
         $response->assertJsonMissing(['id' => $organisationEvent3->id]);
         $response->assertJsonMissing(['id' => $organisationEvent5->id]);
 
-        $response = $this->json('GET', "/core/v1/organisation-events?filter[has_wheelchair_access]=0");
+        $response = $this->json('GET', '/core/v1/organisation-events?filter[has_wheelchair_access]=0');
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonFragment(['id' => $organisationEvent1->id]);
@@ -390,18 +390,18 @@ class OrganisationEventsTest extends TestCase
      */
     public function getAllOrganisationEventsFilterByCollectionAsGuest200()
     {
-        $organisationEventCollection1 = factory(Collection::class)->states('typeOrganisationEvent')->create();
-        $organisationEventCollection2 = factory(Collection::class)->states('typeOrganisationEvent')->create();
-        $taxonomy1 = factory(Taxonomy::class)->create();
-        $taxonomy2 = factory(Taxonomy::class)->create();
-        $taxonomy3 = factory(Taxonomy::class)->create();
+        $organisationEventCollection1 = Collection::factory()->typeOrganisationEvent()->create();
+        $organisationEventCollection2 = Collection::factory()->typeOrganisationEvent()->create();
+        $taxonomy1 = Taxonomy::factory()->create();
+        $taxonomy2 = Taxonomy::factory()->create();
+        $taxonomy3 = Taxonomy::factory()->create();
         $organisationEventCollection1->syncCollectionTaxonomies((new \Illuminate\Database\Eloquent\Collection([$taxonomy1])));
         $organisationEventCollection2->syncCollectionTaxonomies((new \Illuminate\Database\Eloquent\Collection([$taxonomy2])));
 
-        $organisationEvent1 = factory(OrganisationEvent::class)->create();
-        $organisationEvent2 = factory(OrganisationEvent::class)->create();
-        $organisationEvent3 = factory(OrganisationEvent::class)->create();
-        $organisationEvent4 = factory(OrganisationEvent::class)->create();
+        $organisationEvent1 = OrganisationEvent::factory()->create();
+        $organisationEvent2 = OrganisationEvent::factory()->create();
+        $organisationEvent3 = OrganisationEvent::factory()->create();
+        $organisationEvent4 = OrganisationEvent::factory()->create();
         $organisationEvent1->syncTaxonomyRelationships((new \Illuminate\Database\Eloquent\Collection([$taxonomy1])));
         $organisationEvent2->syncTaxonomyRelationships((new \Illuminate\Database\Eloquent\Collection([$taxonomy2])));
         $organisationEvent3->syncTaxonomyRelationships((new \Illuminate\Database\Eloquent\Collection([$taxonomy3])));
@@ -428,20 +428,20 @@ class OrganisationEventsTest extends TestCase
      */
     public function getAllOrganisationEventsOnlyRelatedOrganisationsAsOrganisationAdmin200()
     {
-        $organisation1 = factory(Organisation::class)->create();
-        $organisation2 = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation1);
+        $organisation1 = Organisation::factory()->create();
+        $organisation2 = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation1);
 
         Passport::actingAs($user);
 
-        $organisationEvent1 = factory(OrganisationEvent::class)->create([
+        $organisationEvent1 = OrganisationEvent::factory()->create([
             'organisation_id' => $organisation1->id,
         ]);
-        $organisationEvent2 = factory(OrganisationEvent::class)->create([
+        $organisationEvent2 = OrganisationEvent::factory()->create([
             'organisation_id' => $organisation2->id,
         ]);
 
-        $response = $this->json('GET', "/core/v1/organisation-events?filter[has_permission]=true");
+        $response = $this->json('GET', '/core/v1/organisation-events?filter[has_permission]=true');
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonFragment(['id' => $organisationEvent1->id]);
@@ -455,12 +455,12 @@ class OrganisationEventsTest extends TestCase
     {
         $this->fakeEvents();
 
-        $event = factory(OrganisationEvent::class)->create();
+        $event = OrganisationEvent::factory()->create();
 
         $this->json('GET', '/core/v1/organisation-events');
 
         Event::assertDispatched(EndpointHit::class, function (EndpointHit $event) {
-            return ($event->getAction() === Audit::ACTION_READ);
+            return $event->getAction() === Audit::ACTION_READ;
         });
     }
 
@@ -483,8 +483,8 @@ class OrganisationEventsTest extends TestCase
      */
     public function postCreateOrganisationEventAsServiceWorker403()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
 
         Passport::actingAs($user);
 
@@ -498,8 +498,8 @@ class OrganisationEventsTest extends TestCase
      */
     public function postCreateOrganisationEventAsServiceAdmin403()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
@@ -513,17 +513,17 @@ class OrganisationEventsTest extends TestCase
      */
     public function postCreateOrganisationEventAsOrganisationAdmin201()
     {
-        $organisation = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
         $image = Storage::disk('local')->get('/test-data/image.png');
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
+            'file' => 'data:image/png;base64,'.base64_encode($image),
         ]);
 
         $date = $this->faker->dateTimeBetween('tomorrow', '+6 weeks')->format('Y-m-d');
@@ -533,18 +533,18 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => false,
-            'fees_text' => $this->faker->sentence,
-            'fees_url' => $this->faker->url,
-            'organiser_name' => $this->faker->name,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => false,
             'is_virtual' => false,
@@ -579,7 +579,7 @@ class OrganisationEventsTest extends TestCase
         // Simulate frontend check by making call with UpdateRequest ID.
         $updateRequestId = $responseData->id;
 
-        $globalAdminUser = factory(User::class)->create()->makeGlobalAdmin();
+        $globalAdminUser = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($globalAdminUser);
 
         $updateRequestCheckResponse = $this->get(
@@ -615,9 +615,9 @@ class OrganisationEventsTest extends TestCase
      */
     public function postCreateOrganisationEventAsGlobalAdmin201()
     {
-        $organisation = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -628,18 +628,18 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => false,
-            'fees_text' => $this->faker->sentence,
-            'fees_url' => $this->faker->url,
-            'organiser_name' => $this->faker->name,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => false,
             'is_virtual' => false,
@@ -666,9 +666,9 @@ class OrganisationEventsTest extends TestCase
      */
     public function postCreateOrganisationEventAsSuperAdmin201()
     {
-        $organisation = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($user);
 
@@ -679,18 +679,18 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => false,
-            'fees_text' => $this->faker->sentence,
-            'fees_url' => $this->faker->url,
-            'organiser_name' => $this->faker->name,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => false,
             'is_virtual' => false,
@@ -717,10 +717,10 @@ class OrganisationEventsTest extends TestCase
      */
     public function postCreateOrganisationEventAsOtherOrganisationAdmin403()
     {
-        $organisation1 = factory(Organisation::class)->create();
-        $organisation2 = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation2);
+        $organisation1 = Organisation::factory()->create();
+        $organisation2 = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation2);
 
         Passport::actingAs($user);
 
@@ -731,18 +731,18 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => false,
-            'fees_text' => $this->faker->sentence,
-            'fees_url' => $this->faker->url,
-            'organiser_name' => $this->faker->name,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => false,
             'is_virtual' => false,
@@ -761,9 +761,9 @@ class OrganisationEventsTest extends TestCase
      */
     public function postCreateHomepageOrganisationEventAsOrganisationAdmin422()
     {
-        $organisation = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -774,18 +774,18 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => false,
-            'fees_text' => $this->faker->sentence,
-            'fees_url' => $this->faker->url,
-            'organiser_name' => $this->faker->name,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => true,
             'is_virtual' => false,
@@ -804,9 +804,9 @@ class OrganisationEventsTest extends TestCase
      */
     public function postCreateHomepageOrganisationEventAsGlobalAdmin201()
     {
-        $organisation = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -817,18 +817,18 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => false,
-            'fees_text' => $this->faker->sentence,
-            'fees_url' => $this->faker->url,
-            'organiser_name' => $this->faker->name,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => true,
             'is_virtual' => false,
@@ -852,10 +852,10 @@ class OrganisationEventsTest extends TestCase
      */
     public function postCreateOrganisationEventWithTaxonomiesAsOrganisationAdmin422()
     {
-        $organisation = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
-        $taxonomy = factory(Taxonomy::class)->states('lga-standards')->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $taxonomy = Taxonomy::factory()->lgaStandards()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -866,18 +866,18 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => false,
-            'fees_text' => $this->faker->sentence,
-            'fees_url' => $this->faker->url,
-            'organiser_name' => $this->faker->name,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => true,
             'is_virtual' => false,
@@ -896,10 +896,10 @@ class OrganisationEventsTest extends TestCase
      */
     public function postCreateOrganisationEventWithTaxonomiesAsGlobalAdmin201()
     {
-        $organisation = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
-        $taxonomy = factory(Taxonomy::class)->states('lga-standards')->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $taxonomy = Taxonomy::factory()->lgaStandards()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -910,18 +910,18 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => false,
-            'fees_text' => $this->faker->sentence,
-            'fees_url' => $this->faker->url,
-            'organiser_name' => $this->faker->name,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => true,
             'is_virtual' => false,
@@ -973,8 +973,8 @@ class OrganisationEventsTest extends TestCase
     {
         $this->fakeEvents();
 
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -985,18 +985,18 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => false,
-            'fees_text' => $this->faker->sentence,
-            'fees_url' => $this->faker->url,
-            'organiser_name' => $this->faker->name,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => false,
             'is_virtual' => true,
@@ -1021,17 +1021,17 @@ class OrganisationEventsTest extends TestCase
      */
     public function postCreateOrganisationEventWithImageAsGlobalAdmin201()
     {
-        $organisation = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
         $image = Storage::disk('local')->get('/test-data/image.png');
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
+            'file' => 'data:image/png;base64,'.base64_encode($image),
         ]);
 
         $date = $this->faker->dateTimeBetween('tomorrow', '+6 weeks')->format('Y-m-d');
@@ -1041,18 +1041,18 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => false,
-            'fees_text' => $this->faker->sentence,
-            'fees_url' => $this->faker->url,
-            'organiser_name' => $this->faker->name,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => false,
             'is_virtual' => false,
@@ -1077,17 +1077,17 @@ class OrganisationEventsTest extends TestCase
      */
     public function postCreateOrganisationEventWithImageAsOrganisationAdmin201()
     {
-        $organisation = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
         $image = Storage::disk('local')->get('/test-data/image.png');
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
+            'file' => 'data:image/png;base64,'.base64_encode($image),
         ]);
 
         $date = $this->faker->dateTimeBetween('tomorrow', '+6 weeks')->format('Y-m-d');
@@ -1097,18 +1097,18 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => false,
-            'fees_text' => $this->faker->sentence,
-            'fees_url' => $this->faker->url,
-            'organiser_name' => $this->faker->name,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => false,
             'is_virtual' => false,
@@ -1143,7 +1143,7 @@ class OrganisationEventsTest extends TestCase
         // Simulate frontend check by making call with UpdateRequest ID.
         $updateRequestId = $responseData->id;
 
-        $globalAdminUser = factory(User::class)->create()->makeGlobalAdmin();
+        $globalAdminUser = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($globalAdminUser);
 
         $updateRequestCheckResponse = $this->get(
@@ -1183,9 +1183,9 @@ class OrganisationEventsTest extends TestCase
      */
     public function postCreateOrganisationEventMinimumFieldsAsOrganisationAdmin201()
     {
-        $organisation = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -1196,8 +1196,8 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => true,
             'fees_text' => null,
             'fees_url' => null,
@@ -1226,9 +1226,9 @@ class OrganisationEventsTest extends TestCase
      */
     public function postCreateOrganisationEventRequiredFieldsAsOrganisationAdmin422()
     {
-        $organisation = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -1284,7 +1284,7 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
+            'intro' => $this->faker->sentence(),
         ]);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -1295,8 +1295,8 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
         ]);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -1307,9 +1307,9 @@ class OrganisationEventsTest extends TestCase
      */
     public function postCreateOrganisationEventIfNotFreeRequiresFeeDataAsOrganisationAdmin201()
     {
-        $organisation = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -1320,18 +1320,18 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => true,
             'fees_text' => null,
             'fees_url' => null,
-            'organiser_name' => $this->faker->name,
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => false,
             'is_virtual' => false,
@@ -1350,13 +1350,13 @@ class OrganisationEventsTest extends TestCase
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
-        $payload['fees_url'] = $this->faker->url;
+        $payload['fees_url'] = $this->faker->url();
 
         $response = $this->json('POST', '/core/v1/organisation-events', $payload);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
-        $payload['fees_text'] = $this->faker->sentence;
+        $payload['fees_text'] = $this->faker->sentence();
 
         $response = $this->json('POST', '/core/v1/organisation-events', $payload);
 
@@ -1368,9 +1368,9 @@ class OrganisationEventsTest extends TestCase
      */
     public function postCreateOrganisationEventWithOrganiserRequiresOrganiserContactAsOrganisationAdmin201()
     {
-        $organisation = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -1381,8 +1381,8 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => true,
             'fees_text' => null,
             'fees_url' => null,
@@ -1391,8 +1391,8 @@ class OrganisationEventsTest extends TestCase
             'organiser_email' => null,
             'organiser_url' => null,
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => false,
             'is_virtual' => false,
@@ -1405,7 +1405,7 @@ class OrganisationEventsTest extends TestCase
 
         $response->assertStatus(Response::HTTP_OK);
 
-        $payload['organiser_name'] = $this->faker->name;
+        $payload['organiser_name'] = $this->faker->name();
 
         $response = $this->json('POST', '/core/v1/organisation-events', $payload);
 
@@ -1418,14 +1418,14 @@ class OrganisationEventsTest extends TestCase
         $response->assertStatus(Response::HTTP_OK);
 
         $payload['organiser_phone'] = null;
-        $payload['organiser_email'] = $this->faker->safeEmail;
+        $payload['organiser_email'] = $this->faker->safeEmail();
 
         $response = $this->json('POST', '/core/v1/organisation-events', $payload);
 
         $response->assertStatus(Response::HTTP_OK);
 
         $payload['organiser_email'] = null;
-        $payload['organiser_url'] = $this->faker->url;
+        $payload['organiser_url'] = $this->faker->url();
 
         $response = $this->json('POST', '/core/v1/organisation-events', $payload);
 
@@ -1437,9 +1437,9 @@ class OrganisationEventsTest extends TestCase
      */
     public function postCreateOrganisationEventWithBookingDetailsRequiresAllBookingFieldsAsOrganisationAdmin201()
     {
-        $organisation = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -1450,15 +1450,15 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => true,
             'fees_text' => null,
             'fees_url' => null,
-            'organiser_name' => $this->faker->name,
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => null,
             'booking_summary' => null,
             'booking_url' => null,
@@ -1480,13 +1480,13 @@ class OrganisationEventsTest extends TestCase
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
-        $payload['booking_summary'] = $this->faker->sentence;
+        $payload['booking_summary'] = $this->faker->sentence();
 
         $response = $this->json('POST', '/core/v1/organisation-events', $payload);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
-        $payload['booking_url'] = $this->faker->url;
+        $payload['booking_url'] = $this->faker->url();
 
         $response = $this->json('POST', '/core/v1/organisation-events', $payload);
 
@@ -1508,7 +1508,7 @@ class OrganisationEventsTest extends TestCase
      */
     public function getSingleOrganisationEventAsGuest200()
     {
-        $organisationEvent = factory(OrganisationEvent::class)->create();
+        $organisationEvent = OrganisationEvent::factory()->create();
 
         $response = $this->json('GET', "/core/v1/organisation-events/{$organisationEvent->id}");
 
@@ -1554,7 +1554,7 @@ class OrganisationEventsTest extends TestCase
     {
         $this->fakeEvents();
 
-        $organisationEvent = factory(OrganisationEvent::class)->create();
+        $organisationEvent = OrganisationEvent::factory()->create();
 
         $response = $this->json('GET', "/core/v1/organisation-events/{$organisationEvent->id}");
 
@@ -1571,7 +1571,7 @@ class OrganisationEventsTest extends TestCase
      */
     public function getSingleOrganisationEventImageAsGuest200()
     {
-        $organisationEvent = factory(OrganisationEvent::class)->states('withImage')->create();
+        $organisationEvent = OrganisationEvent::factory()->withImage()->create();
 
         $response = $this->get("/core/v1/organisation-events/{$organisationEvent->id}/image.png");
 
@@ -1586,7 +1586,7 @@ class OrganisationEventsTest extends TestCase
     {
         $this->fakeEvents();
 
-        $organisationEvent = factory(OrganisationEvent::class)->states('withImage')->create();
+        $organisationEvent = OrganisationEvent::factory()->withImage()->create();
 
         $response = $this->get("/core/v1/organisation-events/{$organisationEvent->id}/image.png");
 
@@ -1601,14 +1601,14 @@ class OrganisationEventsTest extends TestCase
      */
     public function getSingleOrganisationEventIcalAsGuest200()
     {
-        $organisationEvent = factory(OrganisationEvent::class)->states('notVirtual', 'withOrganiser')->create();
+        $organisationEvent = OrganisationEvent::factory()->notVirtual()->withOrganiser()->create();
 
         $now = new DateTime();
         $start = new Carbon($organisationEvent->start_date);
-        list($startHour, $startMinute, $startSecond) = explode(':', $organisationEvent->start_time);
+        [$startHour, $startMinute, $startSecond] = explode(':', $organisationEvent->start_time);
         $start->setTime($startHour, $startMinute, $startSecond);
         $end = new Carbon($organisationEvent->end_date);
-        list($endHour, $endMinute, $endSecond) = explode(':', $organisationEvent->end_time);
+        [$endHour, $endMinute, $endSecond] = explode(':', $organisationEvent->end_time);
         $end->setTime($endHour, $endMinute, $endSecond);
         $urlsafeTitle = urlencode($organisationEvent->title);
         $urlsafeIntro = urlencode($organisationEvent->intro);
@@ -1619,24 +1619,24 @@ class OrganisationEventsTest extends TestCase
             'VERSION:2.0',
             'PRODID:-//hacksw/handcal//NONSGML v1.0//EN',
             'BEGIN:VEVENT',
-            'UID:' . $organisationEvent->id,
-            'DTSTAMP:' . $now->format('Ymd\\THis\\Z'),
-            'ORGANIZER;CN=' . $organisationEvent->organiser_name . ':MAILTO:' . $organisationEvent->organiser_email,
-            'DTSTART:' . $start->format('Ymd\\THis\\Z'),
-            'DTEND:' . $end->format('Ymd\\THis\\Z'),
-            'SUMMARY:' . $organisationEvent->title,
-            'DESCRIPTION:' . $organisationEvent->intro,
-            'GEO:' . $organisationEvent->location->lat . ';' . $organisationEvent->location->lon,
-            'LOCATION:' . str_ireplace(',', '\,', $organisationEvent->location->toAddress()->__toString()),
+            'UID:'.$organisationEvent->id,
+            'DTSTAMP:'.$now->format('Ymd\\THis\\Z'),
+            'ORGANIZER;CN='.$organisationEvent->organiser_name.':MAILTO:'.$organisationEvent->organiser_email,
+            'DTSTART:'.$start->format('Ymd\\THis\\Z'),
+            'DTEND:'.$end->format('Ymd\\THis\\Z'),
+            'SUMMARY:'.$organisationEvent->title,
+            'DESCRIPTION:'.$organisationEvent->intro,
+            'GEO:'.$organisationEvent->location->lat.';'.$organisationEvent->location->lon,
+            'LOCATION:'.str_ireplace(',', '\,', $organisationEvent->location->toAddress()->__toString()),
             'END:VEVENT',
             'END:VCALENDAR',
         ]);
 
-        $this->assertEquals('https://calendar.google.com/calendar/render?action=TEMPLATE&dates=' . urlencode($start->format('Ymd\\THis\\Z') . '/' . $end->format('Ymd\\THis\\Z')) . '&details=' . $urlsafeTitle . '&location=' . $urlsafeLocation . '&text=' . $urlsafeIntro, $organisationEvent->googleCalendarlink);
+        $this->assertEquals('https://calendar.google.com/calendar/render?action=TEMPLATE&dates='.urlencode($start->format('Ymd\\THis\\Z').'/'.$end->format('Ymd\\THis\\Z')).'&details='.$urlsafeTitle.'&location='.$urlsafeLocation.'&text='.$urlsafeIntro, $organisationEvent->googleCalendarlink);
 
-        $this->assertEquals('https://outlook.office.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&rru=addevent&startdt=' . urlencode($start->format(DateTime::ATOM)) . '&enddt=' . urlencode($end->format(DateTime::ATOM)) . '&subject=' . $urlsafeTitle . '&location=' . $urlsafeLocation . '&body=' . $urlsafeIntro, $organisationEvent->microsoftCalendarLink);
+        $this->assertEquals('https://outlook.office.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&rru=addevent&startdt='.urlencode($start->format(DateTime::ATOM)).'&enddt='.urlencode($end->format(DateTime::ATOM)).'&subject='.$urlsafeTitle.'&location='.$urlsafeLocation.'&body='.$urlsafeIntro, $organisationEvent->microsoftCalendarLink);
 
-        $this->assertEquals(secure_url('/core/v1/organisation-events/' . $organisationEvent->id . '/event.ics'), $organisationEvent->appleCalendarLink);
+        $this->assertEquals(secure_url('/core/v1/organisation-events/'.$organisationEvent->id.'/event.ics'), $organisationEvent->appleCalendarLink);
 
         $response = $this->get($organisationEvent->appleCalendarLink);
 
@@ -1655,7 +1655,7 @@ class OrganisationEventsTest extends TestCase
      */
     public function putUpdateOrganisationEventAsGuest401()
     {
-        $organisationEvent = factory(OrganisationEvent::class)->create();
+        $organisationEvent = OrganisationEvent::factory()->create();
 
         $response = $this->json('PUT', "/core/v1/organisation-events/{$organisationEvent->id}");
 
@@ -1667,12 +1667,12 @@ class OrganisationEventsTest extends TestCase
      */
     public function putUpdateOrganisationEventAsServiceWorker403()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
 
         Passport::actingAs($user);
 
-        $organisationEvent = factory(OrganisationEvent::class)->create();
+        $organisationEvent = OrganisationEvent::factory()->create();
 
         $response = $this->json('PUT', "/core/v1/organisation-events/{$organisationEvent->id}");
 
@@ -1684,12 +1684,12 @@ class OrganisationEventsTest extends TestCase
      */
     public function putUpdateOrganisationEventAsServiceAdmin403()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
-        $organisationEvent = factory(OrganisationEvent::class)->create();
+        $organisationEvent = OrganisationEvent::factory()->create();
 
         $response = $this->json('PUT', "/core/v1/organisation-events/{$organisationEvent->id}");
 
@@ -1701,13 +1701,13 @@ class OrganisationEventsTest extends TestCase
      */
     public function putUpdateOrganisationEventAsOrganisationAdmin200()
     {
-        $organisation = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
-        $organisationEvent = factory(OrganisationEvent::class)->create([
+        $organisationEvent = OrganisationEvent::factory()->create([
             'organisation_id' => $organisation->id,
         ]);
 
@@ -1718,18 +1718,18 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => false,
-            'fees_text' => $this->faker->sentence,
-            'fees_url' => $this->faker->url,
-            'organiser_name' => $this->faker->name,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => false,
             'is_virtual' => false,
@@ -1743,7 +1743,7 @@ class OrganisationEventsTest extends TestCase
 
         $response->assertJsonFragment($payload);
 
-        $globalAdminUser = factory(User::class)->create()->makeGlobalAdmin();
+        $globalAdminUser = User::factory()->create()->makeGlobalAdmin();
 
         $this->assertDatabaseHas((new UpdateRequest())->getTable(), [
             'user_id' => $user->id,
@@ -1778,12 +1778,12 @@ class OrganisationEventsTest extends TestCase
      */
     public function putUpdateOrganisationEventAutoApprovedAsGlobalAdmin200()
     {
-        $location = factory(Location::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $location = Location::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
-        $organisationEvent = factory(OrganisationEvent::class)->create();
+        $organisationEvent = OrganisationEvent::factory()->create();
 
         $date = $this->faker->dateTimeBetween('tomorrow', '+6 weeks')->format('Y-m-d');
         $payload = [
@@ -1792,18 +1792,18 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => false,
-            'fees_text' => $this->faker->sentence,
-            'fees_url' => $this->faker->url,
-            'organiser_name' => $this->faker->name,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => false,
             'is_virtual' => false,
@@ -1848,13 +1848,13 @@ class OrganisationEventsTest extends TestCase
      */
     public function putUpdateOrganisationEventAutoApprovedAsSuperAdmin200()
     {
-        $organisation = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
-        $user = factory(User::class)->create()->makeSuperAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin($organisation);
 
         Passport::actingAs($user);
 
-        $organisationEvent = factory(OrganisationEvent::class)->create();
+        $organisationEvent = OrganisationEvent::factory()->create();
 
         $date = $this->faker->dateTimeBetween('tomorrow', '+6 weeks')->format('Y-m-d');
         $payload = [
@@ -1863,18 +1863,18 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => false,
-            'fees_text' => $this->faker->sentence,
-            'fees_url' => $this->faker->url,
-            'organiser_name' => $this->faker->name,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => false,
             'is_virtual' => false,
@@ -1920,13 +1920,13 @@ class OrganisationEventsTest extends TestCase
     {
         $this->fakeEvents();
 
-        $organisation = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
-        $organisationEvent = factory(OrganisationEvent::class)->create([
+        $organisationEvent = OrganisationEvent::factory()->create([
             'organisation_id' => $organisation->id,
         ]);
 
@@ -1937,18 +1937,18 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => false,
-            'fees_text' => $this->faker->sentence,
-            'fees_url' => $this->faker->url,
-            'organiser_name' => $this->faker->name,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => false,
             'is_virtual' => false,
@@ -1973,7 +1973,7 @@ class OrganisationEventsTest extends TestCase
      */
     public function putUpdateOrganisationEventAsGlobalAdminAddImage200()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         $image = Storage::disk('local')->get('/test-data/image.png');
 
         Passport::actingAs($user);
@@ -1981,10 +1981,10 @@ class OrganisationEventsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
+            'file' => 'data:image/png;base64,'.base64_encode($image),
         ]);
 
-        $organisationEvent = factory(OrganisationEvent::class)->create();
+        $organisationEvent = OrganisationEvent::factory()->create();
 
         $payload = [
             'image_file_id' => $this->getResponseContent($imageResponse, 'data.id'),
@@ -2003,11 +2003,11 @@ class OrganisationEventsTest extends TestCase
      */
     public function putUpdateOrganisationEventAsGlobalAdminRemoveImage200()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
-        $organisationEvent = factory(OrganisationEvent::class)->states('withImage')->create();
+        $organisationEvent = OrganisationEvent::factory()->withImage()->create();
 
         $payload = [
             'image_file_id' => null,
@@ -2026,14 +2026,14 @@ class OrganisationEventsTest extends TestCase
      */
     public function putUpdateOrganisationEventAsOtherOrganisationAdmin403()
     {
-        $organisation1 = factory(Organisation::class)->create();
-        $organisation2 = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation2);
+        $organisation1 = Organisation::factory()->create();
+        $organisation2 = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation2);
 
         Passport::actingAs($user);
 
-        $organisationEvent = factory(OrganisationEvent::class)->create([
+        $organisationEvent = OrganisationEvent::factory()->create([
             'organisation_id' => $organisation1->id,
         ]);
 
@@ -2044,18 +2044,18 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => false,
-            'fees_text' => $this->faker->sentence,
-            'fees_url' => $this->faker->url,
-            'organiser_name' => $this->faker->name,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => false,
             'is_virtual' => false,
@@ -2073,13 +2073,13 @@ class OrganisationEventsTest extends TestCase
      */
     public function putUpdateOrganisationEventAddToHomepageAsOrganisationAdmin422()
     {
-        $organisation = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
-        $organisationEvent = factory(OrganisationEvent::class)->create([
+        $organisationEvent = OrganisationEvent::factory()->create([
             'organisation_id' => $organisation->id,
         ]);
 
@@ -2090,18 +2090,18 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => false,
-            'fees_text' => $this->faker->sentence,
-            'fees_url' => $this->faker->url,
-            'organiser_name' => $this->faker->name,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => true,
             'is_virtual' => false,
@@ -2119,13 +2119,13 @@ class OrganisationEventsTest extends TestCase
      */
     public function putUpdateOrganisationEventAddToHomepageAsGlobalAdmin200()
     {
-        $organisation = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
-        $organisationEvent = factory(OrganisationEvent::class)->create([
+        $organisationEvent = OrganisationEvent::factory()->create([
             'organisation_id' => $organisation->id,
         ]);
 
@@ -2136,18 +2136,18 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => false,
-            'fees_text' => $this->faker->sentence,
-            'fees_url' => $this->faker->url,
-            'organiser_name' => $this->faker->name,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => true,
             'is_virtual' => false,
@@ -2191,18 +2191,18 @@ class OrganisationEventsTest extends TestCase
      */
     public function putUpdateOrganisationEventUpdateTaxonomiesAsOrganisationAdmin200()
     {
-        $organisation = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
-        $organisationEvent = factory(OrganisationEvent::class)->create([
+        $organisationEvent = OrganisationEvent::factory()->create([
             'organisation_id' => $organisation->id,
         ]);
 
-        $taxonomy1 = factory(Taxonomy::class)->create();
-        $taxonomy2 = factory(Taxonomy::class)->create();
+        $taxonomy1 = Taxonomy::factory()->create();
+        $taxonomy2 = Taxonomy::factory()->create();
         $organisationEvent->syncTaxonomyRelationships(collect([$taxonomy1]));
 
         $this->assertDatabaseHas(table(OrganisationEventTaxonomy::class), [
@@ -2217,18 +2217,18 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => false,
-            'fees_text' => $this->faker->sentence,
-            'fees_url' => $this->faker->url,
-            'organiser_name' => $this->faker->name,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => false,
             'is_virtual' => false,
@@ -2268,19 +2268,19 @@ class OrganisationEventsTest extends TestCase
      */
     public function putUpdateOrganisationEventUpdateTaxonomiesAsGlobalAdmin200()
     {
-        $organisation = factory(Organisation::class)->create();
-        $location = factory(Location::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
-        $organisationEvent = factory(OrganisationEvent::class)->create([
+        $organisationEvent = OrganisationEvent::factory()->create([
             'organisation_id' => $organisation->id,
         ]);
 
-        $taxonomy1 = factory(Taxonomy::class)->create();
-        $taxonomy2 = factory(Taxonomy::class)->create();
-        $taxonomy3 = factory(Taxonomy::class)->create();
+        $taxonomy1 = Taxonomy::factory()->create();
+        $taxonomy2 = Taxonomy::factory()->create();
+        $taxonomy3 = Taxonomy::factory()->create();
         $organisationEvent->syncTaxonomyRelationships(collect([$taxonomy1]));
 
         $this->assertDatabaseHas(table(OrganisationEventTaxonomy::class), [
@@ -2295,18 +2295,18 @@ class OrganisationEventsTest extends TestCase
             'end_date' => $date,
             'start_time' => '09:00:00',
             'end_time' => '13:00:00',
-            'intro' => $this->faker->sentence,
-            'description' => $this->faker->paragraph,
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'is_free' => false,
-            'fees_text' => $this->faker->sentence,
-            'fees_url' => $this->faker->url,
-            'organiser_name' => $this->faker->name,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
             'organiser_phone' => random_uk_phone(),
-            'organiser_email' => $this->faker->safeEmail,
-            'organiser_url' => $this->faker->url,
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
             'booking_title' => $this->faker->sentence(3),
-            'booking_summary' => $this->faker->sentence,
-            'booking_url' => $this->faker->url,
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
             'booking_cta' => $this->faker->words(2, true),
             'homepage' => false,
             'is_virtual' => false,
@@ -2378,7 +2378,7 @@ class OrganisationEventsTest extends TestCase
      */
     public function deleteRemoveOrganisationEventAsGuest401()
     {
-        $organisationEvent = factory(OrganisationEvent::class)->create();
+        $organisationEvent = OrganisationEvent::factory()->create();
 
         $response = $this->json('DELETE', "/core/v1/organisation-events/{$organisationEvent->id}");
 
@@ -2390,12 +2390,12 @@ class OrganisationEventsTest extends TestCase
      */
     public function deleteRemoveOrganisationEventAsServiceWorker403()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
 
         Passport::actingAs($user);
 
-        $organisationEvent = factory(OrganisationEvent::class)->create();
+        $organisationEvent = OrganisationEvent::factory()->create();
 
         $response = $this->json('DELETE', "/core/v1/organisation-events/{$organisationEvent->id}");
 
@@ -2407,12 +2407,12 @@ class OrganisationEventsTest extends TestCase
      */
     public function deleteRemoveOrganisationEventAsServiceAdmin403()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
-        $organisationEvent = factory(OrganisationEvent::class)->create();
+        $organisationEvent = OrganisationEvent::factory()->create();
 
         $response = $this->json('DELETE', "/core/v1/organisation-events/{$organisationEvent->id}");
 
@@ -2424,12 +2424,12 @@ class OrganisationEventsTest extends TestCase
      */
     public function deleteRemoveOrganisationEventAsOrganisationAdmin200()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
-        $organisationEvent = factory(OrganisationEvent::class)->create([
+        $organisationEvent = OrganisationEvent::factory()->create([
             'organisation_id' => $organisation->id,
         ]);
 
@@ -2444,12 +2444,12 @@ class OrganisationEventsTest extends TestCase
      */
     public function deleteRemoveOrganisationEventAsGlobalAdmin200()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin($organisation);
 
         Passport::actingAs($user);
 
-        $organisationEvent = factory(OrganisationEvent::class)->create();
+        $organisationEvent = OrganisationEvent::factory()->create();
 
         $response = $this->json('DELETE', "/core/v1/organisation-events/{$organisationEvent->id}");
 
@@ -2462,12 +2462,12 @@ class OrganisationEventsTest extends TestCase
      */
     public function deleteRemoveOrganisationEventAsSuperAdmin200()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeSuperAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin($organisation);
 
         Passport::actingAs($user);
 
-        $organisationEvent = factory(OrganisationEvent::class)->create();
+        $organisationEvent = OrganisationEvent::factory()->create();
 
         $response = $this->json('DELETE', "/core/v1/organisation-events/{$organisationEvent->id}");
 
@@ -2482,12 +2482,12 @@ class OrganisationEventsTest extends TestCase
     {
         $this->fakeEvents();
 
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
-        $organisationEvent = factory(OrganisationEvent::class)->create([
+        $organisationEvent = OrganisationEvent::factory()->create([
             'organisation_id' => $organisation->id,
         ]);
 

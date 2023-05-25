@@ -12,7 +12,7 @@ class ReferralsTest extends TestCase
 {
     public function test_auto_delete_works()
     {
-        $newReferral = factory(Referral::class)->create([
+        $newReferral = Referral::factory()->create([
             'email' => 'test@example.com',
             'referee_email' => 'test@example.com',
             'status' => Referral::STATUS_COMPLETED,
@@ -20,7 +20,7 @@ class ReferralsTest extends TestCase
             'updated_at' => Date::today(),
         ]);
 
-        $dueForDeletionReferral = factory(Referral::class)->create([
+        $dueForDeletionReferral = Referral::factory()->create([
             'email' => 'test@example.com',
             'referee_email' => 'test@example.com',
             'status' => Referral::STATUS_COMPLETED,
@@ -36,7 +36,7 @@ class ReferralsTest extends TestCase
 
     public function test_old_incompleted_referrals_are_not_deleted()
     {
-        $dueForDeletionReferral = factory(Referral::class)->create([
+        $dueForDeletionReferral = Referral::factory()->create([
             'email' => 'test@example.com',
             'referee_email' => 'test@example.com',
             'status' => Referral::STATUS_INCOMPLETED,

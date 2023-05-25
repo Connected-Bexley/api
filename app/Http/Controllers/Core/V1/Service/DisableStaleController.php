@@ -27,7 +27,7 @@ class DisableStaleController extends Controller
      */
     public function __invoke(UpdateRequest $request, Service $service)
     {
-        return DB::transaction(function () use ($request, $service) {
+        return DB::transaction(function () use ($request) {
             Service::query()
                 ->where('last_modified_at', '<', $request->last_modified_at)
                 ->update(['status' => Service::STATUS_INACTIVE]);

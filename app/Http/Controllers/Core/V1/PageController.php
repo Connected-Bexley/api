@@ -15,6 +15,7 @@ use App\Models\Page;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedInclude;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class PageController extends Controller
@@ -45,7 +46,11 @@ class PageController extends Controller
         }
 
         $pages = QueryBuilder::for($baseQuery)
-            ->allowedIncludes(['parent', 'children', 'landingPageAncestors'])
+            ->allowedIncludes([
+                'parent',
+                'children',
+                AllowedInclude::relationship('landing-page-ancestors', 'landingPageAncestors'),
+            ])
             ->allowedFilters([
                 AllowedFilter::scope('landing_page', 'pageDescendants'),
                 AllowedFilter::exact('id'),

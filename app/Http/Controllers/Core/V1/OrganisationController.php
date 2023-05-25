@@ -137,17 +137,17 @@ class OrganisationController extends Controller
     {
         return DB::transaction(function () use ($request, $organisation) {
             $data = array_filter_missing([
-                'slug' => $request->missing('slug'),
-                'name' => $request->missing('name'),
-                'description' => $request->missing('description', function ($description) {
+                'slug' => $request->missingValue('slug'),
+                'name' => $request->missingValue('name'),
+                'description' => $request->missingValue('description', function ($description) {
                     return sanitize_markdown($description);
                 }),
-                'url' => $request->missing('url'),
-                'email' => $request->missing('email'),
-                'phone' => $request->missing('phone'),
-                'logo_file_id' => $request->missing('logo_file_id'),
+                'url' => $request->missingValue('url'),
+                'email' => $request->missingValue('email'),
+                'phone' => $request->missingValue('phone'),
+                'logo_file_id' => $request->missingValue('logo_file_id'),
                 'social_medias' => $request->has('social_medias') ? [] : new MissingValue(),
-                'category_taxonomies' => $request->missing('category_taxonomies'),
+                'category_taxonomies' => $request->missingValue('category_taxonomies'),
             ]);
 
             if ($request->filled('logo_file_id')) {

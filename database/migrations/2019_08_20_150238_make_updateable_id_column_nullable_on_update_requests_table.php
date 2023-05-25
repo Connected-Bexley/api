@@ -3,8 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-class MakeUpdateableIdColumnNullableOnUpdateRequestsTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -20,4 +19,4 @@ class MakeUpdateableIdColumnNullableOnUpdateRequestsTable extends Migration
     {
         DB::statement('ALTER TABLE `update_requests` MODIFY `updateable_id` CHAR(36);');
     }
-}
+};

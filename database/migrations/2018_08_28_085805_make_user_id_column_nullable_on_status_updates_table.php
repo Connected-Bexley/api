@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class MakeUserIdColumnNullableOnStatusUpdatesTable extends Migration
-{
+return new class() extends Migration {
     /**
      * MakeUserIdColumnNullableOnStatusUpdatesTable constructor.
      */
@@ -33,4 +32,4 @@ class MakeUserIdColumnNullableOnStatusUpdatesTable extends Migration
             $table->string('user_id', 36)->nullable(false)->change();
         });
     }
-}
+};

@@ -7,8 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
-class AddSlugColumnToTaxonomiesTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -60,4 +59,4 @@ class AddSlugColumnToTaxonomiesTable extends Migration
             $table->dropColumn('slug');
         });
     }
-}
+};

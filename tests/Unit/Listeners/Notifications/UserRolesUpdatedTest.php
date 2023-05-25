@@ -21,11 +21,11 @@ class UserRolesUpdatedTest extends TestCase
     {
         Queue::fake();
 
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
 
         Request::create('')->setUserResolver(function () {
-            return factory(User::class)->create();
+            return User::factory()->create();
         });
         $event = new UserRolesUpdatedEvent($user, new Collection(), $user->userRoles);
         $listener = new UserRolesUpdatedListener();
@@ -42,6 +42,7 @@ class UserRolesUpdatedTest extends TestCase
             $this->assertArrayHasKey('NAME', $email->values);
             $this->assertArrayHasKey('OLD_PERMISSIONS', $email->values);
             $this->assertArrayHasKey('PERMISSIONS', $email->values);
+
             return true;
         });
     }
@@ -49,7 +50,7 @@ class UserRolesUpdatedTest extends TestCase
     public function test_revoked_roles_method_works_from_super_admin_to_global_admin()
     {
         /** @var \App\Models\User $user */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
 
         $oldRoles = new Collection([
             new UserRole([
@@ -80,7 +81,7 @@ class UserRolesUpdatedTest extends TestCase
     public function test_revoked_roles_method_works_from_global_admin_to_super_admin()
     {
         /** @var \App\Models\User $user */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
 
         $oldRoles = new Collection([
             new UserRole([
@@ -109,13 +110,13 @@ class UserRolesUpdatedTest extends TestCase
     public function test_revoked_roles_method_works_from_global_admin_to_organisation_admin()
     {
         /** @var \App\Models\User $user */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
 
         /** @var \App\Models\Organisation $organisationOne */
-        $organisationOne = factory(Organisation::class)->create();
+        $organisationOne = Organisation::factory()->create();
 
         /** @var \App\Models\Organisation $organisationOne */
-        $organisationTwo = factory(Organisation::class)->create();
+        $organisationTwo = Organisation::factory()->create();
 
         $globalAdminUserRole = new UserRole([
             'id' => uuid(),
@@ -158,7 +159,7 @@ class UserRolesUpdatedTest extends TestCase
     public function test_added_roles_method_works_from_global_admin_to_super_admin()
     {
         /** @var \App\Models\User $user */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
 
         $superAdmin = new UserRole([
             'id' => uuid(),

@@ -400,7 +400,7 @@ class UpdateRequest extends FormRequest
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function messages()
     {

@@ -94,6 +94,7 @@ class SpreadsheetParser
      * Read the spreadsheet headers.
      *
      * @param type name
+     *
      * @author
      */
     public function readHeaders()

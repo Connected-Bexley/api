@@ -1,14 +1,25 @@
 <?php
 
-use Faker\Generator as Faker;
+namespace Database\Factories;
 
-$factory->define(App\Models\ServiceLocation::class, function (Faker $faker) {
-    return [
-        'service_id' => function () {
-            return factory(\App\Models\Service::class)->create()->id;
-        },
-        'location_id' => function () {
-            return factory(\App\Models\Location::class)->create()->id;
-        },
-    ];
-});
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class ServiceLocationFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition()
+    {
+        return [
+            'service_id' => function () {
+                return \App\Models\Service::factory()->create()->id;
+            },
+            'location_id' => function () {
+                return \App\Models\Location::factory()->create()->id;
+            },
+        ];
+    }
+}

@@ -30,8 +30,8 @@ class ReportSchedulesTest extends TestCase
 
     public function test_service_worker_cannot_list_them()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceWorker($service);
 
         Passport::actingAs($user);
@@ -43,8 +43,8 @@ class ReportSchedulesTest extends TestCase
 
     public function test_service_admin_cannot_list_them()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
 
         Passport::actingAs($user);
@@ -56,8 +56,8 @@ class ReportSchedulesTest extends TestCase
 
     public function test_organisation_admin_cannot_list_them()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create();
         $user->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
@@ -69,7 +69,7 @@ class ReportSchedulesTest extends TestCase
 
     public function test_global_admin_can_list_them()
     {
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $reportSchedule = ReportSchedule::create([
             'report_type_id' => ReportType::usersExport()->id,
@@ -93,7 +93,7 @@ class ReportSchedulesTest extends TestCase
     {
         $this->fakeEvents();
 
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
 
         Passport::actingAs($user);
@@ -119,8 +119,8 @@ class ReportSchedulesTest extends TestCase
 
     public function test_service_worker_cannot_create_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceWorker($service);
 
         Passport::actingAs($user);
@@ -132,8 +132,8 @@ class ReportSchedulesTest extends TestCase
 
     public function test_service_admin_cannot_create_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
 
         Passport::actingAs($user);
@@ -145,8 +145,8 @@ class ReportSchedulesTest extends TestCase
 
     public function test_organisation_admin_cannot_create_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create();
         $user->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
@@ -158,7 +158,7 @@ class ReportSchedulesTest extends TestCase
 
     public function test_global_admin_can_create_one()
     {
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
 
         Passport::actingAs($user);
@@ -183,7 +183,7 @@ class ReportSchedulesTest extends TestCase
     {
         $this->fakeEvents();
 
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
 
         Passport::actingAs($user);
@@ -206,7 +206,7 @@ class ReportSchedulesTest extends TestCase
 
     public function test_guest_cannot_view_one()
     {
-        $reportSchedule = factory(ReportSchedule::class)->create();
+        $reportSchedule = ReportSchedule::factory()->create();
 
         $response = $this->json('GET', "/core/v1/report-schedules/{$reportSchedule->id}");
 
@@ -215,9 +215,9 @@ class ReportSchedulesTest extends TestCase
 
     public function test_service_worker_cannot_view_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
-        $reportSchedule = factory(ReportSchedule::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
+        $reportSchedule = ReportSchedule::factory()->create();
 
         Passport::actingAs($user);
 
@@ -228,9 +228,9 @@ class ReportSchedulesTest extends TestCase
 
     public function test_service_admin_cannot_view_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
-        $reportSchedule = factory(ReportSchedule::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
+        $reportSchedule = ReportSchedule::factory()->create();
 
         Passport::actingAs($user);
 
@@ -241,9 +241,9 @@ class ReportSchedulesTest extends TestCase
 
     public function test_organisation_admin_cannot_view_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
-        $reportSchedule = factory(ReportSchedule::class)->create();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
+        $reportSchedule = ReportSchedule::factory()->create();
 
         Passport::actingAs($user);
 
@@ -254,8 +254,8 @@ class ReportSchedulesTest extends TestCase
 
     public function test_global_admin_can_view_one()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
-        $reportSchedule = factory(ReportSchedule::class)->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $reportSchedule = ReportSchedule::factory()->create();
 
         Passport::actingAs($user);
 
@@ -276,8 +276,8 @@ class ReportSchedulesTest extends TestCase
     {
         $this->fakeEvents();
 
-        $user = factory(User::class)->create()->makeGlobalAdmin();
-        $reportSchedule = factory(ReportSchedule::class)->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $reportSchedule = ReportSchedule::factory()->create();
 
         Passport::actingAs($user);
 
@@ -296,7 +296,7 @@ class ReportSchedulesTest extends TestCase
 
     public function test_guest_cannot_update_one()
     {
-        $reportSchedule = factory(ReportSchedule::class)->create();
+        $reportSchedule = ReportSchedule::factory()->create();
 
         $response = $this->json('PUT', "/core/v1/report-schedules/{$reportSchedule->id}");
 
@@ -305,9 +305,9 @@ class ReportSchedulesTest extends TestCase
 
     public function test_service_worker_cannot_update_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
-        $reportSchedule = factory(ReportSchedule::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
+        $reportSchedule = ReportSchedule::factory()->create();
 
         Passport::actingAs($user);
 
@@ -318,9 +318,9 @@ class ReportSchedulesTest extends TestCase
 
     public function test_service_admin_cannot_update_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
-        $reportSchedule = factory(ReportSchedule::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
+        $reportSchedule = ReportSchedule::factory()->create();
 
         Passport::actingAs($user);
 
@@ -331,9 +331,9 @@ class ReportSchedulesTest extends TestCase
 
     public function test_organisation_admin_cannot_update_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
-        $reportSchedule = factory(ReportSchedule::class)->create();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
+        $reportSchedule = ReportSchedule::factory()->create();
 
         Passport::actingAs($user);
 
@@ -344,8 +344,8 @@ class ReportSchedulesTest extends TestCase
 
     public function test_global_admin_can_update_one()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
-        $reportSchedule = factory(ReportSchedule::class)->create([
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $reportSchedule = ReportSchedule::factory()->create([
             'repeat_type' => ReportSchedule::REPEAT_TYPE_WEEKLY,
         ]);
 
@@ -371,8 +371,8 @@ class ReportSchedulesTest extends TestCase
     {
         $this->fakeEvents();
 
-        $user = factory(User::class)->create()->makeGlobalAdmin();
-        $reportSchedule = factory(ReportSchedule::class)->create([
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $reportSchedule = ReportSchedule::factory()->create([
             'repeat_type' => ReportSchedule::REPEAT_TYPE_WEEKLY,
         ]);
 
@@ -396,7 +396,7 @@ class ReportSchedulesTest extends TestCase
 
     public function test_guest_cannot_delete_one()
     {
-        $reportSchedule = factory(ReportSchedule::class)->create();
+        $reportSchedule = ReportSchedule::factory()->create();
 
         $response = $this->json('DELETE', "/core/v1/report-schedules/{$reportSchedule->id}");
 
@@ -405,9 +405,9 @@ class ReportSchedulesTest extends TestCase
 
     public function test_service_worker_cannot_delete_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
-        $reportSchedule = factory(ReportSchedule::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
+        $reportSchedule = ReportSchedule::factory()->create();
 
         Passport::actingAs($user);
 
@@ -418,9 +418,9 @@ class ReportSchedulesTest extends TestCase
 
     public function test_service_admin_cannot_delete_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
-        $reportSchedule = factory(ReportSchedule::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
+        $reportSchedule = ReportSchedule::factory()->create();
 
         Passport::actingAs($user);
 
@@ -431,9 +431,9 @@ class ReportSchedulesTest extends TestCase
 
     public function test_organisation_admin_cannot_delete_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
-        $reportSchedule = factory(ReportSchedule::class)->create();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
+        $reportSchedule = ReportSchedule::factory()->create();
 
         Passport::actingAs($user);
 
@@ -444,8 +444,8 @@ class ReportSchedulesTest extends TestCase
 
     public function test_global_admin_can_delete_one()
     {
-        $user = factory(User::class)->create()->makeGlobalAdmin();
-        $reportSchedule = factory(ReportSchedule::class)->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $reportSchedule = ReportSchedule::factory()->create();
 
         Passport::actingAs($user);
 
@@ -459,8 +459,8 @@ class ReportSchedulesTest extends TestCase
     {
         $this->fakeEvents();
 
-        $user = factory(User::class)->create()->makeGlobalAdmin();
-        $reportSchedule = factory(ReportSchedule::class)->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $reportSchedule = ReportSchedule::factory()->create();
 
         Passport::actingAs($user);
 

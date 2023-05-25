@@ -47,7 +47,7 @@ class ServiceResource extends JsonResource
             'category_taxonomies' => TaxonomyResource::collection($this->taxonomies),
             'eligibility_types' => new ServiceEligibilityResource($this->serviceEligibilities),
             'score' => $this->score,
-            'ends_at' => optional($this->ends_at)->format(CarbonImmutable::ISO8601),
+            'ends_at' => $this->ends_at?->format(CarbonImmutable::ISO8601),
             'last_modified_at' => $this->last_modified_at->format(CarbonImmutable::ISO8601),
             'created_at' => $this->created_at->format(CarbonImmutable::ISO8601),
             'updated_at' => $this->updated_at->format(CarbonImmutable::ISO8601),

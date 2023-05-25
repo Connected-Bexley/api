@@ -2,37 +2,36 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\File;
-use App\Models\Role;
-use App\Models\User;
-use App\Models\Audit;
-use App\Models\Service;
-use App\Models\Taxonomy;
-use App\Models\UserRole;
 use App\Events\EndpointHit;
-use App\Models\SocialMedia;
-use Carbon\CarbonImmutable;
-use Illuminate\Support\Str;
+use App\Models\Audit;
+use App\Models\File;
 use App\Models\Organisation;
+use App\Models\OrganisationTaxonomy;
+use App\Models\Role;
+use App\Models\Service;
+use App\Models\SocialMedia;
+use App\Models\Taxonomy;
 use App\Models\UpdateRequest;
+use App\Models\User;
+use App\Models\UserRole;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Response;
-use Laravel\Passport\Passport;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
-use App\Models\OrganisationTaxonomy;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Passport\Passport;
+use Tests\TestCase;
 
 class OrganisationsTest extends TestCase
 {
     /**
      * Create spreadsheets of organisations
      *
-     * @param Illuminate\Support\Collection $organisations
+     * @param  Illuminate\Support\Collection  $organisations
      * @return null
      **/
-    public function createOrganisationSpreadsheets(\Illuminate\Support\Collection $organisations)
+    public function createOrganisationSpreadsheets(Collection $organisations)
     {
         $headers = [
             'id',
@@ -46,6 +45,7 @@ class OrganisationsTest extends TestCase
         $organisations = $organisations->map(function ($organisation) {
             $organisationAttributes = $organisation->getAttributes();
             $organisationAttributes['id'] = $organisation->id ?: uuid();
+
             return $organisationAttributes;
         });
 
@@ -59,7 +59,7 @@ class OrganisationsTest extends TestCase
 
     public function test_guest_can_list_them()
     {
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
 
         $response = $this->json('GET', '/core/v1/organisations');
 
@@ -89,16 +89,16 @@ class OrganisationsTest extends TestCase
         $this->json('GET', '/core/v1/organisations');
 
         Event::assertDispatched(EndpointHit::class, function (EndpointHit $event) {
-            return ($event->getAction() === Audit::ACTION_READ);
+            return $event->getAction() === Audit::ACTION_READ;
         });
     }
 
     public function test_guest_can_sort_by_name()
     {
-        $organisationOne = factory(Organisation::class)->create([
+        $organisationOne = Organisation::factory()->create([
             'name' => 'Organisation A',
         ]);
-        $organisationTwo = factory(Organisation::class)->create([
+        $organisationTwo = Organisation::factory()->create([
             'name' => 'Organisation B',
         ]);
 
@@ -128,8 +128,8 @@ class OrganisationsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceWorker($service);
 
         Passport::actingAs($user);
@@ -145,8 +145,8 @@ class OrganisationsTest extends TestCase
          * @var \App\Models\Service $service
          * @var \App\Models\User $user
          */
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
 
         Passport::actingAs($user);
@@ -162,8 +162,8 @@ class OrganisationsTest extends TestCase
          * @var \App\Models\Organisation $organisation
          * @var \App\Models\User $user
          */
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create();
         $user->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
@@ -178,7 +178,7 @@ class OrganisationsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $payload = [
             'slug' => 'test-org',
@@ -209,7 +209,7 @@ class OrganisationsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $payload = [
             'slug' => 'test-org',
@@ -234,7 +234,7 @@ class OrganisationsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $payload = [
             'slug' => 'test-org',
@@ -260,7 +260,7 @@ class OrganisationsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $payload = [
             'slug' => 'test-org',
@@ -284,10 +284,10 @@ class OrganisationsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
 
-        $taxonomy = factory(Taxonomy::class)->states('lga-standards')->create();
+        $taxonomy = Taxonomy::factory()->lgaStandards()->create();
 
         $payload = [
             'slug' => 'test-org',
@@ -342,8 +342,8 @@ class OrganisationsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $globalAdmin1 = factory(User::class)->create()->makeGlobalAdmin();
-        $globalAdmin2 = factory(User::class)->create()->makeGlobalAdmin();
+        $globalAdmin1 = User::factory()->create()->makeGlobalAdmin();
+        $globalAdmin2 = User::factory()->create()->makeGlobalAdmin();
         $payload = [
             'slug' => 'test-org',
             'name' => 'Test Org',
@@ -393,7 +393,7 @@ class OrganisationsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
 
         Passport::actingAs($user);
@@ -427,7 +427,7 @@ class OrganisationsTest extends TestCase
 
     public function test_guest_can_view_one()
     {
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
 
         $organisation->socialMedias()->create([
             'type' => SocialMedia::TYPE_INSTAGRAM,
@@ -462,7 +462,7 @@ class OrganisationsTest extends TestCase
 
     public function test_guest_can_view_one_by_slug()
     {
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
 
         $response = $this->json('GET', "/core/v1/organisations/{$organisation->slug}");
 
@@ -489,7 +489,7 @@ class OrganisationsTest extends TestCase
     {
         $this->fakeEvents();
 
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
 
         $this->json('GET', "/core/v1/organisations/{$organisation->id}");
 
@@ -505,7 +505,7 @@ class OrganisationsTest extends TestCase
 
     public function test_guest_cannot_update_one()
     {
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
 
         $response = $this->json('PUT', "/core/v1/organisations/{$organisation->id}");
 
@@ -514,9 +514,9 @@ class OrganisationsTest extends TestCase
 
     public function test_service_worker_cannot_update_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
-        $organisation = factory(Organisation::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
+        $organisation = Organisation::factory()->create();
 
         Passport::actingAs($user);
 
@@ -527,9 +527,9 @@ class OrganisationsTest extends TestCase
 
     public function test_service_admin_cannot_update_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
-        $organisation = factory(Organisation::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
+        $organisation = Organisation::factory()->create();
 
         Passport::actingAs($user);
 
@@ -540,8 +540,8 @@ class OrganisationsTest extends TestCase
 
     public function test_organisation_admin_can_update_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
         $payload = [
             'slug' => 'test-org',
             'name' => 'Test Org',
@@ -571,8 +571,8 @@ class OrganisationsTest extends TestCase
 
     public function test_global_admin_can_update_one_with_auto_approval()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
         $payload = [
             'slug' => 'test-org',
             'name' => 'Test Org',
@@ -623,8 +623,8 @@ class OrganisationsTest extends TestCase
 
     public function test_organisation_admin_can_add_social_media_to_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
         $payload = [
             'social_medias' => [
                 [
@@ -650,7 +650,7 @@ class OrganisationsTest extends TestCase
             ->where('updateable_id', $organisation->id)
             ->firstOrFail();
         $this->assertEquals($updateRequest->data, $payload);
-        $updateRequest->apply(factory(User::class)->create()->makeGlobalAdmin());
+        $updateRequest->apply(User::factory()->create()->makeGlobalAdmin());
         $organisation->refresh();
         $this->assertCount(1, $organisation->socialMedias);
         $this->assertInstanceOf(SocialMedia::class, $organisation->socialMedias->first());
@@ -659,8 +659,8 @@ class OrganisationsTest extends TestCase
 
     public function test_organisation_admin_can_remove_social_media_from_one()
     {
-        $organisation = factory(Organisation::class)->states(['social-media'])->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->socialMedia()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
         $payload = [
             'social_medias' => [],
         ];
@@ -681,19 +681,19 @@ class OrganisationsTest extends TestCase
             ->where('updateable_id', $organisation->id)
             ->firstOrFail();
         $this->assertEquals($updateRequest->data, $payload);
-        $updateRequest->apply(factory(User::class)->create()->makeGlobalAdmin());
+        $updateRequest->apply(User::factory()->create()->makeGlobalAdmin());
         $organisation->refresh();
         $this->assertCount(0, $organisation->socialMedias);
     }
 
     public function test_organisation_admin_can_add_additional_social_media_to_one()
     {
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
         $organisation->socialMedias()->create([
             'type' => SocialMedia::TYPE_TWITTER,
             'url' => 'https://twitter.com/ayupdigital/',
         ]);
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
         $payload = [
             'social_medias' => [
                 [
@@ -723,15 +723,15 @@ class OrganisationsTest extends TestCase
             ->where('updateable_id', $organisation->id)
             ->firstOrFail();
         $this->assertEquals($updateRequest->data, $payload);
-        $updateRequest->apply(factory(User::class)->create()->makeGlobalAdmin());
+        $updateRequest->apply(User::factory()->create()->makeGlobalAdmin());
         $organisation->refresh();
         $this->assertCount(2, $organisation->socialMedias);
     }
 
     public function test_organisation_admin_can_update_with_single_form_of_contact()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
         $payload = [
             'slug' => 'test-org',
             'name' => 'Test Org',
@@ -761,11 +761,11 @@ class OrganisationsTest extends TestCase
 
     public function test_organisation_admin_cannot_update_with_no_form_of_contact()
     {
-        $organisation = factory(Organisation::class)->create([
+        $organisation = Organisation::factory()->create([
             'email' => 'info@test-org.example.com',
             'phone' => null,
         ]);
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -783,12 +783,12 @@ class OrganisationsTest extends TestCase
 
     public function test_global_admin_can_update_without_contact_details()
     {
-        $organisation = factory(Organisation::class)->create([
+        $organisation = Organisation::factory()->create([
             'url' => 'http://test-org.example.com',
             'email' => 'info@test-org.example.com',
             'phone' => '01234567890',
         ]);
-        $user = factory(User::class)->create()->makeGlobalAdmin($organisation);
+        $user = User::factory()->create()->makeGlobalAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -810,12 +810,12 @@ class OrganisationsTest extends TestCase
 
     public function test_global_admin_cannot_update_with_non_numeric_phone()
     {
-        $organisation = factory(Organisation::class)->create([
+        $organisation = Organisation::factory()->create([
             'url' => 'http://test-org.example.com',
             'email' => 'info@test-org.example.com',
             'phone' => '01234567890',
         ]);
-        $user = factory(User::class)->create()->makeGlobalAdmin($organisation);
+        $user = User::factory()->create()->makeGlobalAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -835,11 +835,11 @@ class OrganisationsTest extends TestCase
 
     public function test_organisation_admin_can_update_organisation_taxonomies()
     {
-        $organisation = factory(Organisation::class)->create();
-        $taxonomy1 = factory(Taxonomy::class)->create();
-        $taxonomy2 = factory(Taxonomy::class)->create();
+        $organisation = Organisation::factory()->create();
+        $taxonomy1 = Taxonomy::factory()->create();
+        $taxonomy2 = Taxonomy::factory()->create();
         $organisation->syncTaxonomyRelationships(collect([$taxonomy1]));
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
         $payload = [
             'slug' => 'test-org',
             'name' => 'Test Org',
@@ -881,10 +881,10 @@ class OrganisationsTest extends TestCase
 
     public function test_global_admin_can_update_organisation_taxonomies()
     {
-        $organisation = factory(Organisation::class)->create();
-        $taxonomy1 = factory(Taxonomy::class)->create();
-        $taxonomy2 = factory(Taxonomy::class)->create();
-        $taxonomy3 = factory(Taxonomy::class)->create();
+        $organisation = Organisation::factory()->create();
+        $taxonomy1 = Taxonomy::factory()->create();
+        $taxonomy2 = Taxonomy::factory()->create();
+        $taxonomy3 = Taxonomy::factory()->create();
         $organisation->syncTaxonomyRelationships(collect([$taxonomy1]));
 
         $this->assertDatabaseHas(table(OrganisationTaxonomy::class), [
@@ -892,7 +892,7 @@ class OrganisationsTest extends TestCase
             'taxonomy_id' => $taxonomy1->id,
         ]);
 
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeGlobalAdmin();
         $payload = [
             'slug' => 'test-org',
             'name' => 'Test Org',
@@ -962,8 +962,8 @@ class OrganisationsTest extends TestCase
 
     public function test_only_partial_fields_can_be_updated()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
         $payload = [
             'slug' => 'test-org',
         ];
@@ -990,8 +990,8 @@ class OrganisationsTest extends TestCase
     {
         $this->fakeEvents();
 
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -1013,8 +1013,8 @@ class OrganisationsTest extends TestCase
 
     public function test_fields_removed_for_existing_update_requests()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -1044,7 +1044,7 @@ class OrganisationsTest extends TestCase
 
     public function test_guest_cannot_delete_one()
     {
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
 
         $response = $this->json('DELETE', "/core/v1/organisations/{$organisation->id}");
 
@@ -1053,9 +1053,9 @@ class OrganisationsTest extends TestCase
 
     public function test_service_worker_cannot_delete_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceWorker($service);
-        $organisation = factory(Organisation::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
+        $organisation = Organisation::factory()->create();
 
         Passport::actingAs($user);
 
@@ -1066,9 +1066,9 @@ class OrganisationsTest extends TestCase
 
     public function test_service_admin_cannot_delete_one()
     {
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create()->makeServiceAdmin($service);
-        $organisation = factory(Organisation::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
+        $organisation = Organisation::factory()->create();
 
         Passport::actingAs($user);
 
@@ -1079,8 +1079,8 @@ class OrganisationsTest extends TestCase
 
     public function test_organisation_admin_cannot_delete_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeOrganisationAdmin($organisation);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -1091,8 +1091,8 @@ class OrganisationsTest extends TestCase
 
     public function test_global_admin_cannot_delete_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         Passport::actingAs($user);
 
@@ -1103,8 +1103,8 @@ class OrganisationsTest extends TestCase
 
     public function test_super_admin_can_delete_one()
     {
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($user);
 
@@ -1116,12 +1116,12 @@ class OrganisationsTest extends TestCase
 
     public function test_related_social_media_are_deleted_when_deleting_one()
     {
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
         $organisation->socialMedias()->create([
             'type' => SocialMedia::TYPE_TWITTER,
             'url' => 'https://twitter.com/ayupdigital/',
         ]);
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($user);
 
@@ -1135,8 +1135,8 @@ class OrganisationsTest extends TestCase
     {
         $this->fakeEvents();
 
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create()->makeSuperAdmin();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($user);
 
@@ -1155,7 +1155,7 @@ class OrganisationsTest extends TestCase
 
     public function test_guest_can_view_logo()
     {
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
 
         $response = $this->get("/core/v1/organisations/{$organisation->id}/logo.png");
 
@@ -1167,7 +1167,7 @@ class OrganisationsTest extends TestCase
     {
         $this->fakeEvents();
 
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
 
         $this->get("/core/v1/organisations/{$organisation->id}/logo.png");
 
@@ -1186,7 +1186,7 @@ class OrganisationsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $image = Storage::disk('local')->get('/test-data/image.png');
 
@@ -1195,7 +1195,7 @@ class OrganisationsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
+            'file' => 'data:image/png;base64,'.base64_encode($image),
         ]);
 
         $response = $this->json('POST', '/core/v1/organisations', [
@@ -1229,10 +1229,10 @@ class OrganisationsTest extends TestCase
         /**
          * @var \App\Models\User $user
          */
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
-        $organisation = factory(Organisation::class)->create([
-            'logo_file_id' => factory(File::class)->create()->id,
+        $organisation = Organisation::factory()->create([
+            'logo_file_id' => File::factory()->create()->id,
         ]);
         $payload = [
             'slug' => $organisation->slug,
@@ -1257,19 +1257,18 @@ class OrganisationsTest extends TestCase
     /**
      * Bulk import organisations
      */
-
     public function test_guest_cannot_bulk_import()
     {
         Storage::fake('local');
 
-        $organisations = factory(Organisation::class, 2)->make();
+        $organisations = Organisation::factory()->count(2)->make();
 
         $this->createOrganisationSpreadsheets($organisations);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
-        $response = $this->json('POST', "/core/v1/organisations/import", $data);
+        $response = $this->json('POST', '/core/v1/organisations/import', $data);
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
@@ -1278,21 +1277,21 @@ class OrganisationsTest extends TestCase
     {
         Storage::fake('local');
 
-        $organisations = factory(Organisation::class, 2)->make();
+        $organisations = Organisation::factory()->count(2)->make();
 
         $this->createOrganisationSpreadsheets($organisations);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceWorker($service);
 
         Passport::actingAs($user);
 
-        $response = $this->json('POST', "/core/v1/organisations/import", $data);
+        $response = $this->json('POST', '/core/v1/organisations/import', $data);
 
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
@@ -1301,21 +1300,21 @@ class OrganisationsTest extends TestCase
     {
         Storage::fake('local');
 
-        $organisations = factory(Organisation::class, 2)->make();
+        $organisations = Organisation::factory()->count(2)->make();
 
         $this->createOrganisationSpreadsheets($organisations);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $service = factory(Service::class)->create();
-        $user = factory(User::class)->create();
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
         $user->makeServiceAdmin($service);
 
         Passport::actingAs($user);
 
-        $response = $this->json('POST', "/core/v1/organisations/import", $data);
+        $response = $this->json('POST', '/core/v1/organisations/import', $data);
 
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
@@ -1324,20 +1323,20 @@ class OrganisationsTest extends TestCase
     {
         Storage::fake('local');
 
-        $organisations = factory(Organisation::class, 2)->make();
+        $organisations = Organisation::factory()->count(2)->make();
 
         $this->createOrganisationSpreadsheets($organisations);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
-        $organisation = factory(Organisation::class)->create();
-        $user = factory(User::class)->create();
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create();
         $user->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
-        $response = $this->json('POST', "/core/v1/organisations/import", $data);
+        $response = $this->json('POST', '/core/v1/organisations/import', $data);
 
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
@@ -1346,19 +1345,19 @@ class OrganisationsTest extends TestCase
     {
         Storage::fake('local');
 
-        $organisations = factory(Organisation::class, 2)->make();
+        $organisations = Organisation::factory()->count(2)->make();
 
         $this->createOrganisationSpreadsheets($organisations);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeGlobalAdmin();
         Passport::actingAs($user);
 
-        $response = $this->json('POST', "/core/v1/organisations/import", $data);
+        $response = $this->json('POST', '/core/v1/organisations/import', $data);
 
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
@@ -1367,19 +1366,19 @@ class OrganisationsTest extends TestCase
     {
         Storage::fake('local');
 
-        $organisations = factory(Organisation::class, 2)->make();
+        $organisations = Organisation::factory()->count(2)->make();
 
         $this->createOrganisationSpreadsheets($organisations);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         Passport::actingAs($user);
 
-        $response = $this->json('POST', "/core/v1/organisations/import", $data);
+        $response = $this->json('POST', '/core/v1/organisations/import', $data);
 
         $response->assertStatus(Response::HTTP_CREATED);
     }
@@ -1388,21 +1387,21 @@ class OrganisationsTest extends TestCase
     {
         Storage::fake('local');
 
-        $organisations = factory(Organisation::class, 2)->make([
+        $organisations = Organisation::factory()->count(2)->make([
             'phone' => '',
         ]);
 
         $this->createOrganisationSpreadsheets($organisations);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         Passport::actingAs($user);
 
-        $response = $this->json('POST', "/core/v1/organisations/import", $data);
+        $response = $this->json('POST', '/core/v1/organisations/import', $data);
 
         $response->assertStatus(Response::HTTP_CREATED);
 
@@ -1417,23 +1416,23 @@ class OrganisationsTest extends TestCase
     {
         Storage::fake('local');
 
-        $organisations = factory(Organisation::class, 2)->make();
+        $organisations = Organisation::factory()->count(2)->make();
 
         $this->createOrganisationSpreadsheets($organisations);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         Passport::actingAs($user);
 
-        $response = $this->json('POST', "/core/v1/organisations/import", $data);
+        $response = $this->json('POST', '/core/v1/organisations/import', $data);
 
         $response->assertStatus(Response::HTTP_CREATED);
 
-        $response = $this->json('GET', "/core/v1/organisations?filter=[has_permission]=true");
+        $response = $this->json('GET', '/core/v1/organisations?filter=[has_permission]=true');
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -1450,27 +1449,27 @@ class OrganisationsTest extends TestCase
     {
         Storage::fake('local');
 
-        $organisations = factory(Organisation::class, 2)->make();
+        $organisations = Organisation::factory()->count(2)->make();
 
         $this->createOrganisationSpreadsheets($organisations);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
-        $super = factory(User::class)->create();
+        $super = User::factory()->create();
         $super->makeSuperAdmin();
-        $global = factory(User::class)->create();
+        $global = User::factory()->create();
         $global->makeGlobalAdmin();
         Passport::actingAs($super);
 
-        $response = $this->json('POST', "/core/v1/organisations/import", $data);
+        $response = $this->json('POST', '/core/v1/organisations/import', $data);
 
         $response->assertStatus(Response::HTTP_CREATED);
 
         Passport::actingAs($global);
 
-        $response = $this->json('GET', "/core/v1/organisations?filter=[has_permission]=true&page=1&sort=name");
+        $response = $this->json('GET', '/core/v1/organisations?filter=[has_permission]=true&page=1&sort=name');
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -1513,20 +1512,20 @@ class OrganisationsTest extends TestCase
             ['spreadsheet' => UploadedFile::fake()->create('dummy.csv', 3000)],
         ];
 
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         Passport::actingAs($user);
 
         foreach ($invalidFieldTypes as $data) {
-            $response = $this->json('POST', "/core/v1/organisations/import", $data);
+            $response = $this->json('POST', '/core/v1/organisations/import', $data);
             $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $organisations = factory(Organisation::class, 2)->make();
+        $organisations = Organisation::factory()->count(2)->make();
 
         $this->createOrganisationSpreadsheets($organisations);
 
-        $response = $this->json('POST', "/core/v1/organisations/import", ['spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
+        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
 
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
@@ -1535,11 +1534,11 @@ class OrganisationsTest extends TestCase
             ],
         ]);
 
-        $organisations = factory(Organisation::class, 2)->make();
+        $organisations = Organisation::factory()->count(2)->make();
 
         $this->createOrganisationSpreadsheets($organisations);
 
-        $response = $this->json('POST', "/core/v1/organisations/import", ['spreadsheet' => 'data:application/octet-stream;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
+        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/octet-stream;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
             'data' => [
@@ -1547,11 +1546,11 @@ class OrganisationsTest extends TestCase
             ],
         ]);
 
-        $organisations = factory(Organisation::class, 2)->make();
+        $organisations = Organisation::factory()->count(2)->make();
 
         $this->createOrganisationSpreadsheets($organisations);
 
-        $response = $this->json('POST', "/core/v1/organisations/import", ['spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx')))]);
+        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx')))]);
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
             'data' => [
@@ -1564,28 +1563,28 @@ class OrganisationsTest extends TestCase
     {
         Storage::fake('local');
 
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         Passport::actingAs($user);
 
-        $organisation1 = factory(Organisation::class)->make([
+        $organisation1 = Organisation::factory()->make([
             'name' => '',
             'url' => 'www.foo.com',
             'email' => 'foo.com',
         ]);
 
-        $organisation2 = factory(Organisation::class)->make([
+        $organisation2 = Organisation::factory()->make([
             'email' => '',
             'phone' => '',
         ]);
 
-        $organisation3 = factory(Organisation::class)->make([
-            'id' => factory(Organisation::class)->create()->id,
+        $organisation3 = Organisation::factory()->make([
+            'id' => Organisation::factory()->create()->id,
         ]);
 
         $this->createOrganisationSpreadsheets(collect([$organisation1, $organisation2, $organisation3]));
 
-        $response = $this->json('POST', "/core/v1/organisations/import", ['spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
+        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
         $response->assertJson([
@@ -1618,7 +1617,7 @@ class OrganisationsTest extends TestCase
             ],
         ]);
 
-        $response = $this->json('POST', "/core/v1/organisations/import", ['spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx')))]);
+        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx')))]);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
         $response->assertJson([
@@ -1656,15 +1655,15 @@ class OrganisationsTest extends TestCase
     {
         Storage::fake('local');
 
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         Passport::actingAs($user);
 
-        $organisations = factory(Organisation::class, 100)->make();
+        $organisations = Organisation::factory()->count(100)->make();
 
         $this->createOrganisationSpreadsheets($organisations);
 
-        $response = $this->json('POST', "/core/v1/organisations/import", ['spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
+        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
 
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
@@ -1673,11 +1672,11 @@ class OrganisationsTest extends TestCase
             ],
         ]);
 
-        $organisations = factory(Organisation::class, 100)->make();
+        $organisations = Organisation::factory()->count(100)->make();
 
         $this->createOrganisationSpreadsheets($organisations);
 
-        $response = $this->json('POST', "/core/v1/organisations/import", ['spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx')))]);
+        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx')))]);
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
             'data' => [
@@ -1693,15 +1692,15 @@ class OrganisationsTest extends TestCase
     {
         Storage::fake('local');
 
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         Passport::actingAs($user);
 
-        $organisations = factory(Organisation::class, 5000)->make();
+        $organisations = Organisation::factory()->count(5000)->make();
 
         $this->createOrganisationSpreadsheets($organisations);
 
-        $response = $this->json('POST', "/core/v1/organisations/import", ['spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
+        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
             'data' => [
@@ -1709,11 +1708,11 @@ class OrganisationsTest extends TestCase
             ],
         ]);
 
-        $organisations = factory(Organisation::class, 5000)->make();
+        $organisations = Organisation::factory()->count(5000)->make();
 
         $this->createOrganisationSpreadsheets($organisations);
 
-        $response = $this->json('POST', "/core/v1/organisations/import", ['spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
+        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
             'data' => [
@@ -1729,28 +1728,28 @@ class OrganisationsTest extends TestCase
     {
         Storage::fake('local');
 
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         Passport::actingAs($user);
 
-        $organisation = factory(Organisation::class)->create();
+        $organisation = Organisation::factory()->create();
 
         $uuid = uuid();
 
         $organisations = collect([
             $organisation,
-            factory(Organisation::class)->make([
+            Organisation::factory()->make([
                 'id' => $uuid,
             ]),
-            factory(Organisation::class)->make([
+            Organisation::factory()->make([
                 'id' => $uuid,
             ]),
         ]);
 
         $this->createOrganisationSpreadsheets($organisations);
 
-        $response = $this->json('POST', "/core/v1/organisations/import", [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+        $response = $this->json('POST', '/core/v1/organisations/import', [
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ]);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -1802,27 +1801,27 @@ class OrganisationsTest extends TestCase
     {
         Storage::fake('local');
 
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         Passport::actingAs($user);
 
-        $organisation1 = factory(Organisation::class)->create(['name' => 'Current Organisation']);
-        $organisation2 = factory(Organisation::class)->create(['name' => 'Current  Organisation']);
-        $organisation3 = factory(Organisation::class)->create(['name' => 'Current "Organisation"']);
-        $organisation4 = factory(Organisation::class)->create(['name' => 'Current.Organisation']);
-        $organisation5 = factory(Organisation::class)->create(['name' => 'Current, Organisation']);
-        $organisation6 = factory(Organisation::class)->create(['name' => 'Current-Organisation']);
+        $organisation1 = Organisation::factory()->create(['name' => 'Current Organisation']);
+        $organisation2 = Organisation::factory()->create(['name' => 'Current  Organisation']);
+        $organisation3 = Organisation::factory()->create(['name' => 'Current "Organisation"']);
+        $organisation4 = Organisation::factory()->create(['name' => 'Current.Organisation']);
+        $organisation5 = Organisation::factory()->create(['name' => 'Current, Organisation']);
+        $organisation6 = Organisation::factory()->create(['name' => 'Current-Organisation']);
 
         $organisations = collect([
-            factory(Organisation::class)->make(['name' => 'Current Organisation']),
-            factory(Organisation::class)->make(['name' => 'New Organisation']),
-            factory(Organisation::class)->make(['name' => 'New Organisation']),
+            Organisation::factory()->make(['name' => 'Current Organisation']),
+            Organisation::factory()->make(['name' => 'New Organisation']),
+            Organisation::factory()->make(['name' => 'New Organisation']),
         ]);
 
         $this->createOrganisationSpreadsheets($organisations);
 
-        $response = $this->json('POST', "/core/v1/organisations/import", [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+        $response = $this->json('POST', '/core/v1/organisations/import', [
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ]);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -1891,25 +1890,25 @@ class OrganisationsTest extends TestCase
     {
         Storage::fake('local');
 
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         Passport::actingAs($user);
 
-        $organisation1 = factory(Organisation::class)->create(['name' => 'Current Organisation']);
-        $organisation2 = factory(Organisation::class)->create(['name' => 'Current  Organisation']);
-        $organisation3 = factory(Organisation::class)->create(['name' => 'Current "Organisation"']);
-        $organisation4 = factory(Organisation::class)->create(['name' => 'Current.Organisation']);
-        $organisation5 = factory(Organisation::class)->create(['name' => 'Current, Organisation']);
-        $organisation6 = factory(Organisation::class)->create(['name' => 'Current-Organisation']);
+        $organisation1 = Organisation::factory()->create(['name' => 'Current Organisation']);
+        $organisation2 = Organisation::factory()->create(['name' => 'Current  Organisation']);
+        $organisation3 = Organisation::factory()->create(['name' => 'Current "Organisation"']);
+        $organisation4 = Organisation::factory()->create(['name' => 'Current.Organisation']);
+        $organisation5 = Organisation::factory()->create(['name' => 'Current, Organisation']);
+        $organisation6 = Organisation::factory()->create(['name' => 'Current-Organisation']);
         $organisations = collect([
-            factory(Organisation::class)->make(['name' => 'Current Organisation']),
-            factory(Organisation::class)->make(['name' => 'New Organisation']),
+            Organisation::factory()->make(['name' => 'Current Organisation']),
+            Organisation::factory()->make(['name' => 'New Organisation']),
         ]);
 
         $this->createOrganisationSpreadsheets($organisations);
 
-        $response = $this->json('POST', "/core/v1/organisations/import", [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+        $response = $this->json('POST', '/core/v1/organisations/import', [
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
             'ignore_duplicates' => [
                 $organisation1->id,
                 $organisation2->id,
@@ -1946,21 +1945,21 @@ class OrganisationsTest extends TestCase
     {
         Storage::fake('local');
 
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $user->makeSuperAdmin();
         Passport::actingAs($user);
 
-        $organisation = factory(Organisation::class)->create([
+        $organisation = Organisation::factory()->create([
             'name' => 'Current Organisation',
             'description' => 'Original Organisation',
         ]);
 
         $organisations = collect([
-            factory(Organisation::class)->make([
+            Organisation::factory()->make([
                 'name' => 'Current Organisation',
                 'description' => 'Import Organisation 1',
             ]),
-            factory(Organisation::class)->make([
+            Organisation::factory()->make([
                 'name' => 'Current Organisation',
                 'description' => 'Import Organisation 2',
             ]),
@@ -1968,8 +1967,8 @@ class OrganisationsTest extends TestCase
 
         $this->createOrganisationSpreadsheets($organisations);
 
-        $response = $this->json('POST', "/core/v1/organisations/import", [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+        $response = $this->json('POST', '/core/v1/organisations/import', [
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ]);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);

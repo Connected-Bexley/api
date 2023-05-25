@@ -20,19 +20,19 @@ class ReferralCompletedTest extends TestCase
     {
         Queue::fake();
 
-        $referral = factory(Referral::class)->create([
+        $referral = Referral::factory()->create([
             'email' => 'test@example.com',
             'referee_email' => 'test@example.com',
             'status' => Referral::STATUS_COMPLETED,
         ]);
         $referral->statusUpdates()->create([
-            'user_id' => factory(User::class)->create()->id,
+            'user_id' => User::factory()->create()->id,
             'from' => Referral::STATUS_NEW,
             'to' => Referral::STATUS_COMPLETED,
         ]);
 
         $request = Request::create('')->setUserResolver(function () {
-            return factory(User::class)->create();
+            return User::factory()->create();
         });
         $event = EndpointHit::onUpdate($request, '', $referral);
         $listener = new ReferralCompleted();
@@ -51,6 +51,7 @@ class ReferralCompletedTest extends TestCase
             $this->assertArrayHasKey('REFERRAL_ID', $email->values);
             $this->assertArrayHasKey('SERVICE_PHONE', $email->values);
             $this->assertArrayHasKey('SERVICE_EMAIL', $email->values);
+
             return true;
         });
 
@@ -64,6 +65,7 @@ class ReferralCompletedTest extends TestCase
             $this->assertEquals('emails.referral.completed.notify_client.content', $email->getContent());
             $this->assertArrayHasKey('REFERRAL_ID', $email->values);
             $this->assertArrayHasKey('SERVICE_NAME', $email->values);
+
             return true;
         });
     }
@@ -72,19 +74,19 @@ class ReferralCompletedTest extends TestCase
     {
         Queue::fake();
 
-        $referral = factory(Referral::class)->create([
+        $referral = Referral::factory()->create([
             'phone' => 'test@example.com',
             'referee_phone' => '07700000000',
             'status' => Referral::STATUS_COMPLETED,
         ]);
         $referral->statusUpdates()->create([
-            'user_id' => factory(User::class)->create()->id,
+            'user_id' => User::factory()->create()->id,
             'from' => Referral::STATUS_NEW,
             'to' => Referral::STATUS_COMPLETED,
         ]);
 
         $request = Request::create('')->setUserResolver(function () {
-            return factory(User::class)->create();
+            return User::factory()->create();
         });
         $event = EndpointHit::onUpdate($request, '', $referral);
         $listener = new ReferralCompleted();
@@ -93,6 +95,7 @@ class ReferralCompletedTest extends TestCase
         Queue::assertPushedOn('notifications', NotifyClientSms::class);
         Queue::assertPushed(NotifyClientSms::class, function (NotifyClientSms $sms) {
             $this->assertArrayHasKey('REFERRAL_ID', $sms->values);
+
             return true;
         });
 
@@ -103,6 +106,7 @@ class ReferralCompletedTest extends TestCase
             $this->assertArrayHasKey('REFERRAL_ID', $sms->values);
             $this->assertArrayHasKey('SERVICE_PHONE', $sms->values);
             $this->assertArrayHasKey('SERVICE_EMAIL', $sms->values);
+
             return true;
         });
     }
@@ -111,20 +115,20 @@ class ReferralCompletedTest extends TestCase
     {
         Queue::fake();
 
-        $referral = factory(Referral::class)->create([
+        $referral = Referral::factory()->create([
             'email' => 'test@example.com',
             'phone' => '07700000000',
             'referee_email' => 'test@example.com',
             'status' => Referral::STATUS_COMPLETED,
         ]);
         $referral->statusUpdates()->create([
-            'user_id' => factory(User::class)->create()->id,
+            'user_id' => User::factory()->create()->id,
             'from' => Referral::STATUS_NEW,
             'to' => Referral::STATUS_COMPLETED,
         ]);
 
         $request = Request::create('')->setUserResolver(function () {
-            return factory(User::class)->create();
+            return User::factory()->create();
         });
         $event = EndpointHit::onUpdate($request, '', $referral);
         $listener = new ReferralCompleted();
@@ -134,12 +138,14 @@ class ReferralCompletedTest extends TestCase
         Queue::assertPushed(NotifyClientEmail::class, function (NotifyClientEmail $email) {
             $this->assertArrayHasKey('REFERRAL_ID', $email->values);
             $this->assertArrayHasKey('SERVICE_NAME', $email->values);
+
             return true;
         });
 
         Queue::assertPushedOn('notifications', NotifyClientSms::class);
         Queue::assertPushed(NotifyClientSms::class, function (NotifyClientSms $sms) {
             $this->assertArrayHasKey('REFERRAL_ID', $sms->values);
+
             return true;
         });
     }

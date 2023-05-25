@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddIndexesToCollectionTaxonomiesTable extends Migration
-{
+return new class() extends Migration {
     /**
      * Run the migrations.
      */
@@ -25,4 +24,4 @@ class AddIndexesToCollectionTaxonomiesTable extends Migration
             $table->dropIndex(['created_at']);
         });
     }
-}
+};

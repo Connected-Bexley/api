@@ -15,7 +15,7 @@ class MigrationServiceProvider extends ServiceProvider
         /*
          * ID Foreign Key Helper.
          */
-        Blueprint::macro('foreignId', function (string $column, string $referencesTable, string $referencedColumn = 'id', bool $nullable = false) {
+        Blueprint::macro('foreignKeyColumn', function (string $column, string $referencesTable, string $referencedColumn = 'id', bool $nullable = false) {
             $this->unsignedInteger($column)->nullable($nullable);
             $this->foreign($column)->references($referencedColumn)->on($referencesTable);
         });
@@ -23,14 +23,14 @@ class MigrationServiceProvider extends ServiceProvider
         /*
          * ID Nullable Foreign Key Helper.
          */
-        Blueprint::macro('nullableForeignId', function (string $column, string $referencesTable, string $referencedColumn = 'id') {
-            $this->foreignId($column, $referencesTable, $referencedColumn, true);
+        Blueprint::macro('nullableForeignKeyColumn', function (string $column, string $referencesTable, string $referencedColumn = 'id') {
+            $this->foreignKeyColumn($column, $referencesTable, $referencedColumn, true);
         });
 
         /*
          * UUID Foreign Key Helper.
          */
-        Blueprint::macro('foreignUuid', function (string $column, string $referencesTable, string $referencedColumn = 'id', bool $nullable = false) {
+        Blueprint::macro('foreignUuidKeyColumn', function (string $column, string $referencesTable, string $referencedColumn = 'id', bool $nullable = false) {
             $this->uuid($column)->nullable($nullable);
             $this->foreign($column)->references($referencedColumn)->on($referencesTable);
         });
@@ -38,24 +38,8 @@ class MigrationServiceProvider extends ServiceProvider
         /*
          * UUID Nullable Foreign Key Helper.
          */
-        Blueprint::macro('nullableForeignUuid', function (string $column, string $referencesTable, string $referencedColumn = 'id') {
-            $this->foreignUuid($column, $referencesTable, $referencedColumn, true);
-        });
-
-        /*
-         * UUID Polymorphic Helper.
-         */
-        Blueprint::macro('morphsUuid', function (string $name, string $indexName = null, bool $nullable = false) {
-            $this->string("{$name}_type")->nullable($nullable);
-            $this->uuid("{$name}_id")->nullable($nullable);
-            $this->index(["{$name}_type", "{$name}_id"], $indexName);
-        });
-
-        /*
-         * UUID Nullable Polymorphic Helper.
-         */
-        Blueprint::macro('nullableMorphsUuid', function (string $name, string $indexName = null) {
-            $this->morphsUuid($name, $indexName, true);
+        Blueprint::macro('nullableForeignUuidKeyColumn', function (string $column, string $referencesTable, string $referencedColumn = 'id') {
+            $this->foreignUuidKeyColumn($column, $referencesTable, $referencedColumn, true);
         });
     }
 

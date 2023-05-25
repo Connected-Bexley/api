@@ -38,6 +38,7 @@ class BatchUploader
      * Validates and then uploads the file.
      *
      * @param string $filePath
+     *
      * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
      * @throws \Exception
      */
