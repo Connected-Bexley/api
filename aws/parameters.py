@@ -64,7 +64,7 @@ def create_database_username_parameter(template):
             MinLength='8',
             MaxLength='36',
             AllowedPattern='[a-zA-Z0-9_]*',
-            ConstraintDescription='Must only contain alphanumeric characters.'
+            ConstraintDescription='Must be at least 8 characters and only contain alphanumeric characters.'
         )
     )
 
@@ -79,7 +79,7 @@ def create_database_password_parameter(template):
             MinLength='8',
             MaxLength='41',
             AllowedPattern='[a-zA-Z0-9]*',
-            ConstraintDescription='Must only contain alphanumeric characters.'
+            ConstraintDescription='Must be at least 8 characters and only contain alphanumeric characters.'
         )
     )
 
