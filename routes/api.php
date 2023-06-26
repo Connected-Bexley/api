@@ -150,7 +150,7 @@ Route::prefix('/core/v1')
                 ->name('search.collections.categories');
             Route::post('/search/collections/personas', Core\V1\Search\CollectionPersonaController::class)
                 ->name('search.collections.personas');
-            Route::post('/search/pages', Core\V1\Search\PageController::class)->name('search');
+            Route::post('/search/pages', Core\V1\Search\PageController::class)->name('search.pages');
             Route::post('/search/events', Core\V1\Search\EventController::class)->name('search.events');
 
             // Service Locations.
