@@ -110,7 +110,7 @@ class File extends Model implements Responsable
      */
     public function upload(string $content): File
     {
-        $response = Storage::disk(config('filesystems.cloud'))->put($this->path(), $content, $this->visibility());
+        Storage::disk(config('filesystems.cloud'))->put($this->path(), $content, $this->visibility());
 
         return $this;
     }

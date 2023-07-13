@@ -13,12 +13,12 @@
         "axios": "^0.25",
         "govuk-frontend": "^2.3.0",
         "laravel-mix": "^6.0.12",
-        "lodash": "^4.17.4",
+        "lodash": "^4.17.21",
+        "postcss": "^8.4.25",
         "resolve-url-loader": "^5.0.0",
-        "sass": "latest",
+        "sass": "^1.63.6",
         "sass-loader": "^12.1.0",
-        "swagger-ui": "^4.14.3",
-        "vue": "^2.5.7",
-        "postcss": "^8.2.8"
+        "swagger-ui": "^4.19.1",
+        "vue": "^2.7.14"
     }
 }
