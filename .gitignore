@@ -13,6 +13,7 @@
 /.vscode
 /.vagrant
 /.*.cache
+/aws/__pycache__
 Homestead.json
 Homestead.yaml
 npm-debug.log

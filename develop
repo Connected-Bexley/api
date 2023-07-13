@@ -92,6 +92,19 @@ if [[ $# -gt 0  ]]; then
             cat aws/${CFN_TEMPLATE}.json
             ;;
 
+        # Manually work with objects in S3 buckets
+        store )
+            docker run --rm -it \
+                -v `pwd`:/var/www/html \
+                -w /var/www/html \
+                -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-''} \
+                -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-''} \
+                -e AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-''} \
+                -e AWS_BUCKET_NAME=${AWS_BUCKET_NAME:-''} \
+                ubuntu:latest \
+                bash aws/store.sh
+            ;;
+
         # Run a docker-compose command
         * ) ${COMPOSE} "$@"; ;;
 
