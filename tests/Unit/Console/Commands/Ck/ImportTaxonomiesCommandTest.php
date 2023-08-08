@@ -5,13 +5,14 @@ namespace Tests\Unit\Console\Commands\Ck;
 use App\Console\Commands\Ck\ImportTaxonomiesCommand;
 use App\Models\Taxonomy;
 use Faker\Factory as Faker;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class ImportTaxonomiesCommandTest extends TestCase
 {
     public $taxonomyRecords = [];
 
-    protected function setUp(): void
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -56,21 +57,32 @@ class ImportTaxonomiesCommandTest extends TestCase
      */
     public function it_can_convert_an_indexed_array_to_an_associative_array()
     {
-        $associativeRecords = (new ImportTaxonomiesCommand())->mapToIdKeys($this->taxonomyRecords);
+        $params = [
+            'taxonomyIdColumn' => 0,
+            'taxonomyNameColumn' => 1,
+            'parentIdColumn' => 2,
+            'rootTaxonomy' => Taxonomy::category(),
+        ];
+        $associativeRecords = (new ImportTaxonomiesCommand($params))->mapToUuidKeys($this->taxonomyRecords);
 
-        $this->assertEquals(
-            $associativeRecords['level-2-2'],
-            [
-                'id' => 'level-2-2',
-                'slug' => 'level-2-2',
-                'name' => 'Level 2 2',
-                'parent_id' => 'level-1-0',
-                'order' => 0,
-                'depth' => 1,
-                'created_at' => $associativeRecords['level-2-2']['created_at'],
-                'updated_at' => $associativeRecords['level-2-2']['updated_at'],
-            ]
-        );
+        foreach ($associativeRecords as $uuid => $record) {
+            $recordKey = array_search($record['name'], array_column($this->taxonomyRecords, 1));
+            $parentKey = array_search($this->taxonomyRecords[$recordKey][2], array_column($this->taxonomyRecords, 0));
+            $parentUuid = $this->taxonomyRecords[$recordKey][2] === Taxonomy::category()->id ? Taxonomy::category()->id : array_search($this->taxonomyRecords[$parentKey][1], array_column($associativeRecords, 'name', 'id'));
+            $this->assertEquals(
+                [
+                    'id' => $record['id'],
+                    'name' => $this->taxonomyRecords[$recordKey][1],
+                    'slug' => Str::slug($this->taxonomyRecords[$recordKey][1] . ' ' . $this->taxonomyRecords[$recordKey][0]),
+                    'parent_id' => $parentUuid,
+                    'order' => 0,
+                    'depth' => 1,
+                    'created_at' => $record['created_at'],
+                    'updated_at' => $record['updated_at'],
+                ],
+                $record
+            );
+        }
     }
 
     /**
@@ -125,7 +137,7 @@ class ImportTaxonomiesCommandTest extends TestCase
 
         $cmd = new ImportTaxonomiesCommand();
 
-        $recordsWithDepth = $cmd->calculateTaxonomyDepth(['level-0-0'], $records);
+        $recordsWithDepth = $cmd->calculateTaxonomyDepth(['level-0-0'], $records, 1);
 
         $this->assertEquals(1, $recordsWithDepth['level-0-0']['depth']);
         $this->assertEquals(2, $recordsWithDepth['level-1-0']['depth']);
@@ -140,18 +152,28 @@ class ImportTaxonomiesCommandTest extends TestCase
      */
     public function it_builds_a_taxonomy_tree_from_a_flat_array()
     {
-        $cmd = new ImportTaxonomiesCommand();
-        $taxonomyRecords = $cmd->mapToIdKeys($this->taxonomyRecords);
+        $params = [
+            'taxonomyIdColumn' => 0,
+            'taxonomyNameColumn' => 1,
+            'parentIdColumn' => 2,
+            'rootTaxonomy' => Taxonomy::category(),
+        ];
+
+        $cmd = new ImportTaxonomiesCommand($params);
+        $taxonomyRecords = $cmd->mapToUuidKeys($this->taxonomyRecords);
 
         $taxonomyRecords = $cmd->mapTaxonomyDepth($taxonomyRecords);
 
-        $this->assertEquals(1, $taxonomyRecords['level-0-0']['depth']);
-        $this->assertEquals(2, $taxonomyRecords['level-1-6']['depth']);
-        $this->assertEquals(3, $taxonomyRecords['level-2-4']['depth']);
-        $this->assertEquals(4, $taxonomyRecords['level-3-9']['depth']);
+        $this->assertEquals(1, $taxonomyRecords[array_search('Level 0 0', array_column($taxonomyRecords, 'name', 'id'))]['depth']);
+        $this->assertEquals(2, $taxonomyRecords[array_search('Level 1 6', array_column($taxonomyRecords, 'name', 'id'))]['depth']);
+        $this->assertEquals(3, $taxonomyRecords[array_search('Level 2 4', array_column($taxonomyRecords, 'name', 'id'))]['depth']);
+        $this->assertEquals(4, $taxonomyRecords[array_search('Level 3 9', array_column($taxonomyRecords, 'name', 'id'))]['depth']);
     }
 
     /**
+     * In Laravel 8.x the deleteAllTaxonomies command will end the active transaction
+     * through Schema disableForeignKeyConstraints and enableForeignKeyConstraints
+     * This throws a no active transaction error when refreshDatabase in tearDown
      * @test
      */
     public function it_can_delete_all_taxonomies()
@@ -160,11 +182,10 @@ class ImportTaxonomiesCommandTest extends TestCase
 
         $currentTaxonomyCount = count($cmd->getDescendantTaxonomyIds([Taxonomy::category()->id]));
 
-
-        $rootTaxonomies = Taxonomy::factory()->count(3)->create();
+        $rootTaxonomies = Taxonomy::factory(3)->create();
 
         $rootTaxonomies->each(function ($taxonomy) {
-            Taxonomy::factory()->count(5)->create([
+            Taxonomy::factory(5)->create([
                 'parent_id' => $taxonomy->id,
                 'depth' => 2,
             ]);
@@ -183,7 +204,14 @@ class ImportTaxonomiesCommandTest extends TestCase
     public function it_can_import_an_array_of_taxonomy_data()
     {
         $faker = Faker::create('en_GB');
-        $cmd = new ImportTaxonomiesCommand();
+        $params = [
+            'taxonomyIdColumn' => 0,
+            'taxonomyNameColumn' => 1,
+            'parentIdColumn' => 2,
+            'firstRowLabels' => true,
+            'rootTaxonomy' => Taxonomy::category(),
+        ];
+        $cmd = new ImportTaxonomiesCommand($params);
         $currentTaxonomyCount = count($cmd->getDescendantTaxonomyIds([Taxonomy::category()->id]));
 
         $taxonomyRecords = [
@@ -204,9 +232,7 @@ class ImportTaxonomiesCommandTest extends TestCase
         $cmd->importTaxonomyRecords($taxonomyRecords, false, false);
 
         $this->assertDatabaseHas((new Taxonomy())->getTable(), [
-            'id' => $taxonomyRecords[10][0],
             'name' => $taxonomyRecords[10][1],
-            'parent_id' => $taxonomyRecords[10][2],
         ]);
 
         $this->assertCount(($currentTaxonomyCount + count($taxonomyRecords) - 1), $cmd->getDescendantTaxonomyIds([Taxonomy::category()->id]));
@@ -218,7 +244,16 @@ class ImportTaxonomiesCommandTest extends TestCase
     public function it_can_delete_existing_taxonomies_and_import_an_array_of_taxonomy_data()
     {
         $faker = Faker::create('en_GB');
-        $cmd = new ImportTaxonomiesCommand();
+        $params = [
+            'taxonomyIdColumn' => 0,
+            'taxonomyNameColumn' => 1,
+            'parentIdColumn' => 2,
+            'firstRowLabels' => true,
+            'rootTaxonomy' => Taxonomy::category(),
+        ];
+        $cmd = new ImportTaxonomiesCommand($params);
+
+        $currentTaxonomyCount = count($cmd->getDescendantTaxonomyIds([Taxonomy::category()->id]));
 
         $taxonomyRecords = [
             [uuid(), $faker->words(3, true), null],
@@ -233,16 +268,16 @@ class ImportTaxonomiesCommandTest extends TestCase
             $taxonomyRecords[] = [uuid(), $faker->words(3, true), $taxonomyRecords[8][0]];
         }
 
+        $newTaxonomyCount = count($taxonomyRecords);
+
         array_splice($taxonomyRecords, 0, 0, [['ID', 'Name', 'Parent ID']]);
 
         $cmd->importTaxonomyRecords($taxonomyRecords, true, false);
 
         $this->assertDatabaseHas((new Taxonomy())->getTable(), [
-            'id' => $taxonomyRecords[10][0],
             'name' => $taxonomyRecords[10][1],
-            'parent_id' => $taxonomyRecords[10][2],
         ]);
 
-        $this->assertCount(count($taxonomyRecords) - 1, $cmd->getDescendantTaxonomyIds([Taxonomy::category()->id]));
+        $this->assertCount($currentTaxonomyCount + $newTaxonomyCount, $cmd->getDescendantTaxonomyIds([Taxonomy::category()->id]));
     }
 }
