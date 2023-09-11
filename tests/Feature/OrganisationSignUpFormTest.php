@@ -25,7 +25,7 @@ class OrganisationSignUpFormTest extends TestCase
                 'first_name' => $this->faker->firstName(),
                 'last_name' => $this->faker->lastName(),
                 'email' => $this->faker->safeEmail(),
-                'phone' => random_uk_phone(),
+                'phone' => random_uk_mobile_phone(),
                 'password' => 'P@55w0rd.',
             ],
             'organisation' => [
@@ -50,7 +50,7 @@ class OrganisationSignUpFormTest extends TestCase
                 'video_embed' => null,
                 'url' => $this->faker->url(),
                 'contact_name' => $this->faker->name(),
-                'contact_phone' => random_uk_phone(),
+                'contact_phone' => random_uk_mobile_phone(),
                 'contact_email' => $this->faker->safeEmail(),
                 'useful_infos' => [
                     [
@@ -84,7 +84,7 @@ class OrganisationSignUpFormTest extends TestCase
                 'first_name' => $this->faker->firstName(),
                 'last_name' => $this->faker->lastName(),
                 'email' => $this->faker->safeEmail(),
-                'phone' => random_uk_phone(),
+                'phone' => random_uk_mobile_phone(),
                 'password' => 'P@55w0rd.',
             ],
             'organisation' => [
@@ -109,7 +109,7 @@ class OrganisationSignUpFormTest extends TestCase
                 'video_embed' => null,
                 'url' => $this->faker->url(),
                 'contact_name' => $this->faker->name(),
-                'contact_phone' => random_uk_phone(),
+                'contact_phone' => random_uk_mobile_phone(),
                 'contact_email' => null,
                 'useful_infos' => [
                     [
@@ -149,7 +149,7 @@ class OrganisationSignUpFormTest extends TestCase
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
             'email' => $this->faker->safeEmail(),
-            'phone' => random_uk_phone(),
+            'phone' => random_uk_mobile_phone(),
             'password' => 'P@55w0rd.',
         ];
 
@@ -200,7 +200,7 @@ class OrganisationSignUpFormTest extends TestCase
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
             'email' => 'admin@organisation.org',
-            'phone' => random_uk_phone(),
+            'phone' => random_uk_mobile_phone(),
             'password' => 'P@55w0rd.',
         ];
 
@@ -217,6 +217,50 @@ class OrganisationSignUpFormTest extends TestCase
     /**
      * @test
      */
+    public function guest_must_sign_up_with_uk_mobile_phone_number()
+    {
+        $this->fakeEvents();
+
+        $organisation = Organisation::factory()->create();
+
+        $userSubmission = [
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
+            'email' => $this->faker->safeEmail(),
+            'phone' => random_uk_phone(),
+            'password' => 'P@55w0rd.',
+        ];
+
+        $response = $this->json('POST', '/core/v1/organisation-sign-up-forms', [
+            'user' => $userSubmission,
+            'organisation' => [
+                'id' => $organisation->id,
+            ],
+        ]);
+
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        $userSubmission = [
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
+            'email' => $this->faker->safeEmail(),
+            'phone' => random_uk_mobile_phone(),
+            'password' => 'P@55w0rd.',
+        ];
+
+        $response = $this->json('POST', '/core/v1/organisation-sign-up-forms', [
+            'user' => $userSubmission,
+            'organisation' => [
+                'id' => $organisation->id,
+            ],
+        ]);
+
+        $response->assertStatus(Response::HTTP_CREATED);
+    }
+
+    /**
+     * @test
+     */
     public function guest_cannot_sign_up_with_email_in_existing_signup_request()
     {
         $this->fakeEvents();
@@ -227,7 +271,7 @@ class OrganisationSignUpFormTest extends TestCase
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
             'email' => 'admin@organisation.org',
-            'phone' => random_uk_phone(),
+            'phone' => random_uk_mobile_phone(),
             'password' => 'P@55w0rd.',
         ];
 
@@ -244,7 +288,7 @@ class OrganisationSignUpFormTest extends TestCase
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
             'email' => 'admin@organisation.org',
-            'phone' => random_uk_phone(),
+            'phone' => random_uk_mobile_phone(),
             'password' => 'P@55w0rd.',
         ];
 
@@ -267,7 +311,7 @@ class OrganisationSignUpFormTest extends TestCase
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
             'email' => $this->faker->safeEmail(),
-            'phone' => random_uk_phone(),
+            'phone' => random_uk_mobile_phone(),
             'password' => 'P@55w0rd.',
         ];
         $response = $this->json('POST', '/core/v1/organisation-sign-up-forms', [
@@ -291,7 +335,7 @@ class OrganisationSignUpFormTest extends TestCase
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
             'email' => $this->faker->safeEmail(),
-            'phone' => random_uk_phone(),
+            'phone' => random_uk_mobile_phone(),
             'password' => 'P@55w0rd.',
         ];
         $organisationSubmission = [
@@ -335,7 +379,7 @@ class OrganisationSignUpFormTest extends TestCase
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
             'email' => $this->faker->safeEmail(),
-            'phone' => random_uk_phone(),
+            'phone' => random_uk_mobile_phone(),
             'password' => 'P@55w0rd.',
         ];
 
@@ -438,7 +482,7 @@ class OrganisationSignUpFormTest extends TestCase
                 'first_name' => $this->faker->firstName(),
                 'last_name' => $this->faker->lastName(),
                 'email' => $this->faker->safeEmail(),
-                'phone' => random_uk_phone(),
+                'phone' => random_uk_mobile_phone(),
                 'password' => 'P@55w0rd.',
             ],
             'organisation' => [
@@ -463,7 +507,7 @@ class OrganisationSignUpFormTest extends TestCase
                 'video_embed' => null,
                 'url' => $this->faker->url(),
                 'contact_name' => $this->faker->name(),
-                'contact_phone' => random_uk_phone(),
+                'contact_phone' => random_uk_mobile_phone(),
                 'contact_email' => $this->faker->safeEmail(),
                 'useful_infos' => [
                     [

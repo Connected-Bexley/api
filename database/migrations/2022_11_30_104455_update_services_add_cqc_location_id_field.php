@@ -11,9 +11,7 @@ return new class() extends Migration {
     public function up()
     {
         Schema::table('services', function (Blueprint $table) {
-            Schema::table('services', function (Blueprint $table) {
-                $table->string('cqc_location_id')->nullable();
-            });
+            $table->string('cqc_location_id')->nullable();
         });
     }
 
@@ -23,9 +21,7 @@ return new class() extends Migration {
     public function down()
     {
         Schema::table('services', function (Blueprint $table) {
-            Schema::table('services', function (Blueprint $table) {
-                $table->dropColumn('cqc_location_id');
-            });
+            $table->dropColumn('cqc_location_id');
         });
     }
 };

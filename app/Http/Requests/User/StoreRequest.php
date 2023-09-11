@@ -5,7 +5,7 @@ namespace App\Http\Requests\User;
 use App\Models\Role;
 use App\Rules\CanAssignRoleToUser;
 use App\Rules\Password;
-use App\Rules\UkPhoneNumber;
+use App\Rules\UkMobilePhoneNumber;
 use App\Rules\UserEmailNotTaken;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -32,7 +32,7 @@ class StoreRequest extends FormRequest
             'first_name' => ['required', 'string', 'min:1', 'max:255'],
             'last_name' => ['required', 'string', 'min:1', 'max:255'],
             'email' => ['required', 'email', 'max:255', new UserEmailNotTaken()],
-            'phone' => ['required', 'string', 'min:1', 'max:255', new UkPhoneNumber()],
+            'phone' => ['required', 'string', 'min:1', 'max:255', new UkMobilePhoneNumber()],
             'password' => ['required', 'string', 'min:8', 'max:255', new Password()],
 
             'roles' => ['required', 'array'],

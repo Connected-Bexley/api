@@ -1,6 +1,6 @@
 <?php
 
-if (! function_exists('uuid')) {
+if (!function_exists('uuid')) {
     /**
      * Generate a UUID (version 4).
      *
@@ -12,7 +12,7 @@ if (! function_exists('uuid')) {
     }
 }
 
-if (! function_exists('is_uuid')) {
+if (!function_exists('is_uuid')) {
     /**
      * Check a string to see if it is a valid UUID
      *
@@ -25,7 +25,7 @@ if (! function_exists('is_uuid')) {
     }
 }
 
-if (! function_exists('random_uk_phone')) {
+if (!function_exists('random_uk_phone')) {
     /**
      * Generate a random UK phone number.
      *
@@ -33,14 +33,23 @@ if (! function_exists('random_uk_phone')) {
      */
     function random_uk_phone(): string
     {
-        return \Illuminate\Support\Arr::random([
-            '0'.rand(1000000000, 1999999999),
-            '0'.rand(7000000000, 7999999999),
-        ]);
+        return '0' . rand(1000000000, 1999999999);
     }
 }
 
-if (! function_exists('array_filter_null')) {
+if (!function_exists('random_uk_mobile_phone')) {
+    /**
+     * Generate a random UK mobile phone number.
+     *
+     * @return string
+     */
+    function random_uk_mobile_phone(): string
+    {
+        return '0' . rand(7000000000, 7999999999);
+    }
+}
+
+if (!function_exists('array_filter_null')) {
     /**
      * Removed any array values with a null value.
      *
@@ -55,7 +64,7 @@ if (! function_exists('array_filter_null')) {
     }
 }
 
-if (! function_exists('array_filter_missing')) {
+if (!function_exists('array_filter_missing')) {
     /**
      * Removed any array values with an empty value.
      *
@@ -65,12 +74,12 @@ if (! function_exists('array_filter_missing')) {
     function array_filter_missing(array $array): array
     {
         return array_filter($array, function ($value) {
-            return ! ($value instanceof \App\Support\MissingValue);
+            return !($value instanceof \App\Support\MissingValue);
         });
     }
 }
 
-if (! function_exists('array_pluck_multi')) {
+if (!function_exists('array_pluck_multi')) {
     /**
      * Plucks a key from a multidimensional array.
      *
@@ -84,7 +93,7 @@ if (! function_exists('array_pluck_multi')) {
     }
 }
 
-if (! function_exists('array_diff_multi')) {
+if (!function_exists('array_diff_multi')) {
     /**
      * Diffs an array from a multidimensional array.
      *
@@ -104,7 +113,7 @@ if (! function_exists('array_diff_multi')) {
     }
 }
 
-if (! function_exists('table')) {
+if (!function_exists('table')) {
     /**
      * Returns the table name of a model.
      *
@@ -114,8 +123,8 @@ if (! function_exists('table')) {
      */
     function table(string $model, string $column = null): ?string
     {
-        if (! is_subclass_of($model, \Illuminate\Database\Eloquent\Model::class)) {
-            throw new InvalidArgumentException("[$model] must be an instance of ".\Illuminate\Database\Eloquent\Model::class);
+        if (!is_subclass_of($model, \Illuminate\Database\Eloquent\Model::class)) {
+            throw new InvalidArgumentException("[$model] must be an instance of " . \Illuminate\Database\Eloquent\Model::class);
         }
 
         $table = (new $model())->getTable();
@@ -124,7 +133,7 @@ if (! function_exists('table')) {
     }
 }
 
-if (! function_exists('single_space')) {
+if (!function_exists('single_space')) {
     /**
      * Removes duplicate spaces from a string.
      *
@@ -140,7 +149,7 @@ if (! function_exists('single_space')) {
     }
 }
 
-if (! function_exists('strip_spaces')) {
+if (!function_exists('strip_spaces')) {
     /**
      * Removes spaces from a string.
      *
@@ -153,7 +162,7 @@ if (! function_exists('strip_spaces')) {
     }
 }
 
-if (! function_exists('occurrence')) {
+if (!function_exists('occurrence')) {
     /**
      * Convert a number from 1 to 5 into an ordinal string.
      *
@@ -181,7 +190,7 @@ if (! function_exists('occurrence')) {
     }
 }
 
-if (! function_exists('weekday')) {
+if (!function_exists('weekday')) {
     /**
      * Convert a number from 1 to 7 into an weekday string.
      *
@@ -211,7 +220,7 @@ if (! function_exists('weekday')) {
     }
 }
 
-if (! function_exists('month')) {
+if (!function_exists('month')) {
     /**
      * Convert a number from 1 to 12 into an month string.
      *
@@ -251,7 +260,7 @@ if (! function_exists('month')) {
     }
 }
 
-if (! function_exists('register_enum_type')) {
+if (!function_exists('register_enum_type')) {
     /**
      * Registers the enum type as a string.
      */
@@ -264,7 +273,7 @@ if (! function_exists('register_enum_type')) {
     }
 }
 
-if (! function_exists('per_page')) {
+if (!function_exists('per_page')) {
     /**
      * @param  int|null  $perPage
      * @return int
@@ -280,7 +289,7 @@ if (! function_exists('per_page')) {
     }
 }
 
-if (! function_exists('page')) {
+if (!function_exists('page')) {
     /**
      * @param  int|null  $page
      * @return int
@@ -295,18 +304,18 @@ if (! function_exists('page')) {
     }
 }
 
-if (! function_exists('backend_uri')) {
+if (!function_exists('backend_uri')) {
     /**
      * @param  string  $path
      * @return string
      */
     function backend_uri(string $path = ''): string
     {
-        return config('local.backend_uri').$path;
+        return config('local.backend_uri') . $path;
     }
 }
 
-if (! function_exists('csv_to_array')) {
+if (!function_exists('csv_to_array')) {
     /**
      * @param  string  $content
      * @return array
@@ -328,7 +337,7 @@ if (! function_exists('csv_to_array')) {
     }
 }
 
-if (! function_exists('array_to_csv')) {
+if (!function_exists('array_to_csv')) {
     /**
      * @see https://coderwall.com/p/zvzwwa/array-to-comma-separated-string-in-php For source of function
      *
@@ -363,7 +372,7 @@ if (! function_exists('array_to_csv')) {
         foreach ($data as $row) {
             // Wrap cells with coma's in double quotes.
             foreach ($row as &$cell) {
-                $cell = \Illuminate\Support\Str::contains($cell, ',') ? '"'.$cell.'"' : $cell;
+                $cell = \Illuminate\Support\Str::contains($cell, ',') ? '"' . $cell . '"' : $cell;
             }
 
             yield $row;
@@ -371,7 +380,7 @@ if (! function_exists('array_to_csv')) {
     }
 }
 
-if (! function_exists('combine_query')) {
+if (!function_exists('combine_query')) {
     /**
      * Outputs the query with bindings inserted.
      *
@@ -389,7 +398,7 @@ if (! function_exists('combine_query')) {
     }
 }
 
-if (! function_exists('sanitize_markdown')) {
+if (!function_exists('sanitize_markdown')) {
     /**
      * Sanitizes the markdown from unwanted markup.
      *
@@ -408,7 +417,7 @@ if (! function_exists('sanitize_markdown')) {
     }
 }
 
-if (! function_exists('trim_quotes')) {
+if (!function_exists('trim_quotes')) {
     /**
      * Trim a string from all types of quotes.
      *

@@ -94,6 +94,10 @@ class UpdateRequest extends FormRequest
             'cms.frontend.privacy_policy.title' => ['required', 'string'],
             'cms.frontend.privacy_policy.content' => ['required', 'string'],
 
+            'cms.frontend.accessibility_statement' => ['required', 'array'],
+            'cms.frontend.accessibility_statement.title' => ['required', 'string'],
+            'cms.frontend.accessibility_statement.content' => ['nullable', 'string'],
+
             'cms.frontend.about' => ['required', 'array'],
             'cms.frontend.about.title' => ['required', 'string'],
             'cms.frontend.about.content' => ['required', 'string'],

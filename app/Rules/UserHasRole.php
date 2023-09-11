@@ -58,6 +58,8 @@ class UserHasRole implements Rule
                 return $this->user->isServiceWorker($this->userRole->service);
             case Role::NAME_ORGANISATION_ADMIN:
                 return $this->user->isOrganisationAdmin($this->userRole->organisation);
+            case Role::NAME_CONTENT_ADMIN:
+                return $this->user->isContentAdmin();
             case Role::NAME_GLOBAL_ADMIN:
                 return $this->user->isGlobalAdmin();
             case Role::NAME_SUPER_ADMIN:

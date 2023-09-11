@@ -39,7 +39,7 @@ class UpdateRequestApprovedTest extends TestCase
         $listener->handle($event);
 
         Queue::assertPushedOn(
-            'notifications',
+            config('queue.queues.notifications', 'default'),
             \App\Emails\UpdateRequestApproved\NotifySubmitterEmail::class
         );
         Queue::assertPushed(
@@ -110,7 +110,7 @@ class UpdateRequestApprovedTest extends TestCase
         $listener->handle($event);
 
         Queue::assertPushedOn(
-            'notifications',
+            config('queue.queues.notifications', 'default'),
             \App\Emails\OrganisationSignUpFormApproved\NotifySubmitterEmail::class
         );
         Queue::assertPushed(

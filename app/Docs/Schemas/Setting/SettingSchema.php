@@ -49,6 +49,11 @@ class SettingSchema extends Schema
             Schema::string('content')->format('markdown')
         );
 
+        $accessibilityStatement = Schema::object('accessibility_statement')->properties(
+            Schema::string('title'),
+            Schema::string('content')->format('markdown')
+        );
+
         $about = Schema::object('about')->properties(
             Schema::string('title'),
             Schema::string('content')->format('markdown'),
@@ -89,6 +94,7 @@ class SettingSchema extends Schema
                                 $home,
                                 $termsAndConditions,
                                 $privacyPolicy,
+                                $accessibilityStatement,
                                 $about,
                                 $contact,
                                 $getInvolved,

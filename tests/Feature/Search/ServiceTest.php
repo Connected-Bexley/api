@@ -34,11 +34,73 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
     public function test_guest_can_search()
     {
+        Service::factory()->create(['name' => 'Thisisatest']);
+
+        sleep(1);
+
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'test',
+            'query' => 'Thisisatest',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
+
+        $response->assertJsonStructure([
+            'data' => [
+                [
+                    "id",
+                    "organisation_id",
+                    "has_logo",
+                    "slug",
+                    "name",
+                    "type",
+                    "status",
+                    "intro",
+                    "description",
+                    "wait_time",
+                    "is_free",
+                    "fees_text",
+                    "fees_url",
+                    "testimonial",
+                    "video_embed",
+                    "url",
+                    "contact_name",
+                    "contact_phone",
+                    "contact_email",
+                    "show_referral_disclaimer",
+                    "referral_method",
+                    "referral_button_text",
+                    "referral_email",
+                    "referral_url",
+                    "useful_infos",
+                    "offerings",
+                    "gallery_items",
+                    "tags",
+                    "category_taxonomies",
+                    "eligibility_types" => [
+                        "custom" => [
+                            "age_group",
+                            "disability",
+                            "ethnicity",
+                            "gender",
+                            "income",
+                            "language",
+                            "housing",
+                            "other",
+                        ],
+                        "taxonomies",
+                    ],
+                    "score",
+                    "ends_at",
+                    "last_modified_at",
+                    "created_at",
+                    "updated_at",
+                    "service_locations",
+                    "cqc_location_id",
+                ],
+            ],
+            'links',
+            'meta',
+        ]);
     }
 
     public function test_query_matches_service_name()
@@ -1108,7 +1170,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response = $this->json('POST', '/core/v1/search', [
             'query' => 'Thisisatest',
             'eligibilities' => [
-                '12 - 15 years', ],
+                '12 - 15 years'],
         ]);
 
         $response->assertStatus(Response::HTTP_OK);

@@ -25,7 +25,7 @@ class UpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        if ($this->user()->isGlobalAdmin()) {
+        if ($this->user()->isContentAdmin()) {
             return true;
         }
 
@@ -57,7 +57,7 @@ class UpdateRequest extends FormRequest
                     $this->user('api'),
                     new UserRole([
                         'user_id' => $this->user('api')->id,
-                        'role_id' => Role::globalAdmin()->id,
+                        'role_id' => Role::contentAdmin()->id,
                     ]),
                     $this->page->slug
                 ),
@@ -82,7 +82,7 @@ class UpdateRequest extends FormRequest
                     $this->user('api'),
                     new UserRole([
                         'user_id' => $this->user('api')->id,
-                        'role_id' => Role::globalAdmin()->id,
+                        'role_id' => Role::contentAdmin()->id,
                     ]),
                     $this->page->enabled
                 ),

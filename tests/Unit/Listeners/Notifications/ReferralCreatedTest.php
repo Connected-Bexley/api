@@ -40,7 +40,7 @@ class ReferralCreatedTest extends TestCase
         $listener = new ReferralCreated();
         $listener->handle($event);
 
-        Queue::assertPushedOn('notifications', NotifyRefereeEmail::class);
+        Queue::assertPushedOn(config('queue.queues.notifications', 'default'), NotifyRefereeEmail::class);
         Queue::assertPushed(NotifyRefereeEmail::class, function (NotifyRefereeEmail $email) {
             $this->assertEquals(
                 config('gov_uk_notify.notifications_template_ids.referral_created.notify_referee.email'),
@@ -56,7 +56,7 @@ class ReferralCreatedTest extends TestCase
             return true;
         });
 
-        Queue::assertPushedOn('notifications', NotifyClientEmail::class);
+        Queue::assertPushedOn(config('queue.queues.notifications', 'default'), NotifyClientEmail::class);
         Queue::assertPushed(NotifyClientEmail::class, function (NotifyClientEmail $email) {
             $this->assertEquals(
                 config('gov_uk_notify.notifications_template_ids.referral_created.notify_client.email'),
@@ -71,7 +71,7 @@ class ReferralCreatedTest extends TestCase
             return true;
         });
 
-        Queue::assertPushedOn('notifications', NotifyServiceEmail::class);
+        Queue::assertPushedOn(config('queue.queues.notifications', 'default'), NotifyServiceEmail::class);
         Queue::assertPushed(NotifyServiceEmail::class, function (NotifyServiceEmail $email) {
             $this->assertEquals(
                 config('gov_uk_notify.notifications_template_ids.referral_created.notify_service.email'),
@@ -112,14 +112,14 @@ class ReferralCreatedTest extends TestCase
         $listener = new ReferralCreated();
         $listener->handle($event);
 
-        Queue::assertPushedOn('notifications', NotifyRefereeSms::class);
+        Queue::assertPushedOn(config('queue.queues.notifications', 'default'), NotifyRefereeSms::class);
         Queue::assertPushed(NotifyRefereeSms::class, function (NotifyRefereeSms $sms) {
             $this->assertArrayHasKey('REFERRAL_ID', $sms->values);
 
             return true;
         });
 
-        Queue::assertPushedOn('notifications', NotifyClientSms::class);
+        Queue::assertPushedOn(config('queue.queues.notifications', 'default'), NotifyClientSms::class);
         Queue::assertPushed(NotifyClientSms::class, function (NotifyClientSms $sms) {
             $this->assertArrayHasKey('REFERRAL_ID', $sms->values);
 
@@ -150,7 +150,7 @@ class ReferralCreatedTest extends TestCase
         $listener = new ReferralCreated();
         $listener->handle($event);
 
-        Queue::assertPushedOn('notifications', NotifyClientEmail::class);
+        Queue::assertPushedOn(config('queue.queues.notifications', 'default'), NotifyClientEmail::class);
         Queue::assertPushed(NotifyClientEmail::class, function (NotifyClientEmail $email) {
             $this->assertArrayHasKey('REFERRAL_SERVICE_NAME', $email->values);
             $this->assertArrayHasKey('REFERRAL_CONTACT_METHOD', $email->values);
@@ -159,7 +159,7 @@ class ReferralCreatedTest extends TestCase
             return true;
         });
 
-        Queue::assertPushedOn('notifications', NotifyClientSms::class);
+        Queue::assertPushedOn(config('queue.queues.notifications', 'default'), NotifyClientSms::class);
         Queue::assertPushed(NotifyClientSms::class, function (NotifyClientSms $sms) {
             $this->assertArrayHasKey('REFERRAL_ID', $sms->values);
 

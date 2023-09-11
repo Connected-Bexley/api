@@ -31,7 +31,7 @@ class UserRolesUpdatedTest extends TestCase
         $listener = new UserRolesUpdatedListener();
         $listener->handle($event);
 
-        Queue::assertPushedOn('notifications', NotifyUserEmail::class);
+        Queue::assertPushedOn(config('queue.queues.notifications', 'default'), NotifyUserEmail::class);
         Queue::assertPushed(NotifyUserEmail::class, function (NotifyUserEmail $email) {
             $this->assertEquals(
                 config('gov_uk_notify.notifications_template_ids.user_roles_updated.notify_user.email'),

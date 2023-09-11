@@ -13,7 +13,7 @@ class ShowRequest extends FormRequest
      */
     public function authorize()
     {
-        if (!$this->user('api') || !$this->user('api')->isGlobalAdmin()) {
+        if (!$this->user('api') || !$this->user('api')->isContentAdmin()) {
             return $this->page->enabled;
         }
 

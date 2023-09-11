@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 
 namespace App\Search\ElasticSearch;
 
@@ -23,6 +23,8 @@ class ServiceEloquentMapper implements EloquentMapper
     {
         $page = page($page);
         $perPage = per_page($perPage);
+
+        $esQuery->load(['serviceLocations'], Service::class);
 
         $queryRequest = $esQuery->buildSearchRequest()->toArray();
 
@@ -58,7 +60,7 @@ class ServiceEloquentMapper implements EloquentMapper
 
     protected function orderServicesByLocation(array $queryRequest, Collection $services): Collection
     {
-        $locations = array_filter($queryRequest['body']['sort']?? [], function ($key) {
+        $locations = array_filter($queryRequest['body']['sort'] ?? [], function ($key) {
             return $key === '_geo_distance';
         }, ARRAY_FILTER_USE_KEY);
 
