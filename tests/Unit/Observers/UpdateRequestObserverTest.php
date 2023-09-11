@@ -30,7 +30,7 @@ class UpdateRequestObserverTest extends TestCase
         ]);
 
         Queue::assertPushedOn(
-            'notifications',
+            config('queue.queues.notifications', 'default'),
             \App\Emails\UpdateRequestReceived\NotifySubmitterEmail::class
         );
         Queue::assertPushed(
@@ -45,7 +45,7 @@ class UpdateRequestObserverTest extends TestCase
         );
 
         Queue::assertPushedOn(
-            'notifications',
+            config('queue.queues.notifications', 'default'),
             \App\Emails\UpdateRequestReceived\NotifyGlobalAdminEmail::class
         );
         Queue::assertPushed(
@@ -105,7 +105,7 @@ class UpdateRequestObserverTest extends TestCase
         ]);
 
         Queue::assertPushedOn(
-            'notifications',
+            config('queue.queues.notifications', 'default'),
             \App\Emails\OrganisationSignUpFormReceived\NotifySubmitterEmail::class
         );
         Queue::assertPushed(
@@ -119,7 +119,7 @@ class UpdateRequestObserverTest extends TestCase
         );
 
         Queue::assertPushedOn(
-            'notifications',
+            config('queue.queues.notifications', 'default'),
             \App\Emails\OrganisationSignUpFormReceived\NotifyGlobalAdminEmail::class
         );
         Queue::assertPushed(

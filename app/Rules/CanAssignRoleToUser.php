@@ -70,6 +70,11 @@ class CanAssignRoleToUser implements Rule
                     return false;
                 }
                 break;
+            case Role::NAME_CONTENT_ADMIN:
+                if (!$this->user->canMakeContentAdmin()) {
+                    return false;
+                }
+                break;
             case Role::NAME_GLOBAL_ADMIN:
                 if (!$this->user->canMakeGlobalAdmin()) {
                     return false;

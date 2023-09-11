@@ -59,6 +59,10 @@ class SettingsTest extends TestCase
                         'title' => 'data/cms/frontend/privacy_policy/title',
                         'content' => 'data/cms/frontend/privacy_policy/content',
                     ],
+                    'accessibility_statement' => [
+                        'title' => 'data/cms/frontend/accessibility_statement/title',
+                        'content' => 'data/cms/frontend/accessibility_statement/content',
+                    ],
                     'about' => [
                         'title' => 'data/cms/frontend/about/title',
                         'content' => 'data/cms/frontend/about/content',
@@ -117,6 +121,10 @@ class SettingsTest extends TestCase
                             'content',
                         ],
                         'privacy_policy' => [
+                            'title',
+                            'content',
+                        ],
+                        'accessibility_statement' => [
                             'title',
                             'content',
                         ],
@@ -182,6 +190,10 @@ class SettingsTest extends TestCase
                         'privacy_policy' => [
                             'title' => 'data/cms/frontend/privacy_policy/title',
                             'content' => 'data/cms/frontend/privacy_policy/content',
+                        ],
+                        'accessibility_statement' => [
+                            'title' => 'data/cms/frontend/accessibility_statement/title',
+                            'content' => 'data/cms/frontend/accessibility_statement/content',
                         ],
                         'about' => [
                             'title' => 'data/cms/frontend/about/title',
@@ -265,6 +277,10 @@ class SettingsTest extends TestCase
                             'content' => 'Content',
                         ],
                         'privacy_policy' => [
+                            'title' => 'Title',
+                            'content' => 'Content',
+                        ],
+                        'accessibility_statement' => [
                             'title' => 'Title',
                             'content' => 'Content',
                         ],
@@ -457,7 +473,7 @@ class SettingsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,'.base64_encode($image),
+            'file' => 'data:image/png;base64,' . base64_encode($image),
         ]);
 
         $this->settingsData['cms']['frontend']['banner']['image_file_id'] = $this->getResponseContent($imageResponse, 'data.id');
@@ -521,7 +537,7 @@ class SettingsTest extends TestCase
         $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,'.base64_encode($image),
+            'file' => 'data:image/png;base64,' . base64_encode($image),
         ]);
 
         $this->settingsData['cms']['frontend']['banner'] = [
@@ -557,7 +573,7 @@ class SettingsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,'.base64_encode($image),
+            'file' => 'data:image/png;base64,' . base64_encode($image),
         ]);
 
         $cmsValue = Setting::cms()->value;
@@ -586,7 +602,7 @@ class SettingsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,'.base64_encode($image),
+            'file' => 'data:image/png;base64,' . base64_encode($image),
         ]);
 
         $cmsValue = Setting::cms()->value;

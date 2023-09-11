@@ -7,6 +7,7 @@ use App\Models\Audit;
 use App\Models\Collection;
 use App\Models\File;
 use App\Models\Page;
+use App\Models\Service;
 use App\Models\User;
 use Faker\Factory as Faker;
 use Illuminate\Http\Response;
@@ -99,7 +100,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function listMixedStatePagesAsAdmin200()
+    public function listMixedStatePagesAsContentAdmin200()
     {
         /**
          * @var \App\Models\User $user
@@ -147,7 +148,7 @@ class PagesTest extends TestCase
             $disabledLandingPage->id,
         ];
 
-        $response = $this->json('GET', '/core/v1/pages/index?filter[id]='.implode(',', $ids));
+        $response = $this->json('GET', '/core/v1/pages/index?filter[id]=' . implode(',', $ids));
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonCount(2, 'data');
@@ -196,7 +197,7 @@ class PagesTest extends TestCase
             $disabledLandingPage->id,
         ];
 
-        $response = $this->json('GET', '/core/v1/pages/index?filter[id]='.implode(',', $ids));
+        $response = $this->json('GET', '/core/v1/pages/index?filter[id]=' . implode(',', $ids));
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonCount(4, 'data');
@@ -228,7 +229,7 @@ class PagesTest extends TestCase
         $page1 = Page::factory()->withChildren()->create();
         $page2 = Page::factory()->withChildren()->create();
 
-        $response = $this->json('GET', '/core/v1/pages/index?filter[parent_id]='.$page1->id);
+        $response = $this->json('GET', '/core/v1/pages/index?filter[parent_id]=' . $page1->id);
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonCount(3, 'data');
@@ -265,7 +266,7 @@ class PagesTest extends TestCase
     {
         $landingPage = Page::factory()->landingPage()->withChildren()->create();
 
-        $response = $this->json('GET', '/core/v1/pages/index?filter[parent_id]='.$landingPage->id);
+        $response = $this->json('GET', '/core/v1/pages/index?filter[parent_id]=' . $landingPage->id);
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonCount(3, 'data');
@@ -615,7 +616,7 @@ class PagesTest extends TestCase
         $landingPage1->appendNode($parent);
         $landingPage2 = Page::factory()->landingPage()->withChildren()->create();
 
-        $response = $this->json('GET', '/core/v1/pages/index?filter[landing_page]='.$landingPage1->id.'&include=parent');
+        $response = $this->json('GET', '/core/v1/pages/index?filter[landing_page]=' . $landingPage1->id . '&include=parent');
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonStructure([
             'data' => [
@@ -665,397 +666,13 @@ class PagesTest extends TestCase
     }
 
     /**
-     * Get a single page
+     * Create a page
      */
 
     /**
      * @test
      */
-    public function getEnabledInformationPageAsGuest200()
-    {
-        $page = Page::factory()->withImage()->withParent()->withChildren()->create();
-
-        $response = $this->json('GET', '/core/v1/pages/'.$page->id);
-        $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonResource([
-            'id',
-            'slug',
-            'title',
-            'excerpt',
-            'content',
-            'order',
-            'enabled',
-            'page_type',
-            'image' => [
-                'id',
-                'mime_type',
-                'created_at',
-                'updated_at',
-            ],
-            'landing_page',
-            'parent' => [
-                'id',
-                'slug',
-                'title',
-                'image',
-                'content',
-                'order',
-                'enabled',
-                'page_type',
-                'created_at',
-                'updated_at',
-            ],
-            'children' => [
-                '*' => [
-                    'id',
-                    'slug',
-                    'title',
-                    'image',
-                    'content',
-                    'order',
-                    'enabled',
-                    'page_type',
-                    'created_at',
-                    'updated_at',
-                ],
-            ],
-            'created_at',
-            'updated_at',
-        ]);
-    }
-
-    /**
-     * @test
-     */
-    public function getEnabledLandingPageAsGuest200()
-    {
-        $page = Page::factory()->withImage()->landingPage()->withChildren()->create();
-
-        $response = $this->json('GET', '/core/v1/pages/'.$page->id);
-        $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonResource([
-            'id',
-            'slug',
-            'title',
-            'excerpt',
-            'content',
-            'order',
-            'enabled',
-            'page_type',
-            'image' => [
-                'id',
-                'mime_type',
-                'created_at',
-                'updated_at',
-            ],
-            'landing_page',
-            'parent',
-            'children' => [
-                '*' => [
-                    'id',
-                    'slug',
-                    'title',
-                    'image',
-                    'content',
-                    'order',
-                    'enabled',
-                    'page_type',
-                    'created_at',
-                    'updated_at',
-                ],
-            ],
-            'created_at',
-            'updated_at',
-        ]);
-    }
-
-    /**
-     * @test
-     */
-    public function getInformationPageBySlugAsGuest200()
-    {
-        $page = Page::factory()->withImage()->withParent()->withChildren()->create();
-
-        $response = $this->json('GET', '/core/v1/pages/'.$page->slug);
-        $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonFragment([
-            'id' => $page->id,
-        ]);
-    }
-
-    /**
-     * @test
-     */
-    public function getEnabledInformationPageWithLandingPageAncestorAsGuest200()
-    {
-        $page = Page::factory()->withImage()->withChildren()->create();
-        $parent = Page::factory()->create();
-        $parent->appendNode($page);
-        $landingPage = Page::factory()->landingPage()->create();
-        $landingPage->appendNode($parent);
-
-        $response = $this->json('GET', '/core/v1/pages/'.$page->id);
-        $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonResource([
-            'id',
-            'title',
-            'excerpt',
-            'content',
-            'order',
-            'enabled',
-            'page_type',
-            'image' => [
-                'id',
-                'mime_type',
-                'created_at',
-                'updated_at',
-            ],
-            'landing_page' => [
-                'id',
-                'title',
-                'image',
-                'content',
-                'order',
-                'enabled',
-                'page_type',
-                'created_at',
-                'updated_at',
-            ],
-            'parent' => [
-                'id',
-                'title',
-                'image',
-                'content',
-                'order',
-                'enabled',
-                'page_type',
-                'created_at',
-                'updated_at',
-            ],
-            'children' => [
-                '*' => [
-                    'id',
-                    'title',
-                    'image',
-                    'content',
-                    'order',
-                    'enabled',
-                    'page_type',
-                    'created_at',
-                    'updated_at',
-                ],
-            ],
-            'created_at',
-            'updated_at',
-        ]);
-
-        $response->assertJson([
-            'data' => [
-                'landing_page' => [
-                    'id' => $landingPage->id,
-                ],
-            ],
-        ]);
-    }
-
-    /**
-     * @test
-     */
-    public function auditCreatedOnShow()
-    {
-        $this->fakeEvents();
-
-        $page = Page::factory()->create();
-
-        $this->json('GET', '/core/v1/pages/'.$page->id);
-
-        Event::assertDispatched(EndpointHit::class, function (EndpointHit $event) {
-            return $event->getAction() === Audit::ACTION_READ;
-        });
-    }
-
-    /**
-     * @test
-     */
-    public function getDisabledPageAsGuest403()
-    {
-        $page = Page::factory()->withImage()->withParent()->withChildren()->disabled()
-            ->create();
-
-        $response = $this->json('GET', '/core/v1/pages/'.$page->id);
-
-        $response->assertStatus(Response::HTTP_FORBIDDEN);
-    }
-
-    /**
-     * @test
-     */
-    public function getDisabledPageAsAdmin200()
-    {
-        /**
-         * @var \App\Models\User $user
-         */
-        $user = User::factory()->create();
-        $user->makeGlobalAdmin();
-
-        Passport::actingAs($user);
-
-        $page = Page::factory()->withImage()->withParent()->withChildren()->disabled()
-            ->create();
-
-        $response = $this->json('GET', '/core/v1/pages/'.$page->id);
-
-        $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonResource([
-            'id',
-            'slug',
-            'title',
-            'excerpt',
-            'content',
-            'order',
-            'enabled',
-            'page_type',
-            'image' => [
-                'id',
-                'mime_type',
-                'created_at',
-                'updated_at',
-            ],
-            'landing_page',
-            'parent' => [
-                'id',
-                'slug',
-                'title',
-                'image',
-                'content',
-                'order',
-                'enabled',
-                'page_type',
-                'created_at',
-                'updated_at',
-            ],
-            'children' => [
-                '*' => [
-                    'id',
-                    'slug',
-                    'title',
-                    'image',
-                    'content',
-                    'order',
-                    'enabled',
-                    'page_type',
-                    'created_at',
-                    'updated_at',
-                ],
-            ],
-            'created_at',
-            'updated_at',
-        ]);
-    }
-
-    /**
-     * @test
-     */
-    public function getEnabledPageImagePNGAsGuest200()
-    {
-        /**
-         * @var \App\Models\User $user
-         */
-        $user = User::factory()->create();
-        $user->makeGlobalAdmin();
-
-        Passport::actingAs($user);
-
-        $parentPage = Page::factory()->create();
-
-        $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.png',
-            'mime_type' => 'image/png',
-        ]);
-
-        $base64Image = 'data:image/png;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.png'));
-
-        $image->uploadBase64EncodedFile($base64Image);
-
-        $page = Page::factory()->create([
-            'image_file_id' => $image->id,
-        ]);
-
-        $response = $this->json('GET', '/core/v1/pages/'.$page->id.'/image.png');
-        $response->assertStatus(Response::HTTP_OK);
-        $this->assertEquals($base64Image, 'data:image/png;base64,'.base64_encode($response->content()));
-    }
-
-    /**
-     * @test
-     */
-    public function getEnabledPageImageJPGAsGuest200()
-    {
-        /**
-         * @var \App\Models\User $user
-         */
-        $user = User::factory()->create();
-        $user->makeGlobalAdmin();
-
-        Passport::actingAs($user);
-
-        $parentPage = Page::factory()->create();
-
-        $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.jpg',
-            'mime_type' => 'image/jepg',
-        ]);
-
-        $base64Image = 'data:image/jpeg;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.jpg'));
-
-        $image->uploadBase64EncodedFile($base64Image);
-
-        $page = Page::factory()->create([
-            'image_file_id' => $image->id,
-        ]);
-
-        $response = $this->json('GET', '/core/v1/pages/'.$page->id.'/image.jpg');
-        $response->assertStatus(Response::HTTP_OK);
-        $this->assertEquals($base64Image, 'data:image/jpeg;base64,'.base64_encode($response->content()));
-    }
-
-    /**
-     * @test
-     */
-    public function getEnabledPageImageSVGAsGuest200()
-    {
-        /**
-         * @var \App\Models\User $user
-         */
-        $user = User::factory()->create();
-        $user->makeGlobalAdmin();
-
-        Passport::actingAs($user);
-
-        $parentPage = Page::factory()->create();
-
-        $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
-            'mime_type' => 'image/svg+xml',
-        ]);
-
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
-
-        $image->uploadBase64EncodedFile($base64Image);
-
-        $page = Page::factory()->create([
-            'image_file_id' => $image->id,
-        ]);
-
-        $response = $this->json('GET', '/core/v1/pages/'.$page->id.'/image.svg');
-        $response->assertStatus(Response::HTTP_OK);
-        $this->assertEquals($base64Image, 'data:image/svg+xml;base64,'.base64_encode($response->content()));
-    }
-
-    /**
-     * @test
-     */
-    public function createPageAsGuest403()
+    public function createPageAsGuest401()
     {
         $parentPage = Page::factory()->create();
 
@@ -1083,13 +700,140 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageAsAdmin201()
+    public function createPageAsServiceWorker403()
+    {
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
+        $parentPage = Page::factory()->create();
+
+        Passport::actingAs($user);
+
+        $data = [
+            'title' => $this->faker->sentence(),
+            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'content' => [
+                'introduction' => [
+                    'content' => [
+                        [
+                            'type' => 'copy',
+                            'value' => $this->faker->realText(),
+                        ],
+                    ],
+                ],
+            ],
+            'parent_id' => $parentPage->id,
+        ];
+
+        $response = $this->json('POST', '/core/v1/pages', $data);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function createPageAsServiceAdmin403()
+    {
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
+        $parentPage = Page::factory()->create();
+
+        Passport::actingAs($user);
+
+        $data = [
+            'title' => $this->faker->sentence(),
+            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'content' => [
+                'introduction' => [
+                    'content' => [
+                        [
+                            'type' => 'copy',
+                            'value' => $this->faker->realText(),
+                        ],
+                    ],
+                ],
+            ],
+            'parent_id' => $parentPage->id,
+        ];
+
+        $response = $this->json('POST', '/core/v1/pages', $data);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function createPageAsOrganisationAdmin403()
+    {
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
+        $parentPage = Page::factory()->create();
+
+        Passport::actingAs($user);
+
+        $data = [
+            'title' => $this->faker->sentence(),
+            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'content' => [
+                'introduction' => [
+                    'content' => [
+                        [
+                            'type' => 'copy',
+                            'value' => $this->faker->realText(),
+                        ],
+                    ],
+                ],
+            ],
+            'parent_id' => $parentPage->id,
+        ];
+
+        $response = $this->json('POST', '/core/v1/pages', $data);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function createPageAsGlobalAdmin403()
+    {
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $parentPage = Page::factory()->create();
+
+        Passport::actingAs($user);
+
+        $data = [
+            'title' => $this->faker->sentence(),
+            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'content' => [
+                'introduction' => [
+                    'content' => [
+                        [
+                            'type' => 'copy',
+                            'value' => $this->faker->realText(),
+                        ],
+                    ],
+                ],
+            ],
+            'parent_id' => $parentPage->id,
+        ];
+
+        $response = $this->json('POST', '/core/v1/pages', $data);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function createPageAsContentAdmin201()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -1137,13 +881,67 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageWithMinimalDataAsAdmin201()
+    public function createPageAsSuperAdmin201()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeSuperAdmin();
+
+        Passport::actingAs($user);
+
+        $parentPage = Page::factory()->create();
+
+        $data = [
+            'title' => $this->faker->sentence(),
+            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'content' => [
+                'introduction' => [
+                    'content' => [
+                        [
+                            'type' => 'copy',
+                            'value' => $this->faker->realText(),
+                        ],
+                    ],
+                ],
+            ],
+            'parent_id' => $parentPage->id,
+        ];
+
+        $response = $this->json('POST', '/core/v1/pages', $data);
+
+        $response->assertStatus(Response::HTTP_CREATED);
+
+        $response->assertJsonResource([
+            'id',
+            'title',
+            'excerpt',
+            'content',
+            'order',
+            'enabled',
+            'page_type',
+            'image',
+            'landing_page',
+            'parent',
+            'children',
+            'collection_categories',
+            'collection_personas',
+            'created_at',
+            'updated_at',
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function createPageWithMinimalDataAsContentAdmin201()
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -1213,7 +1011,7 @@ class PagesTest extends TestCase
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -1247,13 +1045,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageAsAdminWithInvalidData422()
+    public function createPageAsContentAdminWithInvalidData422()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -1408,7 +1206,7 @@ class PagesTest extends TestCase
 
         // Assigned Images not allowed
         $image = File::factory()->create([
-            'filename' => Str::random().'.png',
+            'filename' => Str::random() . '.png',
             'mime_type' => 'image/png',
         ]);
 
@@ -1434,13 +1232,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageAsChild201()
+    public function createChildPageAsContentAdmin201()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -1497,13 +1295,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageAsChildInheritParentStatus201()
+    public function createChildPageInheritParentStatusAsContentAdmin201()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -1539,13 +1337,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createInformationPageRootAsAdmin201()
+    public function createInformationPageRootAsContentAdmin201()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -1602,13 +1400,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createLandingPageAsAdmin201()
+    public function createLandingPageAsContentAdmin201()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -1695,13 +1493,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageAfterSibling201()
+    public function createPageAfterSiblingAsContentAdmin201()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -1741,13 +1539,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageAsFirstChild201()
+    public function createFirstChildPageAsContentAdmin201()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -1788,25 +1586,25 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageWithImagePNG201()
+    public function createPageWithImagePNGAsContentAdmin201()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
         $parentPage = Page::factory()->create();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.png',
+            'filename' => Str::random() . '.png',
             'mime_type' => 'image/png',
         ]);
 
         $image->uploadBase64EncodedFile(
-            'data:image/png;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.png'))
+            'data:image/png;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.png'))
         );
 
         $data = [
@@ -1860,25 +1658,25 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageWithImageJPG201()
+    public function createPageWithImageJPGAsContentAdmin201()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
         $parentPage = Page::factory()->create();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.jpg',
+            'filename' => Str::random() . '.jpg',
             'mime_type' => 'image/jpeg',
         ]);
 
         $image->uploadBase64EncodedFile(
-            'data:image/jpeg;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.jpg'))
+            'data:image/jpeg;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.jpg'))
         );
 
         $data = [
@@ -1932,25 +1730,25 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageWithImageSVG201()
+    public function createPageWithImageSVGAsContentAdmin201()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
         $parentPage = Page::factory()->create();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
         $image->uploadBase64EncodedFile(
-            'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'))
+            'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'))
         );
 
         $data = [
@@ -2004,13 +1802,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createInformationPageWithCollections422()
+    public function createInformationPageWithCollectionsAsContentAdmin422()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -2043,13 +1841,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createLandingPageWithCollections201()
+    public function createLandingPageWithCollectionsAsContentAdmin201()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -2143,13 +1941,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createInformationPageWithCallToAction422()
+    public function createInformationPageWithCallToActionAsContentAdmin422()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -2267,13 +2065,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createInformationPageWithCallToAction201()
+    public function createInformationPageWithCallToActionAsContentAdmin201()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -2310,13 +2108,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createLandingPageWithCallToActions201()
+    public function createLandingPageWithCallToActionsAsContentAdmin201()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -2394,13 +2192,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageWithSameTitleAsExistingPageIncrementsSlugAsAdmin201()
+    public function createPageWithSameTitleAsExistingPageIncrementsSlugAsContentAdmin201()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -2458,13 +2256,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageWithSlugAsAdmin201()
+    public function createPageWithSlugAsContentAdmin201()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -2502,9 +2300,401 @@ class PagesTest extends TestCase
     }
 
     /**
+     * Get a single page
+     */
+
+    /**
      * @test
      */
-    public function updatePageAsGuest403()
+    public function getEnabledInformationPageAsGuest200()
+    {
+        $page = Page::factory()->withImage()->withParent()->withChildren()->create();
+
+        $response = $this->json('GET', '/core/v1/pages/' . $page->id);
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonResource([
+            'id',
+            'slug',
+            'title',
+            'excerpt',
+            'content',
+            'order',
+            'enabled',
+            'page_type',
+            'image' => [
+                'id',
+                'mime_type',
+                'created_at',
+                'updated_at',
+            ],
+            'landing_page',
+            'parent' => [
+                'id',
+                'slug',
+                'title',
+                'image',
+                'content',
+                'order',
+                'enabled',
+                'page_type',
+                'created_at',
+                'updated_at',
+            ],
+            'children' => [
+                '*' => [
+                    'id',
+                    'slug',
+                    'title',
+                    'image',
+                    'content',
+                    'order',
+                    'enabled',
+                    'page_type',
+                    'created_at',
+                    'updated_at',
+                ],
+            ],
+            'created_at',
+            'updated_at',
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function getEnabledLandingPageAsGuest200()
+    {
+        $page = Page::factory()->withImage()->landingPage()->withChildren()->create();
+
+        $response = $this->json('GET', '/core/v1/pages/' . $page->id);
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonResource([
+            'id',
+            'slug',
+            'title',
+            'excerpt',
+            'content',
+            'order',
+            'enabled',
+            'page_type',
+            'image' => [
+                'id',
+                'mime_type',
+                'created_at',
+                'updated_at',
+            ],
+            'landing_page',
+            'parent',
+            'children' => [
+                '*' => [
+                    'id',
+                    'slug',
+                    'title',
+                    'image',
+                    'content',
+                    'order',
+                    'enabled',
+                    'page_type',
+                    'created_at',
+                    'updated_at',
+                ],
+            ],
+            'created_at',
+            'updated_at',
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function getInformationPageBySlugAsGuest200()
+    {
+        $page = Page::factory()->withImage()->withParent()->withChildren()->create();
+
+        $response = $this->json('GET', '/core/v1/pages/' . $page->slug);
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonFragment([
+            'id' => $page->id,
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function getEnabledInformationPageWithLandingPageAncestorAsGuest200()
+    {
+        $page = Page::factory()->withImage()->withChildren()->create();
+        $parent = Page::factory()->create();
+        $parent->appendNode($page);
+        $landingPage = Page::factory()->landingPage()->create();
+        $landingPage->appendNode($parent);
+
+        $response = $this->json('GET', '/core/v1/pages/' . $page->id);
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonResource([
+            'id',
+            'title',
+            'excerpt',
+            'content',
+            'order',
+            'enabled',
+            'page_type',
+            'image' => [
+                'id',
+                'mime_type',
+                'created_at',
+                'updated_at',
+            ],
+            'landing_page' => [
+                'id',
+                'title',
+                'image',
+                'content',
+                'order',
+                'enabled',
+                'page_type',
+                'created_at',
+                'updated_at',
+            ],
+            'parent' => [
+                'id',
+                'title',
+                'image',
+                'content',
+                'order',
+                'enabled',
+                'page_type',
+                'created_at',
+                'updated_at',
+            ],
+            'children' => [
+                '*' => [
+                    'id',
+                    'title',
+                    'image',
+                    'content',
+                    'order',
+                    'enabled',
+                    'page_type',
+                    'created_at',
+                    'updated_at',
+                ],
+            ],
+            'created_at',
+            'updated_at',
+        ]);
+
+        $response->assertJson([
+            'data' => [
+                'landing_page' => [
+                    'id' => $landingPage->id,
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function auditCreatedOnShow()
+    {
+        $this->fakeEvents();
+
+        $page = Page::factory()->create();
+
+        $this->json('GET', '/core/v1/pages/' . $page->id);
+
+        Event::assertDispatched(EndpointHit::class, function (EndpointHit $event) {
+            return $event->getAction() === Audit::ACTION_READ;
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function getDisabledPageAsGuest403()
+    {
+        $page = Page::factory()->withImage()->withParent()->withChildren()->disabled()
+            ->create();
+
+        $response = $this->json('GET', '/core/v1/pages/' . $page->id);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function getDisabledPageAsContentAdmin200()
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeContentAdmin();
+
+        Passport::actingAs($user);
+
+        $page = Page::factory()->withImage()->withParent()->withChildren()->disabled()
+            ->create();
+
+        $response = $this->json('GET', '/core/v1/pages/' . $page->id);
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonResource([
+            'id',
+            'slug',
+            'title',
+            'excerpt',
+            'content',
+            'order',
+            'enabled',
+            'page_type',
+            'image' => [
+                'id',
+                'mime_type',
+                'created_at',
+                'updated_at',
+            ],
+            'landing_page',
+            'parent' => [
+                'id',
+                'slug',
+                'title',
+                'image',
+                'content',
+                'order',
+                'enabled',
+                'page_type',
+                'created_at',
+                'updated_at',
+            ],
+            'children' => [
+                '*' => [
+                    'id',
+                    'slug',
+                    'title',
+                    'image',
+                    'content',
+                    'order',
+                    'enabled',
+                    'page_type',
+                    'created_at',
+                    'updated_at',
+                ],
+            ],
+            'created_at',
+            'updated_at',
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function getEnabledPageImagePNGAsGuest200()
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeGlobalAdmin();
+
+        Passport::actingAs($user);
+
+        $parentPage = Page::factory()->create();
+
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random() . '.png',
+            'mime_type' => 'image/png',
+        ]);
+
+        $base64Image = 'data:image/png;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.png'));
+
+        $image->uploadBase64EncodedFile($base64Image);
+
+        $page = Page::factory()->create([
+            'image_file_id' => $image->id,
+        ]);
+
+        $response = $this->json('GET', '/core/v1/pages/' . $page->id . '/image.png');
+        $response->assertStatus(Response::HTTP_OK);
+        $this->assertEquals($base64Image, 'data:image/png;base64,' . base64_encode($response->content()));
+    }
+
+    /**
+     * @test
+     */
+    public function getEnabledPageImageJPGAsGuest200()
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeGlobalAdmin();
+
+        Passport::actingAs($user);
+
+        $parentPage = Page::factory()->create();
+
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random() . '.jpg',
+            'mime_type' => 'image/jepg',
+        ]);
+
+        $base64Image = 'data:image/jpeg;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.jpg'));
+
+        $image->uploadBase64EncodedFile($base64Image);
+
+        $page = Page::factory()->create([
+            'image_file_id' => $image->id,
+        ]);
+
+        $response = $this->json('GET', '/core/v1/pages/' . $page->id . '/image.jpg');
+        $response->assertStatus(Response::HTTP_OK);
+        $this->assertEquals($base64Image, 'data:image/jpeg;base64,' . base64_encode($response->content()));
+    }
+
+    /**
+     * @test
+     */
+    public function getEnabledPageImageSVGAsGuest200()
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeGlobalAdmin();
+
+        Passport::actingAs($user);
+
+        $parentPage = Page::factory()->create();
+
+        $image = File::factory()->pendingAssignment()->create([
+            'filename' => Str::random() . '.svg',
+            'mime_type' => 'image/svg+xml',
+        ]);
+
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+
+        $image->uploadBase64EncodedFile($base64Image);
+
+        $page = Page::factory()->create([
+            'image_file_id' => $image->id,
+        ]);
+
+        $response = $this->json('GET', '/core/v1/pages/' . $page->id . '/image.svg');
+        $response->assertStatus(Response::HTTP_OK);
+        $this->assertEquals($base64Image, 'data:image/svg+xml;base64,' . base64_encode($response->content()));
+    }
+
+    /**
+     * Update page
+     */
+
+    /**
+     * @test
+     */
+    public function updatePageAsGuest401()
     {
         $page = Page::factory()->withImage()->withParent()->withChildren()->disabled()
             ->create();
@@ -2513,7 +2703,7 @@ class PagesTest extends TestCase
             'title' => 'New Title',
         ];
 
-        $response = $this->json('PUT', '/core/v1/pages/'.$page->id, $data);
+        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
@@ -2521,13 +2711,92 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageAsAdmin200()
+    public function updatePageAsServiceWorker403()
+    {
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
+        $page = Page::factory()->withImage()->withParent()->withChildren()->disabled()
+            ->create();
+        Passport::actingAs($user);
+
+        $data = [
+            'title' => 'New Title',
+        ];
+
+        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function updatePageAsServiceAdmin403()
+    {
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
+        $page = Page::factory()->withImage()->withParent()->withChildren()->disabled()
+            ->create();
+        Passport::actingAs($user);
+
+        $data = [
+            'title' => 'New Title',
+        ];
+
+        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function updatePageAsOrganisationAdmin403()
+    {
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
+        $page = Page::factory()->withImage()->withParent()->withChildren()->disabled()
+            ->create();
+        Passport::actingAs($user);
+
+        $data = [
+            'title' => 'New Title',
+        ];
+
+        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function updatePageAsGlobalAdmin403()
+    {
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $page = Page::factory()->withImage()->withParent()->withChildren()->disabled()
+            ->create();
+        Passport::actingAs($user);
+
+        $data = [
+            'title' => 'New Title',
+        ];
+
+        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function updatePageAsContentAdmin200()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -2538,7 +2807,54 @@ class PagesTest extends TestCase
             'title' => 'New Title',
         ];
 
-        $response = $this->json('PUT', '/core/v1/pages/'.$page->id, $data);
+        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $response->assertJsonResource([
+            'id',
+            'title',
+            'excerpt',
+            'content',
+            'order',
+            'enabled',
+            'page_type',
+            'image',
+            'landing_page',
+            'parent',
+            'children',
+            'collection_categories',
+            'collection_personas',
+            'created_at',
+            'updated_at',
+        ]);
+
+        $response->assertJsonFragment([
+            'title' => 'New Title',
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function updatePageAsSuperAdmin200()
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeSuperAdmin();
+
+        Passport::actingAs($user);
+
+        $page = Page::factory()->withImage()->withParent()->withChildren()->disabled()
+            ->create();
+
+        $data = [
+            'title' => 'New Title',
+        ];
+
+        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -2576,7 +2892,7 @@ class PagesTest extends TestCase
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -2586,7 +2902,7 @@ class PagesTest extends TestCase
             'title' => 'New Title',
         ];
 
-        $this->json('PUT', '/core/v1/pages/'.$page->id, $data);
+        $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
 
         Event::assertDispatched(EndpointHit::class, function (EndpointHit $event) {
             return $event->getAction() === Audit::ACTION_UPDATE;
@@ -2602,43 +2918,43 @@ class PagesTest extends TestCase
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
         $page = Page::factory()->withImage()->withParent()->withChildren()->disabled()
             ->create();
 
-        $this->json('PUT', '/core/v1/pages/'.$page->id, [
+        $this->json('PUT', '/core/v1/pages/' . $page->id, [
             'title' => '',
         ])->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
-        $this->json('PUT', '/core/v1/pages/'.$page->id, [
+        $this->json('PUT', '/core/v1/pages/' . $page->id, [
             'content' => '',
         ])->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
-        $this->json('PUT', '/core/v1/pages/'.$page->id, [
+        $this->json('PUT', '/core/v1/pages/' . $page->id, [
             'title' => '',
             'content' => '',
         ])->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
-        $this->json('PUT', '/core/v1/pages/'.$page->id, [
+        $this->json('PUT', '/core/v1/pages/' . $page->id, [
             'content' => $this->faker->realText(),
         ])->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
-        $this->json('PUT', '/core/v1/pages/'.$page->id, [
+        $this->json('PUT', '/core/v1/pages/' . $page->id, [
             'parent_id' => $this->faker->uuid(),
         ])->assertStatus(Response::HTTP_NOT_FOUND);
 
-        $this->json('PUT', '/core/v1/pages/'.$page->id, [
+        $this->json('PUT', '/core/v1/pages/' . $page->id, [
             'order' => $page->siblingsAndSelf()->count() + 1,
         ])->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
-        $this->json('PUT', '/core/v1/pages/'.$page->id, [
+        $this->json('PUT', '/core/v1/pages/' . $page->id, [
             'order' => -1,
         ])->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
-        $this->json('PUT', '/core/v1/pages/'.$page->id, [
+        $this->json('PUT', '/core/v1/pages/' . $page->id, [
             'page_type' => 'landing',
         ])->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
@@ -2646,11 +2962,11 @@ class PagesTest extends TestCase
          * Assigned Images not allowed
          */
         $image = File::factory()->create([
-            'filename' => Str::random().'.png',
+            'filename' => Str::random() . '.png',
             'mime_type' => 'image/png',
         ]);
 
-        $this->json('PUT', '/core/v1/pages/'.$page->id, [
+        $this->json('PUT', '/core/v1/pages/' . $page->id, [
             'image_file_id' => $image->id,
         ])->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
@@ -2658,23 +2974,23 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageAddImageAsAdmin200()
+    public function updatePageAddImageAsContentAdmin200()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.jpg',
+            'filename' => Str::random() . '.jpg',
             'mime_type' => 'image/jpeg',
         ]);
 
         $image->uploadBase64EncodedFile(
-            'data:image/jpeg;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.jpg'))
+            'data:image/jpeg;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.jpg'))
         );
 
         $page = Page::factory()->withParent()->withChildren()->disabled()
@@ -2684,7 +3000,7 @@ class PagesTest extends TestCase
             'image_file_id' => $image->id,
         ];
 
-        $response = $this->json('PUT', '/core/v1/pages/'.$page->id, $data);
+        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -2719,23 +3035,23 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageRemoveImageAsAdmin200()
+    public function updatePageRemoveImageAsContentAdmin200()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
         $image = File::factory()->create([
-            'filename' => Str::random().'.jpg',
+            'filename' => Str::random() . '.jpg',
             'mime_type' => 'image/jpeg',
         ]);
 
         $image->uploadBase64EncodedFile(
-            'data:image/jpeg;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.jpg'))
+            'data:image/jpeg;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.jpg'))
         );
 
         $page = Page::factory()->withParent()->withChildren()->disabled()
@@ -2747,7 +3063,7 @@ class PagesTest extends TestCase
             'image_file_id' => null,
         ];
 
-        $response = $this->json('PUT', '/core/v1/pages/'.$page->id, $data);
+        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -2777,32 +3093,32 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageChangeImageAsAdmin200()
+    public function updatePageChangeImageAsContentAdmin200()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
         $imageJpg = File::factory()->create([
-            'filename' => Str::random().'.jpg',
+            'filename' => Str::random() . '.jpg',
             'mime_type' => 'image/jpeg',
         ]);
 
         $imageJpg->uploadBase64EncodedFile(
-            'data:image/jpeg;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.jpg'))
+            'data:image/jpeg;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.jpg'))
         );
 
         $imagePng = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.png',
+            'filename' => Str::random() . '.png',
             'mime_type' => 'image/png',
         ]);
 
         $imagePng->uploadBase64EncodedFile(
-            'data:image/png;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.png'))
+            'data:image/png;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.png'))
         );
 
         $page = Page::factory()->withParent()->withChildren()->disabled()
@@ -2814,7 +3130,7 @@ class PagesTest extends TestCase
             'image_file_id' => $imagePng->id,
         ];
 
-        $response = $this->json('PUT', '/core/v1/pages/'.$page->id, $data);
+        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -2853,13 +3169,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageChangeParentAsAdmin200()
+    public function updatePageChangeParentAsContentAdmin200()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -2875,7 +3191,7 @@ class PagesTest extends TestCase
             'parent_id' => $parentPage2->id,
         ];
 
-        $response = $this->json('PUT', '/core/v1/pages/'.$page->id, $data);
+        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -2891,13 +3207,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageChangeParentInheritStatusAsAdmin200()
+    public function updatePageChangeParentInheritStatusAsContentAdmin200()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -2913,7 +3229,7 @@ class PagesTest extends TestCase
             'parent_id' => $parentPage2->id,
         ];
 
-        $response = $this->json('PUT', '/core/v1/pages/'.$page->id, $data);
+        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -2927,13 +3243,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageChangePageTypeAsAdmin200()
+    public function updatePageChangePageTypeAsContentAdmin200()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -2948,7 +3264,7 @@ class PagesTest extends TestCase
             'page_type' => Page::PAGE_TYPE_LANDING,
         ];
 
-        $response = $this->json('PUT', '/core/v1/pages/'.$page->id, $data);
+        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
@@ -2957,7 +3273,7 @@ class PagesTest extends TestCase
             'parent_id' => null,
         ];
 
-        $response = $this->json('PUT', '/core/v1/pages/'.$page->id, $data);
+        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -2973,13 +3289,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageChangeOrderAsAdmin200()
+    public function updatePageChangeOrderAsContentAdmin200()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -2991,7 +3307,7 @@ class PagesTest extends TestCase
             'order' => 2,
         ];
 
-        $response = $this->json('PUT', '/core/v1/pages/'.$children->get(1)->id, $data);
+        $response = $this->json('PUT', '/core/v1/pages/' . $children->get(1)->id, $data);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -3011,7 +3327,7 @@ class PagesTest extends TestCase
             'order' => 0,
         ];
 
-        $response = $this->json('PUT', '/core/v1/pages/'.$children->get(1)->id, $data);
+        $response = $this->json('PUT', '/core/v1/pages/' . $children->get(1)->id, $data);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -3031,13 +3347,12 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageDisabledCascadestoChildPagesAsAdmin200()
+    public function updatePageDisabledCascadestoChildPagesAsContentAdmin200()
     {
         /**
          * @var \App\Models\User $user
          */
-        $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user = User::factory()->create()->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -3051,7 +3366,7 @@ class PagesTest extends TestCase
             'enabled' => 0,
         ];
 
-        $response = $this->json('PUT', '/core/v1/pages/'.$parent->id, $data);
+        $response = $this->json('PUT', '/core/v1/pages/' . $parent->id, $data);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -3071,7 +3386,7 @@ class PagesTest extends TestCase
             'enabled' => 1,
         ];
 
-        $response = $this->json('PUT', '/core/v1/pages/'.$parent->id, $data);
+        $response = $this->json('PUT', '/core/v1/pages/' . $parent->id, $data);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -3087,13 +3402,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updateInformationPageAddCollections422()
+    public function updateInformationPageAddCollectionsAsContentAdmin422()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -3104,7 +3419,7 @@ class PagesTest extends TestCase
         $data = [
             'collections' => $collections->pluck('id'),
         ];
-        $response = $this->json('PUT', '/core/v1/pages/'.$page->id, $data);
+        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
@@ -3112,13 +3427,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updateLandingPageAddCollections200()
+    public function updateLandingPageAddCollectionsAsContentAdmin200()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -3129,7 +3444,7 @@ class PagesTest extends TestCase
         $data = [
             'collections' => $collections->pluck('id'),
         ];
-        $response = $this->json('PUT', '/core/v1/pages/'.$page->id, $data);
+        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -3171,13 +3486,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updateLandingPageUpdateCollections200()
+    public function updateLandingPageUpdateCollectionsAsContentAdmin200()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -3193,7 +3508,7 @@ class PagesTest extends TestCase
         $data = [
             'collections' => $collectionIds->all(),
         ];
-        $response = $this->json('PUT', '/core/v1/pages/'.$page->id, $data);
+        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -3238,13 +3553,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageUpdateSlugAsAdmin200()
+    public function updatePageUpdateSlugAsContentAdmin200()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -3258,7 +3573,7 @@ class PagesTest extends TestCase
             'title' => 'New Title',
         ];
 
-        $response = $this->json('PUT', '/core/v1/pages/'.$page->id, $data);
+        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -3274,7 +3589,7 @@ class PagesTest extends TestCase
             'slug' => 'new-title',
         ];
 
-        $response = $this->json('PUT', '/core/v1/pages/'.$page->id, $data);
+        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -3292,19 +3607,23 @@ class PagesTest extends TestCase
             'slug' => 'existing-page',
         ];
 
-        $response = $this->json('PUT', '/core/v1/pages/'.$page->id, $data);
+        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     /**
+     * Delete page
+     */
+
+    /**
      * @test
      */
-    public function deletePageAsGuest403()
+    public function deletePageAsGuest401()
     {
         $page = Page::factory()->create();
 
-        $response = $this->json('DELETE', '/core/v1/pages/'.$page->id);
+        $response = $this->json('DELETE', '/core/v1/pages/' . $page->id);
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
@@ -3312,19 +3631,114 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function deletePageAsAdmin200()
+    public function deletePageAsServiceWorker403()
     {
-        /**
-         * @var \App\Models\User $user
-         */
-        $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
 
         Passport::actingAs($user);
 
         $page = Page::factory()->create();
 
-        $response = $this->json('DELETE', '/core/v1/pages/'.$page->id);
+        $response = $this->json('DELETE', '/core/v1/pages/' . $page->id);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+
+        $this->assertDatabaseHas('pages', ['id' => $page->id]);
+    }
+
+    /**
+     * @test
+     */
+    public function deletePageAsServiceAdmin403()
+    {
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
+
+        Passport::actingAs($user);
+
+        $page = Page::factory()->create();
+
+        $response = $this->json('DELETE', '/core/v1/pages/' . $page->id);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+
+        $this->assertDatabaseHas('pages', ['id' => $page->id]);
+    }
+
+    /**
+     * @test
+     */
+    public function deletePageAsOrganisationAdmin403()
+    {
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
+
+        Passport::actingAs($user);
+
+        $page = Page::factory()->create();
+
+        $response = $this->json('DELETE', '/core/v1/pages/' . $page->id);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+
+        $this->assertDatabaseHas('pages', ['id' => $page->id]);
+    }
+
+    /**
+     * @test
+     */
+    public function deletePageAsGlobalAdmin403()
+    {
+        $user = User::factory()->create()->makeGlobalAdmin();
+
+        Passport::actingAs($user);
+
+        $page = Page::factory()->create();
+
+        $response = $this->json('DELETE', '/core/v1/pages/' . $page->id);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+
+        $this->assertDatabaseHas('pages', ['id' => $page->id]);
+    }
+
+    /**
+     * @test
+     */
+    public function deletePageAsContentAdmin200()
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create()->makeContentAdmin();
+
+        Passport::actingAs($user);
+
+        $page = Page::factory()->create();
+
+        $response = $this->json('DELETE', '/core/v1/pages/' . $page->id);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $this->assertDatabaseMissing('pages', ['id' => $page->id]);
+    }
+
+    /**
+     * @test
+     */
+    public function deletePageAsSuperAdmin200()
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create()->makeSuperAdmin();
+
+        Passport::actingAs($user);
+
+        $page = Page::factory()->create();
+
+        $response = $this->json('DELETE', '/core/v1/pages/' . $page->id);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -3342,13 +3756,13 @@ class PagesTest extends TestCase
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
         $page = Page::factory()->create();
 
-        $this->json('DELETE', '/core/v1/pages/'.$page->id);
+        $this->json('DELETE', '/core/v1/pages/' . $page->id);
 
         Event::assertDispatched(EndpointHit::class, function (EndpointHit $event) {
             return $event->getAction() === Audit::ACTION_DELETE;
@@ -3358,13 +3772,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function deletePageWithChildren422()
+    public function deletePageWithChildrenAsContentAdmin422()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -3374,7 +3788,7 @@ class PagesTest extends TestCase
 
         $children = $page->children()->defaultOrder()->get();
 
-        $response = $this->json('DELETE', '/core/v1/pages/'.$page->id);
+        $response = $this->json('DELETE', '/core/v1/pages/' . $page->id);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
@@ -3388,13 +3802,13 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function deleteLandingPageWithChildren422()
+    public function deleteLandingPageWithChildrenAsContentAdmin422()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -3404,7 +3818,7 @@ class PagesTest extends TestCase
 
         $children = $page->children()->defaultOrder()->get();
 
-        $response = $this->json('DELETE', '/core/v1/pages/'.$page->id);
+        $response = $this->json('DELETE', '/core/v1/pages/' . $page->id);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
@@ -3417,13 +3831,69 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function deletePageWithImage200()
+    public function deletePageWithCollectionsAsContentAdmin200()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeContentAdmin();
+
+        Passport::actingAs($user);
+
+        $page = Page::factory()->withCollections()->create();
+
+        $pageCollectionIds = $page->collections()->pluck('id');
+
+        $response = $this->json('DELETE', '/core/v1/pages/' . $page->id);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $this->assertDatabaseMissing('pages', ['id' => $page->id]);
+        foreach ($pageCollectionIds as $collectionId) {
+            $this->assertDatabaseMissing('collection_page', ['page_id' => $page->id, 'collection_id' => $collectionId]);
+            $this->assertDatabaseHas('collections', ['id' => $collectionId]);
+        }
+    }
+
+    /**
+     * @test
+     */
+    public function deleteLandingPageWithCollectionsAsContentAdmin200()
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeContentAdmin();
+
+        Passport::actingAs($user);
+
+        $page = Page::factory()->landingPage()->withCollections()->create();
+
+        $pageCollectionIds = $page->collections()->pluck('id');
+
+        $response = $this->json('DELETE', '/core/v1/pages/' . $page->id);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $this->assertDatabaseMissing('pages', ['id' => $page->id]);
+        foreach ($pageCollectionIds as $collectionId) {
+            $this->assertDatabaseMissing('collection_page', ['page_id' => $page->id, 'collection_id' => $collectionId]);
+            $this->assertDatabaseHas('collections', ['id' => $collectionId]);
+        }
+    }
+
+    /**
+     * @test
+     */
+    public function deletePageWithImageAsContentAdmin200()
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeContentAdmin();
 
         Passport::actingAs($user);
 
@@ -3431,7 +3901,7 @@ class PagesTest extends TestCase
 
         $imageId = $page->image_file_id;
 
-        $response = $this->json('DELETE', '/core/v1/pages/'.$page->id);
+        $response = $this->json('DELETE', '/core/v1/pages/' . $page->id);
 
         $response->assertStatus(Response::HTTP_OK);
 

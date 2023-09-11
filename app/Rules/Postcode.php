@@ -6,7 +6,11 @@ use Illuminate\Contracts\Validation\Rule;
 
 class Postcode implements Rule
 {
-    const PATTERN = '/^([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z][0-9]{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y][0-9]{1,2})|(([A-Za-z][0-9][A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y][0-9]?[A-Za-z]))))\s[0-9][A-Za-z]{2})$/';
+    /**
+     * See https://stackoverflow.com/a/51885364/709923
+     * for discussion of this regex.
+     */
+    const PATTERN = '/^([A-Z][A-HJ-Y]?\d[A-Z\d]? ?\d[A-Z]{2}|GIR ?0A{2})$/i';
 
     /**
      * Determine if the validation rule passes.

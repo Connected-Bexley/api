@@ -32,7 +32,7 @@ class UnactionedReferralsCommandTest extends TestCase
 
         Artisan::call(UnactionedReferralsCommand::class);
 
-        Queue::assertPushedOn('notifications', NotifyServiceEmail::class);
+        Queue::assertPushedOn(config('queue.queues.notifications', 'default'), NotifyServiceEmail::class);
         Queue::assertPushed(NotifyServiceEmail::class, function (NotifyServiceEmail $email) {
             $this->assertArrayHasKey('REFERRAL_SERVICE_NAME', $email->values);
             $this->assertArrayHasKey('REFERRAL_INITIALS', $email->values);

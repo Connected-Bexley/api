@@ -10,6 +10,7 @@ use App\Rules\MarkdownMaxLength;
 use App\Rules\MarkdownMinLength;
 use App\Rules\Password;
 use App\Rules\Slug;
+use App\Rules\UkMobilePhoneNumber;
 use App\Rules\UkPhoneNumber;
 use App\Rules\UserEmailNotInPendingSignupRequest;
 use App\Rules\UserEmailNotTaken;
@@ -52,7 +53,7 @@ class StoreRequest extends FormRequest
                 'string',
                 'min:1',
                 'max:255',
-                new UkPhoneNumber('User Phone - Please enter a valid UK telephone number.'),
+                new UkMobilePhoneNumber('User Phone - Please enter a valid UK mobile telephone number.'),
             ],
             'user.password' => [
                 'required',

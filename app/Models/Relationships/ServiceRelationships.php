@@ -84,7 +84,7 @@ trait ServiceRelationships
      */
     public function offerings()
     {
-        return $this->hasMany(Offering::class);
+        return $this->hasMany(Offering::class)->orderBy('order', 'asc');
     }
 
     /**

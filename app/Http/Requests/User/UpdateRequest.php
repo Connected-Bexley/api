@@ -7,7 +7,7 @@ use App\Models\UserRole;
 use App\Rules\CanAssignRoleToUser;
 use App\Rules\CanRevokeRoleFromUser;
 use App\Rules\Password;
-use App\Rules\UkPhoneNumber;
+use App\Rules\UkMobilePhoneNumber;
 use App\Rules\UserEmailNotTaken;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
@@ -118,14 +118,17 @@ class UpdateRequest extends FormRequest
                     return 1;
                 case Role::NAME_GLOBAL_ADMIN:
                     return 2;
-                case Role::NAME_ORGANISATION_ADMIN:
+                case Role::NAME_CONTENT_ADMIN:
                     return 3;
-                case Role::NAME_SERVICE_ADMIN:
+                case Role::NAME_ORGANISATION_ADMIN:
                     return 4;
-                case Role::NAME_SERVICE_WORKER:
+                case Role::NAME_SERVICE_ADMIN:
                     return 5;
-                default:
+                case Role::NAME_SERVICE_WORKER:
                     return 6;
+
+                default:
+                    return 7;
             }
         });
     }
@@ -152,7 +155,7 @@ class UpdateRequest extends FormRequest
             'first_name' => ['required', 'string', 'min:1', 'max:255'],
             'last_name' => ['required', 'string', 'min:1', 'max:255'],
             'email' => ['required', 'email', 'max:255', new UserEmailNotTaken($this->user)],
-            'phone' => ['required', 'string', 'min:1', 'max:255', new UkPhoneNumber()],
+            'phone' => ['required', 'string', 'min:1', 'max:255', new UkMobilePhoneNumber()],
             'password' => ['string', 'min:8', 'max:255', new Password()],
 
             'roles' => ['required', 'array'],
