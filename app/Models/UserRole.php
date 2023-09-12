@@ -21,8 +21,8 @@ class UserRole extends Model
         $isServiceAdmin = $this->role->name === Role::NAME_SERVICE_WORKER;
 
         return $service
-            ? ($isServiceAdmin && $this->service_id === $service->id)
-            : $isServiceAdmin;
+        ? ($isServiceAdmin && $this->service_id === $service->id)
+        : $isServiceAdmin;
     }
 
     /**
@@ -34,8 +34,8 @@ class UserRole extends Model
         $isServiceAdmin = $this->role->name === Role::NAME_SERVICE_ADMIN;
 
         return $service
-            ? ($isServiceAdmin && $this->service_id === $service->id)
-            : $isServiceAdmin;
+        ? ($isServiceAdmin && $this->service_id === $service->id)
+        : $isServiceAdmin;
     }
 
     /**
@@ -47,8 +47,16 @@ class UserRole extends Model
         $isOrganisationAdmin = $this->role->name === Role::NAME_ORGANISATION_ADMIN;
 
         return $organisation
-            ? ($isOrganisationAdmin && $this->organisation_id === $organisation->id)
-            : $isOrganisationAdmin;
+        ? ($isOrganisationAdmin && $this->organisation_id === $organisation->id)
+        : $isOrganisationAdmin;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isContentAdmin(): bool
+    {
+        return $this->role->name === Role::NAME_CONTENT_ADMIN;
     }
 
     /**

@@ -254,6 +254,14 @@ class User extends Authenticatable implements Notifiable
         }
 
         /*
+         * If the invoker is a global admin,
+         * and the subject is a content admin.
+         */
+        if ($this->isGlobalAdmin() && $subject->isContentAdmin()) {
+            return true;
+        }
+
+        /*
          * If the invoker is an organisation admin for the organisation,
          * and the subject is not a global admin.
          */
@@ -306,9 +314,9 @@ class User extends Authenticatable implements Notifiable
 
         /*
          * If the invoker is an organisation admin for the organisation,
-         * and the subject is not a global admin.
+         * and the subject is not a content admin or a global admin.
          */
-        if ($this->isOrganisationAdmin() && !$subject->isGlobalAdmin()) {
+        if ($this->isOrganisationAdmin() && !($subject->isGlobalAdmin() || $subject->isContentAdmin())) {
             return true;
         }
 
@@ -316,7 +324,7 @@ class User extends Authenticatable implements Notifiable
          * If the invoker is a service admin for the service,
          * and the subject is not a organisation admin for the organisation.
          */
-        if ($this->isServiceAdmin() && !$subject->isOrganisationAdmin()) {
+        if ($this->isServiceAdmin() && !($subject->isOrganisationAdmin() || $subject->isContentAdmin())) {
             return true;
         }
 
@@ -348,7 +356,7 @@ class User extends Authenticatable implements Notifiable
     public function isServiceAdmin(Service $service = null): bool
     {
         return $this->hasRole(Role::serviceAdmin(), $service)
-            || $this->isOrganisationAdmin($service->organisation ?? null);
+        || $this->isOrganisationAdmin($service->organisation ?? null);
     }
 
     /**
@@ -358,6 +366,14 @@ class User extends Authenticatable implements Notifiable
     public function isOrganisationAdmin(Organisation $organisation = null): bool
     {
         return $this->hasRole(Role::organisationAdmin(), null, $organisation) || $this->isGlobalAdmin();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isContentAdmin(): bool
+    {
+        return $this->hasRole(Role::contentAdmin()) || $this->isSuperAdmin();
     }
 
     /**
@@ -411,6 +427,16 @@ class User extends Authenticatable implements Notifiable
         }
 
         $this->assignRole(Role::organisationAdmin(), null, $organisation);
+
+        return $this;
+    }
+
+    /**
+     * @return \App\Models\User
+     */
+    public function makeContentAdmin(): self
+    {
+        $this->assignRole(Role::contentAdmin());
 
         return $this;
     }
@@ -490,6 +516,21 @@ class User extends Authenticatable implements Notifiable
      * @throws \App\Exceptions\CannotRevokeRoleException
      * @return \App\Models\User
      */
+    public function revokeContentAdmin()
+    {
+        if ($this->hasRole(Role::superAdmin())) {
+            throw new CannotRevokeRoleException('Cannot revoke content admin role when user is an super admin');
+        }
+
+        $this->removeRoll(Role::contentAdmin());
+
+        return $this;
+    }
+
+    /**
+     * @throws \App\Exceptions\CannotRevokeRoleException
+     * @return \App\Models\User
+     */
     public function revokeGlobalAdmin()
     {
         if ($this->hasRole(Role::superAdmin())) {
@@ -541,6 +582,14 @@ class User extends Authenticatable implements Notifiable
     /**
      * @return bool
      */
+    public function canMakeContentAdmin(): bool
+    {
+        return $this->isGlobalAdmin();
+    }
+
+    /**
+     * @return bool
+     */
     public function canMakeGlobalAdmin(): bool
     {
         return $this->isGlobalAdmin();
@@ -582,6 +631,15 @@ class User extends Authenticatable implements Notifiable
     public function canRevokeOrganisationAdmin(User $subject, Organisation $organisation): bool
     {
         return $this->canRevokeRole($subject, $organisation);
+    }
+
+    /**
+     * @param \App\Models\User $subject
+     * @return bool
+     */
+    public function canRevokeContentAdmin(User $subject): bool
+    {
+        return $this->canRevokeRole($subject);
     }
 
     /**

@@ -4,7 +4,7 @@ namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
 
-class UkPhoneNumber implements Rule
+class UkMobilePhoneNumber implements Rule
 {
     /**
      * @var string|null
@@ -35,7 +35,7 @@ class UkPhoneNumber implements Rule
             return false;
         }
 
-        $matches = preg_match('/^0([1-6][0-9]{8,10}|7[0-9]{9})$/', $value);
+        $matches = preg_match('/^(07[0-9]{9})$/', $value);
 
         return $matches === 1;
     }
@@ -47,6 +47,6 @@ class UkPhoneNumber implements Rule
      */
     public function message()
     {
-        return $this->message ?? 'The :attribute must be a valid UK phone number.';
+        return $this->message ?? 'The :attribute must be a valid UK mobile phone number.';
     }
 }

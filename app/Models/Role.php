@@ -18,6 +18,8 @@ class Role extends Model
 
     const NAME_ORGANISATION_ADMIN = 'Organisation Admin';
 
+    const NAME_CONTENT_ADMIN = 'Content Admin';
+
     const NAME_GLOBAL_ADMIN = 'Global Admin';
 
     const NAME_SUPER_ADMIN = 'Super Admin';
@@ -49,6 +51,16 @@ class Role extends Model
     {
         return cache()->rememberForever('Role::organisationAdmin', function () {
             return static::query()->where('name', static::NAME_ORGANISATION_ADMIN)->firstOrFail();
+        });
+    }
+
+    /**
+     * @return \App\Models\Role
+     */
+    public static function contentAdmin(): self
+    {
+        return cache()->rememberForever('Role::contentAdmin', function () {
+            return static::query()->where('name', static::NAME_CONTENT_ADMIN)->firstOrFail();
         });
     }
 

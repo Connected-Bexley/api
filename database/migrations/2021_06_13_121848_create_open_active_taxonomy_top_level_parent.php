@@ -6,6 +6,7 @@ use App\Models\Taxonomy;
 use Carbon\Carbon;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 return new class() extends Migration {
@@ -49,34 +50,33 @@ return new class() extends Migration {
      */
     public function down()
     {
+        Schema::disableForeignKeyConstraints();
+
         $taxonomyTable = (new Taxonomy())->getTable();
         $categoryId = Taxonomy::category()->id;
         $openActiveId = DB::table($taxonomyTable)
             ->where('parent_id', $categoryId)
-            ->where('name', 'OpenActive Taxonomy')
+            ->where('name', 'OpenActive')
             ->value('id');
 
-        $openActiveTaxonomyIds = $this->getDescendantTaxonomyIds(
-            DB::table($taxonomyTable)->where('parent_id', $openActiveId)->pluck('id')
-        );
+        $openActiveTaxonomyIds = $this->getDescendantTaxonomyIds([$openActiveId]);
 
         DB::table((new ServiceTaxonomy())->getTable())
             ->whereIn('taxonomy_id', $openActiveTaxonomyIds)
             ->delete();
-
         DB::table((new ServiceTaxonomy())->getTable())
             ->where('taxonomy_id', $openActiveId)
             ->delete();
-
         DB::table($taxonomyTable)
             ->whereIn('id', $openActiveTaxonomyIds)
             ->delete();
-
         DB::table($taxonomyTable)
             ->where('id', $openActiveId)
             ->delete();
 
         Taxonomy::category()->updateDepth();
+
+        Schema::enableForeignKeyConstraints();
     }
 
     /**
@@ -91,11 +91,10 @@ return new class() extends Migration {
     {
         $childIds = DB::table((new Taxonomy())->getTable())->whereIn('parent_id', $rootIds)->pluck('id');
 
-        $taxonomyIds = array_merge($taxonomyIds, array_diff($childIds->all(), $taxonomyIds));
+        $taxonomyIds = $childIds->concat($taxonomyIds)->unique()->values()->all();
 
-        if (count($childIds)) {
-            $childTaxonomyIds = $this->getDescendantTaxonomyIds($childIds, $taxonomyIds);
-            $taxonomyIds = array_merge($taxonomyIds, array_diff($childTaxonomyIds, $taxonomyIds));
+        if ($childIds->isNotEmpty()) {
+            $taxonomyIds = $this->getDescendantTaxonomyIds($childIds->all(), $taxonomyIds);
         }
 
         return $taxonomyIds;

@@ -80,6 +80,16 @@ class UpdateSettingSchema extends Schema
                 Schema::string('content')->format('markdown')
             );
 
+        $accessibilityStatement = Schema::object('accessibility_statement')
+            ->required(
+                'title',
+                'content'
+            )
+            ->properties(
+                Schema::string('title'),
+                Schema::string('content')->format('markdown')
+            );
+
         $about = Schema::object('about')
             ->required(
                 'title',
@@ -152,6 +162,7 @@ class UpdateSettingSchema extends Schema
                                 'home',
                                 'terms_and_conditions',
                                 'privacy_policy',
+                                'accessibility_statement',
                                 'about',
                                 'contact',
                                 'get_involved',
@@ -163,6 +174,7 @@ class UpdateSettingSchema extends Schema
                                 $home,
                                 $termsAndConditions,
                                 $privacyPolicy,
+                                $accessibilityStatement,
                                 $about,
                                 $contact,
                                 $getInvolved,

@@ -14,8 +14,10 @@ return new class() extends Migration {
      */
     public function up()
     {
-        $uuidRegex = '|suttoninformationhub\.org\.uk\/([0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12})|i';
-        Page::chunk(50, function ($pages) use ($uuidRegex) {
+        $host = parse_url(config('app.url'), PHP_URL_HOST);
+        $escHost = str_replace('.', '\.', $host);
+        $uuidRegex = '|' . $escHost . '\/([0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12})|i';
+        Page::chunk(50, function ($pages) use ($host, $uuidRegex) {
             foreach ($pages as $page) {
                 if (preg_match_all($uuidRegex, print_r($page->content, true), $matches)) {
                     $content = $page->content;
@@ -25,7 +27,7 @@ return new class() extends Migration {
                     foreach ($matchingPages as $id => $slug) {
                         foreach ($content as $label => $details) {
                             foreach ($details['copy'] as $i => $copy) {
-                                $content[$label]['copy'][$i] = str_replace("suttoninformationhub.org.uk/$id", "suttoninformationhub.org.uk/pages/$slug", $copy);
+                                $content[$label]['copy'][$i] = str_replace("$host/$id", "$host/pages/$slug", $copy);
                             }
                         }
                     }
@@ -35,7 +37,7 @@ return new class() extends Migration {
             }
         });
 
-        Service::chunk(50, function ($services) use ($uuidRegex) {
+        Service::chunk(50, function ($services) use ($host, $uuidRegex) {
             foreach ($services as $service) {
                 if (preg_match_all($uuidRegex, $service->description, $matches)) {
                     $description = $service->description;
@@ -43,7 +45,7 @@ return new class() extends Migration {
                         ->whereIn('id', $matches[1])
                         ->pluck('slug', 'id');
                     foreach ($matchingServices as $id => $slug) {
-                        $description = str_replace("suttoninformationhub.org.uk/$id", "suttoninformationhub.org.uk/pages/$slug", $description);
+                        $description = str_replace("$host/$id", "$host/pages/$slug", $description);
                     }
                     $service->description = $description;
                     $service->save();
@@ -51,7 +53,7 @@ return new class() extends Migration {
             }
         });
 
-        UsefulInfo::chunk(50, function ($usefulInfos) use ($uuidRegex) {
+        UsefulInfo::chunk(50, function ($usefulInfos) use ($host, $uuidRegex) {
             foreach ($usefulInfos as $usefulInfo) {
                 if (preg_match_all($uuidRegex, $usefulInfo->description, $matches)) {
                     $description = $usefulInfo->description;
@@ -59,7 +61,7 @@ return new class() extends Migration {
                         ->whereIn('id', $matches[1])
                         ->pluck('slug', 'id');
                     foreach ($matchingUsefulInfos as $id => $slug) {
-                        $description = str_replace("suttoninformationhub.org.uk/$id", "suttoninformationhub.org.uk/pages/$slug", $description);
+                        $description = str_replace("$host/$id", "$host/pages/$slug", $description);
                     }
                     $usefulInfo->description = $description;
                     $usefulInfo->save();

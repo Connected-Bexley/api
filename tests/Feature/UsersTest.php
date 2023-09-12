@@ -102,7 +102,7 @@ class UsersTest extends TestCase
         $this->assertEquals($serviceWorker->id, $data['data'][0]['id']);
     }
 
-    public function test_service_worker_can_sort_by_at_organisation()
+    public function test_service_worker_can_filter_by_at_organisation()
     {
         $organisation = Organisation::factory()->create();
         $organisationAdmin = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -120,7 +120,7 @@ class UsersTest extends TestCase
         $this->assertEquals($organisationAdmin->id, $data['data'][0]['id']);
     }
 
-    public function test_service_worker_can_sort_by_at_service()
+    public function test_service_worker_can_filter_by_at_service()
     {
         $service = Service::factory()->create();
         $serviceAdmin = User::factory()->create()->makeServiceAdmin($service);
@@ -138,7 +138,7 @@ class UsersTest extends TestCase
         $this->assertEquals($serviceAdmin->id, $data['data'][0]['id']);
     }
 
-    public function test_service_worker_can_sort_by_at_organisation_and_includes_service_workers()
+    public function test_service_worker_can_filter_by_at_organisation_and_includes_service_workers()
     {
         $service = Service::factory()->create();
         $serviceWorker = User::factory()->create()->makeServiceWorker($service);
@@ -156,7 +156,7 @@ class UsersTest extends TestCase
         $this->assertEquals($serviceWorker->id, $data['data'][0]['id']);
     }
 
-    public function test_service_worker_can_sort_by_at_organisation_and_excludes_global_admins()
+    public function test_service_worker_can_filter_by_at_organisation_and_excludes_global_admins()
     {
         $organisation = Organisation::factory()->create();
         $organisationAdmin = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -416,6 +416,19 @@ class UsersTest extends TestCase
         $this->assertEquals(3, $createdUser->roles()->count());
     }
 
+    public function test_organisation_admin_cannot_create_content_admin()
+    {
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
+        Passport::actingAs($user);
+
+        $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
+            ['role' => Role::NAME_CONTENT_ADMIN],
+        ]));
+
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
     public function test_organisation_admin_cannot_create_global_admin()
     {
         $service = Service::factory()->create();
@@ -424,6 +437,95 @@ class UsersTest extends TestCase
 
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
             ['role' => Role::NAME_GLOBAL_ADMIN],
+        ]));
+
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    /*
+     * Content Admin Invoked.
+     */
+    public function test_content_admin_cannot_create_service_worker()
+    {
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeContentAdmin();
+        Passport::actingAs($user);
+
+        $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
+            [
+                'role' => Role::NAME_SERVICE_WORKER,
+                'service_id' => $service->id,
+            ],
+        ]));
+
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    public function test_content_admin_cannot_create_service_admin()
+    {
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeContentAdmin();
+        Passport::actingAs($user);
+
+        $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
+            [
+                'role' => Role::NAME_SERVICE_ADMIN,
+                'service_id' => $service->id,
+            ],
+        ]));
+
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    public function test_content_admin_cannot_create_organisation_admin()
+    {
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeContentAdmin();
+        Passport::actingAs($user);
+
+        $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
+            [
+                'role' => Role::NAME_ORGANISATION_ADMIN,
+                'organisation_id' => $service->organisation->id,
+            ],
+        ]));
+
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    public function test_content_admin_cannot_create_content_admin()
+    {
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeContentAdmin();
+        Passport::actingAs($user);
+
+        $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
+            ['role' => Role::NAME_CONTENT_ADMIN],
+        ]));
+
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    public function test_content_admin_cannot_create_global_admin()
+    {
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeContentAdmin();
+        Passport::actingAs($user);
+
+        $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
+            ['role' => Role::NAME_GLOBAL_ADMIN],
+        ]));
+
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    public function test_content_admin_cannot_create_super_admin()
+    {
+        $user = User::factory()->create()->makeContentAdmin();
+        Passport::actingAs($user);
+
+        $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
+            ['role' => Role::NAME_SUPER_ADMIN],
         ]));
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -493,6 +595,26 @@ class UsersTest extends TestCase
         $this->assertTrue($createdUser->isServiceAdmin($service));
         $this->assertTrue($createdUser->isOrganisationAdmin($service->organisation));
         $this->assertEquals(3, $createdUser->roles()->count());
+    }
+
+    public function test_global_admin_can_create_content_admin()
+    {
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
+        Passport::actingAs($user);
+
+        $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
+            ['role' => Role::NAME_CONTENT_ADMIN],
+        ]));
+
+        $response->assertStatus(Response::HTTP_CREATED);
+        $createdUserId = json_decode($response->getContent(), true)['data']['id'];
+        $createdUser = User::findOrFail($createdUserId);
+        $this->assertFalse($createdUser->isServiceWorker($service));
+        $this->assertFalse($createdUser->isServiceAdmin($service));
+        $this->assertFalse($createdUser->isOrganisationAdmin($service->organisation));
+        $this->assertTrue($createdUser->isContentAdmin());
+        $this->assertEquals(1, $createdUser->roles()->count());
     }
 
     public function test_global_admin_can_create_global_admin()
@@ -594,6 +716,27 @@ class UsersTest extends TestCase
         $this->assertEquals(3, $createdUser->roles()->count());
     }
 
+    public function test_super_admin_can_create_content_admin()
+    {
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
+        Passport::actingAs($user);
+
+        $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
+            ['role' => Role::NAME_CONTENT_ADMIN],
+        ]));
+
+        $response->assertStatus(Response::HTTP_CREATED);
+        $createdUserId = json_decode($response->getContent(), true)['data']['id'];
+        $createdUser = User::findOrFail($createdUserId);
+        $this->assertFalse($createdUser->isServiceWorker($service));
+        $this->assertFalse($createdUser->isServiceAdmin($service));
+        $this->assertFalse($createdUser->isOrganisationAdmin($service->organisation));
+        $this->assertTrue($createdUser->isContentAdmin());
+        $this->assertFalse($createdUser->isGlobalAdmin());
+        $this->assertEquals(1, $createdUser->roles()->count());
+    }
+
     public function test_super_admin_can_create_global_admin()
     {
         $service = Service::factory()->create();
@@ -647,7 +790,7 @@ class UsersTest extends TestCase
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
             'email' => 'test@example.com',
-            'phone' => random_uk_phone(),
+            'phone' => random_uk_mobile_phone(),
             'password' => 'Pa$$w0rd',
             'roles' => [
                 ['role' => Role::NAME_SUPER_ADMIN],
@@ -1120,13 +1263,37 @@ class UsersTest extends TestCase
         ]);
     }
 
+    public function test_organisation_admin_cannot_update_content_admin()
+    {
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeOrganisationAdmin($service->organisation);
+        Passport::actingAs($invoker);
+
+        $user = User::factory()->create()->makeContentAdmin();
+
+        $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'password' => 'Pa$$w0rd',
+            'roles' => [
+                [
+                    'role' => Role::NAME_CONTENT_ADMIN,
+                ],
+            ],
+        ]);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
     public function test_organisation_admin_cannot_update_global_admin()
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeOrganisationAdmin($service->organisation);
         Passport::actingAs($invoker);
 
-        $user = User::factory()->create()->makeGlobalAdmin($service->organisation);
+        $user = User::factory()->create()->makeGlobalAdmin();
 
         $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
             'first_name' => $user->first_name,
@@ -1150,6 +1317,188 @@ class UsersTest extends TestCase
                 [
                     'role' => Role::NAME_GLOBAL_ADMIN,
                 ],
+            ],
+        ]);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /*
+     * Content Admin Invoked.
+     */
+
+    public function test_content_admin_cannot_update_service_worker()
+    {
+        $invoker = User::factory()->create()->makeContentAdmin();
+        Passport::actingAs($invoker);
+
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceWorker($service);
+
+        $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'password' => 'Pa$$w0rd',
+            'roles' => [
+                [
+                    'role' => Role::NAME_SERVICE_WORKER,
+                    'service_id' => $service->id,
+                ],
+            ],
+        ]);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    public function test_content_admin_cannot_update_service_admin()
+    {
+        $invoker = User::factory()->create()->makeContentAdmin();
+        Passport::actingAs($invoker);
+
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($service);
+
+        $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'password' => 'Pa$$w0rd',
+            'roles' => [
+                [
+                    'role' => Role::NAME_SERVICE_WORKER,
+                    'service_id' => $service->id,
+                ],
+                [
+                    'role' => Role::NAME_SERVICE_ADMIN,
+                    'service_id' => $service->id,
+                ],
+            ],
+        ]);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    public function test_content_admin_cannot_update_organisation_admin()
+    {
+        $invoker = User::factory()->create()->makeContentAdmin();
+        Passport::actingAs($invoker);
+
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
+
+        $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'password' => 'Pa$$w0rd',
+            'roles' => [
+                [
+                    'role' => Role::NAME_SERVICE_WORKER,
+                    'service_id' => $service->id,
+                ],
+                [
+                    'role' => Role::NAME_SERVICE_ADMIN,
+                    'service_id' => $service->id,
+                ],
+                [
+                    'role' => Role::NAME_ORGANISATION_ADMIN,
+                    'organisation_id' => $service->organisation->id,
+                ],
+            ],
+        ]);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    public function test_content_admin_cannot_update_content_admin()
+    {
+        $invoker = User::factory()->create()->makeContentAdmin();
+        Passport::actingAs($invoker);
+
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeContentAdmin();
+
+        $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'password' => 'Pa$$w0rd',
+            'roles' => [
+                ['role' => Role::NAME_CONTENT_ADMIN],
+            ],
+        ]);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    public function test_content_admin_cannot_update_global_admin()
+    {
+        $invoker = User::factory()->create()->makeContentAdmin();
+        Passport::actingAs($invoker);
+
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
+
+        $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'password' => 'Pa$$w0rd',
+            'roles' => [
+                [
+                    'role' => Role::NAME_SERVICE_WORKER,
+                    'service_id' => $service->id,
+                ],
+                [
+                    'role' => Role::NAME_SERVICE_ADMIN,
+                    'service_id' => $service->id,
+                ],
+                [
+                    'role' => Role::NAME_ORGANISATION_ADMIN,
+                    'organisation_id' => $service->organisation->id,
+                ],
+                ['role' => Role::NAME_GLOBAL_ADMIN],
+            ],
+        ]);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    public function test_content_admin_cannot_update_super_admin()
+    {
+        $invoker = User::factory()->create()->makeContentAdmin();
+        Passport::actingAs($invoker);
+
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
+
+        $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'password' => 'Pa$$w0rd',
+            'roles' => [
+                [
+                    'role' => Role::NAME_SERVICE_WORKER,
+                    'service_id' => $service->id,
+                ],
+                [
+                    'role' => Role::NAME_SERVICE_ADMIN,
+                    'service_id' => $service->id,
+                ],
+                [
+                    'role' => Role::NAME_ORGANISATION_ADMIN,
+                    'organisation_id' => $service->organisation->id,
+                ],
+                ['role' => Role::NAME_GLOBAL_ADMIN],
+                ['role' => Role::NAME_SUPER_ADMIN],
             ],
         ]);
 
@@ -1299,6 +1648,38 @@ class UsersTest extends TestCase
         ]);
     }
 
+    public function test_global_admin_can_update_content_admin()
+    {
+        $invoker = User::factory()->create()->makeGlobalAdmin();
+        Passport::actingAs($invoker);
+
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeContentAdmin();
+
+        $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'password' => 'Pa$$w0rd',
+            'roles' => [
+                ['role' => Role::NAME_CONTENT_ADMIN],
+            ],
+        ]);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $response->assertJsonFragment([
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+        ]);
+        $response->assertJsonFragment([
+            ['role' => Role::NAME_CONTENT_ADMIN],
+        ]);
+    }
+
     public function test_global_admin_can_update_global_admin()
     {
         $invoker = User::factory()->create()->makeGlobalAdmin();
@@ -1331,6 +1712,7 @@ class UsersTest extends TestCase
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
+
         $response->assertJsonFragment([
             'first_name' => $user->first_name,
             'last_name' => $user->last_name,
@@ -1570,6 +1952,38 @@ class UsersTest extends TestCase
                 'role' => Role::NAME_ORGANISATION_ADMIN,
                 'organisation_id' => $service->organisation->id,
             ],
+        ]);
+    }
+
+    public function test_super_admin_can_update_content_admin()
+    {
+        $invoker = User::factory()->create()->makeSuperAdmin();
+        Passport::actingAs($invoker);
+
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeContentAdmin();
+
+        $response = $this->json('PUT', "/core/v1/users/{$user->id}", [
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'password' => 'Pa$$w0rd',
+            'roles' => [
+                ['role' => Role::NAME_CONTENT_ADMIN],
+            ],
+        ]);
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonFragment([
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+        ]);
+
+        $response->assertJsonFragment([
+            ['role' => Role::NAME_CONTENT_ADMIN],
         ]);
     }
 
@@ -1820,6 +2234,18 @@ class UsersTest extends TestCase
         $this->assertSoftDeleted((new User())->getTable(), ['id' => $subject->id]);
     }
 
+    public function test_content_admin_cannot_delete_service_admin()
+    {
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeContentAdmin();
+        $subject = User::factory()->create()->makeServiceAdmin($service);
+        Passport::actingAs($invoker);
+
+        $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
     public function test_guest_cannot_delete_organisation_admin()
     {
         $service = Service::factory()->create();
@@ -1867,6 +2293,86 @@ class UsersTest extends TestCase
         $this->assertSoftDeleted((new User())->getTable(), ['id' => $subject->id]);
     }
 
+    public function test_content_admin_cannot_delete_organisation_admin()
+    {
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeContentAdmin();
+        $subject = User::factory()->create()->makeOrganisationAdmin($service->organisation);
+        Passport::actingAs($invoker);
+
+        $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    public function test_guest_cannot_delete_content_admin()
+    {
+        $subject = User::factory()->create()->makeContentAdmin();
+
+        $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
+
+        $response->assertStatus(Response::HTTP_UNAUTHORIZED);
+    }
+
+    public function test_service_worker_cannot_delete_content_admin()
+    {
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeServiceWorker($service);
+        $subject = User::factory()->create()->makeContentAdmin();
+        Passport::actingAs($invoker);
+
+        $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    public function test_service_admin_cannot_delete_content_admin()
+    {
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeServiceAdmin($service);
+        $subject = User::factory()->create()->makeContentAdmin();
+        Passport::actingAs($invoker);
+
+        $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    public function test_organisation_admin_cannot_delete_content_admin()
+    {
+        $service = Service::factory()->create();
+        $invoker = User::factory()->create()->makeOrganisationAdmin($service->organisation);
+        $subject = User::factory()->create()->makeContentAdmin();
+        Passport::actingAs($invoker);
+
+        $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    public function test_content_admin_cannot_delete_content_admin()
+    {
+        $invoker = User::factory()->create()->makeContentAdmin();
+        $subject = User::factory()->create()->makeContentAdmin();
+        Passport::actingAs($invoker);
+
+        $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    public function test_global_admin_can_delete_content_admin()
+    {
+        $invoker = User::factory()->create()->makeGlobalAdmin();
+        $subject = User::factory()->create()->makeContentAdmin();
+        Passport::actingAs($invoker);
+
+        $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
+
+        $response->assertStatus(Response::HTTP_OK);
+        $this->assertSoftDeleted((new User())->getTable(), ['id' => $subject->id]);
+    }
+
     public function test_guest_cannot_delete_global_admin()
     {
         $subject = User::factory()->create()->makeGlobalAdmin();
@@ -1900,10 +2406,21 @@ class UsersTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_can_delete_global_admin()
+    public function test_organisation_admin_cannot_delete_global_admin()
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeOrganisationAdmin($service->organisation);
+        $subject = User::factory()->create()->makeGlobalAdmin();
+        Passport::actingAs($invoker);
+
+        $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    public function test_content_admin_cannot_delete_global_admin()
+    {
+        $invoker = User::factory()->create()->makeContentAdmin();
         $subject = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($invoker);
 
@@ -1957,10 +2474,21 @@ class UsersTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_can_delete_super_admin()
+    public function test_organisation_admin_cannot_delete_super_admin()
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeOrganisationAdmin($service->organisation);
+        $subject = User::factory()->create()->makeSuperAdmin();
+        Passport::actingAs($invoker);
+
+        $response = $this->json('DELETE', "/core/v1/users/{$subject->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    public function test_content_admin_cannot_delete_super_admin()
+    {
+        $invoker = User::factory()->create()->makeContentAdmin();
         $subject = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($invoker);
 
@@ -2025,7 +2553,7 @@ class UsersTest extends TestCase
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
             'email' => $this->faker->safeEmail(),
-            'phone' => random_uk_phone(),
+            'phone' => random_uk_mobile_phone(),
             'password' => 'Pa$$w0rd',
             'roles' => $roles,
         ];
@@ -2041,7 +2569,7 @@ class UsersTest extends TestCase
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
             'email' => $this->faker->safeEmail(),
-            'phone' => random_uk_phone(),
+            'phone' => random_uk_mobile_phone(),
             'roles' => $roles,
         ];
     }

@@ -31,7 +31,7 @@ class ServiceCreatedTest extends TestCase
         $listener = new ServiceCreated();
         $listener->handle($event);
 
-        Queue::assertPushedOn('notifications', NotifyGlobalAdminEmail::class);
+        Queue::assertPushedOn(config('queue.queues.notifications', 'default'), NotifyGlobalAdminEmail::class);
         Queue::assertPushed(
             NotifyGlobalAdminEmail::class,
             function (NotifyGlobalAdminEmail $email) use ($service, $user) {
