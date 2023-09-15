@@ -10,7 +10,7 @@ interface QueryBuilder
     /**
      * Build the search query.
      *
-     * @param App\Search\SearchCriteriaQuery $query
+     * @param \App\Search\SearchCriteriaQuery $query
      * @param int $page
      * @param int $perPage
      * @return ElasticScoutDriverPlus\Builders\SearchRequestBuilder

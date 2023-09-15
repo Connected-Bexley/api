@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 
 namespace App\Search\ElasticSearch;
 
@@ -51,10 +51,11 @@ abstract class ElasticsearchQueryBuilder
      * @param string $term
      * @param int $boost
      * @param mixed $fuzziness
+     * @param string $operator
      */
-    protected function addMatch(string $field, string $term, string $path = null, $boost = 1, $fuzziness = 'AUTO'): void
+    protected function addMatch(string $field, string $term, string $path = null, $boost = 1, $fuzziness = 'AUTO', $operator = 'OR'): void
     {
-        $path = $path?? $this->mustPath;
+        $path = $path ?? $this->mustPath;
         $matches = Arr::get($this->esQuery, $path);
         $matches[] = [
             'match' => [
@@ -62,6 +63,7 @@ abstract class ElasticsearchQueryBuilder
                     'query' => $term,
                     'boost' => $boost,
                     'fuzziness' => $fuzziness,
+                    'operator' => $operator,
                 ],
             ],
         ];
@@ -77,7 +79,7 @@ abstract class ElasticsearchQueryBuilder
      */
     protected function addMatchPhrase(string $field, string $term, string $path = null, $boost = 1): void
     {
-        $path = $path?? $this->mustPath;
+        $path = $path ?? $this->mustPath;
         $matches = Arr::get($this->esQuery, $path);
         $matches[] = [
             'match_phrase' => [
@@ -99,7 +101,7 @@ abstract class ElasticsearchQueryBuilder
      */
     protected function addTerm(string $field, string $term, string $path = null, $boost = 1): void
     {
-        $path = $path?? $this->mustPath;
+        $path = $path ?? $this->mustPath;
         $matches = Arr::get($this->esQuery, $path);
         $matches[] = [
             'term' => [
@@ -121,7 +123,7 @@ abstract class ElasticsearchQueryBuilder
      */
     protected function addTerms(string $field, array $terms, string $path = null, $boost = 1): void
     {
-        $path = $path?? $this->mustPath;
+        $path = $path ?? $this->mustPath;
         $matches = Arr::get($this->esQuery, $path);
         $matches[] = [
             'terms' => [

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 
 namespace App\Search\ElasticSearch;
 
@@ -10,8 +10,13 @@ use App\Models\OrganisationEvent;
 use App\Search\SearchCriteriaQuery;
 use App\Support\Coordinate;
 use Carbon\Carbon;
+use Carbon\Exceptions\InvalidFormatException;
+use Carbon\Exceptions\UnitException;
 use ElasticScoutDriverPlus\Builders\SearchRequestBuilder;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Arr;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 class EventQueryBuilder extends ElasticsearchQueryBuilder implements QueryBuilder
 {
@@ -40,6 +45,19 @@ class EventQueryBuilder extends ElasticsearchQueryBuilder implements QueryBuilde
         $this->filterPath = 'function_score.query.bool.filter';
     }
 
+    /**
+     * Build the search query.
+     *
+     * @param App\Search\SearchCriteriaQuery $query
+     * @param int $page
+     * @param int $perPage
+     * @throws BindingResolutionException
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws InvalidFormatException
+     * @throws UnitException
+     * @return ElasticScoutDriverPlus\Builders\SearchRequestBuilder
+     */
     public function build(SearchCriteriaQuery $query, int $page = null, int $perPage = null): SearchRequestBuilder
     {
         $page = page($page);
@@ -96,11 +114,21 @@ class EventQueryBuilder extends ElasticsearchQueryBuilder implements QueryBuilde
 
     protected function applyQuery(string $query): void
     {
-        $this->addMatch('title', $query, $this->shouldPath, 3);
-        $this->addMatch('organisation_name', $query, $this->shouldPath, 3);
-        $this->addMatch('intro', $query, $this->shouldPath, 2);
-        $this->addMatch('description', $query, $this->shouldPath, 1.5);
-        $this->addMatch('taxonomy_categories', $query, $this->shouldPath);
+        $this->addMatch('title', $query, $this->shouldPath, 1.5);
+        $this->addMatch('title', $query, $this->shouldPath, 2.5, 'AUTO', 'AND');
+        $this->addMatchPhrase('title', $query, $this->shouldPath, 4);
+        $this->addMatch('organisation_name', $query, $this->shouldPath);
+        $this->addMatch('organisation_name', $query, $this->shouldPath, 2, 'AUTO', 'AND');
+        $this->addMatchPhrase('organisation_name', $query, $this->shouldPath, 3);
+        $this->addMatch('intro', $query, $this->shouldPath);
+        $this->addMatch('intro', $query, $this->shouldPath, 1.5, 'AUTO', 'AND');
+        $this->addMatchPhrase('intro', $query, $this->shouldPath, 2.5);
+        $this->addMatch('description', $query, $this->shouldPath, 0.5);
+        $this->addMatch('description', $query, $this->shouldPath, 1.5, 'AUTO', 'AND');
+        $this->addMatchPhrase('description', $query, $this->shouldPath, 2);
+        $this->addMatch('taxonomy_categories', $query, $this->shouldPath, 0.5);
+        $this->addMatch('taxonomy_categories', $query, $this->shouldPath, 1, 'AUTO', 'AND');
+        $this->addMatchPhrase('taxonomy_categories', $query, $this->shouldPath, 1.5);
 
         $this->addMinimumShouldMatch();
     }
@@ -174,6 +202,15 @@ class EventQueryBuilder extends ElasticsearchQueryBuilder implements QueryBuilde
         Arr::set($this->esQuery, $this->filterPath, $filters);
     }
 
+    /**
+     * Add a search distance in miles filter and order by distance.
+     *
+     * @param Coordinate $coordinate
+     * @param int|null $distance
+     * @throws BindingResolutionException
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     */
     protected function applyLocation(Coordinate $coordinate, ?int $distance): void
     {
         $filters = Arr::get($this->esQuery, $this->filterPath);
@@ -202,6 +239,11 @@ class EventQueryBuilder extends ElasticsearchQueryBuilder implements QueryBuilde
         ];
     }
 
+    /**
+     * Add a has wheel chair access filter.
+     *
+     * @param bool $hasWheelchairAccess
+     */
     protected function applyHasWheelchairAccess(bool $hasWheelchairAccess): void
     {
         $filters = Arr::get($this->esQuery, $this->filterPath);
@@ -218,6 +260,11 @@ class EventQueryBuilder extends ElasticsearchQueryBuilder implements QueryBuilde
         Arr::set($this->esQuery, $this->filterPath, $filters);
     }
 
+    /**
+     * Add a has induction loop filter.
+     *
+     * @param bool $hasInductionLoop
+     */
     protected function applyHasInductionLoop(bool $hasInductionLoop): void
     {
         $filters = Arr::get($this->esQuery, $this->filterPath);
@@ -234,6 +281,11 @@ class EventQueryBuilder extends ElasticsearchQueryBuilder implements QueryBuilde
         Arr::set($this->esQuery, $this->filterPath, $filters);
     }
 
+    /**
+     * Add a has accessible toilet filter.
+     *
+     * @param bool $hasAccessibleToilet
+     */
     protected function applyHasAccessibleToilet(bool $hasAccessibleToilet): void
     {
         $filters = Arr::get($this->esQuery, $this->filterPath);
@@ -250,6 +302,12 @@ class EventQueryBuilder extends ElasticsearchQueryBuilder implements QueryBuilde
         Arr::set($this->esQuery, $this->filterPath, $filters);
     }
 
+    /**
+     * Add an order by clause.
+     *
+     * @param SearchCriteriaQuery $query
+     * @return array
+     */
     protected function applyOrder(SearchCriteriaQuery $query): array
     {
         $order = $query->getOrder();
@@ -283,6 +341,9 @@ class EventQueryBuilder extends ElasticsearchQueryBuilder implements QueryBuilde
         return ['_score'];
     }
 
+    /**
+     * Add the minimum should match value.
+     */
     protected function addMinimumShouldMatch()
     {
         $bool = Arr::get($this->esQuery, 'function_score.query.bool');

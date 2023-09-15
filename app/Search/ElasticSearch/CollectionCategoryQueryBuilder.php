@@ -1,13 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 
 namespace App\Search\ElasticSearch;
 
 use App\Contracts\QueryBuilder;
 use App\Models\Collection;
 use App\Models\Service;
-use App\Models\Taxonomy;
 use App\Search\SearchCriteriaQuery;
 use ElasticScoutDriverPlus\Builders\SearchRequestBuilder;
 use Illuminate\Support\Arr;
@@ -69,13 +68,13 @@ class CollectionCategoryQueryBuilder extends ElasticsearchQueryBuilder implement
 
         $should = Arr::get($this->esQuery, 'function_score.query.bool.should');
 
-        $category->taxonomies->each(function (Taxonomy $taxonomy) use ($should): void {
+        foreach ($category->taxonomies as $taxonomy) {
             $should[] = [
                 'term' => [
                     'taxonomy_categories.keyword' => $taxonomy->getAttribute('name'),
                 ],
             ];
-        });
+        }
 
         Arr::set($this->esQuery, 'function_score.query.bool.should', $should);
     }

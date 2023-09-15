@@ -140,6 +140,7 @@ class CollectionCategoriesTest extends TestCase implements UsesElasticsearch
         $collection->collectionTaxonomies()->create(['taxonomy_id' => $taxonomy1->id]);
         $collection->collectionTaxonomies()->create(['taxonomy_id' => $taxonomy2->id]);
         $collection->collectionTaxonomies()->create(['taxonomy_id' => $taxonomy3->id]);
+        $collection->save();
 
         // Create 3 services
         $service1 = Service::factory()->create(['name' => 'Gold Co.']);
@@ -167,6 +168,7 @@ class CollectionCategoriesTest extends TestCase implements UsesElasticsearch
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
+
         $response->assertJsonCount(3, 'data');
 
         $content = $this->getResponseContent($response)['data'];

@@ -5,7 +5,6 @@ namespace Tests\Feature\Search;
 use App\Models\Collection;
 use App\Models\Page;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 use Tests\UsesElasticsearch;
 
@@ -43,7 +42,7 @@ class PageTest extends TestCase implements UsesElasticsearch
     public function test_query_matches_page_title()
     {
         $page = Page::factory()->create([
-            'title' => 'Thisisatest'
+            'title' => 'This is a test',
         ]);
 
         sleep(1);
@@ -174,14 +173,14 @@ class PageTest extends TestCase implements UsesElasticsearch
 
     public function test_query_ranks_page_title_above_page_content()
     {
-        $page1 = Page::factory()->create(['title' => 'Thisisatest']);
+        $page1 = Page::factory()->create(['title' => 'This is a test']);
         $page2 = Page::factory()->create([
             'content' => [
                 'introduction' => [
                     'content' => [
                         [
                             'type' => 'copy',
-                            'value' => 'Thisisatest',
+                            'value' => 'This is a test',
                         ],
                     ],
                 ],
@@ -190,7 +189,7 @@ class PageTest extends TestCase implements UsesElasticsearch
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search/pages', [
-            'query' => 'Thisisatest',
+            'query' => 'test this',
             'page' => 1,
             'per_page' => 20,
         ]);
@@ -214,7 +213,7 @@ class PageTest extends TestCase implements UsesElasticsearch
     {
         $page1 = Page::factory()->create();
         $page1->updateCollections([Collection::factory()->create([
-            'name' => 'Thisisatest',
+            'name' => 'This is a test',
         ])->id]);
 
         $page2 = Page::factory()->create();
@@ -225,7 +224,7 @@ class PageTest extends TestCase implements UsesElasticsearch
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search/pages', [
-            'query' => 'Thisisatest',
+            'query' => 'This is a test',
             'page' => 1,
             'per_page' => 20,
         ]);
@@ -237,7 +236,7 @@ class PageTest extends TestCase implements UsesElasticsearch
 
         // Fuzzy
         $response = $this->json('POST', '/core/v1/search/pages', [
-            'query' => 'Thsiisatst',
+            'query' => 'those tests',
             'page' => 1,
             'per_page' => 20,
         ]);
@@ -292,12 +291,12 @@ class PageTest extends TestCase implements UsesElasticsearch
 
     public function test_query_ranks_perfect_match_above_fuzzy_match()
     {
-        $page1 = Page::factory()->create(['title' => 'Thisisatest']);
-        $page2 = Page::factory()->create(['title' => 'Thsiisatst']);
+        $page1 = Page::factory()->create(['title' => 'This is a test']);
+        $page2 = Page::factory()->create(['title' => 'Those are tests']);
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search/pages', [
-            'query' => 'Thisisatest',
+            'query' => 'This is a test',
             'page' => 1,
             'per_page' => 20,
         ]);

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 
 namespace App\Search\ElasticSearch;
 
@@ -24,6 +24,7 @@ class EventEloquentMapper implements EloquentMapper
         $perPage = per_page($perPage);
 
         $queryRequest = $esQuery->buildSearchRequest()->toArray();
+
         $response = $esQuery->execute();
 
         $this->logMetrics($queryRequest, $response);
@@ -60,7 +61,7 @@ class EventEloquentMapper implements EloquentMapper
      */
     protected function orderEventsByLocation(array $queryRequest, Collection $events): Collection
     {
-        $locations = array_filter($queryRequest['body']['sort']?? [], function ($key) {
+        $locations = array_filter($queryRequest['body']['sort'] ?? [], function ($key) {
             return $key === '_geo_distance';
         }, ARRAY_FILTER_USE_KEY);
 

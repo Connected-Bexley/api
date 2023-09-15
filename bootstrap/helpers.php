@@ -280,9 +280,10 @@ if (!function_exists('per_page')) {
      */
     function per_page(int $perPage = null): int
     {
-        $perPage = $perPage ?? config('local.pagination_results');
+        $perPage = $perPage ?: config('local.pagination_results');
 
         $perPage = min(config('local.max_pagination_results'), $perPage);
+
         $perPage = max(1, $perPage);
 
         return $perPage;
