@@ -27,7 +27,7 @@ class PageFactory extends Factory
                     'content' => [
                         [
                             'type' => 'copy',
-                            'value' => $this->faker->realText(),
+                            'value' => 'Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium.',
                         ],
                     ],
                 ],
@@ -65,12 +65,12 @@ class PageFactory extends Factory
                         'content' => [
                             [
                                 'type' => 'copy',
-                                'value' => $this->faker->realText(),
+                                'value' => 'Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium.',
                             ],
                             [
                                 'type' => 'cta',
-                                'title' => $this->faker->sentence(),
-                                'description' => $this->faker->realText(),
+                                'title' => 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit.',
+                                'description' => 'Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium.',
                                 'url' => $this->faker->url(),
                                 'buttonText' => $this->faker->words(3, true),
                             ],
@@ -80,33 +80,33 @@ class PageFactory extends Factory
                         'content' => [
                             [
                                 'type' => 'copy',
-                                'value' => $this->faker->realText(),
+                                'value' => 'Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium.',
                             ],
                             [
                                 'type' => 'cta',
-                                'title' => $this->faker->sentence(),
-                                'description' => $this->faker->realText(),
+                                'title' => 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit.',
+                                'description' => 'Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium.',
                                 'url' => $this->faker->url(),
                                 'buttonText' => $this->faker->words(3, true),
                             ],
                             [
                                 'type' => 'copy',
-                                'value' => $this->faker->realText(),
+                                'value' => 'Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium.',
                             ],
                         ],
                     ],
                     'info-pages' => [
-                        'title' => $this->faker->sentence(),
+                        'title' => 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit.',
                         'content' => [
                             [
                                 'type' => 'copy',
-                                'value' => $this->faker->realText(), ], ], ],
+                                'value' => 'Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium.']]],
                     'collections' => [
-                        'title' => $this->faker->sentence(),
+                        'title' => 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit.',
                         'content' => [
                             [
                                 'type' => 'copy',
-                                'value' => $this->faker->realText(),
+                                'value' => 'Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium.',
                             ],
                         ],
                     ],

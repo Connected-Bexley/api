@@ -21,13 +21,13 @@ class OrganisationEventFactory extends Factory
         $starttime = $this->faker->time('H:i:s', $endtime);
 
         return [
-            'title' => $this->faker->sentence(3),
+            'title' => 'Organisation Event Title',
             'start_date' => $date->format('Y-m-d'),
             'end_date' => $date->format('Y-m-d'),
             'start_time' => $starttime,
             'end_time' => $endtime,
-            'intro' => $this->faker->sentence(),
-            'description' => $this->faker->paragraph(),
+            'intro' => 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit',
+            'description' => 'Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. ',
             'is_free' => true,
             'fees_text' => null,
             'fees_url' => null,

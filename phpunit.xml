@@ -33,9 +33,10 @@
     <env name="SCOUT_DRIVER" value="elastic"/>
     <env name="ELASTIC_HOST" value="elasticsearch:9200"/>
     <env name="SCOUT_PREFIX" value="testing_"/>
+    <env name="ELASTIC_SCOUT_DRIVER_REFRESH_DOCUMENTS" value="(true)"/>
     <env name="OTP_ENABLED" value="(true)"/>
     <env name="CQC_LOCATION" value="(true)"/>
     <env name="SERVICE_TAGS" value="(true)"/>
-    <env name="TELESCOPE_ENABLED" value="false"/>
+    <env name="TELESCOPE_ENABLED" value="(false)"/>
   </php>
 </phpunit>

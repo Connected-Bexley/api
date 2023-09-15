@@ -27,8 +27,8 @@ class CollectionPersonaController extends Controller
         $criteria->setPersonas([$request->input('persona')]);
 
         // Get the pagination values
-        $page = page($request->input('page'));
-        $perPage = per_page($request->input('per_page'));
+        $page = page((int)$request->input('page'));
+        $perPage = per_page((int)$request->input('per_page'));
 
         // Create the query
         $esQuery = $builder->build(

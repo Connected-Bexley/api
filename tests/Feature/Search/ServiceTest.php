@@ -34,12 +34,12 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
     public function test_guest_can_search()
     {
-        Service::factory()->create(['name' => 'Thisisatest']);
+        Service::factory()->create(['name' => 'This is a test']);
 
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'Thisisatest',
+            'query' => 'This is a test',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
@@ -105,13 +105,13 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
     public function test_query_matches_service_name()
     {
-        $service1 = Service::factory()->create(['name' => 'Thisisatest']);
+        $service1 = Service::factory()->create(['name' => 'This is a test']);
         $service2 = Service::factory()->create(['name' => 'Should not match']);
 
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'Thisisatest',
+            'query' => 'This is a test',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
@@ -122,7 +122,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
         // Fuzzy match
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'Thsiisatst',
+            'query' => 'test those',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
@@ -134,13 +134,13 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
     public function test_query_matches_service_description()
     {
-        $service1 = Service::factory()->create(['description' => 'Thisisatest']);
+        $service1 = Service::factory()->create(['description' => 'This is a test']);
         $service2 = Service::factory()->create(['description' => 'Should not match']);
 
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'Thisisatest',
+            'query' => 'This is a test',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
@@ -151,7 +151,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
         // Fuzzy match
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'Thsiisatst',
+            'query' => 'test those',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
@@ -165,8 +165,8 @@ class ServiceTest extends TestCase implements UsesElasticsearch
     {
         $service1 = Service::factory()->create();
         $taxonomy = Taxonomy::category()->children()->create([
-            'slug' => 'thisisatest',
-            'name' => 'Thisisatest',
+            'slug' => 'this-is-a-test',
+            'name' => 'This is a test',
             'order' => 1,
             'depth' => 1,
         ]);
@@ -184,7 +184,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'Thisisatest',
+            'query' => 'This is a test',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
@@ -193,7 +193,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
         // Fuzzy
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'Thsiisatst',
+            'query' => 'test these',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
@@ -243,7 +243,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
     public function test_query_matches_organisation_name()
     {
-        $organisation1 = Organisation::factory()->create(['name' => 'Thisisatest']);
+        $organisation1 = Organisation::factory()->create(['name' => 'This is a test']);
         $organisation2 = Organisation::factory()->create(['name' => 'Should not match']);
         $service1 = Service::factory()->create(['organisation_id' => $organisation1->id]);
         $service2 = Service::factory()->create(['organisation_id' => $organisation2->id]);
@@ -251,7 +251,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'Thisisatest',
+            'query' => 'This is a test',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
@@ -262,7 +262,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
         // Fuzzy
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'Thsiisatst',
+            'query' => 'test those',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
@@ -272,7 +272,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
     public function test_query_ranks_service_name_equivalent_to_organisation_name()
     {
-        $organisation = Organisation::factory()->create(['name' => 'Thisisatest']);
+        $organisation = Organisation::factory()->create(['name' => 'This is a test']);
         $serviceWithRelevantOrganisationName = Service::factory()->create([
             'name' => 'Relevant Organisation',
             'intro' => 'Service Intro',
@@ -281,21 +281,21 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         ]);
         $serviceWithRelevantOrganisationName->save();
         $serviceWithRelevantServiceName = Service::factory()->create([
-            'name' => 'Thisisatest',
+            'name' => 'This is a test',
             'intro' => 'Service Intro',
             'description' => 'Service description',
         ]);
         $serviceWithRelevantServiceName->save();
         $serviceWithRelevantIntro = Service::factory()->create([
             'name' => 'Relevant Intro',
-            'intro' => 'Thisisatest',
+            'intro' => 'This is a test',
             'description' => 'Service description',
         ]);
         $serviceWithRelevantIntro->save();
         $serviceWithRelevantDescription = Service::factory()->create([
             'name' => 'Relevant Description',
             'intro' => 'Service Intro',
-            'description' => 'Thisisatest',
+            'description' => 'This is a test',
         ]);
         $serviceWithRelevantDescription->save();
         $serviceWithRelevantTaxonomy = Service::factory()->create([
@@ -304,8 +304,8 @@ class ServiceTest extends TestCase implements UsesElasticsearch
             'description' => 'Service description',
         ]);
         $taxonomy = Taxonomy::category()->children()->create([
-            'slug' => 'thisisatest',
-            'name' => 'Thisisatest',
+            'slug' => 'this-is-a-test',
+            'name' => 'This is a test',
             'order' => 1,
             'depth' => 1,
         ]);
@@ -315,7 +315,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'Thisisatest',
+            'query' => 'This is a test',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
@@ -328,13 +328,13 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
     public function test_query_ranks_perfect_match_above_fuzzy_match()
     {
-        $service1 = Service::factory()->create(['name' => 'Thisisatest']);
-        $service2 = Service::factory()->create(['name' => 'Thsiisatst']);
+        $service1 = Service::factory()->create(['name' => 'This is a test']);
+        $service2 = Service::factory()->create(['name' => 'These tests']);
 
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'Thisisatest',
+            'query' => 'This is a test',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
@@ -748,20 +748,20 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $service1->save();
 
         // Relevant < 1 mile
-        $service2 = Service::factory()->create(['intro' => 'Thisisatest']);
+        $service2 = Service::factory()->create(['intro' => 'This is a test']);
         $serviceLocation2 = ServiceLocation::factory()->create(['service_id' => $service2->id]);
         DB::table('locations')->where('id', $serviceLocation2->location->id)->update(['lat' => 51.46813624630186, 'lon' => -0.38543053111827796]);
         $service2->save();
 
         // Relevant < 1 mile
-        $organisation3 = Organisation::factory()->create(['name' => 'Thisisatest']);
+        $organisation3 = Organisation::factory()->create(['name' => 'This is a test']);
         $service3 = Service::factory()->create(['organisation_id' => $organisation3->id]);
         $serviceLocation3 = ServiceLocation::factory()->create(['service_id' => $service3->id]);
         DB::table('locations')->where('id', $serviceLocation3->location->id)->update(['lat' => 51.46933926508632, 'lon' => -0.3745729484111921]);
         $service3->save();
 
         // Relevant > 1 mile
-        $service4 = Service::factory()->create(['name' => 'Thisisatest']);
+        $service4 = Service::factory()->create(['name' => 'This is a test']);
         $serviceLocation4 = ServiceLocation::factory()->create(['service_id' => $service4->id]);
         DB::table('locations')->where('id', $serviceLocation4->location->id)->update(['lat' => 51.46741441979822, 'lon' => -0.40152378521657234]);
         $service4->save();
@@ -769,7 +769,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'Thisisatest',
+            'query' => 'This is a test',
             'order' => 'relevance',
             'distance' => 1,
             'location' => [
@@ -1130,13 +1130,13 @@ class ServiceTest extends TestCase implements UsesElasticsearch
     {
         $serviceEligibility1 = Taxonomy::where('name', '12 - 15 years')->firstOrFail();
         $serviceEligibility2 = Taxonomy::where('name', '16 - 18 years')->firstOrFail();
-        $service1 = Service::factory()->create(['name' => 'Thisisatest']);
-        $service2 = Service::factory()->create(['intro' => 'Thisisatest']);
-        $service3 = Service::factory()->create(['description' => 'Thisisatest']);
+        $service1 = Service::factory()->create(['name' => 'This is a test']);
+        $service2 = Service::factory()->create(['intro' => 'This is a test']);
+        $service3 = Service::factory()->create(['description' => 'This is a test']);
         $service4 = Service::factory()->create();
         $taxonomy = Taxonomy::category()->children()->create([
-            'slug' => 'thisisatest',
-            'name' => 'Thisisatest',
+            'slug' => 'this-is-a-test',
+            'name' => 'This is a test',
             'order' => 1,
             'depth' => 1,
         ]);
@@ -1161,14 +1161,14 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'Thisisatest',
+            'query' => 'This is a test',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonCount(4, 'data');
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'Thisisatest',
+            'query' => 'This is a test',
             'eligibilities' => [
                 '12 - 15 years'],
         ]);
