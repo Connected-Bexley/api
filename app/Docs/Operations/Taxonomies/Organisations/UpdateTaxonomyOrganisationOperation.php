@@ -25,7 +25,7 @@ class UpdateTaxonomyOrganisationOperation extends Operation
             ->action(static::ACTION_PUT)
             ->tags(TaxonomyOrganisationsTag::create())
             ->summary('Update a specific organisation taxonomy')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->requestBody(
                 RequestBody::create()
                     ->required()

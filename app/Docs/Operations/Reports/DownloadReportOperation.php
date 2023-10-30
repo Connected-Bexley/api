@@ -22,7 +22,7 @@ class DownloadReportOperation extends Operation
             ->action(static::ACTION_GET)
             ->tags(ReportsTag::create())
             ->summary('Download a specific report')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Supermin`')
             ->responses(
                 Response::ok()->content(
                     MediaType::pdf()->schema(

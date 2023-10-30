@@ -20,7 +20,7 @@ class DestroyReportScheduleOperation extends Operation
             ->action(static::ACTION_DELETE)
             ->tags(ReportSchedulesTag::create())
             ->summary('Delete a specific report schedule')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->responses(ResourceDeletedResponse::create());
     }
 }

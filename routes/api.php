@@ -120,7 +120,10 @@ Route::prefix('/core/v1')
             // Pages.
             Route::match(['GET', 'POST'], '/pages/index', [Core\V1\PageController::class, 'index']);
             Route::apiResource('/pages', Core\V1\PageController::class);
-            Route::get('/pages/{page}/image.{suffix}', Core\V1\Page\ImageController::class)
+            Route::get('/pages/new/image.{suffix}', [Core\V1\Page\ImageController::class, 'showNew'])
+                ->where('suffix', 'png|jpg|jpeg|svg')
+                ->name('pages.image-new');
+            Route::get('/pages/{page}/image.{suffix}', [Core\V1\Page\ImageController::class, 'show'])
                 ->where('suffix', 'png|jpg|jpeg|svg')
                 ->name('pages.image');
 

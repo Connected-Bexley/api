@@ -53,6 +53,8 @@ EOT;
                     return Role::superAdmin()->id;
                 case Role::NAME_GLOBAL_ADMIN:
                     return Role::globalAdmin()->id;
+                case Role::NAME_CONTENT_ADMIN:
+                    return Role::contentAdmin()->id;
                 case Role::NAME_ORGANISATION_ADMIN:
                     return Role::organisationAdmin()->id;
                 case Role::NAME_SERVICE_ADMIN:

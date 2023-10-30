@@ -25,7 +25,7 @@ class UpdateCollectionOrganisationEventOperation extends Operation
             ->action(static::ACTION_PUT)
             ->tags(CollectionOrganisationEventsTag::create())
             ->summary('Update a specific organisation event collection')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->requestBody(
                 RequestBody::create()
                     ->required()

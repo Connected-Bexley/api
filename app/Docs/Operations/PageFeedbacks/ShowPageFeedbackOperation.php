@@ -23,7 +23,7 @@ class ShowPageFeedbackOperation extends Operation
             ->action(static::ACTION_GET)
             ->tags(PageFeedbacksTag::create())
             ->summary('Get a specific page feedback')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->responses(
                 Response::ok()->content(
                     MediaType::json()->schema(

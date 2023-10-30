@@ -25,7 +25,7 @@ class StoreReportScheduleOperation extends Operation
             ->action(static::ACTION_POST)
             ->tags(ReportSchedulesTag::create())
             ->summary('Create a report schedule')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->requestBody(
                 RequestBody::create()
                     ->required()

@@ -20,7 +20,10 @@ class TaxonomyOrganisationsTest extends TestCase
      * List all the organisation taxonomies.
      */
 
-    public function test_guest_can_list_them()
+    /**
+     * @test
+     */
+    public function guest_can_list_them()
     {
         $taxonomy = $this->createTaxonomyOrganisation();
 
@@ -39,7 +42,10 @@ class TaxonomyOrganisationsTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_listed()
+    /**
+     * @test
+     */
+    public function audit_created_when_listed()
     {
         $this->fakeEvents();
 
@@ -54,14 +60,20 @@ class TaxonomyOrganisationsTest extends TestCase
      * Create an organisation taxonomy.
      */
 
-    public function test_guest_cannot_create_one()
+    /**
+     * @test
+     */
+    public function guest_cannot_create_one()
     {
         $response = $this->json('POST', '/core/v1/taxonomies/organisations');
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_create_one()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_create_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -73,7 +85,10 @@ class TaxonomyOrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_create_one()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_create_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -85,7 +100,10 @@ class TaxonomyOrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_create_one()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_create_one()
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -97,9 +115,26 @@ class TaxonomyOrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_create_one()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_create_one()
     {
         $user = User::factory()->create()->makeGlobalAdmin();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('POST', '/core/v1/taxonomies/organisations');
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function super_admin_can_create_one()
+    {
+        $user = User::factory()->create()->makeSuperAdmin();
         $siblingCount = Taxonomy::organisation()->children()->count();
         $payload = [
             'name' => 'PHPUnit Taxonomy Organisation Test',
@@ -113,7 +148,10 @@ class TaxonomyOrganisationsTest extends TestCase
         $response->assertJsonFragment($payload);
     }
 
-    public function test_order_is_updated_when_created_at_beginning()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_created_at_beginning()
     {
         $this->createTaxonomyOrganisation(['slug' => 'org']);
         $this->createTaxonomyOrganisation(['slug' => 'org-1']);
@@ -139,7 +177,10 @@ class TaxonomyOrganisationsTest extends TestCase
         }
     }
 
-    public function test_order_is_updated_when_created_at_middle()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_created_at_middle()
     {
         $this->createTaxonomyOrganisation(['slug' => 'org']);
         $this->createTaxonomyOrganisation(['slug' => 'org-1']);
@@ -172,7 +213,10 @@ class TaxonomyOrganisationsTest extends TestCase
         }
     }
 
-    public function test_order_is_updated_when_created_at_end()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_created_at_end()
     {
         $this->createTaxonomyOrganisation(['slug' => 'org']);
         $this->createTaxonomyOrganisation(['slug' => 'org-1']);
@@ -198,7 +242,10 @@ class TaxonomyOrganisationsTest extends TestCase
         }
     }
 
-    public function test_order_cannot_be_less_than_1_when_created()
+    /**
+     * @test
+     */
+    public function order_cannot_be_less_than_1_when_created()
     {
         $user = User::factory()->create()->makeSuperAdmin();
         $payload = [
@@ -212,7 +259,10 @@ class TaxonomyOrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_order_cannot_be_greater_than_count_plus_1_when_created()
+    /**
+     * @test
+     */
+    public function order_cannot_be_greater_than_count_plus_1_when_created()
     {
         $user = User::factory()->create()->makeSuperAdmin();
         $siblingCount = Taxonomy::organisation()->children()->count();
@@ -227,7 +277,10 @@ class TaxonomyOrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_audit_created_when_created()
+    /**
+     * @test
+     */
+    public function audit_created_when_created()
     {
         $this->fakeEvents();
 
@@ -251,7 +304,10 @@ class TaxonomyOrganisationsTest extends TestCase
      * Get a specific organisation taxonomy.
      */
 
-    public function test_guest_can_view_one()
+    /**
+     * @test
+     */
+    public function guest_can_view_one()
     {
         $taxonomy = $this->createTaxonomyOrganisation();
 
@@ -270,7 +326,10 @@ class TaxonomyOrganisationsTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_viewed()
+    /**
+     * @test
+     */
+    public function audit_created_when_viewed()
     {
         $this->fakeEvents();
 
@@ -288,7 +347,10 @@ class TaxonomyOrganisationsTest extends TestCase
      * Update a specific organisation taxonomy.
      */
 
-    public function test_guest_cannot_update_one()
+    /**
+     * @test
+     */
+    public function guest_cannot_update_one()
     {
         $organisation = $this->createTaxonomyOrganisation();
 
@@ -297,7 +359,10 @@ class TaxonomyOrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_update_one()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_update_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -309,7 +374,10 @@ class TaxonomyOrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_update_one()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_update_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -321,7 +389,10 @@ class TaxonomyOrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_update_one()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_update_one()
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -333,9 +404,26 @@ class TaxonomyOrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_update_one()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_update_one()
     {
         $user = User::factory()->create()->makeGlobalAdmin();
+        $organisation = $this->createTaxonomyOrganisation();
+
+        Passport::actingAs($user);
+        $response = $this->json('PUT', "/core/v1/taxonomies/organisations/{$organisation->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function super_admin_can_update_one()
+    {
+        $user = User::factory()->create()->makeSuperAdmin();
         $organisation = $this->createTaxonomyOrganisation();
         $payload = [
             'name' => 'PHPUnit Test Organisation',
@@ -349,7 +437,10 @@ class TaxonomyOrganisationsTest extends TestCase
         $response->assertJsonFragment($payload);
     }
 
-    public function test_order_is_updated_when_updated_to_beginning()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_updated_to_beginning()
     {
         $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
@@ -369,7 +460,10 @@ class TaxonomyOrganisationsTest extends TestCase
         $this->assertDatabaseHas((new Taxonomy())->getTable(), ['id' => $organisationThree->id, 'order' => 3]);
     }
 
-    public function test_order_is_updated_when_updated_to_middle()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_updated_to_middle()
     {
         $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
@@ -389,7 +483,10 @@ class TaxonomyOrganisationsTest extends TestCase
         $this->assertDatabaseHas((new Taxonomy())->getTable(), ['id' => $organisationThree->id, 'order' => 3]);
     }
 
-    public function test_order_is_updated_when_updated_to_end()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_updated_to_end()
     {
         $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
@@ -409,7 +506,10 @@ class TaxonomyOrganisationsTest extends TestCase
         $this->assertDatabaseHas((new Taxonomy())->getTable(), ['id' => $organisationThree->id, 'order' => 2]);
     }
 
-    public function test_order_cannot_be_less_than_1_when_updated()
+    /**
+     * @test
+     */
+    public function order_cannot_be_less_than_1_when_updated()
     {
         $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
@@ -424,7 +524,10 @@ class TaxonomyOrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_order_cannot_be_greater_than_count_plus_1_when_updated()
+    /**
+     * @test
+     */
+    public function order_cannot_be_greater_than_count_plus_1_when_updated()
     {
         $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
@@ -441,7 +544,10 @@ class TaxonomyOrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_audit_created_when_updated()
+    /**
+     * @test
+     */
+    public function audit_created_when_updated()
     {
         $this->fakeEvents();
 
@@ -465,7 +571,10 @@ class TaxonomyOrganisationsTest extends TestCase
      * Delete a specific organisation taxonomy.
      */
 
-    public function test_guest_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function guest_cannot_delete_one()
     {
         $organisation = $this->createTaxonomyOrganisation();
 
@@ -474,7 +583,10 @@ class TaxonomyOrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_delete_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -486,7 +598,10 @@ class TaxonomyOrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_delete_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -498,7 +613,10 @@ class TaxonomyOrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_delete_one()
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -510,9 +628,27 @@ class TaxonomyOrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_delete_one()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_delete_one()
     {
+        $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeGlobalAdmin();
+        $organisation = $this->createTaxonomyOrganisation();
+
+        Passport::actingAs($user);
+        $response = $this->json('DELETE', "/core/v1/taxonomies/organisations/{$organisation->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function super_admin_can_delete_one()
+    {
+        $user = User::factory()->create()->makeSuperAdmin();
         $organisation = $this->createTaxonomyOrganisation();
 
         Passport::actingAs($user);
@@ -522,7 +658,10 @@ class TaxonomyOrganisationsTest extends TestCase
         $this->assertDatabaseMissing((new Taxonomy())->getTable(), ['id' => $organisation->id]);
     }
 
-    public function test_audit_created_when_deleted()
+    /**
+     * @test
+     */
+    public function audit_created_when_deleted()
     {
         $this->fakeEvents();
 

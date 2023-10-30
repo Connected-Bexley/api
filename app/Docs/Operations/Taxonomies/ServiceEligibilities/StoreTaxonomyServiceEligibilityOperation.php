@@ -25,7 +25,7 @@ class StoreTaxonomyServiceEligibilityOperation extends Operation
             ->action(static::ACTION_POST)
             ->tags(TaxonomyServiceEligibilitiesTag::create())
             ->summary('Create a service eligibility taxonomy')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->requestBody(
                 RequestBody::create()
                     ->required()

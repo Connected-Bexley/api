@@ -39,7 +39,7 @@ class UpdateRequestReceived implements Responsable
     public function toResponse($request)
     {
         return response()->json([
-            'message' => $this->updateRequest->isApproved() ? __('updates.pre-approved') : __('updates.pending'),
+            'message' => $this->updateRequest->isApproved() ? __('updates.pre-approved') : __('updates.pending', ['appname' => config('app.name', 'Laravel')]),
             'id' => $this->updateRequest->id,
             'data' => $this->updateRequest->getUpdateable()->getData(
                 $this->updateRequest->data

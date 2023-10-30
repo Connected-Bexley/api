@@ -362,7 +362,7 @@ class SettingsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_update_them()
+    public function test_organisation_admin_cannot_update_them()
     {
         Passport::actingAs(
             User::factory()->create()->makeOrganisationAdmin(
@@ -375,10 +375,21 @@ class SettingsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_update_them()
+    public function test_global_admin_cannot_update_them()
     {
         Passport::actingAs(
             User::factory()->create()->makeGlobalAdmin()
+        );
+
+        $response = $this->putJson('/core/v1/settings');
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    public function test_super_admin_can_update_them()
+    {
+        Passport::actingAs(
+            User::factory()->create()->makeSuperAdmin()
         );
 
         $response = $this->putJson('/core/v1/settings', $this->settingsData);
@@ -389,7 +400,7 @@ class SettingsTest extends TestCase
     public function test_structure_correct_when_updated()
     {
         Passport::actingAs(
-            User::factory()->create()->makeGlobalAdmin()
+            User::factory()->create()->makeSuperAdmin()
         );
 
         $response = $this->putJson('/core/v1/settings', $this->settingsData);
@@ -400,7 +411,7 @@ class SettingsTest extends TestCase
     public function test_values_correct_when_updated()
     {
         Passport::actingAs(
-            User::factory()->create()->makeGlobalAdmin()
+            User::factory()->create()->makeSuperAdmin()
         );
 
         $response = $this->putJson('/core/v1/settings', $this->settingsData);
@@ -413,7 +424,7 @@ class SettingsTest extends TestCase
         $this->fakeEvents();
 
         Passport::actingAs(
-            User::factory()->create()->makeGlobalAdmin()
+            User::factory()->create()->makeSuperAdmin()
         );
 
         $this->putJson('/core/v1/settings', $this->settingsData);
@@ -429,7 +440,7 @@ class SettingsTest extends TestCase
     public function video_url_is_optional()
     {
         Passport::actingAs(
-            User::factory()->create()->makeGlobalAdmin()
+            User::factory()->create()->makeSuperAdmin()
         );
 
         $response = $this->putJson('/core/v1/settings', $this->settingsData);
@@ -466,7 +477,7 @@ class SettingsTest extends TestCase
     public function test_banner_image_can_be_update()
     {
         Passport::actingAs(
-            User::factory()->create()->makeGlobalAdmin()
+            User::factory()->create()->makeSuperAdmin()
         );
 
         $image = Storage::disk('local')->get('/test-data/image.png');
@@ -488,7 +499,7 @@ class SettingsTest extends TestCase
     public function test_banner_image_remains_when_not_provided()
     {
         Passport::actingAs(
-            User::factory()->create()->makeGlobalAdmin()
+            User::factory()->create()->makeSuperAdmin()
         );
 
         $cmsValue = Setting::cms()->value;
@@ -509,7 +520,7 @@ class SettingsTest extends TestCase
     public function test_banner_image_can_be_removed()
     {
         Passport::actingAs(
-            User::factory()->create()->makeGlobalAdmin()
+            User::factory()->create()->makeSuperAdmin()
         );
 
         $cmsValue = Setting::cms()->value;
@@ -530,7 +541,7 @@ class SettingsTest extends TestCase
     public function test_all_banner_fields_are_required()
     {
         Passport::actingAs(
-            User::factory()->create()->makeGlobalAdmin()
+            User::factory()->create()->makeSuperAdmin()
         );
 
         $image = Storage::disk('local')->get('/test-data/image.png');
@@ -563,10 +574,10 @@ class SettingsTest extends TestCase
         $response->assertStatus(Response::HTTP_NOT_FOUND);
     }
 
-    public function test_global_admin_can_view_banner_image()
+    public function test_super_admin_can_view_banner_image()
     {
         Passport::actingAs(
-            User::factory()->create()->makeGlobalAdmin()
+            User::factory()->create()->makeSuperAdmin()
         );
 
         $image = Storage::disk('local')->get('/test-data/image.png');
@@ -595,7 +606,7 @@ class SettingsTest extends TestCase
         $this->fakeEvents();
 
         Passport::actingAs(
-            User::factory()->create()->makeGlobalAdmin()
+            User::factory()->create()->makeSuperAdmin()
         );
 
         $image = Storage::disk('local')->get('/test-data/image.png');
@@ -630,7 +641,7 @@ class SettingsTest extends TestCase
     public function single_home_banner_can_be_added()
     {
         Passport::actingAs(
-            User::factory()->create()->makeGlobalAdmin()
+            User::factory()->create()->makeSuperAdmin()
         );
 
         $this->settingsData['cms']['frontend']['home']['banners'][] = [
@@ -658,7 +669,7 @@ class SettingsTest extends TestCase
     public function multiple_home_banners_can_be_added()
     {
         Passport::actingAs(
-            User::factory()->create()->makeGlobalAdmin()
+            User::factory()->create()->makeSuperAdmin()
         );
 
         // Clear any existing banners
@@ -711,7 +722,7 @@ class SettingsTest extends TestCase
     public function home_banners_can_be_updated()
     {
         Passport::actingAs(
-            User::factory()->create()->makeGlobalAdmin()
+            User::factory()->create()->makeSuperAdmin()
         );
 
         $response = $this->putJson('/core/v1/settings', $this->settingsData);
@@ -745,7 +756,7 @@ class SettingsTest extends TestCase
     public function home_banners_require_title_content_button_text_and_button_url()
     {
         Passport::actingAs(
-            User::factory()->create()->makeGlobalAdmin()
+            User::factory()->create()->makeSuperAdmin()
         );
 
         $this->settingsData['cms']['frontend']['home']['banners'] = [
@@ -843,7 +854,7 @@ class SettingsTest extends TestCase
     public function home_banners_can_be_removed()
     {
         Passport::actingAs(
-            User::factory()->create()->makeGlobalAdmin()
+            User::factory()->create()->makeSuperAdmin()
         );
 
         // Clear any existing banners

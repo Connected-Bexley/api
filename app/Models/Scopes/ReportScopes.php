@@ -20,22 +20,24 @@ trait ReportScopes
     public function getUserExportResults(): Collection
     {
         $sql = <<<'EOT'
-CASE `id`
-    WHEN ? THEN 1
-    WHEN ? THEN 2
-    WHEN ? THEN 3
-    WHEN ? THEN 4
-    WHEN ? THEN 5
-    ELSE 6
-END
-EOT;
+        CASE `id`
+            WHEN ? THEN 1
+            WHEN ? THEN 2
+            WHEN ? THEN 3
+            WHEN ? THEN 4
+            WHEN ? THEN 5
+            WHEN ? THEN 6
+            ELSE 7
+        END
+        EOT;
 
         $bindings = [
             Role::superAdmin()->id,
-            Role::globalAdmin()->id,
             Role::organisationAdmin()->id,
             Role::serviceAdmin()->id,
             Role::serviceWorker()->id,
+            Role::globalAdmin()->id,
+            Role::contentAdmin()->id,
         ];
 
         $rolesQuery = DB::table('roles')
@@ -53,7 +55,7 @@ EOT;
                 'users.email as email',
             ])
             ->selectRaw('substring_index(group_concat(distinct all_roles.name ORDER BY all_roles.value), ",", 1) max_role')
-            ->selectRaw('trim(trailing "," from replace(replace(replace(replace(group_concat(distinct all_roles.name ORDER BY all_roles.value),?,""),?,""),?,""),",,",",")) all_permissions', [Role::NAME_SUPER_ADMIN, Role::NAME_GLOBAL_ADMIN, Role::NAME_SERVICE_WORKER])
+            ->selectRaw('trim(trailing "," from replace(replace(replace(replace(replace(group_concat(distinct all_roles.name ORDER BY all_roles.value),?,""),?,""),?,""),?,""),",,",",")) all_permissions', [Role::NAME_SUPER_ADMIN, Role::NAME_GLOBAL_ADMIN, Role::NAME_CONTENT_ADMIN, Role::NAME_SERVICE_WORKER])
             ->selectRaw('concat_ws(",",group_concat(distinct user_roles.organisation_id), group_concat(distinct user_roles.service_id)) org_service_ids')
             ->join('user_roles', 'user_roles.user_id', '=', 'users.id')
             ->joinSub($rolesQuery, 'all_roles', function ($join) {
@@ -107,14 +109,20 @@ EOT;
             ->groupBy('organisation_id');
 
         $nonAdminUsersCountQuery = DB::table('user_roles')
-            ->selectRaw('user_roles.organisation_id as organisation_id, count(user_roles.user_id) as count')
-            ->join('roles', 'roles.id', '=', 'user_roles.role_id')
-            ->whereIn('roles.name', [
-                Role::NAME_SERVICE_WORKER,
-                Role::NAME_ORGANISATION_ADMIN,
-                Role::NAME_SERVICE_ADMIN,
-            ])
-            ->groupBy('user_roles.organisation_id', 'user_roles.user_id');
+            ->selectRaw('user_roles.organisation_id as organisation_id, count(distinct user_roles.user_id) as count')
+            ->join('users', 'users.id', '=', 'user_roles.user_id')
+            ->whereNotIn('user_roles.user_id', function ($query) {
+                $query->select('user_id')
+                    ->from('user_roles')
+                    ->join('roles', 'roles.id', '=', 'user_roles.role_id')
+                    ->whereIn('roles.name', [
+                        Role::NAME_SUPER_ADMIN,
+                        Role::NAME_GLOBAL_ADMIN,
+                    ]);
+            })
+            ->whereNull('users.deleted_at')
+            ->distinct()
+            ->groupBy('user_roles.organisation_id');
 
         $query = DB::table('organisations')
             ->select([

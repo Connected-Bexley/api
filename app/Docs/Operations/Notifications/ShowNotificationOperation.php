@@ -23,7 +23,7 @@ class ShowNotificationOperation extends Operation
             ->action(static::ACTION_GET)
             ->tags(NotificationsTag::create())
             ->summary('Get a specific notification')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->responses(
                 Response::ok()->content(
                     MediaType::json()->schema(

@@ -23,7 +23,7 @@ class ShowReportOperation extends Operation
             ->action(static::ACTION_GET)
             ->tags(ReportsTag::create())
             ->summary('Get a specific report')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->responses(
                 Response::ok()->content(
                     MediaType::json()->schema(

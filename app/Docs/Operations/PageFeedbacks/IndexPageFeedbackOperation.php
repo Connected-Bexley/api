@@ -29,7 +29,7 @@ class IndexPageFeedbackOperation extends Operation
             ->action(static::ACTION_GET)
             ->tags(PageFeedbacksTag::create())
             ->summary('List all the page feedbacks')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->parameters(
                 PageParameter::create(),
                 PerPageParameter::create(),

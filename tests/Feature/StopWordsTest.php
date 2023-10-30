@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Passport\Passport;
+use Mockery\Exception;
 use Tests\TestCase;
 
 class StopWordsTest extends TestCase
@@ -33,14 +34,20 @@ class StopWordsTest extends TestCase
      * View the stop words.
      */
 
-    public function test_guest_cannot_view_stop_words()
+    /**
+     * @test
+     */
+    public function guest_cannot_view_stop_words()
     {
         $response = $this->json('GET', '/core/v1/stop-words');
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_view_stop_words()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_view_stop_words()
     {
         Passport::actingAs(
             User::factory()->create()->makeServiceWorker(
@@ -53,7 +60,10 @@ class StopWordsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_view_stop_words()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_view_stop_words()
     {
         Passport::actingAs(
             User::factory()->create()->makeServiceAdmin(
@@ -66,7 +76,10 @@ class StopWordsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_view_stop_words()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_view_stop_words()
     {
         Passport::actingAs(
             User::factory()->create()->makeOrganisationAdmin(
@@ -79,10 +92,27 @@ class StopWordsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_view_stop_words()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_view_stop_words()
     {
         Passport::actingAs(
             User::factory()->create()->makeGlobalAdmin()
+        );
+
+        $response = $this->json('GET', '/core/v1/stop-words');
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function super_admin_can_view_stop_words()
+    {
+        Passport::actingAs(
+            User::factory()->create()->makeSuperAdmin()
         );
         $csv = csv_to_array(
             Storage::disk('local')->get('elasticsearch/stop-words.csv')
@@ -101,14 +131,20 @@ class StopWordsTest extends TestCase
      * Update the stop words.
      */
 
-    public function test_guest_cannot_update_stop_words()
+    /**
+     * @test
+     */
+    public function guest_cannot_update_stop_words()
     {
         $response = $this->json('PUT', '/core/v1/stop-words');
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_update_stop_words()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_update_stop_words()
     {
         Passport::actingAs(
             User::factory()->create()->makeServiceWorker(
@@ -121,7 +157,10 @@ class StopWordsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_update_stop_words()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_update_stop_words()
     {
         Passport::actingAs(
             User::factory()->create()->makeServiceAdmin(
@@ -134,7 +173,10 @@ class StopWordsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_update_stop_words()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_update_stop_words()
     {
         Passport::actingAs(
             User::factory()->create()->makeOrganisationAdmin(
@@ -147,9 +189,26 @@ class StopWordsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_update_stop_words()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_update_stop_words()
     {
-        $user = User::factory()->create()->makeGlobalAdmin();
+        Passport::actingAs(
+            User::factory()->create()->makeGlobalAdmin()
+        );
+
+        $response = $this->json('PUT', '/core/v1/stop-words');
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function super_admin_can_update_stop_words()
+    {
+        $user = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($user);
         $response = $this->json('PUT', '/core/v1/stop-words', [

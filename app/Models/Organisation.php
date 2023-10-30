@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Contracts\AppliesUpdateRequests;
 use App\Http\Requests\Organisation\UpdateRequest as UpdateOrganisationRequest;
 use App\Models\Mutators\OrganisationMutators;
 use App\Models\Relationships\OrganisationRelationships;
@@ -9,7 +10,6 @@ use App\Models\Scopes\OrganisationScopes;
 use App\Rules\FileIsMimeType;
 use App\TaxonomyRelationships\HasTaxonomyRelationships;
 use App\TaxonomyRelationships\UpdateTaxonomyRelationships;
-use App\UpdateRequest\AppliesUpdateRequests;
 use App\UpdateRequest\UpdateRequests;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

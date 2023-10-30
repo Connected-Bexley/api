@@ -9,7 +9,7 @@ class ServiceEligibility extends Model
     use ServiceEligibilityRelationships;
 
     /**
-     * @return \App\Models\ServiceTaxonomy
+     * @return \App\Models\ServiceEligibility
      */
     public function touchService(): ServiceEligibility
     {

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Contracts\AppliesUpdateRequests;
 use App\Http\Requests\OrganisationEvent\UpdateRequest as UpdateOrganisationEventRequest;
 use App\Models\Mutators\OrganisationEventMutators;
 use App\Models\Relationships\OrganisationEventRelationships;
@@ -9,7 +10,6 @@ use App\Models\Scopes\OrganisationEventScopes;
 use App\Rules\FileIsMimeType;
 use App\TaxonomyRelationships\HasTaxonomyRelationships;
 use App\TaxonomyRelationships\UpdateTaxonomyRelationships;
-use App\UpdateRequest\AppliesUpdateRequests;
 use App\UpdateRequest\UpdateRequests;
 use ElasticScoutDriverPlus\Searchable;
 use Illuminate\Contracts\Validation\Validator;

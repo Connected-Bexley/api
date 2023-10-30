@@ -22,14 +22,22 @@ class ReportsTest extends TestCase
      * List all the reports.
      */
 
-    public function test_guest_cannot_list_them()
+    /**
+     * @test
+     *
+     */
+    public function guest_cannot_list_them()
     {
         $response = $this->json('GET', '/core/v1/reports');
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_list_them()
+    /**
+     * @test
+     *
+     */
+    public function service_worker_cannot_list_them()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -41,7 +49,11 @@ class ReportsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_list_them()
+    /**
+     * @test
+     *
+     */
+    public function service_admin_cannot_list_them()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -53,7 +65,11 @@ class ReportsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_list_them()
+    /**
+     * @test
+     *
+     */
+    public function organisation_admin_cannot_list_them()
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -65,9 +81,29 @@ class ReportsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_list_them()
+    /**
+     * @test
+     *
+     */
+    public function global_admin_cannot_list_them()
     {
         $user = User::factory()->create()->makeGlobalAdmin();
+        $report = Report::factory()->create();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('GET', '/core/v1/reports');
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     *
+     */
+    public function super_admin_can_list_them()
+    {
+        $user = User::factory()->create()->makeSuperAdmin();
         $report = Report::factory()->create();
 
         Passport::actingAs($user);
@@ -81,11 +117,15 @@ class ReportsTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_listed()
+    /**
+     * @test
+     *
+     */
+    public function audit_created_when_listed()
     {
         $this->fakeEvents();
 
-        $user = User::factory()->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($user);
 
@@ -101,14 +141,22 @@ class ReportsTest extends TestCase
      * Create a report.
      */
 
-    public function test_guest_cannot_create_one()
+    /**
+     * @test
+     *
+     */
+    public function guest_cannot_create_one()
     {
         $response = $this->json('POST', '/core/v1/reports');
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_create_one()
+    /**
+     * @test
+     *
+     */
+    public function service_worker_cannot_create_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -120,7 +168,11 @@ class ReportsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_create_one()
+    /**
+     * @test
+     *
+     */
+    public function service_admin_cannot_create_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -132,7 +184,11 @@ class ReportsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_create_one()
+    /**
+     * @test
+     *
+     */
+    public function organisation_admin_cannot_create_one()
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -144,9 +200,30 @@ class ReportsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_create_one()
+    /**
+     * @test
+     *
+     */
+    public function global_admin_cannot_create_one()
     {
         $user = User::factory()->create()->makeGlobalAdmin();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('POST', '/core/v1/reports', [
+            'report_type' => ReportType::usersExport()->name,
+        ]);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     *
+     */
+    public function super_admin_can_create_one()
+    {
+        $user = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($user);
 
@@ -173,11 +250,15 @@ class ReportsTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_created()
+    /**
+     * @test
+     *
+     */
+    public function audit_created_when_created()
     {
         $this->fakeEvents();
 
-        $user = User::factory()->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($user);
 
@@ -192,9 +273,13 @@ class ReportsTest extends TestCase
         });
     }
 
-    public function test_global_admin_can_create_one_with_date_range()
+    /**
+     * @test
+     *
+     */
+    public function super_admin_can_create_one_with_date_range()
     {
-        $user = User::factory()->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($user);
 
@@ -221,7 +306,11 @@ class ReportsTest extends TestCase
      * Get a specific report.
      */
 
-    public function test_guest_cannot_view_one()
+    /**
+     * @test
+     *
+     */
+    public function guest_cannot_view_one()
     {
         $report = Report::factory()->create();
 
@@ -230,7 +319,11 @@ class ReportsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_view_one()
+    /**
+     * @test
+     *
+     */
+    public function service_worker_cannot_view_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -243,7 +336,11 @@ class ReportsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_view_one()
+    /**
+     * @test
+     *
+     */
+    public function service_admin_cannot_view_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -256,7 +353,11 @@ class ReportsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_view_one()
+    /**
+     * @test
+     *
+     */
+    public function organisation_admin_cannot_view_one()
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -269,9 +370,29 @@ class ReportsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_view_one()
+    /**
+     * @test
+     *
+     */
+    public function global_admin_cannot_view_one()
     {
         $user = User::factory()->create()->makeGlobalAdmin();
+        $report = Report::factory()->create();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('GET', "/core/v1/reports/{$report->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     *
+     */
+    public function super_admin_can_view_one()
+    {
+        $user = User::factory()->create()->makeSuperAdmin();
         $report = Report::factory()->create();
 
         Passport::actingAs($user);
@@ -285,11 +406,15 @@ class ReportsTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_viewed()
+    /**
+     * @test
+     *
+     */
+    public function audit_created_when_viewed()
     {
         $this->fakeEvents();
 
-        $user = User::factory()->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         $report = Report::factory()->create();
 
         Passport::actingAs($user);
@@ -307,7 +432,11 @@ class ReportsTest extends TestCase
      * Delete a specific report.
      */
 
-    public function test_guest_cannot_delete_one()
+    /**
+     * @test
+     *
+     */
+    public function guest_cannot_delete_one()
     {
         $report = Report::factory()->create();
 
@@ -316,7 +445,11 @@ class ReportsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_delete_one()
+    /**
+     * @test
+     *
+     */
+    public function service_worker_cannot_delete_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -329,7 +462,11 @@ class ReportsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_delete_one()
+    /**
+     * @test
+     *
+     */
+    public function service_admin_cannot_delete_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -342,7 +479,11 @@ class ReportsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_delete_one()
+    /**
+     * @test
+     *
+     */
+    public function organisation_admin_cannot_delete_one()
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -355,9 +496,29 @@ class ReportsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_delete_one()
+    /**
+     * @test
+     *
+     */
+    public function global_admin_cannot_delete_one()
     {
         $user = User::factory()->create()->makeGlobalAdmin();
+        $report = Report::factory()->create();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('DELETE', "/core/v1/reports/{$report->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     *
+     */
+    public function super_admin_can_delete_one()
+    {
+        $user = User::factory()->create()->makeSuperAdmin();
         $report = Report::factory()->create();
 
         Passport::actingAs($user);
@@ -369,11 +530,15 @@ class ReportsTest extends TestCase
         $this->assertDatabaseMissing((new File())->getTable(), ['id' => $report->file_id]);
     }
 
-    public function test_audit_created_when_deleted()
+    /**
+     * @test
+     *
+     */
+    public function audit_created_when_deleted()
     {
         $this->fakeEvents();
 
-        $user = User::factory()->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         $report = Report::factory()->create();
 
         Passport::actingAs($user);
@@ -391,7 +556,11 @@ class ReportsTest extends TestCase
      * Download a specific report.
      */
 
-    public function test_guest_cannot_download_file()
+    /**
+     * @test
+     *
+     */
+    public function guest_cannot_download_file()
     {
         $report = Report::factory()->create();
 
@@ -400,7 +569,11 @@ class ReportsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_download_file()
+    /**
+     * @test
+     *
+     */
+    public function service_worker_cannot_download_file()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -413,7 +586,11 @@ class ReportsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_download_file()
+    /**
+     * @test
+     *
+     */
+    public function service_admin_cannot_download_file()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -426,7 +603,11 @@ class ReportsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_download_file()
+    /**
+     * @test
+     *
+     */
+    public function organisation_admin_cannot_download_file()
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -439,9 +620,29 @@ class ReportsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_download_file()
+    /**
+     * @test
+     *
+     */
+    public function global_admin_cannot_download_file()
     {
         $user = User::factory()->create()->makeGlobalAdmin();
+        $report = Report::generate(ReportType::usersExport());
+
+        Passport::actingAs($user);
+
+        $response = $this->json('GET', "/core/v1/reports/{$report->id}/download");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     *
+     */
+    public function super_admin_can_download_file()
+    {
+        $user = User::factory()->create()->makeSuperAdmin();
         $report = Report::generate(ReportType::usersExport());
 
         Passport::actingAs($user);
@@ -452,11 +653,15 @@ class ReportsTest extends TestCase
         $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
     }
 
-    public function test_audit_created_when_file_viewed()
+    /**
+     * @test
+     *
+     */
+    public function audit_created_when_file_viewed()
     {
         $this->fakeEvents();
 
-        $user = User::factory()->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         $report = Report::generate(ReportType::usersExport());
 
         Passport::actingAs($user);

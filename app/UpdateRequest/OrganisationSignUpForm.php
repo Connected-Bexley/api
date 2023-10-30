@@ -2,6 +2,7 @@
 
 namespace App\UpdateRequest;
 
+use App\Contracts\AppliesUpdateRequests;
 use App\Http\Requests\OrganisationSignUpForm\StoreRequest as StoreOrganisationSignUpFormRequest;
 use App\Models\Organisation;
 use App\Models\Service;

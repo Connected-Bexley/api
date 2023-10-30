@@ -2,14 +2,21 @@
 
 namespace App\Models;
 
+use App\Contracts\AppliesUpdateRequests;
+use App\Generators\UniqueSlugGenerator;
+use App\Http\Requests\Page\UpdateRequest as UpdatePageRequest;
 use App\Models\Mutators\PageMutators;
 use App\Models\Relationships\PageRelationships;
 use App\Models\Scopes\PageScopes;
+use App\Rules\FileIsMimeType;
 use ElasticScoutDriverPlus\Searchable;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Validator as ValidatorFacade;
 use Kalnoy\Nestedset\NodeTrait;
 
-class Page extends Model
+class Page extends Model implements AppliesUpdateRequests
 {
     use HasFactory;
     use PageRelationships;
@@ -263,5 +270,95 @@ class Page extends Model
         }
 
         return $this;
+    }
+
+    /**
+     * Check if the update request is valid.
+     *
+     * @param \App\Models\UpdateRequest $updateRequest
+     * @return \Illuminate\Contracts\Validation\Validator
+     */
+    public function validateUpdateRequest(UpdateRequest $updateRequest): Validator
+    {
+        $rules = (new UpdatePageRequest())
+            ->setUserResolver(function () use ($updateRequest) {
+                return $updateRequest->user;
+            })
+            ->merge(['page' => $this])
+            ->merge($updateRequest->data)
+            ->rules();
+
+        // Remove the pending assignment rule since the file is now uploaded.
+        $rules['image_file_id'] = [
+            'sometimes',
+            'nullable',
+            'exists:files,id',
+            new FileIsMimeType(File::MIME_TYPE_PNG, File::MIME_TYPE_JPG, File::MIME_TYPE_JPEG, File::MIME_TYPE_SVG),
+        ];
+
+        return ValidatorFacade::make($updateRequest->data, $rules);
+    }
+
+    /**
+     * Apply the update request.
+     *
+     * @param \App\Models\UpdateRequest $updateRequest
+     * @return \App\Models\UpdateRequest
+     */
+    public function applyUpdateRequest(UpdateRequest $updateRequest): UpdateRequest
+    {
+        $slugGenerator = app(UniqueSlugGenerator::class);
+        $data = $updateRequest->data;
+        $slug = Arr::get($data, 'slug', $this->slug);
+        if ($slug !== $this->slug) {
+            $slug = $slugGenerator->generate($slug, 'pages');
+        }
+
+        // Update the organisation event record.
+        $this->update([
+            'title' => Arr::get($data, 'title', $this->title),
+            'slug' => $slug,
+            'excerpt' => Arr::get($data, 'excerpt', $this->excerpt),
+            'content' => Arr::get($data, 'content', $this->content),
+            'page_type' => Arr::get($data, 'page_type', $this->page_type),
+        ]);
+
+        if (Arr::has($data, 'parent_id')) {
+            $this->updateParent(Arr::get($data, 'parent_id'));
+            $this->updateStatus(Arr::get($data, 'enabled', $this->enabled));
+        }
+
+        if (Arr::has($data, 'enabled')) {
+            $this->updateStatus(Arr::get($data, 'enabled'));
+        }
+
+        if (Arr::has($data, 'order')) {
+            $this->updateOrder(Arr::get($data, 'order'));
+        }
+
+        if (Arr::has($data, 'image_file_id')) {
+            $this->updateImage(Arr::get($data, 'image_file_id'));
+        }
+
+        if (Arr::has($data, 'collections')) {
+            $this->updateCollections(Arr::get($data, 'collections'));
+        }
+
+        // Update model so far
+        $this->save();
+
+        return $updateRequest;
+    }
+
+    /**
+     * Custom logic for returning the data. Useful when wanting to transform
+     * or modify the data before returning it, e.g. removing passwords.
+     *
+     * @param array $data
+     * @return array
+     */
+    public function getData(array $data): array
+    {
+        return $data;
     }
 }

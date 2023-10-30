@@ -21,14 +21,45 @@ class ReferralsTest extends TestCase
      * List all the referrals.
      */
 
-    public function test_guest_cannot_list_them()
+    /**
+     * @test
+     */
+    public function guest_cannot_list_them()
     {
         $response = $this->json('GET', '/core/v1/referrals');
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_for_another_service_cannot_list_them()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_list_them()
+    {
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $referral = Referral::factory()->create([
+            'service_id' => $service->id,
+            'email' => $this->faker->safeEmail(),
+            'comments' => $this->faker->paragraph(),
+            'referral_consented_at' => $this->now,
+            'referee_name' => $this->faker->name(),
+            'referee_email' => $this->faker->safeEmail(),
+            'referee_phone' => random_uk_phone(),
+            'organisation' => $this->faker->company(),
+        ]);
+
+        Passport::actingAs($user);
+
+        $response = $this->json('GET', "/core/v1/referrals?filter[service_id]={$service->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function service_worker_for_another_service_cannot_list_them()
     {
         /**
          * @var \App\Models\Service $service
@@ -47,7 +78,10 @@ class ReferralsTest extends TestCase
         $response->assertJsonFragment(['data' => []]);
     }
 
-    public function test_service_worker_can_list_them()
+    /**
+     * @test
+     */
+    public function service_worker_can_list_them()
     {
         /**
          * @var \App\Models\Service $service
@@ -96,7 +130,10 @@ class ReferralsTest extends TestCase
         ]);
     }
 
-    public function test_only_referrals_user_is_authorised_to_view_are_shown()
+    /**
+     * @test
+     */
+    public function only_referrals_user_is_authorised_to_view_are_shown()
     {
         /**
          * @var \App\Models\Service $service
@@ -126,7 +163,10 @@ class ReferralsTest extends TestCase
         $response->assertJsonMissing(['id' => $anotherReferral->id]);
     }
 
-    public function test_audit_created_when_listed()
+    /**
+     * @test
+     */
+    public function audit_created_when_listed()
     {
         $this->fakeEvents();
 
@@ -148,7 +188,10 @@ class ReferralsTest extends TestCase
         });
     }
 
-    public function test_global_admin_can_filter_by_organisation_name()
+    /**
+     * @test
+     */
+    public function super_admin_can_filter_by_organisation_name()
     {
         /**
          * @var \App\Models\Organisation $organisationOne
@@ -192,10 +235,7 @@ class ReferralsTest extends TestCase
             'organisation' => $this->faker->company(),
         ]);
 
-        /** @var \App\Models\User $user */
-        $user = User::factory()->create();
-        $user->makeGlobalAdmin();
-        Passport::actingAs($user);
+        Passport::actingAs(User::factory()->create()->makeSuperAdmin());
 
         $response = $this->json('GET', "/core/v1/referrals?filter[organisation_name]={$organisationOne->name}");
 
@@ -204,7 +244,10 @@ class ReferralsTest extends TestCase
         $response->assertJsonMissing(['id' => $referralTwo->id]);
     }
 
-    public function test_global_admin_can_filter_by_service_name()
+    /**
+     * @test
+     */
+    public function super_admin_can_filter_by_service_name()
     {
         /** @var \App\Models\Service $serviceOne */
         $serviceOne = Service::factory()->create([
@@ -238,7 +281,7 @@ class ReferralsTest extends TestCase
 
         /** @var \App\Models\User $user */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeSuperAdmin();
         Passport::actingAs($user);
 
         $response = $this->json('GET', "/core/v1/referrals?filter[service_name]={$serviceOne->name}");
@@ -248,7 +291,10 @@ class ReferralsTest extends TestCase
         $response->assertJsonMissing(['id' => $referralTwo->id]);
     }
 
-    public function test_global_admin_can_sort_by_organisation_name()
+    /**
+     * @test
+     */
+    public function super_admin_can_sort_by_organisation_name()
     {
         /**
          * @var \App\Models\Organisation $organisationOne
@@ -294,7 +340,7 @@ class ReferralsTest extends TestCase
 
         /** @var \App\Models\User $user */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeSuperAdmin();
         Passport::actingAs($user);
 
         $response = $this->json('GET', '/core/v1/referrals?sort=-organisation_name');
@@ -305,7 +351,10 @@ class ReferralsTest extends TestCase
         $this->assertEquals($referralTwo->id, $data['data'][0]['id']);
     }
 
-    public function test_global_admin_can_sort_by_service_name()
+    /**
+     * @test
+     */
+    public function super_admin_can_sort_by_service_name()
     {
         /** @var \App\Models\Service $serviceOne */
         $serviceOne = Service::factory()->create([
@@ -339,7 +388,7 @@ class ReferralsTest extends TestCase
 
         /** @var \App\Models\User $user */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeSuperAdmin();
         Passport::actingAs($user);
 
         $response = $this->json('GET', '/core/v1/referrals?sort=-service_name');
@@ -354,7 +403,10 @@ class ReferralsTest extends TestCase
      * Create a referral.
      */
 
-    public function test_guest_can_create_referral()
+    /**
+     * @test
+     */
+    public function guest_can_create_referral()
     {
         $service = Service::factory()->create([
             'referral_method' => Service::REFERRAL_METHOD_INTERNAL,
@@ -395,7 +447,10 @@ class ReferralsTest extends TestCase
         ]);
     }
 
-    public function test_guest_can_create_self_referral()
+    /**
+     * @test
+     */
+    public function guest_can_create_self_referral()
     {
         $service = Service::factory()->create([
             'referral_method' => Service::REFERRAL_METHOD_INTERNAL,
@@ -432,7 +487,10 @@ class ReferralsTest extends TestCase
         ]);
     }
 
-    public function test_guest_can_create_referral_for_a_service_without_a_contact_method()
+    /**
+     * @test
+     */
+    public function guest_can_create_referral_for_a_service_without_a_contact_method()
     {
         $service = Service::factory()->create();
 
@@ -470,7 +528,10 @@ class ReferralsTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_created()
+    /**
+     * @test
+     */
+    public function audit_created_when_created()
     {
         $this->fakeEvents();
 
@@ -505,7 +566,10 @@ class ReferralsTest extends TestCase
      * Get a specific referral.
      */
 
-    public function test_guest_cannot_view_one()
+    /**
+     * @test
+     */
+    public function guest_cannot_view_one()
     {
         $referral = Referral::factory()->create();
 
@@ -514,7 +578,10 @@ class ReferralsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_for_another_service_cannot_view_one()
+    /**
+     * @test
+     */
+    public function service_worker_for_another_service_cannot_view_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create();
@@ -528,7 +595,25 @@ class ReferralsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_worker_can_view_one()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_view_one()
+    {
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $referral = Referral::factory()->create();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('GET', "/core/v1/referrals/{$referral->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function service_worker_can_view_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create();
@@ -567,7 +652,10 @@ class ReferralsTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_viewed()
+    /**
+     * @test
+     */
+    public function audit_created_when_viewed()
     {
         $this->fakeEvents();
 
@@ -594,7 +682,10 @@ class ReferralsTest extends TestCase
      * Update a specific referral.
      */
 
-    public function test_guest_cannot_update_one()
+    /**
+     * @test
+     */
+    public function guest_cannot_update_one()
     {
         $referral = Referral::factory()->create();
 
@@ -603,7 +694,10 @@ class ReferralsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_for_another_service_cannot_update_one()
+    /**
+     * @test
+     */
+    public function service_worker_for_another_service_cannot_update_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create();
@@ -620,7 +714,28 @@ class ReferralsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_worker_can_update_one()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_update_one()
+    {
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $referral = Referral::factory()->create();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('PUT', "/core/v1/referrals/{$referral->id}", [
+            'status' => Referral::STATUS_IN_PROGRESS,
+            'comments' => 'Assigned to me',
+        ]);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function service_worker_can_update_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create();
@@ -668,7 +783,10 @@ class ReferralsTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_updated()
+    /**
+     * @test
+     */
+    public function audit_created_when_updated()
     {
         $this->fakeEvents();
 
@@ -698,7 +816,10 @@ class ReferralsTest extends TestCase
      * Delete a specific referral.
      */
 
-    public function test_guest_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function guest_cannot_delete_one()
     {
         $referral = Referral::factory()->create();
 
@@ -707,7 +828,10 @@ class ReferralsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_delete_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create();
@@ -721,7 +845,10 @@ class ReferralsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_delete_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create();
@@ -735,7 +862,10 @@ class ReferralsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_delete_one()
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create();
@@ -749,7 +879,10 @@ class ReferralsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_delete_one()
     {
         $user = User::factory()->create();
         $user->makeGlobalAdmin();
@@ -762,7 +895,10 @@ class ReferralsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_super_admin_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function super_admin_cannot_delete_one()
     {
         $user = User::factory()->create();
         $user->makeSuperAdmin();

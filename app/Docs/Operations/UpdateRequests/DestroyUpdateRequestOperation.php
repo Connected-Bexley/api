@@ -20,7 +20,7 @@ class DestroyUpdateRequestOperation extends Operation
             ->action(static::ACTION_DELETE)
             ->tags(UpdateRequestsTag::create())
             ->summary('Delete a specific update request')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->responses(
                 ResourceDeletedResponse::create(null, 'update request')
             );

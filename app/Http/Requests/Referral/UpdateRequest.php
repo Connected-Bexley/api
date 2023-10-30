@@ -15,7 +15,7 @@ class UpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        if ($this->user()->isServiceWorker($this->referral->service)) {
+        if (!$this->user()->isGlobalAdmin() && $this->user()->isServiceWorker($this->referral->service)) {
             return true;
         }
 

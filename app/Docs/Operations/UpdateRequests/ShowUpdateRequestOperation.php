@@ -23,7 +23,7 @@ class ShowUpdateRequestOperation extends Operation
             ->action(static::ACTION_GET)
             ->tags(UpdateRequestsTag::create())
             ->summary('Get a specific update request')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Service Admin`')
             ->responses(
                 Response::ok()->content(
                     MediaType::json()->schema(

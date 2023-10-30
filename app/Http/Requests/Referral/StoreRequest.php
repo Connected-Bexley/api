@@ -4,6 +4,7 @@ namespace App\Http\Requests\Referral;
 
 use App\Models\Taxonomy;
 use App\Rules\RootTaxonomyIs;
+use App\Rules\UkMobilePhoneNumber;
 use App\Rules\UkPhoneNumber;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -31,7 +32,7 @@ class StoreRequest extends FormRequest
             'service_id' => ['required', 'exists:services,id'],
             'name' => ['required', 'string', 'min:1', 'max:255'],
             'email' => ['required_without_all:phone,other_contact', 'nullable', 'email', 'max:255'],
-            'phone' => ['required_without_all:email,other_contact', 'nullable', 'string', 'min:1', 'max:255', new UkPhoneNumber()],
+            'phone' => ['required_without_all:email,other_contact', 'nullable', 'string', 'min:1', 'max:255', new UkMobilePhoneNumber()],
             'other_contact' => ['required_without_all:phone,email', 'nullable', 'string', 'min:1', 'max:255'],
             'postcode_outward_code' => ['present', 'nullable', 'string', 'min:1', 'max:255'],
             'comments' => ['present', 'nullable', 'string', 'min:1', 'max:255'],
@@ -62,5 +63,15 @@ class StoreRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'phone' => str_replace(' ', '', $this->phone),
+        ]);
     }
 }

@@ -98,6 +98,20 @@ trait UpdateRequestScopes
 
     /**
      * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param int $id
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopePageId(Builder $query, $id): Builder
+    {
+        $ids = explode(',', $id);
+
+        return $query
+            ->where('updateable_type', UpdateRequest::EXISTING_TYPE_PAGE)
+            ->whereIn('updateable_id', $ids);
+    }
+
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder $query
      * @param string $alias
      * @return \Illuminate\Database\Eloquent\Builder
      */
@@ -115,13 +129,17 @@ trait UpdateRequestScopes
     public function getEntrySql(): string
     {
         $services = UpdateRequest::EXISTING_TYPE_SERVICE;
-        $newServices = UpdateRequest::NEW_TYPE_SERVICE;
+        $newServicesOrgAdmin = UpdateRequest::NEW_TYPE_SERVICE_ORG_ADMIN;
+        $newServicesGlobalAdmin = UpdateRequest::NEW_TYPE_SERVICE_GLOBAL_ADMIN;
         $locations = UpdateRequest::EXISTING_TYPE_LOCATION;
         $serviceLocations = UpdateRequest::EXISTING_TYPE_SERVICE_LOCATION;
         $organisations = UpdateRequest::EXISTING_TYPE_ORGANISATION;
         $organisationSignUpForm = UpdateRequest::NEW_TYPE_ORGANISATION_SIGN_UP_FORM;
+        $newOrganisationGlobalAdmin = UpdateRequest::NEW_TYPE_ORGANISATION_GLOBAL_ADMIN;
         $organisationEvents = UpdateRequest::EXISTING_TYPE_ORGANISATION_EVENT;
-        $newOrganisationEvent = UpdateRequest::NEW_TYPE_ORGANISATION_EVENT;
+        $newOrganisationEventOrgAdmin = UpdateRequest::NEW_TYPE_ORGANISATION_EVENT;
+        $pages = UpdateRequest::EXISTING_TYPE_PAGE;
+        $newPage = UpdateRequest::NEW_TYPE_PAGE;
 
         return <<<EOT
 CASE `update_requests`.`updateable_type`
@@ -131,7 +149,10 @@ CASE `update_requests`.`updateable_type`
         WHERE `update_requests`.`updateable_id` = `services`.`id`
         LIMIT 1
     )
-    WHEN "{$newServices}" THEN (
+    WHEN "{$newServicesOrgAdmin}" THEN (
+        `update_requests`.`data`->>"$.name"
+    )
+    WHEN "{$newServicesGlobalAdmin}" THEN (
         `update_requests`.`data`->>"$.name"
     )
     WHEN "{$locations}" THEN (
@@ -161,13 +182,30 @@ CASE `update_requests`.`updateable_type`
             LIMIT 1
         ), `update_requests`.`data`->>"$.organisation.name")
     )
+    WHEN "{$newOrganisationGlobalAdmin}" THEN (
+        IF(`update_requests`.`data`->>"$.organisation.id", (
+            SELECT `organisations`.`name`
+            FROM `organisations`
+            WHERE `update_requests`.`data`->>"$.organisation.id" = `organisations`.`id`
+            LIMIT 1
+        ), `update_requests`.`data`->>"$.organisation.name")
+    )
     WHEN "{$organisationEvents}" THEN (
         SELECT `organisation_events`.`title`
         FROM `organisation_events`
         WHERE `update_requests`.`updateable_id` = `organisation_events`.`id`
         LIMIT 1
     )
-    WHEN "{$newOrganisationEvent}" THEN (
+    WHEN "{$newOrganisationEventOrgAdmin}" THEN (
+        `update_requests`.`data`->>"$.title"
+    )
+    WHEN "{$pages}" THEN (
+        SELECT `pages`.`title`
+        FROM `pages`
+        WHERE `update_requests`.`updateable_id` = `pages`.`id`
+        LIMIT 1
+    )
+    WHEN "{$newPage}" THEN (
         `update_requests`.`data`->>"$.title"
     )
 END

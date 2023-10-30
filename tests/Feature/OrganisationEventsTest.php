@@ -511,7 +511,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventAsOrganisationAdmin201()
+    public function postCreateOrganisationEventAsOrganisationAdmin200()
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -523,7 +523,7 @@ class OrganisationEventsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,'.base64_encode($image),
+            'file' => 'data:image/png;base64,' . base64_encode($image),
         ]);
 
         $date = $this->faker->dateTimeBetween('tomorrow', '+6 weeks')->format('Y-m-d');
@@ -579,7 +579,7 @@ class OrganisationEventsTest extends TestCase
         // Simulate frontend check by making call with UpdateRequest ID.
         $updateRequestId = $responseData->id;
 
-        $globalAdminUser = User::factory()->create()->makeGlobalAdmin();
+        $globalAdminUser = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($globalAdminUser);
 
         $updateRequestCheckResponse = $this->get(
@@ -613,7 +613,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventAsGlobalAdmin201()
+    public function postCreateOrganisationEventAsGlobalAdmin200()
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -650,15 +650,29 @@ class OrganisationEventsTest extends TestCase
 
         $response = $this->json('POST', '/core/v1/organisation-events', $payload);
 
-        $response->assertStatus(Response::HTTP_CREATED);
+        $response->assertStatus(Response::HTTP_OK);
 
-        $responseData = json_decode($response->getContent())->data;
+        //Then an update request should be created for the new event
+        $this->assertDatabaseHas((new UpdateRequest())->getTable(), [
+            'user_id' => $user->id,
+            'updateable_type' => UpdateRequest::NEW_TYPE_ORGANISATION_EVENT,
+            'updateable_id' => null,
+        ]);
+
+        $updateRequest = UpdateRequest::query()
+            ->where('updateable_type', UpdateRequest::NEW_TYPE_ORGANISATION_EVENT)
+            ->where('updateable_id', null)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
+        unset($payload['category_taxonomies']);
 
         // The organisation event is created
-        $this->assertDatabaseHas((new OrganisationEvent())->getTable(), ['id' => $responseData->id]);
-
-        // And no update request was created
-        $this->assertEmpty(UpdateRequest::all());
+        $this->assertDatabaseHas((new OrganisationEvent())->getTable(), $payload);
     }
 
     /**
@@ -802,11 +816,76 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateHomepageOrganisationEventAsGlobalAdmin201()
+    public function postCreateHomepageOrganisationEventAsGlobalAdmin200()
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
         $user = User::factory()->create()->makeGlobalAdmin();
+
+        Passport::actingAs($user);
+
+        $date = $this->faker->dateTimeBetween('tomorrow', '+6 weeks')->format('Y-m-d');
+        $payload = [
+            'title' => $this->faker->sentence(3),
+            'start_date' => $date,
+            'end_date' => $date,
+            'start_time' => '09:00:00',
+            'end_time' => '13:00:00',
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
+            'is_free' => false,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
+            'organiser_phone' => random_uk_phone(),
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
+            'booking_title' => $this->faker->sentence(3),
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
+            'booking_cta' => $this->faker->words(2, true),
+            'homepage' => true,
+            'is_virtual' => false,
+            'location_id' => $location->id,
+            'organisation_id' => $organisation->id,
+            'category_taxonomies' => [],
+        ];
+
+        $response = $this->json('POST', '/core/v1/organisation-events', $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        //Then an update request should be created for the new event
+        $this->assertDatabaseHas((new UpdateRequest())->getTable(), [
+            'user_id' => $user->id,
+            'updateable_type' => UpdateRequest::NEW_TYPE_ORGANISATION_EVENT,
+            'updateable_id' => null,
+        ]);
+
+        $updateRequest = UpdateRequest::query()
+            ->where('updateable_type', UpdateRequest::NEW_TYPE_ORGANISATION_EVENT)
+            ->where('updateable_id', null)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
+        unset($payload['category_taxonomies']);
+
+        // The organisation event is created
+        $this->assertDatabaseHas((new OrganisationEvent())->getTable(), $payload);
+    }
+
+    /**
+     * @test
+     */
+    public function postCreateHomepageOrganisationEventAsSuperAdmin201()
+    {
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($user);
 
@@ -894,12 +973,113 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventWithTaxonomiesAsGlobalAdmin201()
+    public function postCreateOrganisationEventWithTaxonomiesAsGlobalAdmin200()
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
         $taxonomy = Taxonomy::factory()->lgaStandards()->create();
         $user = User::factory()->create()->makeGlobalAdmin();
+
+        Passport::actingAs($user);
+
+        $date = $this->faker->dateTimeBetween('tomorrow', '+6 weeks')->format('Y-m-d');
+        $payload = [
+            'title' => $this->faker->sentence(3),
+            'start_date' => $date,
+            'end_date' => $date,
+            'start_time' => '09:00:00',
+            'end_time' => '13:00:00',
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
+            'is_free' => false,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
+            'organiser_phone' => random_uk_phone(),
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
+            'booking_title' => $this->faker->sentence(3),
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
+            'booking_cta' => $this->faker->words(2, true),
+            'homepage' => true,
+            'is_virtual' => false,
+            'location_id' => $location->id,
+            'organisation_id' => $organisation->id,
+            'category_taxonomies' => [$taxonomy->id],
+        ];
+
+        $response = $this->json('POST', '/core/v1/organisation-events', $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        //Then an update request should be created for the new event
+        $this->assertDatabaseHas((new UpdateRequest())->getTable(), [
+            'user_id' => $user->id,
+            'updateable_type' => UpdateRequest::NEW_TYPE_ORGANISATION_EVENT,
+            'updateable_id' => null,
+        ]);
+
+        $updateRequest = UpdateRequest::query()
+            ->where('updateable_type', UpdateRequest::NEW_TYPE_ORGANISATION_EVENT)
+            ->where('updateable_id', null)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
+        unset($payload['category_taxonomies']);
+
+        // The organisation event is created
+        $this->assertDatabaseHas((new OrganisationEvent())->getTable(), $payload);
+
+        $organisationEvent = OrganisationEvent::where('title', $payload['title'])->firstOrFail();
+        $this->assertDatabaseHas(table(OrganisationEventTaxonomy::class), [
+            'organisation_event_id' => $organisationEvent->id,
+            'taxonomy_id' => $taxonomy->id,
+        ]);
+        $this->assertDatabaseHas(table(OrganisationEventTaxonomy::class), [
+            'organisation_event_id' => $organisationEvent->id,
+            'taxonomy_id' => $taxonomy->parent_id,
+        ]);
+
+        $response = $this->getJson('/core/v1/organisation-events/' . $organisationEvent->id);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $responsePayload = $payload;
+        $responsePayload['category_taxonomies'] = [
+            [
+                'id' => $taxonomy->parent->id,
+                'parent_id' => $taxonomy->parent->parent_id,
+                'slug' => $taxonomy->parent->slug,
+                'name' => $taxonomy->parent->name,
+                'created_at' => $taxonomy->parent->created_at->format(CarbonImmutable::ISO8601),
+                'updated_at' => $taxonomy->parent->updated_at->format(CarbonImmutable::ISO8601),
+            ],
+            [
+                'id' => $taxonomy->id,
+                'parent_id' => $taxonomy->parent_id,
+                'slug' => $taxonomy->slug,
+                'name' => $taxonomy->name,
+                'created_at' => $taxonomy->created_at->format(CarbonImmutable::ISO8601),
+                'updated_at' => $taxonomy->updated_at->format(CarbonImmutable::ISO8601),
+            ],
+        ];
+        $response->assertJsonFragment($responsePayload);
+    }
+
+    /**
+     * @test
+     */
+    public function postCreateOrganisationEventWithTaxonomiesAsSuperAdmin201()
+    {
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $taxonomy = Taxonomy::factory()->lgaStandards()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($user);
 
@@ -1019,7 +1199,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventWithImageAsGlobalAdmin201()
+    public function postCreateOrganisationEventWithImageAsGlobalAdmin200()
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -1031,7 +1211,7 @@ class OrganisationEventsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,'.base64_encode($image),
+            'file' => 'data:image/png;base64,' . base64_encode($image),
         ]);
 
         $date = $this->faker->dateTimeBetween('tomorrow', '+6 weeks')->format('Y-m-d');
@@ -1064,11 +1244,33 @@ class OrganisationEventsTest extends TestCase
 
         $response = $this->json('POST', '/core/v1/organisation-events', $payload);
 
-        $response->assertStatus(Response::HTTP_CREATED);
+        $response->assertStatus(Response::HTTP_OK);
 
-        $responseData = json_decode($response->getContent())->data;
+        //Then an update request should be created for the new event
+        $this->assertDatabaseHas((new UpdateRequest())->getTable(), [
+            'user_id' => $user->id,
+            'updateable_type' => UpdateRequest::NEW_TYPE_ORGANISATION_EVENT,
+            'updateable_id' => null,
+        ]);
 
-        $content = $this->get("/core/v1/organisation-events/{$responseData->id}/image.png")->content();
+        $updateRequest = UpdateRequest::query()
+            ->where('updateable_type', UpdateRequest::NEW_TYPE_ORGANISATION_EVENT)
+            ->where('updateable_id', null)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
+        unset($payload['category_taxonomies']);
+
+        // The organisation event is created
+        $this->assertDatabaseHas((new OrganisationEvent())->getTable(), $payload);
+
+        $organisationEvent = OrganisationEvent::where('title', $payload['title'])->firstOrFail();
+
+        $content = $this->get("/core/v1/organisation-events/{$organisationEvent->id}/image.png")->content();
         $this->assertEquals($image, $content);
     }
 
@@ -1087,7 +1289,7 @@ class OrganisationEventsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,'.base64_encode($image),
+            'file' => 'data:image/png;base64,' . base64_encode($image),
         ]);
 
         $date = $this->faker->dateTimeBetween('tomorrow', '+6 weeks')->format('Y-m-d');
@@ -1143,8 +1345,7 @@ class OrganisationEventsTest extends TestCase
         // Simulate frontend check by making call with UpdateRequest ID.
         $updateRequestId = $responseData->id;
 
-        $globalAdminUser = User::factory()->create()->makeGlobalAdmin();
-        Passport::actingAs($globalAdminUser);
+        Passport::actingAs(User::factory()->create()->makeSuperAdmin());
 
         $updateRequestCheckResponse = $this->get(
             route(
@@ -1619,24 +1820,24 @@ class OrganisationEventsTest extends TestCase
             'VERSION:2.0',
             'PRODID:-//hacksw/handcal//NONSGML v1.0//EN',
             'BEGIN:VEVENT',
-            'UID:'.$organisationEvent->id,
-            'DTSTAMP:'.$now->format('Ymd\\THis\\Z'),
-            'ORGANIZER;CN='.$organisationEvent->organiser_name.':MAILTO:'.$organisationEvent->organiser_email,
-            'DTSTART:'.$start->format('Ymd\\THis\\Z'),
-            'DTEND:'.$end->format('Ymd\\THis\\Z'),
-            'SUMMARY:'.$organisationEvent->title,
-            'DESCRIPTION:'.$organisationEvent->intro,
-            'GEO:'.$organisationEvent->location->lat.';'.$organisationEvent->location->lon,
-            'LOCATION:'.str_ireplace(',', '\,', $organisationEvent->location->toAddress()->__toString()),
+            'UID:' . $organisationEvent->id,
+            'DTSTAMP:' . $now->format('Ymd\\THis\\Z'),
+            'ORGANIZER;CN=' . $organisationEvent->organiser_name . ':MAILTO:' . $organisationEvent->organiser_email,
+            'DTSTART:' . $start->format('Ymd\\THis\\Z'),
+            'DTEND:' . $end->format('Ymd\\THis\\Z'),
+            'SUMMARY:' . $organisationEvent->title,
+            'DESCRIPTION:' . $organisationEvent->intro,
+            'GEO:' . $organisationEvent->location->lat . ';' . $organisationEvent->location->lon,
+            'LOCATION:' . str_ireplace(',', '\,', $organisationEvent->location->toAddress()->__toString()),
             'END:VEVENT',
             'END:VCALENDAR',
         ]);
 
-        $this->assertEquals('https://calendar.google.com/calendar/render?action=TEMPLATE&dates='.urlencode($start->format('Ymd\\THis\\Z').'/'.$end->format('Ymd\\THis\\Z')).'&details='.$urlsafeTitle.'&location='.$urlsafeLocation.'&text='.$urlsafeIntro, $organisationEvent->googleCalendarlink);
+        $this->assertEquals('https://calendar.google.com/calendar/render?action=TEMPLATE&dates=' . urlencode($start->format('Ymd\\THis\\Z') . '/' . $end->format('Ymd\\THis\\Z')) . '&details=' . $urlsafeTitle . '&location=' . $urlsafeLocation . '&text=' . $urlsafeIntro, $organisationEvent->googleCalendarlink);
 
-        $this->assertEquals('https://outlook.office.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&rru=addevent&startdt='.urlencode($start->format(DateTime::ATOM)).'&enddt='.urlencode($end->format(DateTime::ATOM)).'&subject='.$urlsafeTitle.'&location='.$urlsafeLocation.'&body='.$urlsafeIntro, $organisationEvent->microsoftCalendarLink);
+        $this->assertEquals('https://outlook.office.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&rru=addevent&startdt=' . urlencode($start->format(DateTime::ATOM)) . '&enddt=' . urlencode($end->format(DateTime::ATOM)) . '&subject=' . $urlsafeTitle . '&location=' . $urlsafeLocation . '&body=' . $urlsafeIntro, $organisationEvent->microsoftCalendarLink);
 
-        $this->assertEquals(secure_url('/core/v1/organisation-events/'.$organisationEvent->id.'/event.ics'), $organisationEvent->appleCalendarLink);
+        $this->assertEquals(secure_url('/core/v1/organisation-events/' . $organisationEvent->id . '/event.ics'), $organisationEvent->appleCalendarLink);
 
         $response = $this->get($organisationEvent->appleCalendarLink);
 
@@ -1743,8 +1944,6 @@ class OrganisationEventsTest extends TestCase
 
         $response->assertJsonFragment($payload);
 
-        $globalAdminUser = User::factory()->create()->makeGlobalAdmin();
-
         $this->assertDatabaseHas((new UpdateRequest())->getTable(), [
             'user_id' => $user->id,
             'updateable_type' => UpdateRequest::EXISTING_TYPE_ORGANISATION_EVENT,
@@ -1761,7 +1960,7 @@ class OrganisationEventsTest extends TestCase
 
         // Simulate frontend check by making call with UpdateRequest ID.
         $updateRequestId = json_decode($response->getContent())->id;
-        Passport::actingAs($globalAdminUser);
+        Passport::actingAs(User::factory()->create()->makeSuperAdmin());
 
         $updateRequestCheckResponse = $this->get(
             route(
@@ -1776,7 +1975,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function putUpdateOrganisationEventAutoApprovedAsGlobalAdmin200()
+    public function putUpdateOrganisationEventAsGlobalAdmin200()
     {
         $location = Location::factory()->create();
         $user = User::factory()->create()->makeGlobalAdmin();
@@ -1815,6 +2014,24 @@ class OrganisationEventsTest extends TestCase
 
         $response->assertStatus(Response::HTTP_OK);
 
+        $response->assertJsonFragment($payload);
+
+        $this->assertDatabaseHas((new UpdateRequest())->getTable(), [
+            'user_id' => $user->id,
+            'updateable_type' => UpdateRequest::EXISTING_TYPE_ORGANISATION_EVENT,
+            'updateable_id' => $organisationEvent->id,
+        ]);
+
+        $updateRequest = UpdateRequest::query()
+            ->where('updateable_type', UpdateRequest::EXISTING_TYPE_ORGANISATION_EVENT)
+            ->where('updateable_id', $organisationEvent->id)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
         // The organisation event is updated
         $this->assertDatabaseHas((new OrganisationEvent())->getTable(), array_merge(['id' => $organisationEvent->id], $payload));
 
@@ -1827,7 +2044,7 @@ class OrganisationEventsTest extends TestCase
 
         // Simulate frontend check by making call with UpdateRequest ID.
         $updateRequestId = json_decode($response->getContent())->id;
-        Passport::actingAs($user);
+        Passport::actingAs(User::factory()->create()->makeSuperAdmin());
 
         $updateRequestCheckResponse = $this->get(
             route(
@@ -1981,7 +2198,7 @@ class OrganisationEventsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,'.base64_encode($image),
+            'file' => 'data:image/png;base64,' . base64_encode($image),
         ]);
 
         $organisationEvent = OrganisationEvent::factory()->create();
@@ -1993,6 +2210,16 @@ class OrganisationEventsTest extends TestCase
         $response = $this->json('PUT', "/core/v1/organisation-events/{$organisationEvent->id}", $payload);
 
         $response->assertStatus(Response::HTTP_OK);
+
+        $updateRequest = UpdateRequest::query()
+            ->where('updateable_type', UpdateRequest::EXISTING_TYPE_ORGANISATION_EVENT)
+            ->where('updateable_id', $organisationEvent->id)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
 
         $content = $this->get("/core/v1/organisation-events/{$organisationEvent->id}/image.png")->content();
         $this->assertEquals($image, $content);
@@ -2016,6 +2243,16 @@ class OrganisationEventsTest extends TestCase
         $response = $this->json('PUT', "/core/v1/organisation-events/{$organisationEvent->id}", $payload);
 
         $response->assertStatus(Response::HTTP_OK);
+
+        $updateRequest = UpdateRequest::query()
+            ->where('updateable_type', UpdateRequest::EXISTING_TYPE_ORGANISATION_EVENT)
+            ->where('updateable_id', $organisationEvent->id)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
 
         $organisationEvent = $organisationEvent->fresh();
         $this->assertEquals(null, $organisationEvent->image_file_id);
@@ -2158,32 +2395,16 @@ class OrganisationEventsTest extends TestCase
 
         $response->assertStatus(Response::HTTP_OK);
 
-        // The organisation event is updated
-        $this->assertDatabaseHas((new OrganisationEvent())->getTable(), array_merge(['id' => $organisationEvent->id], $payload));
-
-        $data = UpdateRequest::query()
+        $updateRequest = UpdateRequest::query()
             ->where('updateable_type', UpdateRequest::EXISTING_TYPE_ORGANISATION_EVENT)
             ->where('updateable_id', $organisationEvent->id)
-            ->firstOrFail()
-            ->data;
-        $this->assertEquals($data, $payload);
+            ->firstOrFail();
+        $this->assertEquals($updateRequest->data, $payload);
 
-        // Simulate frontend check by making call with UpdateRequest ID.
-        $updateRequestId = json_decode($response->getContent())->id;
-        Passport::actingAs($user);
+        $this->approveUpdateRequest($updateRequest->id);
 
-        $updateRequestCheckResponse = $this->get(
-            route(
-                'core.v1.update-requests.show',
-                ['update_request' => $updateRequestId]
-            )
-        );
-
-        $updateRequestCheckResponse->assertSuccessful();
-        $updateRequestResponseData = json_decode($updateRequestCheckResponse->getContent());
-
-        // Update request should already have been approved.
-        $this->assertTrue($updateRequestResponseData->data->homepage);
+        // The organisation event is updated
+        $this->assertDatabaseHas((new OrganisationEvent())->getTable(), array_merge(['id' => $organisationEvent->id], $payload));
     }
 
     /**
@@ -2240,7 +2461,7 @@ class OrganisationEventsTest extends TestCase
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonFragment(['data' => $payload]);
-        $response->assertJsonFragment(['message' => __('updates.pending')]);
+        $response->assertJsonFragment(['message' => __('updates.pending', ['appname' => config('app.name')])]);
         $this->assertDatabaseHas((new UpdateRequest())->getTable(), [
             'user_id' => $user->id,
             'updateable_type' => UpdateRequest::EXISTING_TYPE_ORGANISATION_EVENT,
@@ -2271,6 +2492,125 @@ class OrganisationEventsTest extends TestCase
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
         $user = User::factory()->create()->makeGlobalAdmin();
+
+        Passport::actingAs($user);
+
+        $organisationEvent = OrganisationEvent::factory()->create([
+            'organisation_id' => $organisation->id,
+        ]);
+
+        $taxonomy1 = Taxonomy::factory()->create();
+        $taxonomy2 = Taxonomy::factory()->create();
+        $taxonomy3 = Taxonomy::factory()->create();
+        $organisationEvent->syncTaxonomyRelationships(collect([$taxonomy1]));
+
+        $this->assertDatabaseHas(table(OrganisationEventTaxonomy::class), [
+            'organisation_event_id' => $organisationEvent->id,
+            'taxonomy_id' => $taxonomy1->id,
+        ]);
+
+        $date = $this->faker->dateTimeBetween('tomorrow', '+6 weeks')->format('Y-m-d');
+        $payload = [
+            'title' => $this->faker->sentence(3),
+            'start_date' => $date,
+            'end_date' => $date,
+            'start_time' => '09:00:00',
+            'end_time' => '13:00:00',
+            'intro' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
+            'is_free' => false,
+            'fees_text' => $this->faker->sentence(),
+            'fees_url' => $this->faker->url(),
+            'organiser_name' => $this->faker->name(),
+            'organiser_phone' => random_uk_phone(),
+            'organiser_email' => $this->faker->safeEmail(),
+            'organiser_url' => $this->faker->url(),
+            'booking_title' => $this->faker->sentence(3),
+            'booking_summary' => $this->faker->sentence(),
+            'booking_url' => $this->faker->url(),
+            'booking_cta' => $this->faker->words(2, true),
+            'homepage' => false,
+            'is_virtual' => false,
+            'location_id' => $location->id,
+            'category_taxonomies' => [$taxonomy2->id, $taxonomy3->id],
+        ];
+
+        $response = $this->json('PUT', "/core/v1/organisation-events/{$organisationEvent->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $response->assertJsonFragment(['data' => $payload]);
+        $response->assertJsonFragment(['message' => __('updates.pending', ['appname' => config('app.name')])]);
+        $this->assertDatabaseHas((new UpdateRequest())->getTable(), [
+            'user_id' => $user->id,
+            'updateable_type' => UpdateRequest::EXISTING_TYPE_ORGANISATION_EVENT,
+            'updateable_id' => $organisationEvent->id,
+        ]);
+
+        $updateRequest = UpdateRequest::query()
+            ->where('updateable_type', UpdateRequest::EXISTING_TYPE_ORGANISATION_EVENT)
+            ->where('updateable_id', $organisationEvent->id)
+            ->firstOrFail();
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
+        $this->assertDatabaseHas(table(OrganisationEventTaxonomy::class), [
+            'organisation_event_id' => $organisationEvent->id,
+            'taxonomy_id' => $taxonomy2->id,
+        ]);
+        $this->assertDatabaseHas(table(OrganisationEventTaxonomy::class), [
+            'organisation_event_id' => $organisationEvent->id,
+            'taxonomy_id' => $taxonomy3->id,
+        ]);
+        $this->assertDatabaseHas(table(OrganisationEventTaxonomy::class), [
+            'organisation_event_id' => $organisationEvent->id,
+            'taxonomy_id' => $taxonomy2->parent_id,
+        ]);
+        $this->assertDatabaseMissing(table(OrganisationEventTaxonomy::class), [
+            'organisation_event_id' => $organisationEvent->id,
+            'taxonomy_id' => $taxonomy1->id,
+        ]);
+
+        $responsePayload = $payload;
+        $responsePayload['category_taxonomies'] = [
+            [
+                'id' => $taxonomy2->parent->id,
+                'parent_id' => $taxonomy2->parent->parent_id,
+                'slug' => $taxonomy2->parent->slug,
+                'name' => $taxonomy2->parent->name,
+                'created_at' => $taxonomy2->parent->created_at->format(CarbonImmutable::ISO8601),
+                'updated_at' => $taxonomy2->parent->updated_at->format(CarbonImmutable::ISO8601),
+            ],
+            [
+                'id' => $taxonomy2->id,
+                'parent_id' => $taxonomy2->parent_id,
+                'slug' => $taxonomy2->slug,
+                'name' => $taxonomy2->name,
+                'created_at' => $taxonomy2->created_at->format(CarbonImmutable::ISO8601),
+                'updated_at' => $taxonomy2->updated_at->format(CarbonImmutable::ISO8601),
+            ],
+            [
+                'id' => $taxonomy3->id,
+                'parent_id' => $taxonomy3->parent_id,
+                'slug' => $taxonomy3->slug,
+                'name' => $taxonomy3->name,
+                'created_at' => $taxonomy3->created_at->format(CarbonImmutable::ISO8601),
+                'updated_at' => $taxonomy3->updated_at->format(CarbonImmutable::ISO8601),
+            ],
+        ];
+        $response = $this->json('GET', "/core/v1/organisation-events/{$organisationEvent->id}");
+        $response->assertJsonFragment($responsePayload);
+    }
+
+    /**
+     * @test
+     */
+    public function putUpdateOrganisationEventUpdateTaxonomiesAsSuperAdmin200()
+    {
+        $organisation = Organisation::factory()->create();
+        $location = Location::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($user);
 
@@ -2422,7 +2762,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function deleteRemoveOrganisationEventAsOrganisationAdmin200()
+    public function deleteRemoveOrganisationEventAsOrganisationAdmin403()
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -2435,14 +2775,14 @@ class OrganisationEventsTest extends TestCase
 
         $response = $this->json('DELETE', "/core/v1/organisation-events/{$organisationEvent->id}");
 
-        $response->assertStatus(Response::HTTP_OK);
-        $this->assertDatabaseMissing((new OrganisationEvent())->getTable(), ['id' => $organisationEvent->id]);
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+        $this->assertDatabaseHas((new OrganisationEvent())->getTable(), ['id' => $organisationEvent->id]);
     }
 
     /**
      * @test
      */
-    public function deleteRemoveOrganisationEventAsGlobalAdmin200()
+    public function deleteRemoveOrganisationEventAsGlobalAdmin403()
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeGlobalAdmin($organisation);
@@ -2453,8 +2793,8 @@ class OrganisationEventsTest extends TestCase
 
         $response = $this->json('DELETE', "/core/v1/organisation-events/{$organisationEvent->id}");
 
-        $response->assertStatus(Response::HTTP_OK);
-        $this->assertDatabaseMissing((new OrganisationEvent())->getTable(), ['id' => $organisationEvent->id]);
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+        $this->assertDatabaseHas((new OrganisationEvent())->getTable(), ['id' => $organisationEvent->id]);
     }
 
     /**
@@ -2478,12 +2818,12 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function deleteRemoveOrganisationEventAsOrganisationAdminCreatesAudit200()
+    public function deleteRemoveOrganisationEventAsSuperAdminCreatesAudit200()
     {
         $this->fakeEvents();
 
         $organisation = Organisation::factory()->create();
-        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
+        $user = User::factory()->create()->makeSuperAdmin();
 
         Passport::actingAs($user);
 

@@ -108,9 +108,9 @@ class UniqueSlugGeneratorTest extends TestCase
     public function generateUsedDataProvider(): array
     {
         return [
-            ['string' => 'Test Org', 'expected' => 'test-org-4', 'usedCount' => 3],
-            ['string' => 'TestOrg', 'expected' => 'testorg-6', 'usedCount' => 5],
-            ['string' => 'Test Org PLC', 'expected' => 'test-org-plc-11', 'usedCount' => 10],
+            ['string' => 'Test Org', 'expected' => 'test-org-3', 'usedCount' => 3],
+            ['string' => 'TestOrg', 'expected' => 'testorg-5', 'usedCount' => 5],
+            ['string' => 'Test Org PLC', 'expected' => 'test-org-plc-10', 'usedCount' => 10],
         ];
     }
 

@@ -51,6 +51,7 @@ class Notification extends Model
 
             // Add the email as a job on the queue to be sent.
             $email->notification = $notification;
+
             app(Dispatcher::class)->dispatch($email);
         });
     }

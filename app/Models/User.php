@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Laravel\Passport\HasApiTokens;
@@ -247,25 +248,23 @@ class User extends Authenticatable implements Notifiable
 
         /*
          * If the invoker is a global admin,
-         * and the subject is not a super admin.
          */
-        if ($this->isGlobalAdmin() && !$subject->isSuperAdmin()) {
-            return true;
+        if ($this->isGlobalAdmin()) {
+            return false;
         }
 
         /*
-         * If the invoker is a global admin,
-         * and the subject is a content admin.
+         * If the invoker is a content admin.
          */
-        if ($this->isGlobalAdmin() && $subject->isContentAdmin()) {
-            return true;
+        if ($this->isContentAdmin()) {
+            return false;
         }
 
         /*
          * If the invoker is an organisation admin for the organisation,
          * and the subject is not a global admin.
          */
-        if ($organisation && $this->isOrganisationAdmin($organisation) && !$subject->isGlobalAdmin()) {
+        if ($organisation && $this->isOrganisationAdmin($organisation) && !($subject->isSuperAdmin() || $subject->isGlobalAdmin() || $subject->isContentAdmin())) {
             return true;
         }
 
@@ -306,17 +305,23 @@ class User extends Authenticatable implements Notifiable
 
         /*
          * If the invoker is a global admin,
-         * and the subject is not a super admin.
          */
-        if ($this->isGlobalAdmin() && !$subject->isSuperAdmin()) {
-            return true;
+        if ($this->isGlobalAdmin()) {
+            return false;
+        }
+
+        /*
+         * If the invoker is a content admin,
+         */
+        if ($this->isContentAdmin()) {
+            return false;
         }
 
         /*
          * If the invoker is an organisation admin for the organisation,
          * and the subject is not a content admin or a global admin.
          */
-        if ($this->isOrganisationAdmin() && !($subject->isGlobalAdmin() || $subject->isContentAdmin())) {
+        if ($this->isOrganisationAdmin() && !($subject->isSuperAdmin() || $subject->isGlobalAdmin() || $subject->isContentAdmin())) {
             return true;
         }
 
@@ -324,11 +329,22 @@ class User extends Authenticatable implements Notifiable
          * If the invoker is a service admin for the service,
          * and the subject is not a organisation admin for the organisation.
          */
-        if ($this->isServiceAdmin() && !($subject->isOrganisationAdmin() || $subject->isContentAdmin())) {
+        if ($this->isServiceAdmin() && !($subject->isSuperAdmin() || $subject->isGlobalAdmin() || $subject->isContentAdmin() || $subject->isOrganisationAdmin())) {
             return true;
         }
 
         return false;
+    }
+
+    /**
+     * Check if this user can view the record of another user.
+     *
+     * @param \App\Models\User
+     * @return bool
+     */
+    public function canView(User $user)
+    {
+        return $this->visibleUserIds()->contains($user->id);
     }
 
     /**
@@ -365,7 +381,7 @@ class User extends Authenticatable implements Notifiable
      */
     public function isOrganisationAdmin(Organisation $organisation = null): bool
     {
-        return $this->hasRole(Role::organisationAdmin(), null, $organisation) || $this->isGlobalAdmin();
+        return $this->hasRole(Role::organisationAdmin(), null, $organisation) || $this->isSuperAdmin();
     }
 
     /**
@@ -460,6 +476,10 @@ class User extends Authenticatable implements Notifiable
      */
     public function makeSuperAdmin(): self
     {
+        foreach (Organisation::all() as $organisation) {
+            $this->makeOrganisationAdmin($organisation);
+        }
+        $this->makeContentAdmin();
         $this->makeGlobalAdmin();
         $this->assignRole(Role::superAdmin());
 
@@ -558,7 +578,7 @@ class User extends Authenticatable implements Notifiable
      */
     public function canMakeServiceWorker(Service $service): bool
     {
-        return $this->isServiceWorker($service);
+        return $this->isServiceWorker($service) && !($this->isGlobalAdmin() && !$this->isSuperAdmin());
     }
 
     /**
@@ -567,7 +587,7 @@ class User extends Authenticatable implements Notifiable
      */
     public function canMakeServiceAdmin(Service $service): bool
     {
-        return $this->isServiceAdmin($service);
+        return $this->isServiceAdmin($service) && !($this->isGlobalAdmin() && !$this->isSuperAdmin());
     }
 
     /**
@@ -576,7 +596,7 @@ class User extends Authenticatable implements Notifiable
      */
     public function canMakeOrganisationAdmin(Organisation $organisation): bool
     {
-        return $this->isOrganisationAdmin($organisation);
+        return $this->isOrganisationAdmin($organisation) && !($this->isGlobalAdmin() && !$this->isSuperAdmin());
     }
 
     /**
@@ -584,7 +604,7 @@ class User extends Authenticatable implements Notifiable
      */
     public function canMakeContentAdmin(): bool
     {
-        return $this->isGlobalAdmin();
+        return $this->isSuperAdmin();
     }
 
     /**
@@ -592,7 +612,7 @@ class User extends Authenticatable implements Notifiable
      */
     public function canMakeGlobalAdmin(): bool
     {
-        return $this->isGlobalAdmin();
+        return $this->isSuperAdmin();
     }
 
     /**
@@ -700,5 +720,78 @@ class User extends Authenticatable implements Notifiable
     public function highestRole(): ?Role
     {
         return $this->orderedRoles()->first();
+    }
+
+    /**
+     * Get the IDs of all the users that are in organisations and services
+     * that this user belongs to who are at the same or lower permission level.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function visibleUserIds()
+    {
+        // Super admin can see all users
+        if ($this->isSuperAdmin()) {
+            return User::query()
+                ->pluck('id')
+                ->concat([$this->id])
+                ->unique();
+        }
+
+        // Global Admin can only see self
+        if ($this->isGlobalAdmin()) {
+            return collect([$this->id]);
+        }
+        // Get the service IDs from all the organisations the user belongs to
+        $serviceIds = Service::query()
+            ->whereIn(table(Service::class, 'organisation_id'), $this->organisations()
+                ->pluck(table(Organisation::class, 'id')))
+            ->pluck(table(Service::class, 'id'));
+
+        // Get all the users that belong to these services, except those that are super or global admins
+        $userIds = $this->getUserIdsForServices($serviceIds, [
+            Role::globalAdmin()->id,
+            Role::superAdmin()->id,
+        ]);
+
+        // Get the service IDs from all the services the user belongs to
+        $serviceIds = $this->services()
+            ->wherePivot('role_id', '=', Role::serviceAdmin()->id)
+            ->pluck(table(Service::class, 'id'));
+
+        // Get all the users that belong to these services, except those that are super, global or organisation admins
+        $userIds = $userIds->concat(
+            $this->getUserIdsForServices($serviceIds, [
+                Role::organisationAdmin()->id,
+                Role::globalAdmin()->id,
+                Role::superAdmin()->id,
+            ])
+        );
+
+        // Include this user
+        return $userIds
+            ->concat([$this->id])
+            ->unique();
+    }
+
+    /**
+     * Get the ID's for the users.
+     *
+     * @param array $serviceIds
+     * @param array $blacklistedRoleIds Exclude users who have these roles
+     * @return \Illuminate\Support\Collection
+     */
+    protected function getUserIdsForServices(SupportCollection $serviceIds, array $blacklistedRoleIds): SupportCollection
+    {
+        return User::query()
+            ->whereHas('userRoles', function (Builder $query) use ($serviceIds) {
+                // Where the user has a permission for the service.
+                $query->whereIn(table(UserRole::class, 'service_id'), $serviceIds);
+            })
+            ->whereDoesntHave('userRoles', function (Builder $query) use ($blacklistedRoleIds) {
+                // Exclude users who have these roles.
+                $query->whereIn(table(UserRole::class, 'role_id'), $blacklistedRoleIds);
+            })
+            ->pluck(table(User::class, 'id'));
     }
 }

@@ -259,7 +259,7 @@ class ServiceLocationsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,'.base64_encode($image),
+            'file' => 'data:image/png;base64,' . base64_encode($image),
         ]);
 
         $payload = [
@@ -666,7 +666,7 @@ class ServiceLocationsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,'.base64_encode($image),
+            'file' => 'data:image/png;base64,' . base64_encode($image),
         ]);
 
         $response = $this->json('POST', '/core/v1/service-locations', [
@@ -720,7 +720,7 @@ class ServiceLocationsTest extends TestCase
         $this->assertEquals(null, $updateRequest->data['image_file_id']);
     }
 
-    public function test_global_admin_can_update_one_with_auto_approval()
+    public function test_global_admin_can_update_one()
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $user = User::factory()->create()->makeGlobalAdmin();
@@ -751,22 +751,28 @@ class ServiceLocationsTest extends TestCase
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonFragment(['data' => $payload]);
-        $data = $serviceLocation->updateRequests()->firstOrFail()->data;
-        $this->assertEquals($data, $payload);
+        $this->assertDatabaseHas((new UpdateRequest())->getTable(), [
+            'user_id' => $user->id,
+            'updateable_type' => UpdateRequest::EXISTING_TYPE_SERVICE_LOCATION,
+            'updateable_id' => $serviceLocation->id,
+            'approved_at' => null,
+        ]);
+        $updateRequest = UpdateRequest::query()
+            ->where('updateable_type', UpdateRequest::EXISTING_TYPE_SERVICE_LOCATION)
+            ->where('updateable_id', $serviceLocation->id)
+            ->firstOrFail();
+        $this->assertEquals($updateRequest->data, $payload);
 
-        // Simulate frontend check by making call with UpdateRequest ID.
-        $updateRequestId = json_decode($response->getContent())->id;
-        Passport::actingAs($user);
+        $this->approveUpdateRequest($updateRequest->id);
 
-        $updateRequestCheckResponse = $this->get(
-            route('core.v1.update-requests.show',
-                ['update_request' => $updateRequestId])
-        );
+        $this->assertDatabaseHas(table(ServiceLocation::class), ['name' => 'New Company Name']);
 
-        $updateRequestCheckResponse->assertSuccessful();
-        $updateRequestResponseData = json_decode($updateRequestCheckResponse->getContent());
-
-        // Update request should already have been approved.
-        $this->assertNotNull($updateRequestResponseData->approved_at);
+        $this->assertDatabaseHas(table(RegularOpeningHour::class), [
+            'service_location_id' => $serviceLocation->id,
+            'frequency' => RegularOpeningHour::FREQUENCY_MONTHLY,
+            'day_of_month' => 10,
+            'opens_at' => '10:00:00',
+            'closes_at' => '14:00:00',
+        ]);
     }
 }

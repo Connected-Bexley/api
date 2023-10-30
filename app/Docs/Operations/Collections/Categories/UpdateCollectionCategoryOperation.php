@@ -25,7 +25,7 @@ class UpdateCollectionCategoryOperation extends Operation
             ->action(static::ACTION_PUT)
             ->tags(CollectionCategoriesTag::create())
             ->summary('Update a specific category collection')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->requestBody(
                 RequestBody::create()
                     ->required()

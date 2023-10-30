@@ -24,7 +24,7 @@ class UpdateStopWordOperation extends Operation
             ->action(static::ACTION_PUT)
             ->tags(SearchEngineTag::create())
             ->summary('Update the list of stop words')
-            ->description('**Permission**: `Global Admin`')
+            ->description('**Permission**: `Super Admin`')
             ->requestBody(
                 RequestBody::create()
                     ->required()

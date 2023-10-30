@@ -24,7 +24,10 @@ class CollectionPersonasTest extends TestCase
      * List all the persona collections.
      */
 
-    public function test_guest_can_list_them()
+    /**
+     * @test
+     */
+    public function guest_can_list_them()
     {
         $response = $this->json('GET', '/core/v1/collections/personas');
 
@@ -62,7 +65,10 @@ class CollectionPersonasTest extends TestCase
      * List all the persona collections.
      */
 
-    public function test_guest_can_list_all_of_them()
+    /**
+     * @test
+     */
+    public function guest_can_list_all_of_them()
     {
         $response = $this->json('GET', '/core/v1/collections/personas/all');
 
@@ -102,7 +108,10 @@ class CollectionPersonasTest extends TestCase
         $response->assertJsonCount($collectionPersonaCount, 'data');
     }
 
-    public function test_guest_can_list_enabled_and_disabled_collections()
+    /**
+     * @test
+     */
+    public function guest_can_list_enabled_and_disabled_collections()
     {
         $disabledCollection = Collection::personas()->first();
 
@@ -126,7 +135,10 @@ class CollectionPersonasTest extends TestCase
         ]);
     }
 
-    public function test_guest_can_list_all_enabled_and_disabled_collections()
+    /**
+     * @test
+     */
+    public function guest_can_list_all_enabled_and_disabled_collections()
     {
         $disabledCollection = Collection::personas()->first();
 
@@ -150,7 +162,10 @@ class CollectionPersonasTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_listed()
+    /**
+     * @test
+     */
+    public function audit_created_when_listed()
     {
         $this->fakeEvents();
 
@@ -165,14 +180,20 @@ class CollectionPersonasTest extends TestCase
      * Create a collection persona.
      */
 
-    public function test_guest_cannot_create_one()
+    /**
+     * @test
+     */
+    public function guest_cannot_create_one()
     {
         $response = $this->json('POST', '/core/v1/collections/personas');
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_create_one()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_create_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -189,7 +210,10 @@ class CollectionPersonasTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_create_one()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_create_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -206,7 +230,10 @@ class CollectionPersonasTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_create_one()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_create_one()
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -223,7 +250,10 @@ class CollectionPersonasTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_cannot_create_one()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_create_one()
     {
         /**
          * @var \App\Models\User $user
@@ -238,7 +268,10 @@ class CollectionPersonasTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_super_admin_can_create_one()
+    /**
+     * @test
+     */
+    public function super_admin_can_create_one()
     {
         /**
          * @var \App\Models\User $user
@@ -302,7 +335,10 @@ class CollectionPersonasTest extends TestCase
         ]);
     }
 
-    public function test_super_admin_can_create_a_disabled_one()
+    /**
+     * @test
+     */
+    public function super_admin_can_create_a_disabled_one()
     {
         /**
          * @var \App\Models\User $user
@@ -347,7 +383,10 @@ class CollectionPersonasTest extends TestCase
         ]);
     }
 
-    public function test_super_admin_can_create_a_homepage_one()
+    /**
+     * @test
+     */
+    public function super_admin_can_create_a_homepage_one()
     {
         /**
          * @var \App\Models\User $user
@@ -392,7 +431,10 @@ class CollectionPersonasTest extends TestCase
         ]);
     }
 
-    public function test_order_is_updated_when_created_at_beginning()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_created_at_beginning()
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionPersonas();
@@ -462,7 +504,10 @@ class CollectionPersonasTest extends TestCase
         $this->assertDatabaseHas((new Collection())->getTable(), ['id' => $third->id, 'order' => 4]);
     }
 
-    public function test_order_is_updated_when_created_at_middle()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_created_at_middle()
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionPersonas();
@@ -532,7 +577,10 @@ class CollectionPersonasTest extends TestCase
         $this->assertDatabaseHas((new Collection())->getTable(), ['id' => $third->id, 'order' => 4]);
     }
 
-    public function test_order_is_updated_when_created_at_end()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_created_at_end()
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionPersonas();
@@ -602,7 +650,10 @@ class CollectionPersonasTest extends TestCase
         $this->assertDatabaseHas((new Collection())->getTable(), ['order' => 4]);
     }
 
-    public function test_order_cannot_be_less_than_1_when_created()
+    /**
+     * @test
+     */
+    public function order_cannot_be_less_than_1_when_created()
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionPersonas();
@@ -629,7 +680,10 @@ class CollectionPersonasTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_order_cannot_be_greater_than_count_plus_1_when_created()
+    /**
+     * @test
+     */
+    public function order_cannot_be_greater_than_count_plus_1_when_created()
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionPersonas();
@@ -682,7 +736,10 @@ class CollectionPersonasTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_audit_created_when_created()
+    /**
+     * @test
+     */
+    public function audit_created_when_created()
     {
         $this->fakeEvents();
 
@@ -717,7 +774,10 @@ class CollectionPersonasTest extends TestCase
      * Get a specific persona collection.
      */
 
-    public function test_guest_can_view_one()
+    /**
+     * @test
+     */
+    public function guest_can_view_one()
     {
         $persona = Collection::personas()->inRandomOrder()->firstOrFail();
 
@@ -766,7 +826,10 @@ class CollectionPersonasTest extends TestCase
         ]);
     }
 
-    public function test_guest_can_view_one_by_slug()
+    /**
+     * @test
+     */
+    public function guest_can_view_one_by_slug()
     {
         $persona = Collection::personas()->inRandomOrder()->firstOrFail();
 
@@ -815,7 +878,10 @@ class CollectionPersonasTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_viewed()
+    /**
+     * @test
+     */
+    public function audit_created_when_viewed()
     {
         $this->fakeEvents();
 
@@ -833,7 +899,10 @@ class CollectionPersonasTest extends TestCase
      * Update a specific persona collection.
      */
 
-    public function test_guest_cannot_update_one()
+    /**
+     * @test
+     */
+    public function guest_cannot_update_one()
     {
         $persona = Collection::personas()->inRandomOrder()->firstOrFail();
 
@@ -842,7 +911,10 @@ class CollectionPersonasTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_update_one()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_update_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -860,7 +932,10 @@ class CollectionPersonasTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_update_one()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_update_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -878,7 +953,10 @@ class CollectionPersonasTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_update_one()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_update_one()
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -896,13 +974,35 @@ class CollectionPersonasTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_update_one()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_update_one()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
         $user->makeGlobalAdmin();
+        $persona = Collection::personas()->inRandomOrder()->firstOrFail();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('PUT', "/core/v1/collections/personas/{$persona->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function super_admin_can_update_one()
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeSuperAdmin();
         $persona = Collection::personas()->inRandomOrder()->firstOrFail();
         $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
@@ -961,34 +1061,10 @@ class CollectionPersonasTest extends TestCase
         ]);
     }
 
-    public function test_global_admin_cannot_update_status()
-    {
-        /**
-         * @var \App\Models\User $user
-         */
-        $user = User::factory()->create();
-        $user->makeGlobalAdmin();
-        $persona = Collection::personas()->inRandomOrder()->firstOrFail();
-        $persona->enable()->save();
-        $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
-
-        Passport::actingAs($user);
-
-        $response = $this->json('PUT', "/core/v1/collections/personas/{$persona->id}", [
-            'name' => 'Test Persona',
-            'intro' => 'Lorem ipsum',
-            'subtitle' => 'Subtitle here',
-            'order' => 1,
-            'enabled' => false,
-            'homepage' => false,
-            'sideboxes' => [],
-            'category_taxonomies' => [$taxonomy->id],
-        ]);
-
-        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
-    }
-
-    public function test_super_admin_can_update_status()
+    /**
+     * @test
+     */
+    public function super_admin_can_update_status()
     {
         /**
          * @var \App\Models\User $user
@@ -1054,7 +1130,10 @@ class CollectionPersonasTest extends TestCase
         ]);
     }
 
-    public function test_global_admin_can_update_homepage()
+    /**
+     * @test
+     */
+    public function global_admin_can_update_homepage()
     {
         /**
          * @var \App\Models\User $user
@@ -1120,7 +1199,10 @@ class CollectionPersonasTest extends TestCase
         ]);
     }
 
-    public function test_order_is_updated_when_updated_to_beginning()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_updated_to_beginning()
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionPersonas();
@@ -1192,7 +1274,10 @@ class CollectionPersonasTest extends TestCase
         $this->assertDatabaseHas((new Collection())->getTable(), ['id' => $third->id, 'order' => 1]);
     }
 
-    public function test_order_is_updated_when_updated_to_middle()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_updated_to_middle()
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionPersonas();
@@ -1264,7 +1349,10 @@ class CollectionPersonasTest extends TestCase
         $this->assertDatabaseHas((new Collection())->getTable(), ['id' => $third->id, 'order' => 3]);
     }
 
-    public function test_order_is_updated_when_updated_to_end()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_updated_to_end()
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionPersonas();
@@ -1336,7 +1424,10 @@ class CollectionPersonasTest extends TestCase
         $this->assertDatabaseHas((new Collection())->getTable(), ['id' => $third->id, 'order' => 2]);
     }
 
-    public function test_order_cannot_be_less_than_1_when_updated()
+    /**
+     * @test
+     */
+    public function order_cannot_be_less_than_1_when_updated()
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionPersonas();
@@ -1377,7 +1468,10 @@ class CollectionPersonasTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_order_cannot_be_greater_than_count_plus_1_when_updated()
+    /**
+     * @test
+     */
+    public function order_cannot_be_greater_than_count_plus_1_when_updated()
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionPersonas();
@@ -1418,7 +1512,10 @@ class CollectionPersonasTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_audit_created_when_updated()
+    /**
+     * @test
+     */
+    public function audit_created_when_updated()
     {
         $this->fakeEvents();
 
@@ -1454,7 +1551,10 @@ class CollectionPersonasTest extends TestCase
      * Delete a specific persona collection.
      */
 
-    public function test_guest_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function guest_cannot_delete_one()
     {
         $persona = Collection::personas()->inRandomOrder()->firstOrFail();
 
@@ -1463,7 +1563,10 @@ class CollectionPersonasTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_delete_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -1481,7 +1584,10 @@ class CollectionPersonasTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_delete_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -1499,7 +1605,10 @@ class CollectionPersonasTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_delete_one()
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -1517,7 +1626,10 @@ class CollectionPersonasTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_delete_one()
     {
         /**
          * @var \App\Models\User $user
@@ -1533,7 +1645,10 @@ class CollectionPersonasTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_super_admin_can_delete_one()
+    /**
+     * @test
+     */
+    public function super_admin_can_delete_one()
     {
         /**
          * @var \App\Models\User $user
@@ -1551,7 +1666,10 @@ class CollectionPersonasTest extends TestCase
         $this->assertDatabaseMissing((new CollectionTaxonomy())->getTable(), ['collection_id' => $persona->id]);
     }
 
-    public function test_order_is_updated_when_deleted_at_beginning()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_deleted_at_beginning()
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionPersonas();
@@ -1611,7 +1729,10 @@ class CollectionPersonasTest extends TestCase
         $this->assertDatabaseHas((new Collection())->getTable(), ['id' => $third->id, 'order' => 2]);
     }
 
-    public function test_order_is_updated_when_deleted_at_middle()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_deleted_at_middle()
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionPersonas();
@@ -1671,7 +1792,10 @@ class CollectionPersonasTest extends TestCase
         $this->assertDatabaseHas((new Collection())->getTable(), ['id' => $third->id, 'order' => 2]);
     }
 
-    public function test_order_is_updated_when_deleted_at_end()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_deleted_at_end()
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionPersonas();
@@ -1731,7 +1855,10 @@ class CollectionPersonasTest extends TestCase
         $this->assertDatabaseHas((new Collection())->getTable(), ['id' => $second->id, 'order' => 2]);
     }
 
-    public function test_audit_created_when_deleted()
+    /**
+     * @test
+     */
+    public function audit_created_when_deleted()
     {
         $this->fakeEvents();
 
@@ -1757,7 +1884,10 @@ class CollectionPersonasTest extends TestCase
      * Get a specific persona collection's image.
      */
 
-    public function test_guest_can_view_image()
+    /**
+     * @test
+     */
+    public function guest_can_view_image()
     {
         $persona = Collection::personas()->inRandomOrder()->firstOrFail();
 
@@ -1767,7 +1897,10 @@ class CollectionPersonasTest extends TestCase
         $response->assertHeader('Content-Type', 'image/png');
     }
 
-    public function test_audit_created_when_image_viewed()
+    /**
+     * @test
+     */
+    public function audit_created_when_image_viewed()
     {
         $this->fakeEvents();
 
@@ -1785,7 +1918,10 @@ class CollectionPersonasTest extends TestCase
      * Upload a specific persona collection's image.
      */
 
-    public function test_super_admin_can_upload_image()
+    /**
+     * @test
+     */
+    public function super_admin_can_upload_image()
     {
         /**
          * @var \App\Models\User $user
@@ -1800,7 +1936,7 @@ class CollectionPersonasTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,'.base64_encode($image),
+            'file' => 'data:image/png;base64,' . base64_encode($image),
         ]);
 
         $response = $this->json('POST', '/core/v1/collections/personas', [
@@ -1825,7 +1961,10 @@ class CollectionPersonasTest extends TestCase
      * Delete a specific persona collection's image.
      */
 
-    public function test_super_admin_can_delete_image()
+    /**
+     * @test
+     */
+    public function super_admin_can_delete_image()
     {
         /**
          * @var \App\Models\User $user

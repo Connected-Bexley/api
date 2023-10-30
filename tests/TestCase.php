@@ -7,15 +7,19 @@ use App\Models\OrganisationEvent;
 use App\Models\Page;
 use App\Models\Service;
 use App\Models\Taxonomy;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
+use Laravel\Passport\Passport;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -131,7 +135,7 @@ abstract class TestCase extends BaseTestCase
      */
     protected function clearLog()
     {
-        if (! static::$testLogCleared) {
+        if (!static::$testLogCleared) {
             file_put_contents(config('logging.channels.testing.path'), '');
             static::$testLogCleared = true;
         }
@@ -142,7 +146,7 @@ abstract class TestCase extends BaseTestCase
      */
     protected function setUpElasticsearch()
     {
-        if (! $this instanceof UsesElasticsearch) {
+        if (!$this instanceof UsesElasticsearch) {
             Service::disableSearchSyncing();
             OrganisationEvent::disableSearchSyncing();
             Page::disableSearchSyncing();
@@ -154,7 +158,7 @@ abstract class TestCase extends BaseTestCase
             Page::enableSearchSyncing();
         }
 
-        if (! static::$elasticsearchInitialised) {
+        if (!static::$elasticsearchInitialised) {
             $this->artisan('ck:reindex-elasticsearch');
             static::$elasticsearchInitialised = true;
         }
@@ -165,7 +169,7 @@ abstract class TestCase extends BaseTestCase
      */
     protected function tearDownElasticsearch()
     {
-        if (! $this instanceof UsesElasticsearch) {
+        if (!$this instanceof UsesElasticsearch) {
             Service::disableSearchSyncing();
             OrganisationEvent::disableSearchSyncing();
             Page::disableSearchSyncing();
@@ -218,5 +222,26 @@ abstract class TestCase extends BaseTestCase
         $initialDispatcher = Event::getFacadeRoot();
         Event::fake();
         Model::setEventDispatcher($initialDispatcher);
+    }
+
+    /**
+     * Approve an update request
+     *
+     * @param string $updateRequestId
+     * @return array
+     **/
+    public function approveUpdateRequest($updateRequestId)
+    {
+        $user = Auth::user();
+
+        Passport::actingAs(User::factory()->create()->makeSuperAdmin());
+
+        $response = $this->json('PUT', "/core/v1/update-requests/{$updateRequestId}/approve");
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        Passport::actingAs($user);
+
+        return $response->json();
     }
 }

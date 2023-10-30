@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Contracts\AppliesUpdateRequests;
 use App\Contracts\Geocoder;
 use App\Http\Requests\Location\UpdateRequest as Request;
 use App\Models\Mutators\LocationMutators;
@@ -10,7 +11,6 @@ use App\Models\Scopes\LocationScopes;
 use App\Rules\FileIsMimeType;
 use App\Support\Address;
 use App\Support\Coordinate;
-use App\UpdateRequest\AppliesUpdateRequests;
 use App\UpdateRequest\UpdateRequests;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

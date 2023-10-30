@@ -25,7 +25,7 @@ class StoreReportOperation extends Operation
             ->action(static::ACTION_POST)
             ->tags(ReportsTag::create())
             ->summary('Create a report')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->requestBody(
                 RequestBody::create()
                     ->required()

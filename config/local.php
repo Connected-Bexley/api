@@ -46,4 +46,8 @@ return [
         150,
         350,
     ],
+    /**
+     * The request api rate limit per minute per user / IP.
+     */
+    'api_rate_limit' => env('API_RATE_LIMIT', 300),
 ];

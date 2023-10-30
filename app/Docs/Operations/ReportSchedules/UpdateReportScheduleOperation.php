@@ -25,7 +25,7 @@ class UpdateReportScheduleOperation extends Operation
             ->action(static::ACTION_PUT)
             ->tags(ReportSchedulesTag::create())
             ->summary('Update a specific report schedule')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->requestBody(
                 RequestBody::create()
                     ->required()

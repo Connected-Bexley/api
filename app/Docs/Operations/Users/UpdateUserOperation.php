@@ -31,9 +31,6 @@ class UpdateUserOperation extends Operation
 - Can update service workers
 - Can update other service admins
 
-**Permission:** `Global Admin`
-- Can update other global admins
-
 **Permission:** `Super Admin`
 - Can update other super admins
 EOT

@@ -2,7 +2,7 @@
 
 namespace App\Services\DataPersistence;
 
-use App\Models\File;
+use App\Contracts\DataPersistenceService;
 use App\Models\Model;
 use App\Models\OrganisationEvent;
 use App\Models\Taxonomy;
@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 
 class OrganisationEventPersistenceService implements DataPersistenceService
 {
+    use ResizesImages;
+
     /**
      * Store the model.
      *
@@ -20,7 +22,7 @@ class OrganisationEventPersistenceService implements DataPersistenceService
      */
     public function store(FormRequest $request)
     {
-        return $request->user()->isGlobalAdmin()
+        return $request->user()->isSuperAdmin()
         ? $this->processAsNewEntity($request)
         : $this->processAsUpdateRequest($request, null);
     }
@@ -37,7 +39,7 @@ class OrganisationEventPersistenceService implements DataPersistenceService
     }
 
     /**
-     * Process the requested changes and either update the model or store an update request.
+     * Create a new model from the provided request.
      *
      * @param Illuminate\Foundation\Http\FormRequest $request
      * @return \App\Models\OrganisationEvent
@@ -45,7 +47,7 @@ class OrganisationEventPersistenceService implements DataPersistenceService
     public function processAsNewEntity(FormRequest $request)
     {
         return DB::transaction(function () use ($request) {
-            // Create the organisation.
+            // Create the OrganisationEvent.
             $organisationEvent = OrganisationEvent::create([
                 'title' => $request->title,
                 'start_date' => $request->start_date,
@@ -77,13 +79,7 @@ class OrganisationEventPersistenceService implements DataPersistenceService
             }
 
             if ($request->filled('image_file_id')) {
-                /** @var \App\Models\File $file */
-                $file = File::findOrFail($request->image_file_id)->assigned();
-
-                // Create resized version for common dimensions.
-                foreach (config('local.cached_image_dimensions') as $maxDimension) {
-                    $file->resizedVersion($maxDimension);
-                }
+                $this->resizeImageFile($request->image_file_id);
             }
 
             // Create the category taxonomy records.
@@ -134,18 +130,17 @@ class OrganisationEventPersistenceService implements DataPersistenceService
             ]);
 
             if ($request->filled('image_file_id')) {
-                /** @var \App\Models\File $file */
-                $file = File::findOrFail($request->image_file_id)->assigned();
-
-                // Create resized version for common dimensions.
-                foreach (config('local.cached_image_dimensions') as $maxDimension) {
-                    $file->resizedVersion($maxDimension);
-                }
+                $this->resizeImageFile($request->image_file_id);
             }
 
+            $updateableType = UpdateRequestModel::EXISTING_TYPE_ORGANISATION_EVENT;
+
+            if (!$event) {
+                $updateableType = UpdateRequestModel::NEW_TYPE_ORGANISATION_EVENT;
+            }
             /** @var \App\Models\UpdateRequest $updateRequest */
             $updateRequest = new UpdateRequestModel([
-                'updateable_type' => $event ? UpdateRequestModel::EXISTING_TYPE_ORGANISATION_EVENT : UpdateRequestModel::NEW_TYPE_ORGANISATION_EVENT,
+                'updateable_type' => $updateableType,
                 'updateable_id' => $event->id ?? null,
                 'user_id' => $request->user()->id,
                 'data' => $data,

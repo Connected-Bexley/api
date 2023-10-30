@@ -1,6 +1,6 @@
 <?php
 
-namespace App\UpdateRequest;
+namespace App\Contracts;
 
 use App\Models\UpdateRequest;
 use Illuminate\Contracts\Validation\Validator;

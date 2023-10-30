@@ -20,7 +20,7 @@ class DestroyServiceOperation extends Operation
             ->action(static::ACTION_DELETE)
             ->tags(ServicesTag::create())
             ->summary('Delete a specific service')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->responses(ResourceDeletedResponse::create());
     }
 }

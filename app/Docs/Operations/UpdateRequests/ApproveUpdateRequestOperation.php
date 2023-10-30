@@ -23,7 +23,7 @@ class ApproveUpdateRequestOperation extends Operation
             ->action(static::ACTION_PUT)
             ->tags(UpdateRequestsTag::create())
             ->summary('Approve a specific update request')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->responses(
                 Response::ok()->content(
                     MediaType::json()->schema(

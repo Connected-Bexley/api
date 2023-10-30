@@ -29,10 +29,10 @@ class UniqueSlugGenerator
      * @param int $index
      * @return string
      */
-    public function generate(string $string, string $table, string $column = 'slug', int $index = 1): string
+    public function generate(string $string, string $table, string $column = 'slug', int $index = 0): string
     {
         $slug = $this->slugify($string);
-        $slug .= $index === 1 ? '' : "-{$index}";
+        $slug .= $index === 0 ? '' : "-{$index}";
 
         $slugAlreadyUsed = $this->db->table($table)
             ->where($column, '=', $slug)

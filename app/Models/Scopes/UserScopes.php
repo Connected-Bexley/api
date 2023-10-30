@@ -22,6 +22,17 @@ trait UserScopes
 
     /**
      * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeContentAdmins(Builder $query): Builder
+    {
+        return $query->whereHas('userRoles', function (Builder $query) {
+            return $query->where(table(UserRole::class, 'role_id'), Role::contentAdmin()->id);
+        });
+    }
+
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder $query
      * @param string $alias
      * @return \Illuminate\Database\Eloquent\Builder
      */
@@ -56,16 +67,18 @@ CASE `user_roles`.`role_id`
     WHEN ? THEN 3
     WHEN ? THEN 4
     WHEN ? THEN 5
-    ELSE 6
+    WHEN ? THEN 6
+    ELSE 7
 END
 EOT;
 
         $bindings = [
             Role::superAdmin()->id,
-            Role::globalAdmin()->id,
             Role::organisationAdmin()->id,
             Role::serviceAdmin()->id,
             Role::serviceWorker()->id,
+            Role::globalAdmin()->id,
+            Role::contentAdmin()->id,
         ];
 
         return compact('sql', 'bindings');

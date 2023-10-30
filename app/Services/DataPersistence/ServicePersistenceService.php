@@ -2,7 +2,7 @@
 
 namespace App\Services\DataPersistence;
 
-use App\Models\File;
+use App\Contracts\DataPersistenceService;
 use App\Models\Model;
 use App\Models\Service;
 use App\Models\Tag;
@@ -17,9 +17,11 @@ use Illuminate\Support\Str;
 
 class ServicePersistenceService implements DataPersistenceService
 {
+    use ResizesImages;
+
     public function store(FormRequest $request)
     {
-        return $request->user()->isGlobalAdmin()
+        return $request->user()->isSuperAdmin()
         ? $this->processAsNewEntity($request)
         : $this->processAsUpdateRequest($request);
     }
@@ -102,8 +104,13 @@ class ServicePersistenceService implements DataPersistenceService
                 ];
             }
 
+            $updateableType = UpdateRequestModel::EXISTING_TYPE_SERVICE;
+            if (!$service) {
+                $updateableType = $request->user()->isGlobalAdmin() ? UpdateRequestModel::NEW_TYPE_SERVICE_GLOBAL_ADMIN : UpdateRequestModel::NEW_TYPE_SERVICE_ORG_ADMIN;
+            }
+
             $updateRequest = new UpdateRequestModel([
-                'updateable_type' => $service ? UpdateRequestModel::EXISTING_TYPE_SERVICE : UpdateRequestModel::NEW_TYPE_SERVICE,
+                'updateable_type' => $updateableType,
                 'updateable_id' => $service ? $service->id : null,
                 'user_id' => $request->user()->id,
                 'data' => $data,
@@ -154,8 +161,8 @@ class ServicePersistenceService implements DataPersistenceService
                 'score' => $request->score,
                 'last_modified_at' => Date::now(),
                 'ends_at' => $request->filled('ends_at')
-                    ? Date::createFromFormat(CarbonImmutable::ISO8601, $request->ends_at)
-                    : null,
+                ? Date::createFromFormat(CarbonImmutable::ISO8601, $request->ends_at)
+                : null,
             ];
 
             foreach ($request->input('eligibility_types.custom', []) as $customEligibilityType => $value) {
@@ -169,24 +176,12 @@ class ServicePersistenceService implements DataPersistenceService
 
             if ($request->filled('gallery_items')) {
                 foreach ($request->gallery_items as $galleryItem) {
-                    /** @var \App\Models\File $file */
-                    $file = File::findOrFail($galleryItem['file_id'])->assigned();
-
-                    // Create resized version for common dimensions.
-                    foreach (config('local.cached_image_dimensions') as $maxDimension) {
-                        $file->resizedVersion($maxDimension);
-                    }
+                    $this->resizeImageFile($galleryItem['file_id']);
                 }
             }
 
             if ($request->filled('logo_file_id')) {
-                /** @var \App\Models\File $file */
-                $file = File::findOrFail($request->logo_file_id)->assigned();
-
-                // Create resized version for common dimensions.
-                foreach (config('local.cached_image_dimensions') as $maxDimension) {
-                    $file->resizedVersion($maxDimension);
-                }
+                $this->resizeImageFile($request->logo_file_id);
             }
 
             // Create the useful info records.

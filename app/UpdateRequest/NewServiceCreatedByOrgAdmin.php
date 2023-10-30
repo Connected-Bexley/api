@@ -2,6 +2,7 @@
 
 namespace App\UpdateRequest;
 
+use App\Contracts\AppliesUpdateRequests;
 use App\Http\Requests\Service\StoreRequest;
 use App\Models\Service;
 use App\Models\Taxonomy;

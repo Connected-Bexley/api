@@ -13,6 +13,10 @@ class ShowRequest extends FormRequest
      */
     public function authorize()
     {
+        if ($this->user) {
+            return $this->user('api')->canView($this->user);
+        }
+
         return true;
     }
 

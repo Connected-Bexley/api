@@ -36,7 +36,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // Email Sender.
-        switch (config('mail.driver')) {
+        switch (config('mail.default')) {
             case 'gov':
                 $this->app->singleton(\App\Contracts\EmailSender::class, \App\EmailSenders\GovNotifyEmailSender::class);
                 break;

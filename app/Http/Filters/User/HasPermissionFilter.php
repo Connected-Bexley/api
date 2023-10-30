@@ -23,8 +23,8 @@ class HasPermissionFilter implements Filter
         /** @var \App\Models\User $user */
         $user = request()->user('api');
 
-        // If super admin or global admin then apply no filter.
-        if ($user->isSuperAdmin() || $user->isGlobalAdmin()) {
+        // If super admin then apply no filter.
+        if ($user->isSuperAdmin()) {
             return $query;
         }
 
