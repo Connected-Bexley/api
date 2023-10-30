@@ -32,7 +32,7 @@ class IndexUpdateRequestOperation extends Operation
             ->summary('List all the update requests')
             ->description(
                 <<<'EOT'
-**Permission:** `Global Admin`
+**Permission:** `Super Admin`
 
 ---
 
@@ -88,7 +88,7 @@ EOT
                     )
                     ->schema(Schema::string()),
                 IncludeParameter::create(null, ['user']),
-                SortParameter::create(null, ['entry', 'created_at'], '-created_at')
+                SortParameter::create(null, ['entry','created_at'], '-created_at')
             )
             ->responses(
                 Response::ok()->content(

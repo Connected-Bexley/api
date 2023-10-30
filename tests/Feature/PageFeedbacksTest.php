@@ -20,14 +20,20 @@ class PageFeedbacksTest extends TestCase
      * List all the page feedbacks.
      */
 
-    public function test_guest_cannot_list_them()
+    /**
+     * @test
+     */
+    public function guest_cannot_list_them()
     {
         $response = $this->json('GET', '/core/v1/page-feedbacks');
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_list_them()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_list_them()
     {
         /**
          * @var \App\Models\Service $service
@@ -44,7 +50,10 @@ class PageFeedbacksTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_list_them()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_list_them()
     {
         /**
          * @var \App\Models\Service $service
@@ -61,7 +70,10 @@ class PageFeedbacksTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_list_them()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_list_them()
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -78,13 +90,33 @@ class PageFeedbacksTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_list_them()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_list_them()
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create()->makeGlobalAdmin();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('GET', '/core/v1/page-feedbacks');
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function super_admin_can_list_them()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeSuperAdmin();
         $pageFeedback = PageFeedback::create([
             'url' => url('/test'),
             'feedback' => 'This page does not work',
@@ -113,7 +145,10 @@ class PageFeedbacksTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_listed()
+    /**
+     * @test
+     */
+    public function audit_created_when_listed()
     {
         $this->fakeEvents();
 
@@ -121,7 +156,7 @@ class PageFeedbacksTest extends TestCase
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeSuperAdmin();
 
         Passport::actingAs($user);
 
@@ -137,7 +172,10 @@ class PageFeedbacksTest extends TestCase
      * Create a page feedback.
      */
 
-    public function test_guest_can_create_one()
+    /**
+     * @test
+     */
+    public function guest_can_create_one()
     {
         $payload = [
             'url' => url('test-page'),
@@ -153,7 +191,10 @@ class PageFeedbacksTest extends TestCase
         $response->assertJsonFragment($payload);
     }
 
-    public function test_audit_created_when_created()
+    /**
+     * @test
+     */
+    public function audit_created_when_created()
     {
         $this->fakeEvents();
 
@@ -175,7 +216,10 @@ class PageFeedbacksTest extends TestCase
      * Get a specific page feedback.
      */
 
-    public function test_guest_cannot_view_one()
+    /**
+     * @test
+     */
+    public function guest_cannot_view_one()
     {
         $pageFeedback = PageFeedback::create([
             'url' => url('/test'),
@@ -189,7 +233,10 @@ class PageFeedbacksTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_view_one()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_view_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -212,7 +259,10 @@ class PageFeedbacksTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_view_one()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_view_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -235,7 +285,10 @@ class PageFeedbacksTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_view_one()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_view_one()
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -258,13 +311,39 @@ class PageFeedbacksTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_view_one()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_view_one()
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $pageFeedback = PageFeedback::create([
+            'url' => url('/test'),
+            'feedback' => 'This page does not work',
+            'created_at' => $this->now,
+            'updated_at' => $this->now,
+        ]);
+
+        Passport::actingAs($user);
+
+        $response = $this->json('GET', "/core/v1/page-feedbacks/{$pageFeedback->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function super_admin_can_view_one()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeSuperAdmin();
         $pageFeedback = PageFeedback::create([
             'url' => url('/test'),
             'feedback' => 'This page does not work',
@@ -293,7 +372,10 @@ class PageFeedbacksTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_viewed()
+    /**
+     * @test
+     */
+    public function audit_created_when_viewed()
     {
         $this->fakeEvents();
 
@@ -301,7 +383,7 @@ class PageFeedbacksTest extends TestCase
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeSuperAdmin();
         $pageFeedback = PageFeedback::create([
             'url' => url('/test'),
             'feedback' => 'This page does not work',

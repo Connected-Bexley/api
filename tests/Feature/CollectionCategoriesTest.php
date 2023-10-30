@@ -25,7 +25,10 @@ class CollectionCategoriesTest extends TestCase
      * List all the category collections.
      */
 
-    public function test_guest_can_list_them()
+    /**
+     * @test
+     */
+    public function guest_can_list_them()
     {
         $response = $this->json('GET', '/core/v1/collections/categories');
 
@@ -63,7 +66,10 @@ class CollectionCategoriesTest extends TestCase
      * List all the category collections.
      */
 
-    public function test_guest_can_list_all_of_them()
+    /**
+     * @test
+     */
+    public function guest_can_list_all_of_them()
     {
         $collectionCategoryCount = Collection::categories()->count();
 
@@ -103,7 +109,10 @@ class CollectionCategoriesTest extends TestCase
         $response->assertJsonCount($collectionCategoryCount, 'data');
     }
 
-    public function test_guest_can_list_enabled_and_disabled_collections()
+    /**
+     * @test
+     */
+    public function guest_can_list_enabled_and_disabled_collections()
     {
         $disabledCollection = Collection::categories()->first();
 
@@ -127,7 +136,10 @@ class CollectionCategoriesTest extends TestCase
         ]);
     }
 
-    public function test_guest_can_list_all_enabled_and_disabled_collections()
+    /**
+     * @test
+     */
+    public function guest_can_list_all_enabled_and_disabled_collections()
     {
         $disabledCollection = Collection::categories()->first();
 
@@ -151,7 +163,10 @@ class CollectionCategoriesTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_listed()
+    /**
+     * @test
+     */
+    public function audit_created_when_listed()
     {
         $this->fakeEvents();
 
@@ -166,14 +181,20 @@ class CollectionCategoriesTest extends TestCase
      * Create a collection category.
      */
 
-    public function test_guest_cannot_create_one()
+    /**
+     * @test
+     */
+    public function guest_cannot_create_one()
     {
         $response = $this->json('POST', '/core/v1/collections/categories');
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_create_one()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_create_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -190,7 +211,10 @@ class CollectionCategoriesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_create_one()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_create_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -207,7 +231,10 @@ class CollectionCategoriesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_create_one()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_create_one()
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -224,7 +251,10 @@ class CollectionCategoriesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_cannot_create_one()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_create_one()
     {
         /**
          * @var \App\Models\User $user
@@ -239,7 +269,10 @@ class CollectionCategoriesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_super_admin_can_create_one()
+    /**
+     * @test
+     */
+    public function super_admin_can_create_one()
     {
         /**
          * @var \App\Models\User $user
@@ -249,11 +282,11 @@ class CollectionCategoriesTest extends TestCase
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -326,7 +359,10 @@ class CollectionCategoriesTest extends TestCase
         $this->assertEquals(Storage::disk('local')->get('/test-data/image.svg'), $response->content());
     }
 
-    public function test_super_admin_can_create_a_disabled_one()
+    /**
+     * @test
+     */
+    public function super_admin_can_create_a_disabled_one()
     {
         /**
          * @var \App\Models\User $user
@@ -336,11 +372,11 @@ class CollectionCategoriesTest extends TestCase
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -379,7 +415,10 @@ class CollectionCategoriesTest extends TestCase
         ]);
     }
 
-    public function test_super_admin_can_create_a_homepage_one()
+    /**
+     * @test
+     */
+    public function super_admin_can_create_a_homepage_one()
     {
         /**
          * @var \App\Models\User $user
@@ -389,11 +428,11 @@ class CollectionCategoriesTest extends TestCase
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -432,7 +471,10 @@ class CollectionCategoriesTest extends TestCase
         ]);
     }
 
-    public function test_super_admin_cannot_create_one_without_an_image()
+    /**
+     * @test
+     */
+    public function super_admin_cannot_create_one_without_an_image()
     {
         /**
          * @var \App\Models\User $user
@@ -497,7 +539,10 @@ class CollectionCategoriesTest extends TestCase
         $response->assertStatus(Response::HTTP_NOT_FOUND);
     }
 
-    public function test_super_admin_cannot_create_one_with_an_assigned_image()
+    /**
+     * @test
+     */
+    public function super_admin_cannot_create_one_with_an_assigned_image()
     {
         /**
          * @var \App\Models\User $user
@@ -507,11 +552,11 @@ class CollectionCategoriesTest extends TestCase
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
         $image = File::factory()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -536,7 +581,10 @@ class CollectionCategoriesTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_super_admin_creating_one_with_an_image_assigns_the_image()
+    /**
+     * @test
+     */
+    public function super_admin_creating_one_with_an_image_assigns_the_image()
     {
         /**
          * @var \App\Models\User $user
@@ -546,11 +594,11 @@ class CollectionCategoriesTest extends TestCase
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -586,17 +634,20 @@ class CollectionCategoriesTest extends TestCase
         ]);
     }
 
-    public function test_order_is_updated_when_created_at_beginning()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_created_at_beginning()
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -662,17 +713,20 @@ class CollectionCategoriesTest extends TestCase
         $this->assertDatabaseHas((new Collection())->getTable(), ['id' => $third->id, 'order' => 4]);
     }
 
-    public function test_order_is_updated_when_created_at_middle()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_created_at_middle()
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -738,17 +792,20 @@ class CollectionCategoriesTest extends TestCase
         $this->assertDatabaseHas((new Collection())->getTable(), ['id' => $third->id, 'order' => 4]);
     }
 
-    public function test_order_is_updated_when_created_at_end()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_created_at_end()
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -814,17 +871,20 @@ class CollectionCategoriesTest extends TestCase
         $this->assertDatabaseHas((new Collection())->getTable(), ['order' => 4]);
     }
 
-    public function test_order_cannot_be_less_than_1_when_created()
+    /**
+     * @test
+     */
+    public function order_cannot_be_less_than_1_when_created()
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -850,17 +910,20 @@ class CollectionCategoriesTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_order_cannot_be_greater_than_count_plus_1_when_created()
+    /**
+     * @test
+     */
+    public function order_cannot_be_greater_than_count_plus_1_when_created()
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -910,16 +973,19 @@ class CollectionCategoriesTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_audit_created_when_created()
+    /**
+     * @test
+     */
+    public function audit_created_when_created()
     {
         $this->fakeEvents();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -954,7 +1020,10 @@ class CollectionCategoriesTest extends TestCase
      * Get a specific category collection.
      */
 
-    public function test_guest_can_view_one()
+    /**
+     * @test
+     */
+    public function guest_can_view_one()
     {
         $collectionCategory = Collection::categories()->inRandomOrder()->firstOrFail();
 
@@ -1001,7 +1070,10 @@ class CollectionCategoriesTest extends TestCase
         ]);
     }
 
-    public function test_guest_can_view_one_by_slug()
+    /**
+     * @test
+     */
+    public function guest_can_view_one_by_slug()
     {
         $collectionCategory = Collection::categories()->inRandomOrder()->firstOrFail();
 
@@ -1049,7 +1121,10 @@ class CollectionCategoriesTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_viewed()
+    /**
+     * @test
+     */
+    public function audit_created_when_viewed()
     {
         $this->fakeEvents();
 
@@ -1067,16 +1142,19 @@ class CollectionCategoriesTest extends TestCase
      * Get a specific categories image.
      */
 
-    public function test_guest_can_view_image_as_svg()
+    /**
+     * @test
+     */
+    public function guest_can_view_image_as_svg()
     {
         $collectionCategory = Collection::categories()->inRandomOrder()->firstOrFail();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1092,16 +1170,19 @@ class CollectionCategoriesTest extends TestCase
         $this->assertEquals(Storage::disk('local')->get('/test-data/image.svg'), $response->content());
     }
 
-    public function test_guest_can_view_image_as_png()
+    /**
+     * @test
+     */
+    public function guest_can_view_image_as_png()
     {
         $collectionCategory = Collection::categories()->inRandomOrder()->firstOrFail();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.png',
+            'filename' => Str::random() . '.png',
             'mime_type' => 'image/png',
         ]);
 
-        $base64Image = 'data:image/png;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.png'));
+        $base64Image = 'data:image/png;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.png'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1116,16 +1197,19 @@ class CollectionCategoriesTest extends TestCase
         $this->assertEquals(Storage::disk('local')->get('/test-data/image.png'), $response->content());
     }
 
-    public function test_guest_can_view_image_as_jpg()
+    /**
+     * @test
+     */
+    public function guest_can_view_image_as_jpg()
     {
         $collectionCategory = Collection::categories()->inRandomOrder()->firstOrFail();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.png',
+            'filename' => Str::random() . '.png',
             'mime_type' => 'image/jpeg',
         ]);
 
-        $base64Image = 'data:image/png;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.jpg'));
+        $base64Image = 'data:image/png;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.jpg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1140,18 +1224,21 @@ class CollectionCategoriesTest extends TestCase
         $this->assertEquals(Storage::disk('local')->get('/test-data/image.jpg'), $response->content());
     }
 
-    public function test_audit_created_when_image_viewed()
+    /**
+     * @test
+     */
+    public function audit_created_when_image_viewed()
     {
         $this->fakeEvents();
 
         $collectionCategory = Collection::categories()->inRandomOrder()->firstOrFail();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1168,7 +1255,10 @@ class CollectionCategoriesTest extends TestCase
         });
     }
 
-    public function test_default_image_returned_when_image_is_not_set()
+    /**
+     * @test
+     */
+    public function default_image_returned_when_image_is_not_set()
     {
         $collectionCategory = Collection::categories()->inRandomOrder()->firstOrFail();
 
@@ -1187,7 +1277,10 @@ class CollectionCategoriesTest extends TestCase
      * Update a specific category collection.
      */
 
-    public function test_guest_cannot_update_one()
+    /**
+     * @test
+     */
+    public function guest_cannot_update_one()
     {
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
 
@@ -1196,7 +1289,10 @@ class CollectionCategoriesTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_update_one()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_update_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -1214,7 +1310,10 @@ class CollectionCategoriesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_update_one()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_update_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -1232,7 +1331,10 @@ class CollectionCategoriesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_update_one()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_update_one()
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -1250,7 +1352,10 @@ class CollectionCategoriesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_update_one()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_update_one()
     {
         /**
          * @var \App\Models\User $user
@@ -1258,14 +1363,33 @@ class CollectionCategoriesTest extends TestCase
         $user = User::factory()->create();
         $user->makeGlobalAdmin();
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('PUT', "/core/v1/collections/categories/{$category->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function super_admin_can_update_one()
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeSuperAdmin();
+        $category = Collection::categories()->inRandomOrder()->firstOrFail();
         $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1330,60 +1454,26 @@ class CollectionCategoriesTest extends TestCase
         $this->assertEquals(Storage::disk('local')->get('/test-data/image.svg'), $content);
     }
 
-    public function test_global_admin_cannot_update_status()
+    /**
+     * @test
+     */
+    public function super_admin_cannot_update_one_without_an_image()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeSuperAdmin();
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
         $category->enable()->save();
         $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
-
-        $image->uploadBase64EncodedFile($base64Image);
-
-        Passport::actingAs($user);
-
-        $response = $this->json('PUT', "/core/v1/collections/categories/{$category->id}", [
-            'name' => 'Test Category',
-            'intro' => 'Lorem ipsum',
-            'subtitle' => 'Subtitle here',
-            'image_file_id' => $image->id,
-            'order' => 1,
-            'enabled' => false,
-            'homepage' => false,
-            'sideboxes' => [],
-            'category_taxonomies' => [$taxonomy->id],
-        ]);
-
-        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
-    }
-
-    public function test_global_admin_cannot_update_one_without_an_image()
-    {
-        /**
-         * @var \App\Models\User $user
-         */
-        $user = User::factory()->create();
-        $user->makeGlobalAdmin();
-        $category = Collection::categories()->inRandomOrder()->firstOrFail();
-        $category->enable()->save();
-        $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
-
-        $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
-            'mime_type' => 'image/svg+xml',
-        ]);
-
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1417,23 +1507,26 @@ class CollectionCategoriesTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_global_admin_cannot_update_one_with_an_assigned_image()
+    /**
+     * @test
+     */
+    public function super_admin_cannot_update_one_with_an_assigned_image()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeSuperAdmin();
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
         $category->enable()->save();
         $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
         $image = File::factory()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1454,22 +1547,25 @@ class CollectionCategoriesTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_global_admin_updating_one_with_a_new_image_assigns_the_image()
+    /**
+     * @test
+     */
+    public function super_admin_updating_one_with_a_new_image_assigns_the_image()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeSuperAdmin();
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
         $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1501,7 +1597,10 @@ class CollectionCategoriesTest extends TestCase
         ]);
     }
 
-    public function test_global_admin_can_update_one_without_an_image_when_changing_order()
+    /**
+     * @test
+     */
+    public function super_admin_can_update_one_without_an_image_when_changing_order()
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
@@ -1510,7 +1609,7 @@ class CollectionCategoriesTest extends TestCase
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeSuperAdmin();
         $first = Collection::create([
             'type' => Collection::TYPE_CATEGORY,
             'slug' => 'first',
@@ -1566,7 +1665,10 @@ class CollectionCategoriesTest extends TestCase
         $this->assertDatabaseHas((new Collection())->getTable(), ['id' => $third->id, 'order' => 1]);
     }
 
-    public function test_super_admin_can_update_status()
+    /**
+     * @test
+     */
+    public function super_admin_can_update_status()
     {
         /**
          * @var \App\Models\User $user
@@ -1578,11 +1680,11 @@ class CollectionCategoriesTest extends TestCase
         $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1640,23 +1742,26 @@ class CollectionCategoriesTest extends TestCase
         ]);
     }
 
-    public function test_global_admin_can_update_homepage()
+    /**
+     * @test
+     */
+    public function super_admin_can_update_homepage()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeSuperAdmin();
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
         $category->addToHomepage()->save();
         $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1716,17 +1821,20 @@ class CollectionCategoriesTest extends TestCase
         ]);
     }
 
-    public function test_order_is_updated_when_updated_to_beginning()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_updated_to_beginning()
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1791,17 +1899,20 @@ class CollectionCategoriesTest extends TestCase
         $this->assertDatabaseHas((new Collection())->getTable(), ['id' => $third->id, 'order' => 1]);
     }
 
-    public function test_order_is_updated_when_updated_to_middle()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_updated_to_middle()
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1866,17 +1977,20 @@ class CollectionCategoriesTest extends TestCase
         $this->assertDatabaseHas((new Collection())->getTable(), ['id' => $third->id, 'order' => 3]);
     }
 
-    public function test_order_is_updated_when_updated_to_end()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_updated_to_end()
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1941,17 +2055,20 @@ class CollectionCategoriesTest extends TestCase
         $this->assertDatabaseHas((new Collection())->getTable(), ['id' => $third->id, 'order' => 2]);
     }
 
-    public function test_order_cannot_be_less_than_1_when_updated()
+    /**
+     * @test
+     */
+    public function order_cannot_be_less_than_1_when_updated()
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1989,17 +2106,20 @@ class CollectionCategoriesTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_order_cannot_be_greater_than_count_plus_1_when_updated()
+    /**
+     * @test
+     */
+    public function order_cannot_be_greater_than_count_plus_1_when_updated()
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -2037,7 +2157,10 @@ class CollectionCategoriesTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_audit_created_when_updated()
+    /**
+     * @test
+     */
+    public function audit_created_when_updated()
     {
         $this->fakeEvents();
 
@@ -2050,11 +2173,11 @@ class CollectionCategoriesTest extends TestCase
         $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random().'.svg',
+            'filename' => Str::random() . '.svg',
             'mime_type' => 'image/svg+xml',
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,'.base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -2082,7 +2205,10 @@ class CollectionCategoriesTest extends TestCase
      * Delete a specific category collection.
      */
 
-    public function test_guest_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function guest_cannot_delete_one()
     {
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
 
@@ -2091,7 +2217,10 @@ class CollectionCategoriesTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_delete_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -2109,7 +2238,10 @@ class CollectionCategoriesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_delete_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -2127,7 +2259,10 @@ class CollectionCategoriesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_delete_one()
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -2145,7 +2280,10 @@ class CollectionCategoriesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_delete_one()
     {
         /**
          * @var \App\Models\User $user
@@ -2161,7 +2299,10 @@ class CollectionCategoriesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_super_admin_can_delete_one()
+    /**
+     * @test
+     */
+    public function super_admin_can_delete_one()
     {
         /**
          * @var \App\Models\User $user
@@ -2183,7 +2324,10 @@ class CollectionCategoriesTest extends TestCase
      * Delete a specific category collection's image.
      */
 
-    public function test_super_admin_cannot_delete_image()
+    /**
+     * @test
+     */
+    public function super_admin_cannot_delete_image()
     {
         /**
          * @var \App\Models\User $user
@@ -2214,7 +2358,10 @@ class CollectionCategoriesTest extends TestCase
         $this->assertEquals($meta['image_file_id'], $category->meta['image_file_id']);
     }
 
-    public function test_order_is_updated_when_deleted_at_beginning()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_deleted_at_beginning()
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
@@ -2271,7 +2418,10 @@ class CollectionCategoriesTest extends TestCase
         $this->assertDatabaseHas((new Collection())->getTable(), ['id' => $third->id, 'order' => 2]);
     }
 
-    public function test_order_is_updated_when_deleted_at_middle()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_deleted_at_middle()
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
@@ -2328,7 +2478,10 @@ class CollectionCategoriesTest extends TestCase
         $this->assertDatabaseHas((new Collection())->getTable(), ['id' => $third->id, 'order' => 2]);
     }
 
-    public function test_order_is_updated_when_deleted_at_end()
+    /**
+     * @test
+     */
+    public function order_is_updated_when_deleted_at_end()
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
@@ -2385,7 +2538,10 @@ class CollectionCategoriesTest extends TestCase
         $this->assertDatabaseHas((new Collection())->getTable(), ['id' => $second->id, 'order' => 2]);
     }
 
-    public function test_audit_created_when_deleted()
+    /**
+     * @test
+     */
+    public function audit_created_when_deleted()
     {
         $this->fakeEvents();
 

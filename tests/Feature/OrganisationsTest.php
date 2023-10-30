@@ -57,7 +57,10 @@ class OrganisationsTest extends TestCase
      * List all the organisations.
      */
 
-    public function test_guest_can_list_them()
+    /**
+     * @test
+     */
+    public function guest_can_list_them()
     {
         $organisation = Organisation::factory()->create();
 
@@ -82,7 +85,10 @@ class OrganisationsTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_listed()
+    /**
+     * @test
+     */
+    public function audit_created_when_listed()
     {
         $this->fakeEvents();
 
@@ -93,7 +99,10 @@ class OrganisationsTest extends TestCase
         });
     }
 
-    public function test_guest_can_sort_by_name()
+    /**
+     * @test
+     */
+    public function guest_can_sort_by_name()
     {
         $organisationOne = Organisation::factory()->create([
             'name' => 'Organisation A',
@@ -115,14 +124,20 @@ class OrganisationsTest extends TestCase
      * Create an organisation.
      */
 
-    public function test_guest_cannot_create_one()
+    /**
+     * @test
+     */
+    public function guest_cannot_create_one()
     {
         $response = $this->json('POST', '/core/v1/organisations');
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_create_one()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_create_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -139,7 +154,10 @@ class OrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_create_one()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_create_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -156,7 +174,10 @@ class OrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_create_one()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_create_one()
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -173,7 +194,10 @@ class OrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_create_one()
+    /**
+     * @test
+     */
+    public function global_admin_can_create_one_with_update_request()
     {
         /**
          * @var \App\Models\User $user
@@ -200,11 +224,72 @@ class OrganisationsTest extends TestCase
 
         $response = $this->json('POST', '/core/v1/organisations', $payload);
 
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonFragment(['data' => $payload]);
+
+        $this->assertDatabaseHas((new UpdateRequest())->getTable(), [
+            'user_id' => $user->id,
+            'updateable_type' => UpdateRequest::NEW_TYPE_ORGANISATION_GLOBAL_ADMIN,
+            'updateable_id' => null,
+        ]);
+
+        $updateRequestId = $response->json()['id'];
+
+        $this->assertDatabaseMissing('organisations', [
+            'slug' => 'test-org',
+        ]);
+
+        $data = UpdateRequest::query()
+            ->where('updateable_type', UpdateRequest::NEW_TYPE_ORGANISATION_GLOBAL_ADMIN)
+            ->where('updateable_id', null)
+            ->firstOrFail()->data;
+        $this->assertEquals($data, $payload);
+
+        $this->approveUpdateRequest($updateRequestId);
+
+        $this->assertDatabaseHas('organisations', [
+            'slug' => 'test-org',
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function super_admin_can_create_one()
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeSuperAdmin();
+        $payload = [
+            'slug' => 'test-org',
+            'name' => 'Test Org',
+            'description' => 'Test description',
+            'url' => 'http://test-org.example.com',
+            'email' => 'info@test-org.example.com',
+            'phone' => '07700000000',
+            'social_medias' => [
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital',
+                ],
+            ],
+            'category_taxonomies' => [],
+        ];
+
+        Passport::actingAs($user);
+
+        $response = $this->json('POST', '/core/v1/organisations', $payload);
+
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJsonFragment($payload);
     }
 
-    public function test_global_admin_can_create_one_with_single_form_of_contact()
+    /**
+     * @test
+     */
+    public function global_admin_can_create_one_with_single_form_of_contact()
     {
         /**
          * @var \App\Models\User $user
@@ -225,11 +310,14 @@ class OrganisationsTest extends TestCase
 
         $response = $this->json('POST', '/core/v1/organisations', $payload);
 
-        $response->assertStatus(Response::HTTP_CREATED);
+        $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonFragment($payload);
     }
 
-    public function test_global_admin_can_create_one_without_contact_details()
+    /**
+     * @test
+     */
+    public function global_admin_can_create_one_without_contact_details()
     {
         /**
          * @var \App\Models\User $user
@@ -250,12 +338,15 @@ class OrganisationsTest extends TestCase
 
         $response = $this->json('POST', '/core/v1/organisations', $payload);
 
-        $response->assertStatus(Response::HTTP_CREATED);
+        $response->assertStatus(Response::HTTP_OK);
 
         $response->assertJsonFragment($payload);
     }
 
-    public function test_global_admin_cannot_create_one_with_non_numeric_phone()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_create_one_with_non_numeric_phone()
     {
         /**
          * @var \App\Models\User $user
@@ -279,7 +370,10 @@ class OrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_global_admin_can_create_one_with_taxonomies()
+    /**
+     * @test
+     */
+    public function global_admin_can_create_one_with_taxonomies()
     {
         /**
          * @var \App\Models\User $user
@@ -303,9 +397,13 @@ class OrganisationsTest extends TestCase
 
         $response = $this->json('POST', '/core/v1/organisations', $payload);
 
-        $response->assertStatus(Response::HTTP_CREATED);
+        $response->assertStatus(Response::HTTP_OK);
 
-        $organisation = Organisation::findOrFail($response->json('data.id'));
+        $response->assertJsonFragment($payload);
+
+        $this->approveUpdateRequest($response->json()['id']);
+
+        $organisation = Organisation::where('slug', 'test-org')->firstOrFail();
         $this->assertDatabaseHas(table(OrganisationTaxonomy::class), [
             'organisation_id' => $organisation->id,
             'taxonomy_id' => $taxonomy->id,
@@ -314,30 +412,12 @@ class OrganisationsTest extends TestCase
             'organisation_id' => $organisation->id,
             'taxonomy_id' => $taxonomy->parent_id,
         ]);
-
-        $responsePayload = $payload;
-        $responsePayload['category_taxonomies'] = [
-            [
-                'id' => $taxonomy->parent->id,
-                'parent_id' => $taxonomy->parent->parent_id,
-                'slug' => $taxonomy->parent->slug,
-                'name' => $taxonomy->parent->name,
-                'created_at' => $taxonomy->parent->created_at->format(CarbonImmutable::ISO8601),
-                'updated_at' => $taxonomy->parent->updated_at->format(CarbonImmutable::ISO8601),
-            ],
-            [
-                'id' => $taxonomy->id,
-                'parent_id' => $taxonomy->parent_id,
-                'slug' => $taxonomy->slug,
-                'name' => $taxonomy->name,
-                'created_at' => $taxonomy->created_at->format(CarbonImmutable::ISO8601),
-                'updated_at' => $taxonomy->updated_at->format(CarbonImmutable::ISO8601),
-            ],
-        ];
-        $response->assertJsonFragment($responsePayload);
     }
 
-    public function test_all_global_admins_added_as_organisation_admin_when_one_is_created()
+    /**
+     * @test
+     */
+    public function all_global_admins_added_as_organisation_admin_when_one_is_created()
     {
         /**
          * @var \App\Models\User $user
@@ -364,29 +444,32 @@ class OrganisationsTest extends TestCase
 
         $response = $this->json('POST', '/core/v1/organisations', $payload);
 
-        $response->assertStatus(Response::HTTP_CREATED);
+        $response->assertStatus(Response::HTTP_OK);
 
-        $responseData = $response->json('data');
+        $this->approveUpdateRequest($response->json()['id']);
 
-        $organisation = Organisation::find($responseData['id']);
+        $organisation = Organisation::where('slug', 'test-org')->firstOrFail();
 
         $this->assertDatabaseHas((new UserRole)->getTable(), [
             'user_id' => $globalAdmin1->id,
             'role_id' => Role::organisationAdmin()->id,
-            'organisation_id' => $responseData['id'],
+            'organisation_id' => $organisation->id,
         ]);
 
         $this->assertDatabaseHas((new UserRole)->getTable(), [
             'user_id' => $globalAdmin2->id,
             'role_id' => Role::organisationAdmin()->id,
-            'organisation_id' => $responseData['id'],
+            'organisation_id' => $organisation->id,
         ]);
 
         $this->assertTrue($globalAdmin1->isOrganisationAdmin($organisation));
         $this->assertTrue($globalAdmin2->isOrganisationAdmin($organisation));
     }
 
-    public function test_audit_created_when_created()
+    /**
+     * @test
+     */
+    public function audit_created_when_created()
     {
         $this->fakeEvents();
 
@@ -394,7 +477,7 @@ class OrganisationsTest extends TestCase
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeSuperAdmin();
 
         Passport::actingAs($user);
 
@@ -425,7 +508,10 @@ class OrganisationsTest extends TestCase
      * Get a specific organisation.
      */
 
-    public function test_guest_can_view_one()
+    /**
+     * @test
+     */
+    public function guest_can_view_one()
     {
         $organisation = Organisation::factory()->create();
 
@@ -460,7 +546,10 @@ class OrganisationsTest extends TestCase
         ]);
     }
 
-    public function test_guest_can_view_one_by_slug()
+    /**
+     * @test
+     */
+    public function guest_can_view_one_by_slug()
     {
         $organisation = Organisation::factory()->create();
 
@@ -485,7 +574,10 @@ class OrganisationsTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_viewed()
+    /**
+     * @test
+     */
+    public function audit_created_when_viewed()
     {
         $this->fakeEvents();
 
@@ -503,7 +595,10 @@ class OrganisationsTest extends TestCase
      * Update a specific organisation.
      */
 
-    public function test_guest_cannot_update_one()
+    /**
+     * @test
+     */
+    public function guest_cannot_update_one()
     {
         $organisation = Organisation::factory()->create();
 
@@ -512,7 +607,10 @@ class OrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_update_one()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_update_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -525,7 +623,10 @@ class OrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_update_one()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_update_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -538,7 +639,10 @@ class OrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_can_update_one()
+    /**
+     * @test
+     */
+    public function organisation_admin_can_update_one()
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -569,10 +673,46 @@ class OrganisationsTest extends TestCase
         $this->assertEquals($data, $payload);
     }
 
-    public function test_global_admin_can_update_one_with_auto_approval()
+    /**
+     * @test
+     */
+    public function global_admin_can_update_one()
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeGlobalAdmin();
+        $payload = [
+            'slug' => 'test-org',
+            'name' => 'Test Org',
+            'description' => 'Test description',
+            'url' => 'http://test-org.example.com',
+            'email' => 'info@test-org.example.com',
+            'phone' => '07700000000',
+            'category_taxonomies' => [],
+        ];
+
+        Passport::actingAs($user);
+
+        $response = $this->json('PUT', "/core/v1/organisations/{$organisation->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonFragment(['data' => $payload]);
+        $response->assertJsonFragment(['message' => __('updates.pending', ['appname' => config('app.name')])]);
+
+        $this->assertDatabaseHas((new UpdateRequest())->getTable(), [
+            'user_id' => $user->id,
+            'updateable_type' => UpdateRequest::EXISTING_TYPE_ORGANISATION,
+            'updateable_id' => $organisation->id,
+            'approved_at' => null,
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function super_admin_can_update_one_with_auto_approval()
+    {
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeSuperAdmin();
         $payload = [
             'slug' => 'test-org',
             'name' => 'Test Org',
@@ -621,7 +761,10 @@ class OrganisationsTest extends TestCase
         $this->assertNotNull($updateRequestResponseData->approved_at);
     }
 
-    public function test_organisation_admin_can_add_social_media_to_one()
+    /**
+     * @test
+     */
+    public function organisation_admin_can_add_social_media_to_one()
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -657,7 +800,10 @@ class OrganisationsTest extends TestCase
         $this->assertEquals('https://www.instagram.com/ayupdigital', $organisation->socialMedias->first()->url);
     }
 
-    public function test_organisation_admin_can_remove_social_media_from_one()
+    /**
+     * @test
+     */
+    public function organisation_admin_can_remove_social_media_from_one()
     {
         $organisation = Organisation::factory()->socialMedia()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -686,7 +832,10 @@ class OrganisationsTest extends TestCase
         $this->assertCount(0, $organisation->socialMedias);
     }
 
-    public function test_organisation_admin_can_add_additional_social_media_to_one()
+    /**
+     * @test
+     */
+    public function organisation_admin_can_add_additional_social_media_to_one()
     {
         $organisation = Organisation::factory()->create();
         $organisation->socialMedias()->create([
@@ -728,7 +877,10 @@ class OrganisationsTest extends TestCase
         $this->assertCount(2, $organisation->socialMedias);
     }
 
-    public function test_organisation_admin_can_update_with_single_form_of_contact()
+    /**
+     * @test
+     */
+    public function organisation_admin_can_update_with_single_form_of_contact()
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -759,7 +911,10 @@ class OrganisationsTest extends TestCase
         $this->assertEquals($data, $payload);
     }
 
-    public function test_organisation_admin_cannot_update_with_no_form_of_contact()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_update_with_no_form_of_contact()
     {
         $organisation = Organisation::factory()->create([
             'email' => 'info@test-org.example.com',
@@ -781,7 +936,10 @@ class OrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_global_admin_can_update_without_contact_details()
+    /**
+     * @test
+     */
+    public function global_admin_can_update_without_contact_details()
     {
         $organisation = Organisation::factory()->create([
             'url' => 'http://test-org.example.com',
@@ -808,7 +966,10 @@ class OrganisationsTest extends TestCase
         $response->assertJsonFragment(['data' => $payload]);
     }
 
-    public function test_global_admin_cannot_update_with_non_numeric_phone()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_update_with_non_numeric_phone()
     {
         $organisation = Organisation::factory()->create([
             'url' => 'http://test-org.example.com',
@@ -833,7 +994,10 @@ class OrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_organisation_admin_can_update_organisation_taxonomies()
+    /**
+     * @test
+     */
+    public function organisation_admin_can_update_organisation_taxonomies()
     {
         $organisation = Organisation::factory()->create();
         $taxonomy1 = Taxonomy::factory()->create();
@@ -856,7 +1020,7 @@ class OrganisationsTest extends TestCase
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonFragment(['data' => $payload]);
-        $response->assertJsonFragment(['message' => __('updates.pending')]);
+        $response->assertJsonFragment(['message' => __('updates.pending', ['appname' => config('app.name')])]);
         $this->assertDatabaseHas((new UpdateRequest())->getTable(), [
             'user_id' => $user->id,
             'updateable_type' => UpdateRequest::EXISTING_TYPE_ORGANISATION,
@@ -879,7 +1043,10 @@ class OrganisationsTest extends TestCase
         ]);
     }
 
-    public function test_global_admin_can_update_organisation_taxonomies()
+    /**
+     * @test
+     */
+    public function global_admin_can_update_organisation_taxonomies()
     {
         $organisation = Organisation::factory()->create();
         $taxonomy1 = Taxonomy::factory()->create();
@@ -910,7 +1077,9 @@ class OrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_OK);
 
         $response->assertJsonFragment(['data' => $payload]);
-        $response->assertJsonFragment(['message' => __('updates.pre-approved')]);
+        $response->assertJsonFragment(['message' => __('updates.pending', ['appname' => config('app.name')])]);
+
+        $this->approveUpdateRequest($response->json()['id']);
 
         $this->assertDatabaseHas(table(OrganisationTaxonomy::class), [
             'organisation_id' => $organisation->id,
@@ -960,7 +1129,10 @@ class OrganisationsTest extends TestCase
         $response->assertJsonFragment($responsePayload);
     }
 
-    public function test_only_partial_fields_can_be_updated()
+    /**
+     * @test
+     */
+    public function only_partial_fields_can_be_updated()
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -986,7 +1158,10 @@ class OrganisationsTest extends TestCase
         $this->assertEquals($data, $payload);
     }
 
-    public function test_audit_created_when_updated()
+    /**
+     * @test
+     */
+    public function audit_created_when_updated()
     {
         $this->fakeEvents();
 
@@ -1011,7 +1186,10 @@ class OrganisationsTest extends TestCase
         });
     }
 
-    public function test_fields_removed_for_existing_update_requests()
+    /**
+     * @test
+     */
+    public function fields_removed_for_existing_update_requests()
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -1042,7 +1220,10 @@ class OrganisationsTest extends TestCase
      * Delete a specific organisation.
      */
 
-    public function test_guest_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function guest_cannot_delete_one()
     {
         $organisation = Organisation::factory()->create();
 
@@ -1051,7 +1232,10 @@ class OrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_delete_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -1064,7 +1248,10 @@ class OrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_delete_one()
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -1077,7 +1264,10 @@ class OrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_delete_one()
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -1089,7 +1279,10 @@ class OrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_delete_one()
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeGlobalAdmin();
@@ -1101,7 +1294,10 @@ class OrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_super_admin_can_delete_one()
+    /**
+     * @test
+     */
+    public function super_admin_can_delete_one()
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeSuperAdmin();
@@ -1114,7 +1310,10 @@ class OrganisationsTest extends TestCase
         $this->assertDatabaseMissing((new Organisation())->getTable(), ['id' => $organisation->id]);
     }
 
-    public function test_related_social_media_are_deleted_when_deleting_one()
+    /**
+     * @test
+     */
+    public function related_social_media_are_deleted_when_deleting_one()
     {
         $organisation = Organisation::factory()->create();
         $organisation->socialMedias()->create([
@@ -1131,7 +1330,10 @@ class OrganisationsTest extends TestCase
         $this->assertDatabaseMissing((new SocialMedia())->getTable(), ['url' => 'https://twitter.com/ayupdigital/']);
     }
 
-    public function test_audit_created_when_deleted()
+    /**
+     * @test
+     */
+    public function audit_created_when_deleted()
     {
         $this->fakeEvents();
 
@@ -1153,7 +1355,10 @@ class OrganisationsTest extends TestCase
      * Get a specific organisation's logo.
      */
 
-    public function test_guest_can_view_logo()
+    /**
+     * @test
+     */
+    public function guest_can_view_logo()
     {
         $organisation = Organisation::factory()->create();
 
@@ -1163,7 +1368,10 @@ class OrganisationsTest extends TestCase
         $response->assertHeader('Content-Type', 'image/png');
     }
 
-    public function test_audit_created_when_logo_viewed()
+    /**
+     * @test
+     */
+    public function audit_created_when_logo_viewed()
     {
         $this->fakeEvents();
 
@@ -1181,7 +1389,10 @@ class OrganisationsTest extends TestCase
      * Upload a specific organisation's logo.
      */
 
-    public function test_organisation_admin_can_upload_logo()
+    /**
+     * @test
+     */
+    public function global_admin_can_upload_logo()
     {
         /**
          * @var \App\Models\User $user
@@ -1195,7 +1406,7 @@ class OrganisationsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,'.base64_encode($image),
+            'file' => 'data:image/png;base64,' . base64_encode($image),
         ]);
 
         $response = $this->json('POST', '/core/v1/organisations', [
@@ -1208,14 +1419,16 @@ class OrganisationsTest extends TestCase
             'category_taxonomies' => [],
             'logo_file_id' => $this->getResponseContent($imageResponse, 'data.id'),
         ]);
-        $organisationId = $this->getResponseContent($response, 'data.id');
 
-        $response->assertStatus(Response::HTTP_CREATED);
+        $response->assertStatus(Response::HTTP_OK);
+
+        $this->approveUpdateRequest($response->json()['id']);
+
         $this->assertDatabaseHas(table(Organisation::class), [
-            'id' => $organisationId,
+            'slug' => 'test-org',
         ]);
         $this->assertDatabaseMissing(table(Organisation::class), [
-            'id' => $organisationId,
+            'slug' => 'test-org',
             'logo_file_id' => null,
         ]);
     }
@@ -1224,16 +1437,18 @@ class OrganisationsTest extends TestCase
      * Delete a specific organisation's logo.
      */
 
-    public function test_organisation_admin_can_delete_logo()
+    /**
+     * @test
+     */
+    public function organisation_admin_can_delete_logo()
     {
         /**
          * @var \App\Models\User $user
          */
-        $user = User::factory()->create();
-        $user->makeGlobalAdmin();
         $organisation = Organisation::factory()->create([
             'logo_file_id' => File::factory()->create()->id,
         ]);
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
         $payload = [
             'slug' => $organisation->slug,
             'name' => $organisation->name,
@@ -1257,7 +1472,10 @@ class OrganisationsTest extends TestCase
     /**
      * Bulk import organisations
      */
-    public function test_guest_cannot_bulk_import()
+    /**
+     * @test
+     */
+    public function guest_cannot_bulk_import()
     {
         Storage::fake('local');
 
@@ -1266,14 +1484,17 @@ class OrganisationsTest extends TestCase
         $this->createOrganisationSpreadsheets($organisations);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
         $response = $this->json('POST', '/core/v1/organisations/import', $data);
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_bulk_import()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_bulk_import()
     {
         Storage::fake('local');
 
@@ -1282,7 +1503,7 @@ class OrganisationsTest extends TestCase
         $this->createOrganisationSpreadsheets($organisations);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
         $service = Service::factory()->create();
@@ -1296,7 +1517,10 @@ class OrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_bulk_import()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_bulk_import()
     {
         Storage::fake('local');
 
@@ -1305,7 +1529,7 @@ class OrganisationsTest extends TestCase
         $this->createOrganisationSpreadsheets($organisations);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
         $service = Service::factory()->create();
@@ -1319,7 +1543,10 @@ class OrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_bulk_import()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_bulk_import()
     {
         Storage::fake('local');
 
@@ -1328,7 +1555,7 @@ class OrganisationsTest extends TestCase
         $this->createOrganisationSpreadsheets($organisations);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create();
@@ -1341,7 +1568,10 @@ class OrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_cannot_bulk_import()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_bulk_import()
     {
         Storage::fake('local');
 
@@ -1350,7 +1580,7 @@ class OrganisationsTest extends TestCase
         $this->createOrganisationSpreadsheets($organisations);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
         $user = User::factory()->create();
@@ -1362,7 +1592,10 @@ class OrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_super_admin_can_bulk_import()
+    /**
+     * @test
+     */
+    public function super_admin_can_bulk_import()
     {
         Storage::fake('local');
 
@@ -1371,7 +1604,7 @@ class OrganisationsTest extends TestCase
         $this->createOrganisationSpreadsheets($organisations);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
         $user = User::factory()->create();
@@ -1383,7 +1616,10 @@ class OrganisationsTest extends TestCase
         $response->assertStatus(Response::HTTP_CREATED);
     }
 
-    public function test_super_admin_can_bulk_import_with_minimal_fields()
+    /**
+     * @test
+     */
+    public function super_admin_can_bulk_import_with_minimal_fields()
     {
         Storage::fake('local');
 
@@ -1394,7 +1630,7 @@ class OrganisationsTest extends TestCase
         $this->createOrganisationSpreadsheets($organisations);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
         $user = User::factory()->create();
@@ -1412,7 +1648,10 @@ class OrganisationsTest extends TestCase
         ]);
     }
 
-    public function test_super_admin_can_view_bulk_imported_organisation()
+    /**
+     * @test
+     */
+    public function super_admin_can_view_bulk_imported_organisation()
     {
         Storage::fake('local');
 
@@ -1421,7 +1660,7 @@ class OrganisationsTest extends TestCase
         $this->createOrganisationSpreadsheets($organisations);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
         $user = User::factory()->create();
@@ -1445,7 +1684,10 @@ class OrganisationsTest extends TestCase
         ]);
     }
 
-    public function test_global_admin_can_view_bulk_imported_organisation()
+    /**
+     * @test
+     */
+    public function global_admin_can_view_bulk_imported_organisation()
     {
         Storage::fake('local');
 
@@ -1454,7 +1696,7 @@ class OrganisationsTest extends TestCase
         $this->createOrganisationSpreadsheets($organisations);
 
         $data = [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ];
 
         $super = User::factory()->create();
@@ -1499,7 +1741,10 @@ class OrganisationsTest extends TestCase
         ]);
     }
 
-    public function test_validate_file_import_type()
+    /**
+     * @test
+     */
+    public function validate_file_import_type()
     {
         Storage::fake('local');
 
@@ -1525,7 +1770,7 @@ class OrganisationsTest extends TestCase
 
         $this->createOrganisationSpreadsheets($organisations);
 
-        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
+        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
 
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
@@ -1538,7 +1783,7 @@ class OrganisationsTest extends TestCase
 
         $this->createOrganisationSpreadsheets($organisations);
 
-        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/octet-stream;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
+        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/octet-stream;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
             'data' => [
@@ -1550,7 +1795,7 @@ class OrganisationsTest extends TestCase
 
         $this->createOrganisationSpreadsheets($organisations);
 
-        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx')))]);
+        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx')))]);
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
             'data' => [
@@ -1559,7 +1804,10 @@ class OrganisationsTest extends TestCase
         ]);
     }
 
-    public function test_validate_file_import_fields()
+    /**
+     * @test
+     */
+    public function validate_file_import_fields()
     {
         Storage::fake('local');
 
@@ -1584,7 +1832,7 @@ class OrganisationsTest extends TestCase
 
         $this->createOrganisationSpreadsheets(collect([$organisation1, $organisation2, $organisation3]));
 
-        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
+        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
         $response->assertJson([
@@ -1617,7 +1865,7 @@ class OrganisationsTest extends TestCase
             ],
         ]);
 
-        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx')))]);
+        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx')))]);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
         $response->assertJson([
@@ -1651,7 +1899,10 @@ class OrganisationsTest extends TestCase
         ]);
     }
 
-    public function test_organisations_file_import_100rows()
+    /**
+     * @test
+     */
+    public function organisations_file_import_100rows()
     {
         Storage::fake('local');
 
@@ -1663,7 +1914,7 @@ class OrganisationsTest extends TestCase
 
         $this->createOrganisationSpreadsheets($organisations);
 
-        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
+        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
 
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
@@ -1676,7 +1927,7 @@ class OrganisationsTest extends TestCase
 
         $this->createOrganisationSpreadsheets($organisations);
 
-        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx')))]);
+        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xlsx')))]);
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
             'data' => [
@@ -1688,7 +1939,10 @@ class OrganisationsTest extends TestCase
     /**
      * @group slow
      */
-    public function test_organisations_file_import_5krows()
+    /**
+     * @test
+     */
+    public function organisations_file_import_5krows()
     {
         Storage::fake('local');
 
@@ -1700,7 +1954,7 @@ class OrganisationsTest extends TestCase
 
         $this->createOrganisationSpreadsheets($organisations);
 
-        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
+        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
             'data' => [
@@ -1712,7 +1966,7 @@ class OrganisationsTest extends TestCase
 
         $this->createOrganisationSpreadsheets($organisations);
 
-        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
+        $response = $this->json('POST', '/core/v1/organisations/import', ['spreadsheet' => 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls')))]);
         $response->assertStatus(Response::HTTP_CREATED);
         $response->assertJson([
             'data' => [
@@ -1749,7 +2003,7 @@ class OrganisationsTest extends TestCase
         $this->createOrganisationSpreadsheets($organisations);
 
         $response = $this->json('POST', '/core/v1/organisations/import', [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ]);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -1821,7 +2075,7 @@ class OrganisationsTest extends TestCase
         $this->createOrganisationSpreadsheets($organisations);
 
         $response = $this->json('POST', '/core/v1/organisations/import', [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ]);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -1908,7 +2162,7 @@ class OrganisationsTest extends TestCase
         $this->createOrganisationSpreadsheets($organisations);
 
         $response = $this->json('POST', '/core/v1/organisations/import', [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
             'ignore_duplicates' => [
                 $organisation1->id,
                 $organisation2->id,
@@ -1941,7 +2195,10 @@ class OrganisationsTest extends TestCase
         ]);
     }
 
-    public function test_duplicate_rows_in_import_are_detected()
+    /**
+     * @test
+     */
+    public function duplicate_rows_in_import_are_detected()
     {
         Storage::fake('local');
 
@@ -1968,7 +2225,7 @@ class OrganisationsTest extends TestCase
         $this->createOrganisationSpreadsheets($organisations);
 
         $response = $this->json('POST', '/core/v1/organisations/import', [
-            'spreadsheet' => 'data:application/vnd.ms-excel;base64,'.base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
+            'spreadsheet' => 'data:application/vnd.ms-excel;base64,' . base64_encode(file_get_contents(Storage::disk('local')->path('test.xls'))),
         ]);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);

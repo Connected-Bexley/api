@@ -22,7 +22,7 @@ class IndexStopWordOperation extends Operation
             ->action(static::ACTION_GET)
             ->tags(SearchEngineTag::create())
             ->summary('List all the stop words')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->responses(
                 Response::ok()->content(
                     MediaType::json()->schema(StopWordSchema::create())

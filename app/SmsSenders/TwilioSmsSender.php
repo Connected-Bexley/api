@@ -35,15 +35,37 @@ class TwilioSmsSender implements SmsSender
         /** @var \Twilio\Rest\Client $client */
         $client = resolve(Client::class);
 
-        $message = $client->messages->create($sms->to, [
-            'from' => config('tlr.twilio.from'),
+        $message = $client->messages->create($this->ukToInternationalNumber($sms->to), [
+            'from' => config('sms.twilio.from'),
             'body' => $content,
         ]);
 
-        $sms->notification->update(['message' => $content]);
+        $sms->notification->update(['message' => $message->body]);
 
         if (config('app.debug')) {
-            logger()->debug('SMS sent', $message->toArray());
+            logger()->debug('SMS sent via Twilio', $message->toArray());
         }
+    }
+
+    /**
+     * Convert UK internal mobile '07' numbers to international '+44' numbers.
+     *
+     * @param string $ukMobileNumber
+     * @return string
+     */
+    public function ukToInternationalNumber(string $ukMobileNumber)
+    {
+        $matches = preg_match('/^(\+447[0-9]{9})$/', $ukMobileNumber);
+        if ($matches === 1) {
+            return $ukMobileNumber;
+        }
+
+        $matches = preg_match('/^(07[0-9]{9})$/', $ukMobileNumber);
+
+        if ($matches === 1) {
+            return preg_replace('/^(0)/', '+44', $ukMobileNumber, 1);
+        }
+
+        return false;
     }
 }

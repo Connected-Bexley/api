@@ -19,14 +19,20 @@ class AuditsTest extends TestCase
      * List all the audits.
      */
 
-    public function test_guest_cannot_list_them()
+    /**
+     * @test
+     */
+    public function guest_cannot_list_them()
     {
         $response = $this->json('GET', '/core/v1/audits');
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_list_them()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_list_them()
     {
         /**
          * @var \App\Models\Service $service
@@ -43,7 +49,10 @@ class AuditsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_list_them()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_list_them()
     {
         /**
          * @var \App\Models\Service $service
@@ -60,7 +69,10 @@ class AuditsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_list_them()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_list_them()
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -77,13 +89,34 @@ class AuditsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_list_them()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_list_them()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
         $user->makeGlobalAdmin();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('GET', '/core/v1/audits');
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function super_admin_can_list_them()
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeSuperAdmin();
         $audit = Audit::create([
             'action' => Audit::ACTION_READ,
             'description' => 'Someone viewed a resource',
@@ -112,13 +145,15 @@ class AuditsTest extends TestCase
         ]);
     }
 
-    public function test_global_admin_can_list_them_for_a_specific_user()
+    /**
+     * @test
+     */
+    public function super_admin_can_list_them_for_a_specific_user()
     {
         /**
          * @var \App\Models\User $user
          */
-        $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         $audit = Audit::create([
             'user_id' => $user->id,
             'action' => Audit::ACTION_READ,
@@ -162,11 +197,14 @@ class AuditsTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_listed()
+    /**
+     * @test
+     */
+    public function audit_created_when_listed()
     {
         $this->fakeEvents();
 
-        $user = User::factory()->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
 
         $this->json('GET', '/core/v1/audits');
@@ -181,7 +219,10 @@ class AuditsTest extends TestCase
      * Get a specific audit.
      */
 
-    public function test_guest_cannot_view_one()
+    /**
+     * @test
+     */
+    public function guest_cannot_view_one()
     {
         $audit = Audit::factory()->create();
 
@@ -190,7 +231,10 @@ class AuditsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_view_one()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_view_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -208,7 +252,10 @@ class AuditsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_view_one()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_view_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -226,7 +273,10 @@ class AuditsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_view_one()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_view_one()
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -244,13 +294,35 @@ class AuditsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_view_one()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_view_one()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
         $user->makeGlobalAdmin();
+        $audit = Audit::factory()->create();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('GET', "/core/v1/audits/{$audit->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function super_admin_can_view_one()
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeSuperAdmin();
         $audit = Audit::create([
             'action' => Audit::ACTION_READ,
             'description' => 'Someone viewed a resource',
@@ -279,11 +351,14 @@ class AuditsTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_viewed()
+    /**
+     * @test
+     */
+    public function audit_created_when_viewed()
     {
         $this->fakeEvents();
 
-        $user = User::factory()->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
 
         $audit = Audit::create([

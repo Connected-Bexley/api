@@ -56,11 +56,12 @@ class ModelServiceProvider extends ServiceProvider
 
         Relation::morphMap([
             UpdateRequest::EXISTING_TYPE_LOCATION => Location::class,
+            UpdateRequest::EXISTING_TYPE_ORGANISATION => Organisation::class,
+            UpdateRequest::EXISTING_TYPE_ORGANISATION_EVENT => OrganisationEvent::class,
+            UpdateRequest::EXISTING_TYPE_PAGE => Page::class,
             UpdateRequest::EXISTING_TYPE_REFERRAL => Referral::class,
             UpdateRequest::EXISTING_TYPE_SERVICE => Service::class,
             UpdateRequest::EXISTING_TYPE_SERVICE_LOCATION => ServiceLocation::class,
-            UpdateRequest::EXISTING_TYPE_ORGANISATION => Organisation::class,
-            UpdateRequest::EXISTING_TYPE_ORGANISATION_EVENT => OrganisationEvent::class,
             UpdateRequest::EXISTING_TYPE_USER => User::class,
         ]);
     }

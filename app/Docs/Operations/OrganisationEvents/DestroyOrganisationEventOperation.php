@@ -20,7 +20,7 @@ class DestroyOrganisationEventOperation extends Operation
             ->action(static::ACTION_DELETE)
             ->tags(OrganisationEventsTag::create())
             ->summary('Delete a specific organisation event')
-            ->description('**Permission:** `Organisation Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->responses(ResourceDeletedResponse::create(null, 'organisation event'));
     }
 }

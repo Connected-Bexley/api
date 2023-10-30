@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\DataPersistence;
+namespace App\Contracts;
 
 use App\Models\Model;
 use Illuminate\Foundation\Http\FormRequest;

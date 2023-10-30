@@ -13,7 +13,7 @@ class LogSmsSender implements SmsSender
      */
     public function send(Sms $sms)
     {
-        logger()->debug('SMS sent at [' . Date::now()->toDateTimeString() . ']', [
+        logger()->debug('SMS sent via Log SMS at [' . Date::now()->toDateTimeString() . ']', [
             'to' => $sms->to,
             'templateId' => $sms->templateId,
             'values' => $sms->values,

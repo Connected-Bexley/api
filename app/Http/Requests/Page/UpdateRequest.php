@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Page;
 
+use App\Http\Requests\HasMissingValues;
 use App\Models\File;
 use App\Models\Page;
 use App\Models\Role;
@@ -18,6 +19,8 @@ use Illuminate\Validation\Rule;
 
 class UpdateRequest extends FormRequest
 {
+    use HasMissingValues;
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -107,5 +110,15 @@ class UpdateRequest extends FormRequest
             ],
             'collections.*' => ['sometimes', 'exists:collections,id'],
         ];
+    }
+
+    /**
+     * Check if the user requested only a preview of the update request.
+     *
+     * @return bool
+     */
+    public function isPreview(): bool
+    {
+        return $this->preview === true;
     }
 }

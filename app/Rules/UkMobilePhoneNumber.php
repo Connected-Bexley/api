@@ -37,7 +37,17 @@ class UkMobilePhoneNumber implements Rule
 
         $matches = preg_match('/^(07[0-9]{9})$/', $value);
 
-        return $matches === 1;
+        if ($matches === 1) {
+            return true;
+        }
+
+        $matches = preg_match('/^(\+447[0-9]{9})$/', $value);
+
+        if ($matches === 1) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

@@ -252,9 +252,21 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_view_one()
+    public function test_global_admin_cannot_view_one()
     {
         $user = User::factory()->create()->makeGlobalAdmin();
+        $reportSchedule = ReportSchedule::factory()->create();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('GET', "/core/v1/report-schedules/{$reportSchedule->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    public function test_super_admin_can_view_one()
+    {
+        $user = User::factory()->create()->makeSuperAdmin();
         $reportSchedule = ReportSchedule::factory()->create();
 
         Passport::actingAs($user);
@@ -276,7 +288,7 @@ class ReportSchedulesTest extends TestCase
     {
         $this->fakeEvents();
 
-        $user = User::factory()->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         $reportSchedule = ReportSchedule::factory()->create();
 
         Passport::actingAs($user);
@@ -342,9 +354,21 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_update_one()
+    public function test_global_admin_cannot_update_one()
     {
         $user = User::factory()->create()->makeGlobalAdmin();
+        $reportSchedule = ReportSchedule::factory()->create();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('PUT', "/core/v1/report-schedules/{$reportSchedule->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    public function test_super_admin_can_update_one()
+    {
+        $user = User::factory()->create()->makeSuperAdmin();
         $reportSchedule = ReportSchedule::factory()->create([
             'repeat_type' => ReportSchedule::REPEAT_TYPE_WEEKLY,
         ]);
@@ -371,7 +395,7 @@ class ReportSchedulesTest extends TestCase
     {
         $this->fakeEvents();
 
-        $user = User::factory()->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         $reportSchedule = ReportSchedule::factory()->create([
             'repeat_type' => ReportSchedule::REPEAT_TYPE_WEEKLY,
         ]);
@@ -442,9 +466,21 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_delete_one()
+    public function test_global_admin_cannot_delete_one()
     {
         $user = User::factory()->create()->makeGlobalAdmin();
+        $reportSchedule = ReportSchedule::factory()->create();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('DELETE', "/core/v1/report-schedules/{$reportSchedule->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    public function test_super_admin_can_delete_one()
+    {
+        $user = User::factory()->create()->makeSuperAdmin();
         $reportSchedule = ReportSchedule::factory()->create();
 
         Passport::actingAs($user);
@@ -459,7 +495,7 @@ class ReportSchedulesTest extends TestCase
     {
         $this->fakeEvents();
 
-        $user = User::factory()->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeSuperAdmin();
         $reportSchedule = ReportSchedule::factory()->create();
 
         Passport::actingAs($user);

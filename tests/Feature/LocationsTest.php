@@ -23,7 +23,10 @@ class LocationsTest extends TestCase
      * List all the locations.
      */
 
-    public function test_guest_can_list_them()
+    /**
+     * @test
+     */
+    public function guest_can_list_them()
     {
         $location = Location::factory()->create();
 
@@ -70,7 +73,10 @@ class LocationsTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_listed()
+    /**
+     * @test
+     */
+    public function audit_created_when_listed()
     {
         $this->fakeEvents();
 
@@ -85,14 +91,20 @@ class LocationsTest extends TestCase
      * Create a location.
      */
 
-    public function test_guest_cannot_create_one()
+    /**
+     * @test
+     */
+    public function guest_cannot_create_one()
     {
         $response = $this->json('POST', '/core/v1/locations');
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_create_one()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_create_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -109,7 +121,10 @@ class LocationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_can_create_one()
+    /**
+     * @test
+     */
+    public function service_admin_can_create_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -152,7 +167,55 @@ class LocationsTest extends TestCase
         ]);
     }
 
-    public function test_invalid_address_error_returned_when_creating_one()
+    /**
+     * @test
+     */
+    public function global_admin_can_create_one()
+    {
+        /**
+         * @var \App\Models\Service $service
+         * @var \App\Models\User $user
+         */
+        $service = Service::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('POST', '/core/v1/locations', [
+            'address_line_1' => '30-34 Aire St',
+            'address_line_2' => null,
+            'address_line_3' => null,
+            'city' => 'Leeds',
+            'county' => 'West Yorkshire',
+            'postcode' => 'LS1 4HT',
+            'country' => 'England',
+            'accessibility_info' => null,
+            'has_wheelchair_access' => false,
+            'has_induction_loop' => false,
+            'has_accessible_toilet' => false,
+        ]);
+
+        $response->assertStatus(Response::HTTP_CREATED);
+        $response->assertJsonFragment([
+            'has_image' => false,
+            'address_line_1' => '30-34 Aire St',
+            'address_line_2' => null,
+            'address_line_3' => null,
+            'city' => 'Leeds',
+            'county' => 'West Yorkshire',
+            'postcode' => 'LS1 4HT',
+            'country' => 'England',
+            'accessibility_info' => null,
+            'has_wheelchair_access' => false,
+            'has_induction_loop' => false,
+            'has_accessible_toilet' => false,
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function invalid_address_error_returned_when_creating_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -186,7 +249,10 @@ class LocationsTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_created()
+    /**
+     * @test
+     */
+    public function audit_created_when_created()
     {
         $this->fakeEvents();
 
@@ -225,7 +291,10 @@ class LocationsTest extends TestCase
      * Get a specific location.
      */
 
-    public function test_guest_can_view_one()
+    /**
+     * @test
+     */
+    public function guest_can_view_one()
     {
         $location = Location::factory()->create();
 
@@ -253,7 +322,10 @@ class LocationsTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_viewed()
+    /**
+     * @test
+     */
+    public function audit_created_when_viewed()
     {
         $this->fakeEvents();
 
@@ -271,7 +343,10 @@ class LocationsTest extends TestCase
      * Update a specific location.
      */
 
-    public function test_guest_cannot_update_one()
+    /**
+     * @test
+     */
+    public function guest_cannot_update_one()
     {
         $location = Location::factory()->create();
 
@@ -280,7 +355,10 @@ class LocationsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_update_one()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_update_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -298,7 +376,10 @@ class LocationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_can_request_to_update_one()
+    /**
+     * @test
+     */
+    public function service_admin_can_request_to_update_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -341,7 +422,56 @@ class LocationsTest extends TestCase
         $this->assertEquals($data, $payload);
     }
 
-    public function test_audit_created_when_updated()
+    /**
+     * @test
+     */
+    public function global_admin_can_update_one()
+    {
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
+        $user->makeGlobalAdmin();
+        $location = Location::factory()->create();
+
+        Passport::actingAs($user);
+
+        $payload = [
+            'address_line_1' => '30-34 Aire St',
+            'address_line_2' => null,
+            'address_line_3' => null,
+            'city' => 'Leeds',
+            'county' => 'West Yorkshire',
+            'postcode' => 'LS1 4HT',
+            'country' => 'England',
+            'accessibility_info' => null,
+            'has_wheelchair_access' => false,
+            'has_induction_loop' => false,
+            'has_accessible_toilet' => false,
+        ];
+        $response = $this->json('PUT', "/core/v1/locations/{$location->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonFragment(['data' => $payload]);
+        $this->assertDatabaseHas((new UpdateRequest())->getTable(), [
+            'user_id' => $user->id,
+            'updateable_type' => UpdateRequest::EXISTING_TYPE_LOCATION,
+            'updateable_id' => $location->id,
+            'approved_at' => null,
+        ]);
+        $updateRequest = UpdateRequest::query()
+            ->where('updateable_type', UpdateRequest::EXISTING_TYPE_LOCATION)
+            ->where('updateable_id', $location->id)
+            ->firstOrFail();
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
+        $this->assertDatabaseHas(table(Location::class), $payload);
+    }
+
+    /**
+     * @test
+     */
+    public function audit_created_when_updated()
     {
         $this->fakeEvents();
 
@@ -377,7 +507,10 @@ class LocationsTest extends TestCase
         });
     }
 
-    public function test_only_partial_fields_can_be_updated()
+    /**
+     * @test
+     */
+    public function only_partial_fields_can_be_updated()
     {
         /**
          * @var \App\Models\Service $service
@@ -410,7 +543,10 @@ class LocationsTest extends TestCase
         $this->assertEquals($data, $payload);
     }
 
-    public function test_fields_removed_for_existing_update_requests()
+    /**
+     * @test
+     */
+    public function fields_removed_for_existing_update_requests()
     {
         /**
          * @var \App\Models\Service $service
@@ -447,7 +583,10 @@ class LocationsTest extends TestCase
      * Delete a specific location.
      */
 
-    public function test_guest_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function guest_cannot_delete_one()
     {
         $location = Location::factory()->create();
 
@@ -456,7 +595,10 @@ class LocationsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_delete_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -474,7 +616,10 @@ class LocationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_delete_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -492,7 +637,10 @@ class LocationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_delete_one()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_delete_one()
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -510,7 +658,10 @@ class LocationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_delete_one()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_delete_one()
     {
         /**
          * @var \App\Models\User $user
@@ -523,11 +674,33 @@ class LocationsTest extends TestCase
 
         $response = $this->json('DELETE', "/core/v1/locations/{$location->id}");
 
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function super_admin_can_delete_one()
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeSuperAdmin();
+        $location = Location::factory()->create();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('DELETE', "/core/v1/locations/{$location->id}");
+
         $response->assertStatus(Response::HTTP_OK);
         $this->assertDatabaseMissing((new Location())->getTable(), ['id' => $location->id]);
     }
 
-    public function test_audit_created_when_deleted()
+    /**
+     * @test
+     */
+    public function audit_created_when_deleted()
     {
         $this->fakeEvents();
 
@@ -535,7 +708,7 @@ class LocationsTest extends TestCase
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeSuperAdmin();
         $location = Location::factory()->create();
 
         Passport::actingAs($user);
@@ -553,7 +726,10 @@ class LocationsTest extends TestCase
      * Get a specific location's image.
      */
 
-    public function test_guest_can_view_image()
+    /**
+     * @test
+     */
+    public function guest_can_view_image()
     {
         $location = Location::factory()->create();
 
@@ -563,7 +739,10 @@ class LocationsTest extends TestCase
         $response->assertHeader('Content-Type', 'image/png');
     }
 
-    public function test_audit_created_when_image_viewed()
+    /**
+     * @test
+     */
+    public function audit_created_when_image_viewed()
     {
         $this->fakeEvents();
 
@@ -581,10 +760,14 @@ class LocationsTest extends TestCase
      * Upload a specific location's image.
      */
 
-    public function test_organisation_admin_can_upload_image()
+    /**
+     * @test
+     */
+    public function organisation_admin_can_upload_image()
     {
+        $organisation = Organisation::factory()->create();
         /** @var \App\Models\User $user */
-        $user = User::factory()->create()->makeGlobalAdmin();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
         $image = Storage::disk('local')->get('/test-data/image.png');
 
         Passport::actingAs($user);
@@ -592,7 +775,7 @@ class LocationsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,'.base64_encode($image),
+            'file' => 'data:image/png;base64,' . base64_encode($image),
         ]);
 
         $response = $this->json('POST', '/core/v1/locations', [
@@ -625,13 +808,14 @@ class LocationsTest extends TestCase
      * Delete a specific location's image.
      */
 
-    public function test_organisation_admin_can_delete_image()
+    /**
+     * @test
+     */
+    public function organisation_admin_can_delete_image()
     {
-        /**
-         * @var \App\Models\User $user
-         */
-        $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $organisation = Organisation::factory()->create();
+        /** @var \App\Models\User $user */
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
         $location = Location::factory()->create([
             'image_file_id' => File::factory()->create()->id,
         ]);
@@ -658,61 +842,5 @@ class LocationsTest extends TestCase
         $this->assertDatabaseHas(table(UpdateRequest::class), ['updateable_id' => $location->id]);
         $updateRequest = UpdateRequest::where('updateable_id', $location->id)->firstOrFail();
         $this->assertEquals(null, $updateRequest->data['image_file_id']);
-    }
-
-    public function test_global_admin_can_update_one_with_auto_approval()
-    {
-        $service = Service::factory()->create();
-        $user = User::factory()->create();
-        $user->makeGlobalAdmin();
-        $location = Location::factory()->create();
-
-        Passport::actingAs($user);
-
-        $payload = [
-            'address_line_1' => '30-34 Aire St',
-            'address_line_2' => null,
-            'address_line_3' => null,
-            'city' => 'Leeds',
-            'county' => 'West Yorkshire',
-            'postcode' => 'LS1 4HT',
-            'country' => 'England',
-            'accessibility_info' => null,
-            'has_wheelchair_access' => false,
-            'has_induction_loop' => false,
-            'has_accessible_toilet' => false,
-        ];
-        $response = $this->json('PUT', "/core/v1/locations/{$location->id}", $payload);
-
-        $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonFragment(['data' => $payload]);
-        $this->assertDatabaseHas((new UpdateRequest())->getTable(), [
-            'user_id' => $user->id,
-            'updateable_type' => UpdateRequest::EXISTING_TYPE_LOCATION,
-            'updateable_id' => $location->id,
-        ]);
-        $data = UpdateRequest::query()
-            ->where('updateable_type', UpdateRequest::EXISTING_TYPE_LOCATION)
-            ->where('updateable_id', $location->id)
-            ->firstOrFail()
-            ->data;
-        $this->assertEquals($data, $payload);
-
-        // Simulate frontend check by making call with UpdateRequest ID.
-        $updateRequestId = json_decode($response->getContent())->id;
-        Passport::actingAs($user);
-
-        $updateRequestCheckResponse = $this->get(
-            route(
-                'core.v1.update-requests.show',
-                ['update_request' => $updateRequestId]
-            )
-        );
-
-        $updateRequestCheckResponse->assertSuccessful();
-        $updateRequestResponseData = json_decode($updateRequestCheckResponse->getContent());
-
-        // Update request should already have been approved.
-        $this->assertNotNull($updateRequestResponseData->approved_at);
     }
 }

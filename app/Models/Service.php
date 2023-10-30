@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Contracts\AppliesUpdateRequests;
 use App\Emails\Email;
 use App\Http\Requests\Service\UpdateRequest as UpdateServiceRequest;
 use App\Models\Mutators\ServiceMutators;
@@ -14,7 +15,6 @@ use App\Sms\Sms;
 use App\TaxonomyRelationships\HasTaxonomyRelationships;
 use App\TaxonomyRelationships\UpdateServiceEligibilityTaxonomyRelationships;
 use App\TaxonomyRelationships\UpdateTaxonomyRelationships;
-use App\UpdateRequest\AppliesUpdateRequests;
 use App\UpdateRequest\UpdateRequests;
 use Carbon\CarbonImmutable;
 use ElasticScoutDriverPlus\Searchable;
@@ -232,12 +232,12 @@ class Service extends Model implements AppliesUpdateRequests, Notifiable, HasTax
             'logo_file_id' => Arr::get($data, 'logo_file_id', $this->logo_file_id),
             'score' => Arr::get($data, 'score', $this->score),
             'ends_at' => array_key_exists('ends_at', $data)
-                ? (
-                    $data['ends_at'] === null
-                        ? null
-                        : Date::createFromFormat(CarbonImmutable::ISO8601, $data['ends_at'])
-                )
-                : $this->ends_at,
+            ? (
+                $data['ends_at'] === null
+                ? null
+                : Date::createFromFormat(CarbonImmutable::ISO8601, $data['ends_at'])
+            )
+            : $this->ends_at,
             // This must always be updated regardless of the fields changed.
             'last_modified_at' => Date::now(),
             'eligibility_age_group_custom' => Arr::get($data, 'eligibility_types.custom.age_group', $this->eligibility_age_group_custom),

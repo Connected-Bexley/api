@@ -11,7 +11,6 @@ use App\Models\UserRole;
 use App\Rules\DateSanity;
 use App\Rules\FileIsMimeType;
 use App\Rules\FileIsPendingAssignment;
-use App\Rules\IsOrganisationAdmin;
 use App\Rules\MarkdownMaxLength;
 use App\Rules\MarkdownMinLength;
 use App\Rules\RootTaxonomyIs;
@@ -46,7 +45,15 @@ class StoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'organisation_id' => ['required', 'exists:organisations,id', new IsOrganisationAdmin($this->user('api'))],
+            'organisation_id' => [
+                'required',
+                'exists:organisations,id',
+                function ($attribute, $value, $fail) {
+                    if (!$this->user('api')->isGlobalAdmin() && !$this->user('api')->isOrganisationAdmin(Organisation::findOrFail($value))) {
+                        $fail('The organisation_id field must contain an ID for an organisation you are an organisation admin for.');
+                    }
+                },
+            ],
             'title' => ['required', 'string', 'min:1', 'max:255'],
             'start_date' => ['required', 'date_format:Y-m-d', 'after:today', new DateSanity($this)],
             'end_date' => ['required', 'date_format:Y-m-d', new DateSanity($this)],

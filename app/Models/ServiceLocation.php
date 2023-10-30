@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
+use App\Contracts\AppliesUpdateRequests;
 use App\Http\Requests\ServiceLocation\UpdateRequest as Request;
 use App\Models\Mutators\ServiceLocationMutators;
 use App\Models\Relationships\ServiceLocationRelationships;
 use App\Models\Scopes\ServiceLocationScopes;
 use App\Rules\FileIsMimeType;
 use App\Support\Time;
-use App\UpdateRequest\AppliesUpdateRequests;
 use App\UpdateRequest\UpdateRequests;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Validation\Validator;
@@ -172,17 +172,17 @@ class ServiceLocation extends Model implements AppliesUpdateRequests
                         $regularOpeningHour['frequency'],
                         [RegularOpeningHour::FREQUENCY_WEEKLY, RegularOpeningHour::FREQUENCY_NTH_OCCURRENCE_OF_MONTH]
                     )
-                        ? $regularOpeningHour['weekday']
-                        : null,
+                    ? $regularOpeningHour['weekday']
+                    : null,
                     'day_of_month' => ($regularOpeningHour['frequency'] === RegularOpeningHour::FREQUENCY_MONTHLY)
-                        ? $regularOpeningHour['day_of_month']
-                        : null,
+                    ? $regularOpeningHour['day_of_month']
+                    : null,
                     'occurrence_of_month' => ($regularOpeningHour['frequency'] === RegularOpeningHour::FREQUENCY_NTH_OCCURRENCE_OF_MONTH)
-                        ? $regularOpeningHour['occurrence_of_month']
-                        : null,
+                    ? $regularOpeningHour['occurrence_of_month']
+                    : null,
                     'starts_at' => ($regularOpeningHour['frequency'] === RegularOpeningHour::FREQUENCY_FORTNIGHTLY)
-                        ? $regularOpeningHour['starts_at']
-                        : null,
+                    ? $regularOpeningHour['starts_at']
+                    : null,
                     'opens_at' => $regularOpeningHour['opens_at'],
                     'closes_at' => $regularOpeningHour['closes_at'],
                 ]);

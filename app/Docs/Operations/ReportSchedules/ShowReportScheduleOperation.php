@@ -23,7 +23,7 @@ class ShowReportScheduleOperation extends Operation
             ->action(static::ACTION_GET)
             ->tags(ReportSchedulesTag::create())
             ->summary('Get a specific report schedule')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->responses(
                 Response::ok()->content(
                     MediaType::json()->schema(

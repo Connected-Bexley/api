@@ -14,7 +14,7 @@ class ImportRequest extends FormRequest
     public function authorize()
     {
         if ($this->user()) {
-            return $this->user()->isOrganisationAdmin();
+            return $this->user()->isSuperAdmin();
         }
 
         return false;

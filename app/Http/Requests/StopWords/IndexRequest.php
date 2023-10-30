@@ -13,7 +13,7 @@ class IndexRequest extends FormRequest
      */
     public function authorize()
     {
-        return $this->user('api')->isGlobalAdmin();
+        return $this->user('api')->isSuperAdmin();
     }
 
     /**

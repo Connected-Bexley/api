@@ -25,7 +25,7 @@ class UpdateTaxonomyServiceEligibilityOperation extends Operation
             ->action(static::ACTION_PUT)
             ->tags(TaxonomyServiceEligibilitiesTag::create())
             ->summary('Update a specific service eligibility taxonomy')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->requestBody(
                 RequestBody::create()
                     ->required()

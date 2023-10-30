@@ -14,8 +14,8 @@ class TwilioServiceProvider extends ServiceProvider
     {
         $this->app->singleton(Client::class, function () {
             return new Client(
-                config('tlr.twilio.sid'),
-                config('tlr.twilio.token')
+                config('sms.twilio.sid'),
+                config('sms.twilio.token')
             );
         });
     }

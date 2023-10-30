@@ -25,7 +25,7 @@ class UpdateCollectionPersonaOperation extends Operation
             ->action(static::ACTION_PUT)
             ->tags(CollectionPersonasTag::create())
             ->summary('Update a specific persona collection')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->requestBody(
                 RequestBody::create()
                     ->required()

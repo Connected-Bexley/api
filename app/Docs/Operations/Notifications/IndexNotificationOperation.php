@@ -30,7 +30,7 @@ class IndexNotificationOperation extends Operation
             ->summary('List all the notifications')
             ->description(
                 <<<'EOT'
-**Permission:** `Global Admin`
+**Permission:** `Super Admin`
 
 ---
 

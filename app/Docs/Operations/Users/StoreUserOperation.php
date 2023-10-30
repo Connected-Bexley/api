@@ -31,9 +31,6 @@ class StoreUserOperation extends Operation
 - Can create service workers
 - Can create other service admins
 
-**Permission:** `Global Admin`
-- Can create other global admins
-
 **Permission:** `Super Admin`
 - Can create other super admins
 EOT

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use GuzzleHttp\Client as HttpClient;
 use Illuminate\Support\ServiceProvider;
 
 class GovNotifyServiceProvider extends ServiceProvider
@@ -14,7 +15,7 @@ class GovNotifyServiceProvider extends ServiceProvider
         $this->app->singleton(\Alphagov\Notifications\Client::class, function () {
             return new \Alphagov\Notifications\Client([
                 'apiKey' => config('gov_uk_notify.gov_notify_api_key'),
-                'httpClient' => new \Http\Adapter\Guzzle6\Client(),
+                'httpClient' => new HttpClient(),
             ]);
         });
     }

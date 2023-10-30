@@ -10,4 +10,4 @@ Disallow:
 User-agent: *
 Disallow: /
 
-Sitemap: https://api.hounslowconnect.com/sitemap
+Sitemap: https://api.staging.connectedplaces.org/sitemap

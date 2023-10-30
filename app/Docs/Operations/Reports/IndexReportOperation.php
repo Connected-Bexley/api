@@ -28,7 +28,7 @@ class IndexReportOperation extends Operation
             ->summary('List all the reports')
             ->description(
                 <<<'EOT'
-**Permission:** `Global Admin`
+**Permission:** `Super Admin`
 
 ---
 

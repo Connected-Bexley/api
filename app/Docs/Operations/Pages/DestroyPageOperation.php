@@ -20,7 +20,7 @@ class DestroyPageOperation extends Operation
             ->action(static::ACTION_DELETE)
             ->tags(PagesTag::create())
             ->summary('Delete a specific information page')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->responses(
                 ResourceDeletedResponse::create(null, 'information page')
             );

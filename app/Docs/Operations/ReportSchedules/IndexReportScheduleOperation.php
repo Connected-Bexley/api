@@ -28,7 +28,7 @@ class IndexReportScheduleOperation extends Operation
             ->summary('List all the report schedules')
             ->description(
                 <<<'EOT'
-**Permission:** `Global Admin`
+**Permission:** `Super Admin`
 
 ---
 

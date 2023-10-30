@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Page\Image\ShowRequest;
 use App\Models\File;
 use App\Models\Page;
+use App\Models\UpdateRequest;
 
 class ImageController extends Controller
 {
@@ -18,14 +19,50 @@ class ImageController extends Controller
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      * @return \Illuminate\Http\Response
      */
-    public function __invoke(ShowRequest $request, Page $page)
+    public function show(ShowRequest $request, Page $page)
     {
         event(EndpointHit::onRead($request, "Viewed image for information page [{$page->id}]", $page));
 
         // Get the image file associated.
-        $file = File::findOrFail($page->image_file_id);
+        $file = $page->image;
 
-        // Return the file, or placeholder if the file is null.
+        // Use the file from an update request instead, if specified.
+        if ($request->has('update_request_id')) {
+            $imageId = UpdateRequest::query()
+                ->pageId($page->id)
+                ->where('id', '=', $request->update_request_id)
+                ->firstOrFail()
+                ->data['image_file_id'];
+
+            /** @var \App\Models\File $file */
+            $file = File::findOrFail($imageId);
+        }
+
+        // Return the file or null.
+        return $file ? $file->resizedVersion($request->max_dimension) : null;
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param \App\Http\Requests\Page\Image\ShowRequest $request
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     * @return \Illuminate\Http\Response
+     */
+    public function showNew(ShowRequest $request)
+    {
+        if ($request->has('update_request_id')) {
+            // Use the file from an update request instead, if specified.
+            $imageId = UpdateRequest::query()
+                ->where('id', '=', $request->update_request_id)
+                ->firstOrFail()
+                ->data['image_file_id'];
+
+            /** @var \App\Models\File $file */
+            $file = File::findOrFail($imageId);
+        }
+
+        // Return the file or null.
         return $file->resizedVersion($request->max_dimension);
     }
 }

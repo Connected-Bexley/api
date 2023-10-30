@@ -26,9 +26,6 @@ class DestroyUserOperation extends Operation
 - Can delete service workers
 - Can delete other service admins
 
-**Permission:** `Global Admin`
-- Can delete other global admins
-
 **Permission:** `Super Admin`
 - Can delete other super admins
 EOT

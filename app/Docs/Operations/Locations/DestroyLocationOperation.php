@@ -20,7 +20,7 @@ class DestroyLocationOperation extends Operation
             ->action(static::ACTION_DELETE)
             ->tags(LocationsTag::create())
             ->summary('Delete a specific location')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->responses(ResourceDeletedResponse::create());
     }
 }

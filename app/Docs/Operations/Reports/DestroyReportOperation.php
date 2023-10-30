@@ -20,7 +20,7 @@ class DestroyReportOperation extends Operation
             ->action(static::ACTION_DELETE)
             ->tags(ReportsTag::create())
             ->summary('Delete a specific report')
-            ->description('**Permission:** `Global Admin`')
+            ->description('**Permission:** `Super Admin`')
             ->responses(ResourceDeletedResponse::create(null, 'report'));
     }
 }

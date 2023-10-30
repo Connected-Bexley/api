@@ -27,7 +27,7 @@ class UpdateSettingOperation extends Operation
             ->summary('Update the settings')
             ->description(
                 <<<'EOT'
-**Permission:** `Global Admin`
+**Permission:** `Super Admin`
 
 ---
 

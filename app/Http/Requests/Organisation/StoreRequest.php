@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Organisation;
 
+use App\Http\Requests\HasMissingValues;
 use App\Models\File;
 use App\Models\Organisation;
 use App\Models\SocialMedia;
@@ -16,6 +17,8 @@ use Illuminate\Validation\Rule;
 
 class StoreRequest extends FormRequest
 {
+    use HasMissingValues;
+
     /**
      * Determine if the user is authorized to make this request.
      *

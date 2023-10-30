@@ -11,9 +11,11 @@ use App\Http\Requests\Page\StoreRequest;
 use App\Http\Requests\Page\UpdateRequest;
 use App\Http\Resources\PageResource;
 use App\Http\Responses\ResourceDeleted;
+use App\Http\Responses\UpdateRequestReceived;
 use App\Models\Page;
+use App\Models\UpdateRequest as UpdateRequestModel;
+use App\Services\DataPersistence\PagePersistenceService;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\AllowedInclude;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -41,7 +43,7 @@ class PageController extends Controller
             ->with('parent')
             ->orderBy($orderByCol);
 
-        if (!$request->user('api') || !$request->user('api')->isGlobalAdmin()) {
+        if (!$request->user('api')) {
             $baseQuery->where('enabled', true);
         }
 
@@ -71,39 +73,24 @@ class PageController extends Controller
      * Store a newly created resource in storage.
      *
      * @param \App\Http\Requests\Page\StoreRequest $request
+     * @param \App\Services\DataPersistence\PagePersistenceService $persistenceService
      * @return \App\Http\Resources\OrganisationResource
      */
-    public function store(StoreRequest $request)
+    public function store(StoreRequest $request, PagePersistenceService $persistenceService)
     {
-        return DB::transaction(function () use ($request) {
-            $parent = $request->filled('parent_id') ? Page::find($request->parent_id) : null;
-            $page = Page::make(
-                [
-                    'title' => $request->input('title'),
-                    'slug' => $this->uniqueSlug($request->input('slug', Str::slug($request->input('title')))),
-                    'excerpt' => $request->input('excerpt'),
-                    'content' => $request->input('content', []),
-                    'page_type' => $request->input('page_type', Page::PAGE_TYPE_INFORMATION),
-                ],
-                $parent
-            );
+        $entity = $persistenceService->store($request);
 
-            // Update relationships
-            $page->updateParent($parent ? $parent->id : null)
-                ->updateStatus($request->input('enabled'))
-                ->updateOrder($request->input('order'))
-                ->updateImage($request->input('image_file_id'))
-                ->updateCollections($request->input('collections'));
+        if ($entity instanceof UpdateRequestModel) {
+            event(EndpointHit::onCreate($request, "Created page as update request [{$entity->id}]", $entity));
 
-            // Update model so far
-            $page->save();
+            return new UpdateRequestReceived($entity);
+        }
 
-            $page->load('landingPageAncestors', 'parent', 'children', 'collectionCategories', 'collectionPersonas');
+        event(EndpointHit::onCreate($request, "Created page [{$entity->id}]", $entity));
 
-            event(EndpointHit::onCreate($request, "Created page [{$page->id}]", $page));
+        $entity->load('landingPageAncestors', 'parent', 'children', 'collectionCategories', 'collectionPersonas');
 
-            return new PageResource($page);
-        });
+        return new PageResource($entity);
     }
 
     /**
@@ -132,34 +119,16 @@ class PageController extends Controller
      *
      * @param \App\Http\Requests\Page\UpdateRequest $request
      * @param \App\Models\Page $page
+     * @param \App\Services\DataPersistence\PagePersistenceService $persistenceService
      * @return \App\Http\Resources\OrganisationResource
      */
-    public function update(UpdateRequest $request, Page $page)
+    public function update(UpdateRequest $request, Page $page, PagePersistenceService $persistenceService)
     {
-        return DB::transaction(function () use ($request, $page) {
-            // Core fields
-            $page->title = $request->input('title', $page->title);
-            $page->slug = $request->has('slug') && $request->slug !== $page->slug ? $this->uniqueSlug($request->slug) : $page->slug;
-            $page->excerpt = $request->input('excerpt', $page->excerpt);
-            $page->page_type = $request->input('page_type', $page->page_type);
-            if ($request->filled('content')) {
-                $page->content = $request->input('content', $page->content);
-            }
+        $updateRequest = $persistenceService->update($request, $page);
 
-            // Update relationships
-            $page->updateParent($request->has('parent_id') ? $request->parent_id : false)
-                ->updateStatus($request->input('enabled'))
-                ->updateOrder($request->input('order'))
-                ->updateImage($request->has('image_file_id') ? $request->image_file_id : $page->image_file_id)
-                ->updateCollections($request->input('collections'));
+        event(EndpointHit::onUpdate($request, "Updated page [{$page->id}]", $page));
 
-            // Update model so far
-            $page->save();
-
-            event(EndpointHit::onUpdate($request, "Updated page [{$page->id}]", $page));
-
-            return new pageResource($page->fresh(['landingPageAncestors', 'parent', 'children', 'collectionCategories', 'collectionPersonas']));
-        });
+        return new UpdateRequestReceived($updateRequest);
     }
 
     /**
@@ -178,26 +147,5 @@ class PageController extends Controller
 
             return new ResourceDeleted('page');
         });
-    }
-
-    /**
-     * Return a unique version of the proposed slug.
-     *
-     * @param string $slug
-     * @return string
-     */
-    public function uniqueSlug($slug)
-    {
-        $uniqueSlug = $baseSlug = preg_replace('|\-\d$|', '', $slug);
-        $suffix = 1;
-        do {
-            $exists = DB::table((new Page())->getTable())->where('slug', $uniqueSlug)->exists();
-            if ($exists) {
-                $uniqueSlug = $baseSlug . '-' . $suffix;
-            }
-            $suffix++;
-        } while ($exists);
-
-        return $uniqueSlug;
     }
 }

@@ -56,7 +56,8 @@ class CanUpdateCategoryTaxonomyRelationships implements Rule
         }
 
         // Allow changing of taxonomies if global admin.
-        if (($this->model instanceof Service && $this->user->isGlobalAdmin())
+        if ($this->user->isSuperAdmin()
+            || ($this->model instanceof Service && $this->user->isGlobalAdmin())
             || ($this->model instanceof Organisation && $this->user->isOrganisationAdmin($this->model))
             || ($this->model instanceof OrganisationEvent && $this->user->isOrganisationAdmin($this->model->organisation))
         ) {

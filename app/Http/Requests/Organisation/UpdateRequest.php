@@ -58,7 +58,7 @@ class UpdateRequest extends FormRequest
                     return $this->user()->isGlobalAdmin();
                 }),
                 'url',
-                'max:255', ],
+                'max:255'],
             'email' => [
                 new NullableIf(function () {
                     return $this->user()->isGlobalAdmin() || $this->input('phone', $this->organisation->phone) !== null;
@@ -100,6 +100,30 @@ class UpdateRequest extends FormRequest
                 'exists:taxonomies,id',
                 new RootTaxonomyIs(Taxonomy::NAME_CATEGORY),
             ],
+        ];
+    }
+
+    /**
+     * Check if the user requested only a preview of the update request.
+     *
+     * @return bool
+     */
+    public function isPreview(): bool
+    {
+        return $this->preview === true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function messages()
+    {
+        $urlMessage = 'Please enter a valid web address in the correct format (starting with https:// or http://).';
+
+        return [
+            'url.url' => $urlMessage,
+            'social_medias.*.url' => $urlMessage,
+            'email.email' => 'Please enter an email address users can use to contact your organisation.',
         ];
     }
 }

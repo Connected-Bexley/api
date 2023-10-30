@@ -21,14 +21,20 @@ class NotificationsTest extends TestCase
      * List all the notifications.
      */
 
-    public function test_guest_cannot_list_them()
+    /**
+     * @test
+     */
+    public function guest_cannot_list_them()
     {
         $response = $this->json('GET', '/core/v1/notifications');
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_list_them()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_list_them()
     {
         /**
          * @var \App\Models\Service $service
@@ -45,7 +51,10 @@ class NotificationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_list_them()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_list_them()
     {
         /**
          * @var \App\Models\Service $service
@@ -62,15 +71,18 @@ class NotificationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_list_them()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_list_them()
     {
         /**
          * @var \App\Models\Organisation $organisation
          * @var \App\Models\User $user
          */
-        $service = Organisation::factory()->create();
+        $organisation = Organisation::factory()->create();
         $user = User::factory()->create();
-        $user->makeOrganisationAdmin($service);
+        $user->makeOrganisationAdmin($organisation);
 
         Passport::actingAs($user);
 
@@ -79,13 +91,34 @@ class NotificationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_list_them()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_list_them()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
         $user->makeGlobalAdmin();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('GET', '/core/v1/notifications');
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function super_admin_can_list_them()
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeSuperAdmin();
         $notification = $user->notifications()->create([
             'channel' => Notification::CHANNEL_EMAIL,
             'recipient' => 'test@example.com',
@@ -111,13 +144,16 @@ class NotificationsTest extends TestCase
         ]);
     }
 
-    public function test_global_admin_can_list_them_for_specific_user()
+    /**
+     * @test
+     */
+    public function super_admin_can_list_them_for_specific_user()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeSuperAdmin();
         $notification = $user->notifications()->create([
             'channel' => Notification::CHANNEL_EMAIL,
             'recipient' => 'test@example.com',
@@ -142,13 +178,16 @@ class NotificationsTest extends TestCase
         $response->assertJsonMissing(['id' => $anotherNotification->id]);
     }
 
-    public function test_global_admin_can_list_them_for_referral()
+    /**
+     * @test
+     */
+    public function super_admin_can_list_them_for_referral()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeSuperAdmin();
         $referral = Referral::factory()->create();
         $notification = $referral->notifications()->create([
             'channel' => Notification::CHANNEL_EMAIL,
@@ -174,13 +213,16 @@ class NotificationsTest extends TestCase
         $response->assertJsonMissing(['id' => $anotherNotification->id]);
     }
 
-    public function test_global_admin_can_list_them_for_service()
+    /**
+     * @test
+     */
+    public function super_admin_can_list_them_for_service()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeSuperAdmin();
         $service = Service::factory()->create();
         $notification = $service->notifications()->create([
             'channel' => Notification::CHANNEL_EMAIL,
@@ -206,7 +248,10 @@ class NotificationsTest extends TestCase
         $response->assertJsonMissing(['id' => $anotherNotification->id]);
     }
 
-    public function test_audit_created_when_listed()
+    /**
+     * @test
+     */
+    public function audit_created_when_listed()
     {
         $this->fakeEvents();
 
@@ -214,7 +259,7 @@ class NotificationsTest extends TestCase
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeSuperAdmin();
         $notification = $user->notifications()->create([
             'channel' => Notification::CHANNEL_EMAIL,
             'recipient' => 'test@example.com',
@@ -237,7 +282,10 @@ class NotificationsTest extends TestCase
      * Get a specific notification.
      */
 
-    public function test_guest_cannot_view_one()
+    /**
+     * @test
+     */
+    public function guest_cannot_view_one()
     {
         $notification = Notification::create([
             'channel' => Notification::CHANNEL_EMAIL,
@@ -252,7 +300,10 @@ class NotificationsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_view_one()
+    /**
+     * @test
+     */
+    public function service_worker_cannot_view_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -276,7 +327,10 @@ class NotificationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_view_one()
+    /**
+     * @test
+     */
+    public function service_admin_cannot_view_one()
     {
         /**
          * @var \App\Models\Service $service
@@ -300,7 +354,10 @@ class NotificationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_view_one()
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_view_one()
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -324,13 +381,41 @@ class NotificationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_view_one()
+    /**
+     * @test
+     */
+    public function global_admin_cannot_view_one()
     {
         /**
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
         $user->makeGlobalAdmin();
+        $notification = Notification::create([
+            'channel' => Notification::CHANNEL_EMAIL,
+            'recipient' => 'test@example.com',
+            'message' => 'This is a test',
+            'created_at' => $this->now,
+            'updated_at' => $this->now,
+        ]);
+
+        Passport::actingAs($user);
+
+        $response = $this->json('GET', "/core/v1/notifications/{$notification->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function super_admin_can_view_one()
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeSuperAdmin();
         $notification = Notification::create([
             'channel' => Notification::CHANNEL_EMAIL,
             'recipient' => 'test@example.com',
@@ -356,7 +441,10 @@ class NotificationsTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_viewed()
+    /**
+     * @test
+     */
+    public function audit_created_when_viewed()
     {
         $this->fakeEvents();
 
@@ -364,7 +452,7 @@ class NotificationsTest extends TestCase
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $user->makeGlobalAdmin();
+        $user->makeSuperAdmin();
         $notification = Notification::create([
             'channel' => Notification::CHANNEL_EMAIL,
             'recipient' => 'test@example.com',

@@ -15,9 +15,14 @@ class OrganisationObserver
      */
     public function created(Organisation $organisation)
     {
-        Role::globalAdmin()->users()->get()->each(function (User $user) use ($organisation) {
-            $user->makeOrganisationAdmin($organisation);
-        });
+        Role::globalAdmin()
+            ->users()
+            ->get()
+            ->concat(Role::superAdmin()->users()->get())
+            ->unique('id')
+            ->each(function (User $user) use ($organisation) {
+                $user->makeOrganisationAdmin($organisation);
+            });
     }
 
     /**

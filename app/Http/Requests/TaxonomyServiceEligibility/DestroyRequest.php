@@ -13,7 +13,7 @@ class DestroyRequest extends FormRequest
      */
     public function authorize()
     {
-        return $this->user()->isGlobalAdmin();
+        return $this->user()->isSuperAdmin();
     }
 
     /**

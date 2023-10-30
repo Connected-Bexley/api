@@ -32,14 +32,14 @@ class UpdateRequestObserver
             $this->handleNewUpdateRequest($updateRequest);
         }
 
-        if ($this->ownerIsGlobalAdmin($updateRequest)) {
+        if ($this->ownerIsSuperAdmin($updateRequest)) {
             $updateRequest->apply($updateRequest->user);
         }
     }
 
     private function handleExistingUpdateRequest(UpdateRequest $updateRequest)
     {
-        if (!$this->ownerIsGlobalAdmin($updateRequest)) {
+        if (!$this->ownerIsSuperAdmin($updateRequest)) {
             $this->sendCreatedNotificationsForExisting($updateRequest);
         }
 
@@ -49,14 +49,14 @@ class UpdateRequestObserver
 
     private function handleNewUpdateRequest(UpdateRequest $updateRequest)
     {
-        if (!$this->ownerIsGlobalAdmin($updateRequest)) {
+        if (!$this->ownerIsSuperAdmin($updateRequest)) {
             $this->sendCreatedNotificationsForNew($updateRequest);
         }
     }
 
-    private function ownerIsGlobalAdmin(UpdateRequest $updateRequest)
+    private function ownerIsSuperAdmin(UpdateRequest $updateRequest)
     {
-        return $updateRequest->user()->exists() ? $updateRequest->user->isGlobalAdmin() : false;
+        return $updateRequest->user()->exists() ? $updateRequest->user->isSuperAdmin() : false;
     }
 
     /**
