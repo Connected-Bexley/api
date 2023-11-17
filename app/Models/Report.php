@@ -37,11 +37,7 @@ class Report extends Model
      * Created a report record and a file record.
      * Then delegates the physical file creation to a `generateReportName` method.
      *
-     * @param \App\Models\ReportType $type
-     * @param \Carbon\CarbonImmutable|null $startsAt
-     * @param \Carbon\CarbonImmutable|null $endsAt
      * @throws \Exception
-     * @return \App\Models\Report
      */
     public static function generate(
         ReportType $type,
@@ -82,9 +78,6 @@ class Report extends Model
         return $report->$methodName($startsAt, $endsAt);
     }
 
-    /**
-     * @return \App\Models\Report
-     */
     public function generateUsersExport(): self
     {
         $headings = [
@@ -117,9 +110,6 @@ class Report extends Model
         return $this;
     }
 
-    /**
-     * @return \App\Models\Report
-     */
     public function generateServicesExport(): self
     {
         $headings = [
@@ -164,9 +154,6 @@ class Report extends Model
         return $this;
     }
 
-    /**
-     * @return \App\Models\Report
-     */
     public function generateOrganisationsExport(): self
     {
         $headings = [
@@ -199,9 +186,6 @@ class Report extends Model
         return $this;
     }
 
-    /**
-     * @return \App\Models\Report
-     */
     public function generateLocationsExport(): self
     {
         $headings = [
@@ -236,11 +220,6 @@ class Report extends Model
         return $this;
     }
 
-    /**
-     * @param \Carbon\CarbonImmutable|null $startsAt
-     * @param \Carbon\CarbonImmutable|null $endsAt
-     * @return \App\Models\Report
-     */
     public function generateReferralsExport(
         CarbonImmutable $startsAt = null,
         CarbonImmutable $endsAt = null
@@ -287,11 +266,6 @@ class Report extends Model
         return $this;
     }
 
-    /**
-     * @param \Carbon\CarbonImmutable|null $startsAt
-     * @param \Carbon\CarbonImmutable|null $endsAt
-     * @return \App\Models\Report
-     */
     public function generateFeedbackExport(
         CarbonImmutable $startsAt = null,
         CarbonImmutable $endsAt = null
@@ -326,11 +300,6 @@ class Report extends Model
         return $this;
     }
 
-    /**
-     * @param \Carbon\CarbonImmutable|null $startsAt
-     * @param \Carbon\CarbonImmutable|null $endsAt
-     * @return \App\Models\Report
-     */
     public function generateAuditLogsExport(
         CarbonImmutable $startsAt = null,
         CarbonImmutable $endsAt = null
@@ -371,11 +340,6 @@ class Report extends Model
         return $this;
     }
 
-    /**
-     * @param \Carbon\CarbonImmutable|null $startsAt
-     * @param \Carbon\CarbonImmutable|null $endsAt
-     * @return \App\Models\Report
-     */
     public function generateSearchHistoriesExport(
         CarbonImmutable $startsAt = null,
         CarbonImmutable $endsAt = null
@@ -400,7 +364,7 @@ class Report extends Model
 
             if ($row->distance) {
                 $distance = json_decode($row->distance);
-                $location = $distance->{'service_locations.location'}?? $distance->{'event_location.location'};
+                $location = $distance->{'service_locations.location'} ?? $distance->{'event_location.location'};
                 $coordinate = empty($location) ? null : implode(',', [$location->lat, $location->lon]);
             }
 
@@ -420,11 +384,6 @@ class Report extends Model
         return $this;
     }
 
-    /**
-     * @param \Carbon\CarbonImmutable|null $startsAt
-     * @param \Carbon\CarbonImmutable|null $endsAt
-     * @return \App\Models\Report
-     */
     public function generateHistoricUpdateRequestsExport(
         CarbonImmutable $startsAt = null,
         CarbonImmutable $endsAt = null
@@ -471,10 +430,6 @@ class Report extends Model
 
     /**
      * Report Row Generator.
-     *
-     * @param Collection $data
-     * @param Closure $callback
-     * @return Generator
      */
     public function reportRowGenerator(Collection $data, Closure $callback): Generator
     {

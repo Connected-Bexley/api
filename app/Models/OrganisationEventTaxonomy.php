@@ -12,9 +12,6 @@ class OrganisationEventTaxonomy extends Model
     use OrganisationEventTaxonomyRelationships;
     use OrganisationEventTaxonomyScopes;
 
-    /**
-     * @return \App\Models\OrganisationEventTaxonomy
-     */
     public function touchOrganisationEvent(): OrganisationEventTaxonomy
     {
         $this->organisationEvent->save();

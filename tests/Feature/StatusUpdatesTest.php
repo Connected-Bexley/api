@@ -18,7 +18,7 @@ class StatusUpdatesTest extends TestCase
      * List all of the status updates.
      */
 
-    public function test_guest_cannot_list_them()
+    public function test_guest_cannot_list_them(): void
     {
         $referral = Referral::factory()->create();
 
@@ -27,7 +27,7 @@ class StatusUpdatesTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_can_list_them()
+    public function test_service_worker_can_list_them(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -53,7 +53,7 @@ class StatusUpdatesTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_listed()
+    public function test_audit_created_when_listed(): void
     {
         $this->fakeEvents();
 

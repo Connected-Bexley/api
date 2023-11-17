@@ -23,10 +23,8 @@ class AuditsCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return mixed
      */
-    public function handle()
+    public function handle(): void
     {
         $months = Audit::AUTO_DELETE_MONTHS;
 

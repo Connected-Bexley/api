@@ -9,7 +9,7 @@ class IsUuidTest extends TestCase
     /**
      * @test
      */
-    public function it_can_tell_valid_uuids_from_invalid_uuids()
+    public function it_can_tell_valid_uuids_from_invalid_uuids(): void
     {
         $goodUuids = ['123e4567-e89b-12d3-a456-426655440000',
             'c73bcdcc-2669-4bf6-81d3-e4ae73fb11fd',

@@ -9,16 +9,12 @@ use App\Http\Resources\ServiceResource;
 use App\Models\Service;
 use App\Support\Coordinate;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class RelatedController extends Controller
 {
-    /**
-     * @param \App\Http\Requests\Service\Related\Request $request
-     * @param \App\Models\Service $service
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
-     */
-    public function __invoke(Request $request, Service $service)
+    public function __invoke(Request $request, Service $service): AnonymousResourceCollection
     {
         /*
          * This query does the following:

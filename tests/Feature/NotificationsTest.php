@@ -24,7 +24,7 @@ class NotificationsTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_list_them()
+    public function guest_cannot_list_them(): void
     {
         $response = $this->json('GET', '/core/v1/notifications');
 
@@ -34,7 +34,7 @@ class NotificationsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_list_them()
+    public function service_worker_cannot_list_them(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -54,7 +54,7 @@ class NotificationsTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_list_them()
+    public function service_admin_cannot_list_them(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -74,7 +74,7 @@ class NotificationsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_list_them()
+    public function organisation_admin_cannot_list_them(): void
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -94,7 +94,7 @@ class NotificationsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_list_them()
+    public function global_admin_cannot_list_them(): void
     {
         /**
          * @var \App\Models\User $user
@@ -112,7 +112,7 @@ class NotificationsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_list_them()
+    public function super_admin_can_list_them(): void
     {
         /**
          * @var \App\Models\User $user
@@ -147,7 +147,7 @@ class NotificationsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_list_them_for_specific_user()
+    public function super_admin_can_list_them_for_specific_user(): void
     {
         /**
          * @var \App\Models\User $user
@@ -181,7 +181,7 @@ class NotificationsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_list_them_for_referral()
+    public function super_admin_can_list_them_for_referral(): void
     {
         /**
          * @var \App\Models\User $user
@@ -216,7 +216,7 @@ class NotificationsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_list_them_for_service()
+    public function super_admin_can_list_them_for_service(): void
     {
         /**
          * @var \App\Models\User $user
@@ -251,7 +251,7 @@ class NotificationsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_listed()
+    public function audit_created_when_listed(): void
     {
         $this->fakeEvents();
 
@@ -285,7 +285,7 @@ class NotificationsTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_view_one()
+    public function guest_cannot_view_one(): void
     {
         $notification = Notification::create([
             'channel' => Notification::CHANNEL_EMAIL,
@@ -303,7 +303,7 @@ class NotificationsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_view_one()
+    public function service_worker_cannot_view_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -330,7 +330,7 @@ class NotificationsTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_view_one()
+    public function service_admin_cannot_view_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -357,7 +357,7 @@ class NotificationsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_view_one()
+    public function organisation_admin_cannot_view_one(): void
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -384,7 +384,7 @@ class NotificationsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_view_one()
+    public function global_admin_cannot_view_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -409,7 +409,7 @@ class NotificationsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_view_one()
+    public function super_admin_can_view_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -444,7 +444,7 @@ class NotificationsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_viewed()
+    public function audit_created_when_viewed(): void
     {
         $this->fakeEvents();
 

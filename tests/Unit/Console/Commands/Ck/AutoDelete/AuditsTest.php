@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class AuditsTest extends TestCase
 {
-    public function test_auto_delete_works()
+    public function test_auto_delete_works(): void
     {
         $newAudit = Audit::factory()->create([
             'created_at' => Date::today(),

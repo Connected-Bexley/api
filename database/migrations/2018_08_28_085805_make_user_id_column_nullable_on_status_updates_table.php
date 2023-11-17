@@ -16,7 +16,7 @@ return new class() extends Migration {
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('status_updates', function (Blueprint $table) {
             $table->string('user_id', 36)->nullable()->change();
@@ -26,7 +26,7 @@ return new class() extends Migration {
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
         Schema::table('status_updates', function (Blueprint $table) {
             $table->string('user_id', 36)->nullable(false)->change();

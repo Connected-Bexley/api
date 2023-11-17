@@ -28,9 +28,6 @@ class StatusUpdate extends Model
 
     const TO_INCOMPLETED = 'incompleted';
 
-    /**
-     * @return bool
-     */
     public function statusHasChanged(): bool
     {
         return $this->from !== $this->to;

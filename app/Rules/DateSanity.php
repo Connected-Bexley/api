@@ -3,9 +3,9 @@
 namespace App\Rules;
 
 use Carbon\Carbon;
-use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class DateSanity implements Rule
+class DateSanity implements ValidationRule
 {
     /**
      * @var Carbon\Carbon
@@ -19,8 +19,6 @@ class DateSanity implements Rule
 
     /**
      * Create a new rule instance.
-     *
-     * @param \Illuminate\Foundation\Http\FormRequest $request
      */
     public function __construct(\Illuminate\Foundation\Http\FormRequest $request)
     {
@@ -40,21 +38,20 @@ class DateSanity implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param string $attribute
      * @param mixed $value
-     * @return bool
+     * @param mixed $fail
      */
-    public function passes($attribute, $value)
+    public function validate(string $attribute, $value, $fail): void
     {
-        return $this->end->greaterThanOrEqualTo($this->start);
+        if (!$this->end->greaterThanOrEqualTo($this->start)) {
+            $fail($this->message());
+        }
     }
 
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
-    public function message()
+    public function message(): string
     {
         return 'The end date and time should be later than the start date and time';
     }

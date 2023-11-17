@@ -11,13 +11,6 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class CollectionPersonaController extends Controller
 {
-    /**
-     * @param \App\Http\Requests\Search\Collection\PersonaRequest $request
-     * @param \App\Search\SearchCriteriaQuery $criteria
-     * @param \App\Search\ElasticSearch\CollectionPersonaQueryBuilder $builder
-     * @param \App\Search\ElasticSearch\ServiceEloquentMapper $mapper
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
-     */
     public function __invoke(
         PersonaRequest $request,
         SearchCriteriaQuery $criteria,

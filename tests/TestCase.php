@@ -44,8 +44,6 @@ abstract class TestCase extends BaseTestCase
 
     /**
      * Setup the test environment.
-     *
-     * @return void
      */
     protected function setUp(): void
     {
@@ -66,7 +64,6 @@ abstract class TestCase extends BaseTestCase
     /**
      * Clean up the testing environment before the next test.
      *
-     * @return void
      *
      * @throws \Throwable
      */
@@ -135,7 +132,7 @@ abstract class TestCase extends BaseTestCase
      */
     protected function clearLog()
     {
-        if (!static::$testLogCleared) {
+        if (! static::$testLogCleared) {
             file_put_contents(config('logging.channels.testing.path'), '');
             static::$testLogCleared = true;
         }
@@ -146,7 +143,7 @@ abstract class TestCase extends BaseTestCase
      */
     protected function setUpElasticsearch()
     {
-        if (!$this instanceof UsesElasticsearch) {
+        if (! $this instanceof UsesElasticsearch) {
             Service::disableSearchSyncing();
             OrganisationEvent::disableSearchSyncing();
             Page::disableSearchSyncing();
@@ -158,7 +155,7 @@ abstract class TestCase extends BaseTestCase
             Page::enableSearchSyncing();
         }
 
-        if (!static::$elasticsearchInitialised) {
+        if (! static::$elasticsearchInitialised) {
             $this->artisan('ck:reindex-elasticsearch');
             static::$elasticsearchInitialised = true;
         }
@@ -169,7 +166,7 @@ abstract class TestCase extends BaseTestCase
      */
     protected function tearDownElasticsearch()
     {
-        if (!$this instanceof UsesElasticsearch) {
+        if (! $this instanceof UsesElasticsearch) {
             Service::disableSearchSyncing();
             OrganisationEvent::disableSearchSyncing();
             Page::disableSearchSyncing();
@@ -190,17 +187,12 @@ abstract class TestCase extends BaseTestCase
         }
     }
 
-    /**
-     * @param  \Illuminate\Testing\TestResponse  $response
-     */
     protected function dumpResponse(TestResponse $response)
     {
         dump(json_decode($response->getContent(), true));
     }
 
     /**
-     * @param  \Illuminate\Testing\TestResponse  $response
-     * @param  string|null  $key
      * @return array|string
      */
     protected function getResponseContent(TestResponse $response, string $key = null)
@@ -227,7 +219,7 @@ abstract class TestCase extends BaseTestCase
     /**
      * Approve an update request
      *
-     * @param string $updateRequestId
+     * @param  string  $updateRequestId
      * @return array
      **/
     public function approveUpdateRequest($updateRequestId)

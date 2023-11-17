@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class ServiceLocationTest extends TestCase
 {
-    public function test_is_open_now_returns_false_if_no_opening_hours_associated()
+    public function test_is_open_now_returns_false_if_no_opening_hours_associated(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
 
@@ -20,7 +20,7 @@ class ServiceLocationTest extends TestCase
      * Weekly Frequency.
      */
 
-    public function test_is_open_now_with_weekly_frequency_returns_true_if_weekday_is_today()
+    public function test_is_open_now_with_weekly_frequency_returns_true_if_weekday_is_today(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $serviceLocation->regularOpeningHours()->create([
@@ -33,7 +33,7 @@ class ServiceLocationTest extends TestCase
         $this->assertTrue($serviceLocation->isOpenNow());
     }
 
-    public function test_is_open_now_with_weekly_frequency_returns_false_if_weekday_is_not_today()
+    public function test_is_open_now_with_weekly_frequency_returns_false_if_weekday_is_not_today(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $serviceLocation->regularOpeningHours()->create([
@@ -46,7 +46,7 @@ class ServiceLocationTest extends TestCase
         $this->assertFalse($serviceLocation->isOpenNow());
     }
 
-    public function test_is_open_now_with_weekly_frequency_returns_false_if_weekday_is_today_but_out_of_hours()
+    public function test_is_open_now_with_weekly_frequency_returns_false_if_weekday_is_today_but_out_of_hours(): void
     {
         Date::setTestNow(Date::now()->setTime(9, 0));
 
@@ -65,7 +65,7 @@ class ServiceLocationTest extends TestCase
      * Monthly Frequency.
      */
 
-    public function test_is_open_now_with_monthly_frequency_returns_true_if_day_of_month_is_today()
+    public function test_is_open_now_with_monthly_frequency_returns_true_if_day_of_month_is_today(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $serviceLocation->regularOpeningHours()->create([
@@ -78,7 +78,7 @@ class ServiceLocationTest extends TestCase
         $this->assertTrue($serviceLocation->isOpenNow());
     }
 
-    public function test_is_open_now_with_monthly_frequency_returns_false_if_day_of_month_is_not_today()
+    public function test_is_open_now_with_monthly_frequency_returns_false_if_day_of_month_is_not_today(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $serviceLocation->regularOpeningHours()->create([
@@ -91,7 +91,7 @@ class ServiceLocationTest extends TestCase
         $this->assertFalse($serviceLocation->isOpenNow());
     }
 
-    public function test_is_open_now_with_monthly_frequency_returns_false_if_day_of_month_is_today_but_out_of_hours()
+    public function test_is_open_now_with_monthly_frequency_returns_false_if_day_of_month_is_today_but_out_of_hours(): void
     {
         Date::setTestNow(Date::now()->setTime(9, 0));
 
@@ -110,7 +110,7 @@ class ServiceLocationTest extends TestCase
      * Fortnightly Frequency.
      */
 
-    public function test_is_open_now_with_fortnightly_frequency_returns_true_if_lands_on_today()
+    public function test_is_open_now_with_fortnightly_frequency_returns_true_if_lands_on_today(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $serviceLocation->regularOpeningHours()->create([
@@ -123,7 +123,7 @@ class ServiceLocationTest extends TestCase
         $this->assertTrue($serviceLocation->isOpenNow());
     }
 
-    public function test_is_open_now_with_fortnightly_frequency_returns_true_if_lands_on_today_in_past()
+    public function test_is_open_now_with_fortnightly_frequency_returns_true_if_lands_on_today_in_past(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $serviceLocation->regularOpeningHours()->create([
@@ -136,7 +136,7 @@ class ServiceLocationTest extends TestCase
         $this->assertTrue($serviceLocation->isOpenNow());
     }
 
-    public function test_is_open_now_with_fortnightly_frequency_returns_true_if_lands_on_today_in_future()
+    public function test_is_open_now_with_fortnightly_frequency_returns_true_if_lands_on_today_in_future(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $serviceLocation->regularOpeningHours()->create([
@@ -149,7 +149,7 @@ class ServiceLocationTest extends TestCase
         $this->assertTrue($serviceLocation->isOpenNow());
     }
 
-    public function test_is_open_now_with_fortnightly_frequency_returns_false_if_lands_on_odd_week()
+    public function test_is_open_now_with_fortnightly_frequency_returns_false_if_lands_on_odd_week(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $serviceLocation->regularOpeningHours()->create([
@@ -162,7 +162,7 @@ class ServiceLocationTest extends TestCase
         $this->assertFalse($serviceLocation->isOpenNow());
     }
 
-    public function test_is_open_now_with_fortnightly_frequency_returns_false_if_lands_off_schedule()
+    public function test_is_open_now_with_fortnightly_frequency_returns_false_if_lands_off_schedule(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $serviceLocation->regularOpeningHours()->create([
@@ -175,7 +175,7 @@ class ServiceLocationTest extends TestCase
         $this->assertFalse($serviceLocation->isOpenNow());
     }
 
-    public function test_is_open_now_with_fortnightly_frequency_returns_false_if_lands_on_today_but_out_of_hours()
+    public function test_is_open_now_with_fortnightly_frequency_returns_false_if_lands_on_today_but_out_of_hours(): void
     {
         Date::setTestNow(Date::now()->setTime(9, 0));
 
@@ -194,7 +194,7 @@ class ServiceLocationTest extends TestCase
      * Nth Occurrence of Month.
      */
 
-    public function test_is_open_now_with_nth_occurrence_of_month_frequency_returns_true_if_lands_on_today()
+    public function test_is_open_now_with_nth_occurrence_of_month_frequency_returns_true_if_lands_on_today(): void
     {
         $now = Date::createFromTimestamp(strtotime('second tuesday of august 2018'));
         Date::setTestNow($now->setTime(9, 0));
@@ -211,7 +211,7 @@ class ServiceLocationTest extends TestCase
         $this->assertTrue($serviceLocation->isOpenNow());
     }
 
-    public function test_is_open_now_with_nth_occurrence_of_month_frequency_returns_false_if_lands_on_different_day()
+    public function test_is_open_now_with_nth_occurrence_of_month_frequency_returns_false_if_lands_on_different_day(): void
     {
         $now = Date::createFromTimestamp(strtotime('second tuesday of august 2018'));
         Date::setTestNow($now->setTime(9, 0));
@@ -229,7 +229,7 @@ class ServiceLocationTest extends TestCase
     }
 
     public function test_is_open_now_with_nth_occurrence_of_month_frequency_returns_true_if_lands_on_today_but_out_of_hours(
-    ) {
+    ): void {
         $now = Date::createFromTimestamp(strtotime('second tuesday of august 2018'));
         Date::setTestNow($now->setTime(9, 0));
 
@@ -245,7 +245,7 @@ class ServiceLocationTest extends TestCase
         $this->assertFalse($serviceLocation->isOpenNow());
     }
 
-    public function test_is_open_now_with_nth_occurrence_of_month_frequency_returns_true_for_last_day_of_month()
+    public function test_is_open_now_with_nth_occurrence_of_month_frequency_returns_true_for_last_day_of_month(): void
     {
         $now = Date::createFromTimestamp(strtotime('last friday of september 2018'));
         Date::setTestNow($now->setTime(9, 0));
@@ -266,7 +266,7 @@ class ServiceLocationTest extends TestCase
      * Holiday Opening Hours.
      */
 
-    public function test_is_open_now_returns_true_if_holiday_opening_hours_include_today()
+    public function test_is_open_now_returns_true_if_holiday_opening_hours_include_today(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $serviceLocation->holidayOpeningHours()->create([
@@ -280,7 +280,7 @@ class ServiceLocationTest extends TestCase
         $this->assertTrue($serviceLocation->isOpenNow());
     }
 
-    public function test_is_open_now_returns_false_if_holiday_opening_hours_include_today_but_out_of_hours()
+    public function test_is_open_now_returns_false_if_holiday_opening_hours_include_today_but_out_of_hours(): void
     {
         Date::setTestNow(Date::now()->setTime(9, 0));
 
@@ -296,7 +296,7 @@ class ServiceLocationTest extends TestCase
         $this->assertFalse($serviceLocation->isOpenNow());
     }
 
-    public function test_is_open_now_with_weekly_frequency_returns_false_if_weekday_is_today_but_closed_for_holiday()
+    public function test_is_open_now_with_weekly_frequency_returns_false_if_weekday_is_today_but_closed_for_holiday(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $serviceLocation->holidayOpeningHours()->create([

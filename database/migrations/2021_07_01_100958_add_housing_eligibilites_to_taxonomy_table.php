@@ -11,7 +11,7 @@ return new class() extends Migration {
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         $now = Carbon::now()->toDateTimeString();
 
@@ -60,7 +60,7 @@ return new class() extends Migration {
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
         Schema::table('taxonomies', function (Blueprint $table) {
             $housingEligibilitytaxonomy = Taxonomy::serviceEligibility()->children()->where('name', 'Housing')->firstOrFail();

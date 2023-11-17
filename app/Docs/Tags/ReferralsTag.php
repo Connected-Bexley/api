@@ -7,10 +7,6 @@ use GoldSpecDigital\ObjectOrientedOAS\Objects\Tag;
 
 class ReferralsTag extends Tag
 {
-    /**
-     * @param string|null $objectId
-     * @return static
-     */
     public static function create(string $objectId = null): BaseObject
     {
         return parent::create($objectId)

@@ -6,10 +6,6 @@ use App\Support\Time;
 
 trait HolidayOpeningHourMutators
 {
-    /**
-     * @param string $opensAt
-     * @return \App\Support\Time
-     */
     public function getOpensAtAttribute(string $opensAt): Time
     {
         return Time::create($opensAt);
@@ -25,10 +21,6 @@ trait HolidayOpeningHourMutators
         $this->attributes['opens_at'] = $opensAt->toString();
     }
 
-    /**
-     * @param string $closesAt
-     * @return \App\Support\Time
-     */
     public function getClosesAtAttribute(string $closesAt): Time
     {
         return Time::create($closesAt);

@@ -6,6 +6,7 @@ use App\Models\Mutators\TaxonomyMutators;
 use App\Models\Relationships\TaxonomyRelationships;
 use App\Models\Scopes\TaxonomyScopes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Collection;
 
 class Taxonomy extends Model
 {
@@ -20,34 +21,21 @@ class Taxonomy extends Model
 
     const NAME_SERVICE_ELIGIBILITY = 'Service Eligibility';
 
-    /**
-     * @return \App\Models\Taxonomy
-     */
     public static function category(): self
     {
         return static::whereNull('parent_id')->where('name', static::NAME_CATEGORY)->firstOrFail();
     }
 
-    /**
-     * @return \App\Models\Taxonomy
-     */
     public static function organisation(): self
     {
         return static::whereNull('parent_id')->where('name', static::NAME_ORGANISATION)->firstOrFail();
     }
 
-    /**
-     * @return \App\Models\Taxonomy
-     */
     public static function serviceEligibility(): self
     {
         return static::whereNull('parent_id')->where('name', static::NAME_SERVICE_ELIGIBILITY)->firstOrFail();
     }
 
-    /**
-     * @param \App\Models\Taxonomy|null $taxonomy
-     * @return \App\Models\Taxonomy
-     */
     public function getRootTaxonomy(Taxonomy $taxonomy = null): Taxonomy
     {
         $taxonomy = $taxonomy ?? $this;
@@ -59,28 +47,18 @@ class Taxonomy extends Model
         return $this->getRootTaxonomy($taxonomy->parent);
     }
 
-    /**
-     * @param string $name
-     * @return bool
-     */
     public function rootIsCalled(string $name): bool
     {
         return $this->getRootTaxonomy()->name === $name;
     }
 
-    /**
-     * @return \App\Models\Taxonomy
-     */
     public function touchServices(): Taxonomy
     {
-        $this->services()->get()->each->save();
+        $this->services()->get()->searchable();
 
         return $this;
     }
 
-    /**
-     * @return int
-     */
     protected function getDepth(): int
     {
         if ($this->parent_id === null) {
@@ -90,9 +68,6 @@ class Taxonomy extends Model
         return 1 + $this->parent->getDepth();
     }
 
-    /**
-     * @return self
-     */
     public function updateDepth(): self
     {
         $this->update(['depth' => $this->getDepth()]);
@@ -107,11 +82,9 @@ class Taxonomy extends Model
     /**
      * Return an array of all Taxonomies below the provided Taxonomy root.
      *
-     * @param App\Models\Taxonomy $taxonomy
      * @param mixed $allTaxonomies
-     * @return Illuminate\Support\Collection
      */
-    public function getAllDescendantTaxonomies(self $taxonomy, &$allTaxonomies = [])
+    public function getAllDescendantTaxonomies(self $taxonomy, &$allTaxonomies = []): Collection
     {
         if (!$taxonomy) {
             $taxonomy = self::serviceEligibility();
@@ -133,7 +106,6 @@ class Taxonomy extends Model
     /**
      * Filter the passed taxonomy IDs for descendants of this taxonomy.
      *
-     * @param array $taxonomyIds
      * @return array|bool
      */
     public function filterDescendants(array $taxonomyIds)

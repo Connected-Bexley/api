@@ -11,13 +11,6 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class CollectionCategoryController extends Controller
 {
-    /**
-     * @param \App\Http\Requests\Search\Collection\CategoryRequest $request
-     * @param \App\Search\SearchCriteriaQuery $criteria
-     * @param \App\Search\ElasticSearch\CollectionCategoryQueryBuilder $builder
-     * @param \App\Search\ElasticSearch\ServiceEloquentMapper $mapper
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
-     */
     public function __invoke(
         CategoryRequest $request,
         SearchCriteriaQuery $criteria,

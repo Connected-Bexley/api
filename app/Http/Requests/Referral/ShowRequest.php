@@ -11,12 +11,10 @@ class ShowRequest extends FormRequest
 
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
-        if (!$this->user()->isGlobalAdmin() && $this->user()->isServiceWorker($this->referral->service)) {
+        if (!$this->user()->isOnlyGlobalAdmin() && $this->user()->isServiceWorker($this->referral->service)) {
             return true;
         }
 
@@ -25,10 +23,8 @@ class ShowRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             //

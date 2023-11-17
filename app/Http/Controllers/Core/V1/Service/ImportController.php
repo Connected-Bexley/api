@@ -17,6 +17,7 @@ use App\Rules\MarkdownMinLength;
 use App\Rules\RootTaxonomyIs;
 use App\Rules\UserHasRole;
 use App\Rules\VideoEmbed;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -52,11 +53,9 @@ class ImportController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param \App\Http\Requests\Service\ImportRequest $request
      * @throws Illuminate\Validation\ValidationException
-     * @return \Illuminate\Http\Response
      */
-    public function __invoke(ImportRequest $request)
+    public function __invoke(ImportRequest $request): JsonResponse
     {
         $this->user = $request->user('api');
 
@@ -78,7 +77,6 @@ class ImportController extends Controller
     /**
      * Validate the spreadsheet rows.
      *
-     * @param string $filePath
      * @return array
      */
     public function validateSpreadsheet(string $filePath)
@@ -231,7 +229,11 @@ class ImportController extends Controller
                     $eligibilityTaxonomyIds = explode(',', $value);
                     $invalidEligibilityTaxonomyIds = [];
                     foreach ($eligibilityTaxonomyIds as $eligibilityTaxonomyId) {
-                        if (!$isServiceEligibility->passes($att, $eligibilityTaxonomyId)) {
+                        $eligibilityTaxonomyIdInvalid = false;
+                        $isServiceEligibility->validate($att, $eligibilityTaxonomyId, function () use (&$eligibilityTaxonomyIdInvalid) {
+                            $eligibilityTaxonomyIdInvalid = true;
+                        });
+                        if ($eligibilityTaxonomyIdInvalid) {
                             $invalidEligibilityTaxonomyIds[] = $eligibilityTaxonomyId;
                         }
                     }
@@ -275,8 +277,6 @@ class ImportController extends Controller
 
     /**
      * Import the uploaded file contents.
-     *
-     * @param string $filePath
      */
     public function importSpreadsheet(string $filePath)
     {

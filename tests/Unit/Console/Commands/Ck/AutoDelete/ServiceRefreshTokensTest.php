@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class ServiceRefreshTokensTest extends TestCase
 {
-    public function test_auto_delete_works()
+    public function test_auto_delete_works(): void
     {
         $newServiceRefreshToken = ServiceRefreshToken::factory()->create([
             'created_at' => Date::today(),

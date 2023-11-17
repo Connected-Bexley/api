@@ -134,9 +134,6 @@ class ServiceQueryBuilder extends ElasticsearchQueryBuilder implements QueryBuil
         $this->addFilter('collection_personas', $personaNames);
     }
 
-    /**
-     * @param string $waitTime
-     */
     protected function applyWaitTime(string $waitTime): void
     {
         if (!Service::waitTimeIsValid($waitTime)) {

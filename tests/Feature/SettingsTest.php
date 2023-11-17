@@ -228,21 +228,21 @@ class SettingsTest extends TestCase
      * List all the settings.
      */
 
-    public function test_guest_can_list_them()
+    public function test_guest_can_list_them(): void
     {
         $response = $this->getJson('/core/v1/settings');
 
         $response->assertStatus(Response::HTTP_OK);
     }
 
-    public function test_structure_correct_when_listed()
+    public function test_structure_correct_when_listed(): void
     {
         $response = $this->getJson('/core/v1/settings');
 
         $response->assertJsonStructure($this->settingsStructure);
     }
 
-    public function test_values_correct_when_listed()
+    public function test_values_correct_when_listed(): void
     {
         $response = $this->getJson('/core/v1/settings');
 
@@ -314,7 +314,7 @@ class SettingsTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_listed()
+    public function test_audit_created_when_listed(): void
     {
         $this->fakeEvents();
 
@@ -329,14 +329,14 @@ class SettingsTest extends TestCase
      * Update the settings.
      */
 
-    public function test_guest_cannot_update_them()
+    public function test_guest_cannot_update_them(): void
     {
         $response = $this->putJson('/core/v1/settings');
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_update_them()
+    public function test_service_worker_cannot_update_them(): void
     {
         Passport::actingAs(
             User::factory()->create()->makeServiceWorker(
@@ -349,7 +349,7 @@ class SettingsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_update_them()
+    public function test_service_admin_cannot_update_them(): void
     {
         Passport::actingAs(
             User::factory()->create()->makeServiceAdmin(
@@ -362,7 +362,7 @@ class SettingsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_update_them()
+    public function test_organisation_admin_cannot_update_them(): void
     {
         Passport::actingAs(
             User::factory()->create()->makeOrganisationAdmin(
@@ -375,7 +375,7 @@ class SettingsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_cannot_update_them()
+    public function test_global_admin_cannot_update_them(): void
     {
         Passport::actingAs(
             User::factory()->create()->makeGlobalAdmin()
@@ -386,7 +386,7 @@ class SettingsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_super_admin_can_update_them()
+    public function test_super_admin_can_update_them(): void
     {
         Passport::actingAs(
             User::factory()->create()->makeSuperAdmin()
@@ -397,7 +397,7 @@ class SettingsTest extends TestCase
         $response->assertStatus(Response::HTTP_OK);
     }
 
-    public function test_structure_correct_when_updated()
+    public function test_structure_correct_when_updated(): void
     {
         Passport::actingAs(
             User::factory()->create()->makeSuperAdmin()
@@ -408,7 +408,7 @@ class SettingsTest extends TestCase
         $response->assertJsonStructure($this->settingsStructure);
     }
 
-    public function test_values_correct_when_updated()
+    public function test_values_correct_when_updated(): void
     {
         Passport::actingAs(
             User::factory()->create()->makeSuperAdmin()
@@ -419,7 +419,7 @@ class SettingsTest extends TestCase
         $response->assertJson($this->settingsResponse);
     }
 
-    public function test_audit_created_when_updated()
+    public function test_audit_created_when_updated(): void
     {
         $this->fakeEvents();
 
@@ -437,7 +437,7 @@ class SettingsTest extends TestCase
     /**
      * @test
      */
-    public function video_url_is_optional()
+    public function video_url_is_optional(): void
     {
         Passport::actingAs(
             User::factory()->create()->makeSuperAdmin()
@@ -474,7 +474,7 @@ class SettingsTest extends TestCase
      * CMS / Frontend / Banner.
      */
 
-    public function test_banner_image_can_be_update()
+    public function test_banner_image_can_be_update(): void
     {
         Passport::actingAs(
             User::factory()->create()->makeSuperAdmin()
@@ -484,7 +484,7 @@ class SettingsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
+            'file' => 'data:image/png;base64,'.base64_encode($image),
         ]);
 
         $this->settingsData['cms']['frontend']['banner']['image_file_id'] = $this->getResponseContent($imageResponse, 'data.id');
@@ -496,7 +496,7 @@ class SettingsTest extends TestCase
         $response->assertJson($this->settingsResponse);
     }
 
-    public function test_banner_image_remains_when_not_provided()
+    public function test_banner_image_remains_when_not_provided(): void
     {
         Passport::actingAs(
             User::factory()->create()->makeSuperAdmin()
@@ -517,7 +517,7 @@ class SettingsTest extends TestCase
         $response->assertJson($this->settingsResponse);
     }
 
-    public function test_banner_image_can_be_removed()
+    public function test_banner_image_can_be_removed(): void
     {
         Passport::actingAs(
             User::factory()->create()->makeSuperAdmin()
@@ -538,7 +538,7 @@ class SettingsTest extends TestCase
         $response->assertJson($this->settingsResponse);
     }
 
-    public function test_all_banner_fields_are_required()
+    public function test_all_banner_fields_are_required(): void
     {
         Passport::actingAs(
             User::factory()->create()->makeSuperAdmin()
@@ -548,7 +548,7 @@ class SettingsTest extends TestCase
         $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
+            'file' => 'data:image/png;base64,'.base64_encode($image),
         ]);
 
         $this->settingsData['cms']['frontend']['banner'] = [
@@ -567,14 +567,14 @@ class SettingsTest extends TestCase
      * Get banner image.
      */
 
-    public function test_guest_cannot_view_banner_image_when_not_provided()
+    public function test_guest_cannot_view_banner_image_when_not_provided(): void
     {
         $response = $this->get('/core/v1/settings/banner-image.png');
 
         $response->assertStatus(Response::HTTP_NOT_FOUND);
     }
 
-    public function test_super_admin_can_view_banner_image()
+    public function test_super_admin_can_view_banner_image(): void
     {
         Passport::actingAs(
             User::factory()->create()->makeSuperAdmin()
@@ -584,7 +584,7 @@ class SettingsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
+            'file' => 'data:image/png;base64,'.base64_encode($image),
         ]);
 
         $cmsValue = Setting::cms()->value;
@@ -601,7 +601,7 @@ class SettingsTest extends TestCase
         $response->assertHeader('Content-Type', 'image/png');
     }
 
-    public function test_audit_created_when_banner_image_viewed()
+    public function test_audit_created_when_banner_image_viewed(): void
     {
         $this->fakeEvents();
 
@@ -613,7 +613,7 @@ class SettingsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
+            'file' => 'data:image/png;base64,'.base64_encode($image),
         ]);
 
         $cmsValue = Setting::cms()->value;
@@ -638,7 +638,7 @@ class SettingsTest extends TestCase
     /**
      * @test
      */
-    public function single_home_banner_can_be_added()
+    public function single_home_banner_can_be_added(): void
     {
         Passport::actingAs(
             User::factory()->create()->makeSuperAdmin()
@@ -666,7 +666,7 @@ class SettingsTest extends TestCase
     /**
      * @test
      */
-    public function multiple_home_banners_can_be_added()
+    public function multiple_home_banners_can_be_added(): void
     {
         Passport::actingAs(
             User::factory()->create()->makeSuperAdmin()
@@ -719,7 +719,7 @@ class SettingsTest extends TestCase
     /**
      * @test
      */
-    public function home_banners_can_be_updated()
+    public function home_banners_can_be_updated(): void
     {
         Passport::actingAs(
             User::factory()->create()->makeSuperAdmin()
@@ -753,7 +753,7 @@ class SettingsTest extends TestCase
     /**
      * @test
      */
-    public function home_banners_require_title_content_button_text_and_button_url()
+    public function home_banners_require_title_content_button_text_and_button_url(): void
     {
         Passport::actingAs(
             User::factory()->create()->makeSuperAdmin()
@@ -851,7 +851,7 @@ class SettingsTest extends TestCase
     /**
      * @test
      */
-    public function home_banners_can_be_removed()
+    public function home_banners_can_be_removed(): void
     {
         Passport::actingAs(
             User::factory()->create()->makeSuperAdmin()

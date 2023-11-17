@@ -3,13 +3,11 @@
 namespace App\Models\Relationships;
 
 use App\Models\ReportType;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait ReportScheduleRelationships
 {
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function reportType()
+    public function reportType(): BelongsTo
     {
         return $this->belongsTo(ReportType::class);
     }

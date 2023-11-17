@@ -4,21 +4,16 @@ namespace App\Models\Relationships;
 
 use App\Models\Collection;
 use App\Models\Taxonomy;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait CollectionTaxonomyRelationships
 {
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function collection()
+    public function collection(): BelongsTo
     {
         return $this->belongsTo(Collection::class);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function taxonomy()
+    public function taxonomy(): BelongsTo
     {
         return $this->belongsTo(Taxonomy::class);
     }

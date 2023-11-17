@@ -3,6 +3,7 @@
 namespace App\Http\Responses;
 
 use Illuminate\Contracts\Support\Responsable;
+use Illuminate\Http\JsonResponse;
 
 class ResourceDeleted implements Responsable
 {
@@ -13,8 +14,6 @@ class ResourceDeleted implements Responsable
 
     /**
      * ResourceDeleted constructor.
-     *
-     * @param string $resource
      */
     public function __construct(string $resource)
     {
@@ -23,11 +22,9 @@ class ResourceDeleted implements Responsable
 
     /**
      * Create an HTTP response that represents the object.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @param mixed $request
      */
-    public function toResponse($request)
+    public function toResponse($request): JsonResponse
     {
         return response()->json(['message' => "The {$this->resource} has been successfully deleted"]);
     }

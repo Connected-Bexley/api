@@ -3,15 +3,14 @@
 namespace App\Http\Requests\Page;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class DestroyRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         if ($this->user()->isSuperAdmin()) {
             return true;
@@ -22,10 +21,8 @@ class DestroyRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             //
@@ -34,10 +31,8 @@ class DestroyRequest extends FormRequest
 
     /**
      * Configure the validator instance.
-     *
-     * @param \Illuminate\Validation\Validator $validator
      */
-    public function withValidator($validator)
+    public function withValidator(Validator $validator)
     {
         $validator->after(function ($validator) {
             if ($this->page->children()->count() !== 0) {

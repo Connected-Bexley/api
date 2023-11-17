@@ -6,9 +6,6 @@ use App\Emails\Email;
 
 class NotifyUserEmail extends Email
 {
-    /**
-     * @return string
-     */
     protected function getTemplateId(): string
     {
         return config('gov_uk_notify.notifications_template_ids.user_roles_updated.notify_user.email');

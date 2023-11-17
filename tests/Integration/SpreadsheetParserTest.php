@@ -93,7 +93,7 @@ class SpreadsheetParserTest extends TestCase
     /**
      * @test
      */
-    public function it_can_import_a_xls_spreadsheet()
+    public function it_can_import_a_xls_spreadsheet(): void
     {
         $spreadsheetParser = new SpreadsheetParser();
 
@@ -107,7 +107,7 @@ class SpreadsheetParserTest extends TestCase
     /**
      * @test
      */
-    public function it_can_import_a_xlsx_spreadsheet()
+    public function it_can_import_a_xlsx_spreadsheet(): void
     {
         $spreadsheetParser = new SpreadsheetParser();
 
@@ -121,7 +121,7 @@ class SpreadsheetParserTest extends TestCase
     /**
      * @test
      */
-    public function it_can_read_rows_from_a_xls_spreadsheet()
+    public function it_can_read_rows_from_a_xls_spreadsheet(): void
     {
         $spreadsheetParser = new SpreadsheetParser();
 

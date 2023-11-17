@@ -7,7 +7,7 @@ return new class() extends Migration {
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         DB::table('collections')
             ->update([
@@ -40,7 +40,7 @@ EOT
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
         DB::table('collections')
             ->update([

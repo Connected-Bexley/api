@@ -16,7 +16,7 @@ use Tests\TestCase;
 
 class ReferralIncompletedTest extends TestCase
 {
-    public function test_emails_sent_out()
+    public function test_emails_sent_out(): void
     {
         Queue::fake();
 
@@ -70,7 +70,7 @@ class ReferralIncompletedTest extends TestCase
         });
     }
 
-    public function test_sms_sent_out()
+    public function test_sms_sent_out(): void
     {
         Queue::fake();
 
@@ -109,7 +109,7 @@ class ReferralIncompletedTest extends TestCase
         });
     }
 
-    public function test_both_email_and_sms_sent_out_to_client()
+    public function test_both_email_and_sms_sent_out_to_client(): void
     {
         Queue::fake();
 

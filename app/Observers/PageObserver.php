@@ -8,8 +8,6 @@ class PageObserver
 {
     /**
      * Handle the information page "deleting" event.
-     *
-     * @param \App\Models\Page $page
      */
     public function deleting(Page $page)
     {

@@ -15,6 +15,7 @@ use App\Http\Responses\ResourceDeleted;
 use App\Models\Collection;
 use App\Models\File;
 use App\Models\Taxonomy;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -31,11 +32,8 @@ class CollectionOrganisationEventController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param \App\Http\Requests\CollectionOrganisationEvent\IndexRequest $request
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index(IndexRequest $request)
+    public function index(IndexRequest $request): AnonymousResourceCollection
     {
         $baseQuery = Collection::organisationEvents()
             ->orderBy('order');
@@ -59,7 +57,6 @@ class CollectionOrganisationEventController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param \App\Http\Requests\CollectionOrganisationEvent\StoreRequest $request
      * @return \Illuminate\Http\Response
      */
     public function store(StoreRequest $request, UniqueSlugGenerator $slugGenerator)
@@ -107,12 +104,8 @@ class CollectionOrganisationEventController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param \App\Http\Requests\CollectionOrganisationEvent\ShowRequest $request
-     * @param \App\Models\Collection $collection
-     * @return \App\Http\Resources\CollectionOrganisationEventResource
      */
-    public function show(ShowRequest $request, Collection $collection)
+    public function show(ShowRequest $request, Collection $collection): CollectionOrganisationEventResource
     {
         $baseQuery = Collection::query()
             ->where('id', $collection->id);
@@ -128,8 +121,6 @@ class CollectionOrganisationEventController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \App\Http\Requests\CollectionOrganisationEvent\UpdateRequest $request
-     * @param \App\Models\Collection $collection
      * @return \Illuminate\Http\Response
      */
     public function update(UpdateRequest $request, UniqueSlugGenerator $slugGenerator, Collection $collection)
@@ -178,8 +169,6 @@ class CollectionOrganisationEventController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param \App\Http\Requests\CollectionOrganisationEvent\DestroyRequest $request
-     * @param \App\Models\Collection $collection
      * @return \Illuminate\Http\Response
      */
     public function destroy(DestroyRequest $request, Collection $collection)

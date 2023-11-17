@@ -13,17 +13,11 @@ class CachedGeocodeResult extends Model
     use CachedGeocodeResultRelationships;
     use CachedGeocodeResultScopes;
 
-    /**
-     * @return bool
-     */
     public function hasNoCoordinate(): bool
     {
         return $this->lat === null || $this->lon === null;
     }
 
-    /**
-     * @return \App\Support\Coordinate
-     */
     public function toCoordinate(): Coordinate
     {
         return new Coordinate($this->lat, $this->lon);

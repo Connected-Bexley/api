@@ -23,10 +23,8 @@ class UpdateRequest extends FormRequest
 
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         if ($this->user()->isContentAdmin()) {
             return true;
@@ -37,10 +35,8 @@ class UpdateRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         $maxOrder = $this->parent_id ?
         Page::findOrFail($this->parent_id)->children->count() :
@@ -114,8 +110,6 @@ class UpdateRequest extends FormRequest
 
     /**
      * Check if the user requested only a preview of the update request.
-     *
-     * @return bool
      */
     public function isPreview(): bool
     {

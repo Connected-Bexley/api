@@ -17,7 +17,6 @@ class OrganisationPersistenceService implements DataPersistenceService
     /**
      * Store the model.
      *
-     * @param \Illuminate\Foundation\Http\FormRequest $request
      * @return \App\Models\UpdateRequest|\App\Models\Organisation
      */
     public function store(FormRequest $request)
@@ -29,22 +28,16 @@ class OrganisationPersistenceService implements DataPersistenceService
 
     /**
      * Update the model.
-     *
-     * @param \Illuminate\Foundation\Http\FormRequest $request
-     * @return \App\Models\UpdateRequest
      */
-    public function update(FormRequest $request, Model $model)
+    public function update(FormRequest $request, Model $model): UpdateRequest
     {
         return $this->processAsUpdateRequest($request, $model);
     }
 
     /**
      * Create a new model from the provided request.
-     *
-     * @param Illuminate\Foundation\Http\FormRequest $request
-     * @return \App\Models\Organisation
      */
-    public function processAsNewEntity(FormRequest $request)
+    public function processAsNewEntity(FormRequest $request): Organisation
     {
         return DB::transaction(function () use ($request) {
             // Create the Organisation.
@@ -82,12 +75,8 @@ class OrganisationPersistenceService implements DataPersistenceService
 
     /**
      * Process the requested changes and either update the model or store an update request.
-     *
-     * @param Illuminate\Foundation\Http\FormRequest $request
-     * @param \App\Models\Organisation $organisation
-     * @return \App\Models\UpdateRequest
      */
-    public function processAsUpdateRequest(FormRequest $request, ?Organisation $organisation)
+    public function processAsUpdateRequest(FormRequest $request, ?Organisation $organisation): UpdateRequest
     {
         return DB::transaction(function () use ($request, $organisation) {
             $data = array_filter_missing([

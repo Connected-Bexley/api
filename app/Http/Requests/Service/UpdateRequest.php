@@ -31,10 +31,8 @@ class UpdateRequest extends FormRequest
 
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         if ($this->user()->isServiceAdmin($this->service)) {
             return true;
@@ -45,10 +43,8 @@ class UpdateRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'organisation_id' => [
@@ -253,7 +249,7 @@ class UpdateRequest extends FormRequest
             'gallery_items.*.file_id' => [
                 'required_with:gallery_items.*',
                 'exists:files,id',
-                new FileIsMimeType(File::MIME_TYPE_PNG, File::MIME_TYPE_JPG, File::MIME_TYPE_JPEG),
+                new FileIsMimeType(File::MIME_TYPE_PNG, File::MIME_TYPE_SVG, File::MIME_TYPE_JPG, File::MIME_TYPE_JPEG),
                 new FileIsPendingAssignment(function (File $file) {
                     return $this->service
                         ->serviceGalleryItems()
@@ -303,7 +299,7 @@ class UpdateRequest extends FormRequest
             'logo_file_id' => [
                 'nullable',
                 'exists:files,id',
-                new FileIsMimeType(File::MIME_TYPE_PNG, File::MIME_TYPE_JPG, File::MIME_TYPE_JPEG),
+                new FileIsMimeType(File::MIME_TYPE_PNG, File::MIME_TYPE_SVG, File::MIME_TYPE_JPG, File::MIME_TYPE_JPEG),
                 new FileIsPendingAssignment(),
             ],
             'score' => [
@@ -335,17 +331,12 @@ class UpdateRequest extends FormRequest
 
     /**
      * Check if the user requested only a preview of the update request.
-     *
-     * @return bool
      */
     public function isPreview(): bool
     {
         return $this->preview === true;
     }
 
-    /**
-     * @return array
-     */
     protected function categoryTaxonomiesRules(): array
     {
         // If global admin and above.
@@ -375,9 +366,6 @@ class UpdateRequest extends FormRequest
         ];
     }
 
-    /**
-     * @return bool
-     */
     protected function showReferralDisclaimerOriginalValue(): bool
     {
         // If the new referral method is none, then always require false.
@@ -402,7 +390,7 @@ class UpdateRequest extends FormRequest
     /**
      * {@inheritDoc}
      */
-    public function messages()
+    public function messages(): array
     {
         $type = $this->input('type', $this->service->type);
 

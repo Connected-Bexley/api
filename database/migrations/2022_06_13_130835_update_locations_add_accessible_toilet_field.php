@@ -10,7 +10,7 @@ return new class() extends Migration {
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('locations', function (Blueprint $table) {
             $table->boolean('has_accessible_toilet')->after('has_induction_loop');
@@ -25,7 +25,7 @@ return new class() extends Migration {
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
         Schema::table('locations', function (Blueprint $table) {
             $table->dropColumn('has_accessible_toilet');

@@ -9,10 +9,6 @@ use App\Support\Coordinate;
 
 abstract class Geocoder implements GeocoderContract
 {
-    /**
-     * @param \App\Support\Address $address
-     * @return \App\Support\Coordinate|null
-     */
     protected function retrieveFromCache(Address $address): ?Coordinate
     {
         $cachedGeocodeResult = CachedGeocodeResult::where('query', $this->normaliseAddress($address))->first();
@@ -24,11 +20,6 @@ abstract class Geocoder implements GeocoderContract
         return $cachedGeocodeResult->toCoordinate();
     }
 
-    /**
-     * @param \App\Support\Address $address
-     * @param \App\Support\Coordinate|null $coordinate
-     * @return \App\Models\CachedGeocodeResult
-     */
     protected function saveToCache(Address $address, ?Coordinate $coordinate): CachedGeocodeResult
     {
         return CachedGeocodeResult::create([
@@ -38,10 +29,6 @@ abstract class Geocoder implements GeocoderContract
         ]);
     }
 
-    /**
-     * @param \App\Support\Address $address
-     * @return string
-     */
     protected function normaliseAddress(Address $address): string
     {
         $postcode = mb_strtolower($address->postcode);

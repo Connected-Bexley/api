@@ -2,20 +2,20 @@
 
 namespace Tests\Feature;
 
-use App\Events\EndpointHit;
-use App\Models\Audit;
+use Tests\TestCase;
 use App\Models\File;
-use App\Models\Location;
-use App\Models\Organisation;
-use App\Models\Service;
-use App\Models\UpdateRequest;
 use App\Models\User;
+use App\Models\Audit;
+use App\Models\Service;
+use App\Models\Location;
+use App\Events\EndpointHit;
 use Carbon\CarbonImmutable;
+use App\Models\Organisation;
+use App\Models\UpdateRequest;
 use Illuminate\Http\Response;
+use Laravel\Passport\Passport;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
-use Laravel\Passport\Passport;
-use Tests\TestCase;
 
 class LocationsTest extends TestCase
 {
@@ -26,7 +26,7 @@ class LocationsTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_list_them()
+    public function guest_can_list_them(): void
     {
         $location = Location::factory()->create();
 
@@ -76,7 +76,7 @@ class LocationsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_listed()
+    public function audit_created_when_listed(): void
     {
         $this->fakeEvents();
 
@@ -94,7 +94,7 @@ class LocationsTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_create_one()
+    public function guest_cannot_create_one(): void
     {
         $response = $this->json('POST', '/core/v1/locations');
 
@@ -104,7 +104,7 @@ class LocationsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_create_one()
+    public function service_worker_cannot_create_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -124,7 +124,7 @@ class LocationsTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_can_create_one()
+    public function service_admin_can_create_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -170,7 +170,7 @@ class LocationsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_can_create_one()
+    public function global_admin_can_create_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -215,7 +215,50 @@ class LocationsTest extends TestCase
     /**
      * @test
      */
-    public function invalid_address_error_returned_when_creating_one()
+    public function organisation_admin_can_upload_image(): void
+    {
+        $organisation = Organisation::factory()->create();
+        /** @var \App\Models\User $user */
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
+        $image = File::factory()->imageJpg()->pendingAssignment()->create();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('POST', '/core/v1/locations', [
+            'address_line_1' => '30-34 Aire St',
+            'address_line_2' => null,
+            'address_line_3' => null,
+            'city' => 'Leeds',
+            'county' => 'West Yorkshire',
+            'postcode' => 'LS1 4HT',
+            'country' => 'England',
+            'accessibility_info' => null,
+            'has_wheelchair_access' => false,
+            'has_induction_loop' => false,
+            'has_accessible_toilet' => false,
+            'image_file_id' => $image->id,
+        ]);
+        $locationId = $this->getResponseContent($response, 'data.id');
+
+        $response->assertStatus(Response::HTTP_CREATED);
+        $this->assertDatabaseHas(table(Location::class), [
+            'id' => $locationId,
+        ]);
+        $this->assertDatabaseMissing(table(Location::class), [
+            'id' => $locationId,
+            'image_file_id' => null,
+        ]);
+
+        $response = $this->get("/core/v1/locations/{$locationId}/image.jpg");
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertHeader('Content-Type', 'image/jpeg');
+    }
+
+    /**
+     * @test
+     */
+    public function invalid_address_error_returned_when_creating_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -252,7 +295,7 @@ class LocationsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_created()
+    public function audit_created_when_created(): void
     {
         $this->fakeEvents();
 
@@ -294,7 +337,7 @@ class LocationsTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_view_one()
+    public function guest_can_view_one(): void
     {
         $location = Location::factory()->create();
 
@@ -325,7 +368,7 @@ class LocationsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_viewed()
+    public function audit_created_when_viewed(): void
     {
         $this->fakeEvents();
 
@@ -346,7 +389,7 @@ class LocationsTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_update_one()
+    public function guest_cannot_update_one(): void
     {
         $location = Location::factory()->create();
 
@@ -358,7 +401,7 @@ class LocationsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_update_one()
+    public function service_worker_cannot_update_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -379,7 +422,7 @@ class LocationsTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_can_request_to_update_one()
+    public function service_admin_can_request_to_update_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -425,7 +468,7 @@ class LocationsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_can_update_one()
+    public function global_admin_can_update_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create();
@@ -471,7 +514,7 @@ class LocationsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_updated()
+    public function audit_created_when_updated(): void
     {
         $this->fakeEvents();
 
@@ -510,7 +553,7 @@ class LocationsTest extends TestCase
     /**
      * @test
      */
-    public function only_partial_fields_can_be_updated()
+    public function only_partial_fields_can_be_updated(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -546,7 +589,7 @@ class LocationsTest extends TestCase
     /**
      * @test
      */
-    public function fields_removed_for_existing_update_requests()
+    public function fields_removed_for_existing_update_requests(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -579,239 +622,92 @@ class LocationsTest extends TestCase
         $this->assertSoftDeleted($updateRequestOne->getTable(), ['id' => $updateRequestOne->id]);
     }
 
-    /*
-     * Delete a specific location.
-     */
-
     /**
      * @test
      */
-    public function guest_cannot_delete_one()
-    {
-        $location = Location::factory()->create();
-
-        $response = $this->json('DELETE', "/core/v1/locations/{$location->id}");
-
-        $response->assertStatus(Response::HTTP_UNAUTHORIZED);
-    }
-
-    /**
-     * @test
-     */
-    public function service_worker_cannot_delete_one()
-    {
-        /**
-         * @var \App\Models\Service $service
-         * @var \App\Models\User $user
-         */
-        $service = Service::factory()->create();
-        $user = User::factory()->create();
-        $user->makeServiceWorker($service);
-        $location = Location::factory()->create();
-
-        Passport::actingAs($user);
-
-        $response = $this->json('DELETE', "/core/v1/locations/{$location->id}");
-
-        $response->assertStatus(Response::HTTP_FORBIDDEN);
-    }
-
-    /**
-     * @test
-     */
-    public function service_admin_cannot_delete_one()
-    {
-        /**
-         * @var \App\Models\Service $service
-         * @var \App\Models\User $user
-         */
-        $service = Service::factory()->create();
-        $user = User::factory()->create();
-        $user->makeServiceAdmin($service);
-        $location = Location::factory()->create();
-
-        Passport::actingAs($user);
-
-        $response = $this->json('DELETE', "/core/v1/locations/{$location->id}");
-
-        $response->assertStatus(Response::HTTP_FORBIDDEN);
-    }
-
-    /**
-     * @test
-     */
-    public function organisation_admin_cannot_delete_one()
-    {
-        /**
-         * @var \App\Models\Organisation $organisation
-         * @var \App\Models\User $user
-         */
-        $organisation = Organisation::factory()->create();
-        $user = User::factory()->create();
-        $user->makeOrganisationAdmin($organisation);
-        $location = Location::factory()->create();
-
-        Passport::actingAs($user);
-
-        $response = $this->json('DELETE', "/core/v1/locations/{$location->id}");
-
-        $response->assertStatus(Response::HTTP_FORBIDDEN);
-    }
-
-    /**
-     * @test
-     */
-    public function global_admin_cannot_delete_one()
-    {
-        /**
-         * @var \App\Models\User $user
-         */
-        $user = User::factory()->create();
-        $user->makeGlobalAdmin();
-        $location = Location::factory()->create();
-
-        Passport::actingAs($user);
-
-        $response = $this->json('DELETE', "/core/v1/locations/{$location->id}");
-
-        $response->assertStatus(Response::HTTP_FORBIDDEN);
-    }
-
-    /**
-     * @test
-     */
-    public function super_admin_can_delete_one()
-    {
-        /**
-         * @var \App\Models\User $user
-         */
-        $user = User::factory()->create();
-        $user->makeSuperAdmin();
-        $location = Location::factory()->create();
-
-        Passport::actingAs($user);
-
-        $response = $this->json('DELETE', "/core/v1/locations/{$location->id}");
-
-        $response->assertStatus(Response::HTTP_OK);
-        $this->assertDatabaseMissing((new Location())->getTable(), ['id' => $location->id]);
-    }
-
-    /**
-     * @test
-     */
-    public function audit_created_when_deleted()
-    {
-        $this->fakeEvents();
-
-        /**
-         * @var \App\Models\User $user
-         */
-        $user = User::factory()->create();
-        $user->makeSuperAdmin();
-        $location = Location::factory()->create();
-
-        Passport::actingAs($user);
-
-        $this->json('DELETE', "/core/v1/locations/{$location->id}");
-
-        Event::assertDispatched(EndpointHit::class, function (EndpointHit $event) use ($user, $location) {
-            return ($event->getAction() === Audit::ACTION_DELETE) &&
-                ($event->getUser()->id === $user->id) &&
-                ($event->getModel()->id === $location->id);
-        });
-    }
-
-    /*
-     * Get a specific location's image.
-     */
-
-    /**
-     * @test
-     */
-    public function guest_can_view_image()
-    {
-        $location = Location::factory()->create();
-
-        $response = $this->get("/core/v1/locations/{$location->id}/image.png");
-
-        $response->assertStatus(Response::HTTP_OK);
-        $response->assertHeader('Content-Type', 'image/png');
-    }
-
-    /**
-     * @test
-     */
-    public function audit_created_when_image_viewed()
-    {
-        $this->fakeEvents();
-
-        $location = Location::factory()->create();
-
-        $this->get("/core/v1/locations/{$location->id}/image.png");
-
-        Event::assertDispatched(EndpointHit::class, function (EndpointHit $event) use ($location) {
-            return ($event->getAction() === Audit::ACTION_READ) &&
-                ($event->getModel()->id === $location->id);
-        });
-    }
-
-    /*
-     * Upload a specific location's image.
-     */
-
-    /**
-     * @test
-     */
-    public function organisation_admin_can_upload_image()
+    public function organisation_admin_can_update_image(): void
     {
         $organisation = Organisation::factory()->create();
         /** @var \App\Models\User $user */
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
-        $image = Storage::disk('local')->get('/test-data/image.png');
+        $location = Location::factory()->create();
 
         Passport::actingAs($user);
 
-        $imageResponse = $this->json('POST', '/core/v1/files', [
-            'is_private' => false,
-            'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
-        ]);
+        // PNG
+        $image = File::factory()->imagePng()->pendingAssignment()->create();
+        $payload = [
+            'image_file_id' => $image->id,
+        ];
 
-        $response = $this->json('POST', '/core/v1/locations', [
-            'address_line_1' => '30-34 Aire St',
-            'address_line_2' => null,
-            'address_line_3' => null,
-            'city' => 'Leeds',
-            'county' => 'West Yorkshire',
-            'postcode' => 'LS1 4HT',
-            'country' => 'England',
-            'accessibility_info' => null,
-            'has_wheelchair_access' => false,
-            'has_induction_loop' => false,
-            'has_accessible_toilet' => false,
-            'image_file_id' => $this->getResponseContent($imageResponse, 'data.id'),
-        ]);
-        $locationId = $this->getResponseContent($response, 'data.id');
+        $response = $this->json('PUT', "/core/v1/locations/{$location->id}", $payload);
 
-        $response->assertStatus(Response::HTTP_CREATED);
-        $this->assertDatabaseHas(table(Location::class), [
-            'id' => $locationId,
-        ]);
-        $this->assertDatabaseMissing(table(Location::class), [
-            'id' => $locationId,
-            'image_file_id' => null,
-        ]);
+        $response->assertStatus(Response::HTTP_OK);
+
+        $response->assertJsonFragment(['data' => $payload]);
+
+        $updateRequest = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
+        // Get the event image for the service location
+        $content = $this->get("/core/v1/locations/$location->id/image.png")->content();
+
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.png'), $content);
+
+        // JPG
+        $image = File::factory()->imageJpg()->pendingAssignment()->create();
+        $payload = [
+            'image_file_id' => $image->id,
+        ];
+
+        $response = $this->json('PUT', "/core/v1/locations/{$location->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $response->assertJsonFragment(['data' => $payload]);
+
+        $updateRequest = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
+        // Get the event image for the service location
+        $content = $this->get("/core/v1/locations/$location->id/image.jpg")->content();
+
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.jpg'), $content);
+
+        // SVG
+        $image = File::factory()->imageSvg()->pendingAssignment()->create();
+        $payload = [
+            'image_file_id' => $image->id,
+        ];
+
+        $response = $this->json('PUT', "/core/v1/locations/{$location->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $response->assertJsonFragment(['data' => $payload]);
+
+        $updateRequest = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
+        // Get the event image for the service location
+        $content = $this->get("/core/v1/locations/$location->id/image.svg")->content();
+
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.svg'), $content);
     }
-
-    /*
-     * Delete a specific location's image.
-     */
 
     /**
      * @test
      */
-    public function organisation_admin_can_delete_image()
+    public function organisation_admin_can_delete_image(): void
     {
         $organisation = Organisation::factory()->create();
         /** @var \App\Models\User $user */
@@ -842,5 +738,182 @@ class LocationsTest extends TestCase
         $this->assertDatabaseHas(table(UpdateRequest::class), ['updateable_id' => $location->id]);
         $updateRequest = UpdateRequest::where('updateable_id', $location->id)->firstOrFail();
         $this->assertEquals(null, $updateRequest->data['image_file_id']);
+    }
+
+    /*
+     * Delete a specific location.
+     */
+
+    /**
+     * @test
+     */
+    public function guest_cannot_delete_one(): void
+    {
+        $location = Location::factory()->create();
+
+        $response = $this->json('DELETE', "/core/v1/locations/{$location->id}");
+
+        $response->assertStatus(Response::HTTP_UNAUTHORIZED);
+    }
+
+    /**
+     * @test
+     */
+    public function service_worker_cannot_delete_one(): void
+    {
+        /**
+         * @var \App\Models\Service $service
+         * @var \App\Models\User $user
+         */
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
+        $user->makeServiceWorker($service);
+        $location = Location::factory()->create();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('DELETE', "/core/v1/locations/{$location->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function service_admin_cannot_delete_one(): void
+    {
+        /**
+         * @var \App\Models\Service $service
+         * @var \App\Models\User $user
+         */
+        $service = Service::factory()->create();
+        $user = User::factory()->create();
+        $user->makeServiceAdmin($service);
+        $location = Location::factory()->create();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('DELETE', "/core/v1/locations/{$location->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function organisation_admin_cannot_delete_one(): void
+    {
+        /**
+         * @var \App\Models\Organisation $organisation
+         * @var \App\Models\User $user
+         */
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create();
+        $user->makeOrganisationAdmin($organisation);
+        $location = Location::factory()->create();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('DELETE', "/core/v1/locations/{$location->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function global_admin_cannot_delete_one(): void
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeGlobalAdmin();
+        $location = Location::factory()->create();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('DELETE', "/core/v1/locations/{$location->id}");
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     */
+    public function super_admin_can_delete_one(): void
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeSuperAdmin();
+        $location = Location::factory()->create();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('DELETE', "/core/v1/locations/{$location->id}");
+
+        $response->assertStatus(Response::HTTP_OK);
+        $this->assertDatabaseMissing((new Location())->getTable(), ['id' => $location->id]);
+    }
+
+    /**
+     * @test
+     */
+    public function audit_created_when_deleted(): void
+    {
+        $this->fakeEvents();
+
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeSuperAdmin();
+        $location = Location::factory()->create();
+
+        Passport::actingAs($user);
+
+        $this->json('DELETE', "/core/v1/locations/{$location->id}");
+
+        Event::assertDispatched(EndpointHit::class, function (EndpointHit $event) use ($user, $location) {
+            return ($event->getAction() === Audit::ACTION_DELETE) &&
+                ($event->getUser()->id === $user->id) &&
+                ($event->getModel()->id === $location->id);
+        });
+    }
+
+    /*
+     * Get a specific location's image.
+     */
+
+    /**
+     * @test
+     */
+    public function guest_can_view_image(): void
+    {
+        $location = Location::factory()->withJpgImage()->create();
+
+        $response = $this->get("/core/v1/locations/{$location->id}/image.jpg");
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertHeader('Content-Type', 'image/jpeg');
+    }
+
+    /**
+     * @test
+     */
+    public function audit_created_when_image_viewed(): void
+    {
+        $this->fakeEvents();
+
+        $location = Location::factory()->create();
+
+        $this->get("/core/v1/locations/{$location->id}/image.png");
+
+        Event::assertDispatched(EndpointHit::class, function (EndpointHit $event) use ($location) {
+            return ($event->getAction() === Audit::ACTION_READ) &&
+                ($event->getModel()->id === $location->id);
+        });
     }
 }

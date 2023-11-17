@@ -5,37 +5,28 @@ namespace App\Models\Relationships;
 use App\Models\Service;
 use App\Models\StatusUpdate;
 use App\Models\Taxonomy;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 trait ReferralRelationships
 {
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function service()
+    public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function statusUpdates()
+    public function statusUpdates(): HasMany
     {
         return $this->hasMany(StatusUpdate::class);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function organisationTaxonomy()
+    public function organisationTaxonomy(): BelongsTo
     {
         return $this->belongsTo(Taxonomy::class, 'organisation_taxonomy_id');
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
-     */
-    public function latestCompletedStatusUpdate()
+    public function latestCompletedStatusUpdate(): HasOne
     {
         return $this->hasOne(StatusUpdate::class)
             ->orderByDesc(table(StatusUpdate::class, 'created_at'))

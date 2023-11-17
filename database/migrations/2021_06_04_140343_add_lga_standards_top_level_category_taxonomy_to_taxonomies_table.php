@@ -10,7 +10,7 @@ return new class() extends Migration {
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         $categoryId = Taxonomy::category()->id;
         $lgaStandardsId = uuid();
@@ -74,7 +74,7 @@ return new class() extends Migration {
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
         $categoryId = Taxonomy::category()->id;
 

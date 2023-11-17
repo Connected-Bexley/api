@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types=1);
+declare(strict_types=1);
 
 namespace App\Search\ElasticSearch;
 
@@ -48,15 +48,11 @@ class EventQueryBuilder extends ElasticsearchQueryBuilder implements QueryBuilde
     /**
      * Build the search query.
      *
-     * @param App\Search\SearchCriteriaQuery $query
-     * @param int $page
-     * @param int $perPage
      * @throws BindingResolutionException
      * @throws NotFoundExceptionInterface
      * @throws ContainerExceptionInterface
      * @throws InvalidFormatException
      * @throws UnitException
-     * @return ElasticScoutDriverPlus\Builders\SearchRequestBuilder
      */
     public function build(SearchCriteriaQuery $query, int $page = null, int $perPage = null): SearchRequestBuilder
     {
@@ -164,9 +160,6 @@ class EventQueryBuilder extends ElasticsearchQueryBuilder implements QueryBuilde
         $this->addFilter('is_virtual', $isVirtual);
     }
 
-    /**
-     * @param string $startsAfter
-     */
     public function applyStartsAfter(?string $startsAfter): void
     {
         if ($startsAfter) {
@@ -180,9 +173,6 @@ class EventQueryBuilder extends ElasticsearchQueryBuilder implements QueryBuilde
         }
     }
 
-    /**
-     * @param string $endsBefore
-     */
     public function applyEndsBefore(?string $endsBefore): void
     {
         $filters = Arr::get($this->esQuery, $this->filterPath);
@@ -205,8 +195,6 @@ class EventQueryBuilder extends ElasticsearchQueryBuilder implements QueryBuilde
     /**
      * Add a search distance in miles filter and order by distance.
      *
-     * @param Coordinate $coordinate
-     * @param int|null $distance
      * @throws BindingResolutionException
      * @throws NotFoundExceptionInterface
      * @throws ContainerExceptionInterface
@@ -241,8 +229,6 @@ class EventQueryBuilder extends ElasticsearchQueryBuilder implements QueryBuilde
 
     /**
      * Add a has wheel chair access filter.
-     *
-     * @param bool $hasWheelchairAccess
      */
     protected function applyHasWheelchairAccess(bool $hasWheelchairAccess): void
     {
@@ -262,8 +248,6 @@ class EventQueryBuilder extends ElasticsearchQueryBuilder implements QueryBuilde
 
     /**
      * Add a has induction loop filter.
-     *
-     * @param bool $hasInductionLoop
      */
     protected function applyHasInductionLoop(bool $hasInductionLoop): void
     {
@@ -283,8 +267,6 @@ class EventQueryBuilder extends ElasticsearchQueryBuilder implements QueryBuilde
 
     /**
      * Add a has accessible toilet filter.
-     *
-     * @param bool $hasAccessibleToilet
      */
     protected function applyHasAccessibleToilet(bool $hasAccessibleToilet): void
     {
@@ -304,9 +286,6 @@ class EventQueryBuilder extends ElasticsearchQueryBuilder implements QueryBuilde
 
     /**
      * Add an order by clause.
-     *
-     * @param SearchCriteriaQuery $query
-     * @return array
      */
     protected function applyOrder(SearchCriteriaQuery $query): array
     {

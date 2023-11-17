@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Core\V1\User;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 class SessionController extends Controller
@@ -15,10 +16,7 @@ class SessionController extends Controller
         $this->middleware('auth:api');
     }
 
-    /**
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function destroy()
+    public function destroy(): JsonResponse
     {
         Auth::user()->clearSessions();
 

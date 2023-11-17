@@ -10,7 +10,7 @@ class TestingServiceProvider extends ServiceProvider
     /**
      * Bootstrap services.
      */
-    public function boot()
+    public function boot(): void
     {
         TestResponse::macro('assertJsonResource', function (array $data) {
             $this->assertJsonStructure(['data' => $data]);
@@ -28,7 +28,7 @@ class TestingServiceProvider extends ServiceProvider
     /**
      * Register services.
      */
-    public function register()
+    public function register(): void
     {
         //
     }

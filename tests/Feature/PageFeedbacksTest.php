@@ -23,7 +23,7 @@ class PageFeedbacksTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_list_them()
+    public function guest_cannot_list_them(): void
     {
         $response = $this->json('GET', '/core/v1/page-feedbacks');
 
@@ -33,7 +33,7 @@ class PageFeedbacksTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_list_them()
+    public function service_worker_cannot_list_them(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -53,7 +53,7 @@ class PageFeedbacksTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_list_them()
+    public function service_admin_cannot_list_them(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -73,7 +73,7 @@ class PageFeedbacksTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_list_them()
+    public function organisation_admin_cannot_list_them(): void
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -93,7 +93,7 @@ class PageFeedbacksTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_list_them()
+    public function global_admin_cannot_list_them(): void
     {
         /**
          * @var \App\Models\User $user
@@ -110,7 +110,7 @@ class PageFeedbacksTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_list_them()
+    public function super_admin_can_list_them(): void
     {
         /**
          * @var \App\Models\User $user
@@ -148,7 +148,7 @@ class PageFeedbacksTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_listed()
+    public function audit_created_when_listed(): void
     {
         $this->fakeEvents();
 
@@ -175,7 +175,7 @@ class PageFeedbacksTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_create_one()
+    public function guest_can_create_one(): void
     {
         $payload = [
             'url' => url('test-page'),
@@ -194,7 +194,7 @@ class PageFeedbacksTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_created()
+    public function audit_created_when_created(): void
     {
         $this->fakeEvents();
 
@@ -219,7 +219,7 @@ class PageFeedbacksTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_view_one()
+    public function guest_cannot_view_one(): void
     {
         $pageFeedback = PageFeedback::create([
             'url' => url('/test'),
@@ -236,7 +236,7 @@ class PageFeedbacksTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_view_one()
+    public function service_worker_cannot_view_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -262,7 +262,7 @@ class PageFeedbacksTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_view_one()
+    public function service_admin_cannot_view_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -288,7 +288,7 @@ class PageFeedbacksTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_view_one()
+    public function organisation_admin_cannot_view_one(): void
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -314,7 +314,7 @@ class PageFeedbacksTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_view_one()
+    public function global_admin_cannot_view_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -337,7 +337,7 @@ class PageFeedbacksTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_view_one()
+    public function super_admin_can_view_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -375,7 +375,7 @@ class PageFeedbacksTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_viewed()
+    public function audit_created_when_viewed(): void
     {
         $this->fakeEvents();
 

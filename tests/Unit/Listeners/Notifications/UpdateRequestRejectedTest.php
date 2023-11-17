@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 class UpdateRequestRejectedTest extends TestCase
 {
-    public function test_emails_sent_out_for_existing()
+    public function test_emails_sent_out_for_existing(): void
     {
         Queue::fake();
 
@@ -61,7 +61,7 @@ class UpdateRequestRejectedTest extends TestCase
         );
     }
 
-    public function test_emails_sent_out_for_new()
+    public function test_emails_sent_out_for_new(): void
     {
         Queue::fake();
 

@@ -10,6 +10,7 @@ use App\Http\Requests\Organisation\ImportRequest;
 use App\Models\Organisation;
 use App\Models\Role;
 use App\Models\UserRole;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -43,11 +44,8 @@ class ImportController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param \App\Http\Requests\Organisation\ImportRequest $request
-     * @return \Illuminate\Http\Response
      */
-    public function __invoke(ImportRequest $request)
+    public function __invoke(ImportRequest $request): JsonResponse
     {
         $this->ignoreDuplicateIds = $request->input('ignore_duplicates', []);
         $this->processSpreadsheet($request->input('spreadsheet'));
@@ -73,7 +71,6 @@ class ImportController extends Controller
     /**
      * Validate the spreadsheet rows.
      *
-     * @param string $filePath
      * @return array
      */
     public function validateSpreadsheet(string $filePath)
@@ -141,7 +138,6 @@ class ImportController extends Controller
     /**
      * Find exisiting Orgaisations that match rows in the spreadsheet.
      *
-     * @param array $rowIndex
      * @return array
      */
     public function rowsExist(array $rowIndex)
@@ -186,12 +182,9 @@ class ImportController extends Controller
     /**
      * Wrap a string in SQL replace functions for a character set.
      *
-     * @param string $string
-     * @param array $replace
-     * @param string $replacement
      * @return string
      */
-    public function buildSqlReplaceCharacterSet(string $string, array $replace, $replacement = '')
+    public function buildSqlReplaceCharacterSet(string $string, array $replace, string $replacement = '')
     {
         $sql = $string;
         foreach ($replace as $chr) {
@@ -206,10 +199,6 @@ class ImportController extends Controller
 
     /**
      * Format the duplicate Organisations and store details of them.
-     *
-     * @param array $duplicates
-     * @param array $headers
-     * @param array $nameIndex
      *
      * @throws App\Exceptions\DuplicateContentException
      */
@@ -279,8 +268,6 @@ class ImportController extends Controller
 
     /**
      * Import the uploaded file contents.
-     *
-     * @param string $filePath
      */
     public function importSpreadsheet(string $filePath)
     {

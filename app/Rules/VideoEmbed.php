@@ -2,23 +2,22 @@
 
 namespace App\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Str;
 
-class VideoEmbed implements Rule
+class VideoEmbed implements ValidationRule
 {
     /**
      * Determine if the validation rule passes.
      *
-     * @param string $attribute
      * @param mixed $value
-     * @return bool
      */
-    public function passes($attribute, $value)
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         // Immediately fail if the value is not a string.
         if (!is_string($value)) {
-            return false;
+            $fail(__('validation.string'));
         }
 
         $validDomains = [
@@ -27,15 +26,15 @@ class VideoEmbed implements Rule
             'https://vimeo.com',
         ];
 
-        return Str::startsWith($value, $validDomains);
+        if (!Str::startsWith($value, $validDomains)) {
+            $fail($this->message());
+        }
     }
 
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
-    public function message()
+    public function message(): string
     {
         return 'The :attribute must be provided by either YouTube or Vimeo.';
     }

@@ -6,9 +6,6 @@ use App\Emails\Email;
 
 class NotifyGlobalAdminEmail extends Email
 {
-    /**
-     * @return string
-     */
     protected function getTemplateId(): string
     {
         return config('gov_uk_notify.notifications_template_ids.referral_still_unactioned.notify_global_admin.email');

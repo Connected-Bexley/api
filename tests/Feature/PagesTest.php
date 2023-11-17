@@ -2,28 +2,26 @@
 
 namespace Tests\Feature;
 
-use App\Events\EndpointHit;
-use App\Models\Audit;
-use App\Models\Collection;
+use Tests\TestCase;
 use App\Models\File;
 use App\Models\Page;
-use App\Models\Service;
-use App\Models\UpdateRequest;
 use App\Models\User;
+use App\Models\Audit;
+use App\Models\Service;
+use App\Models\Collection;
+use App\Events\EndpointHit;
 use Faker\Factory as Faker;
+use Illuminate\Support\Str;
+use App\Models\UpdateRequest;
 use Illuminate\Http\Response;
+use Laravel\Passport\Passport;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Laravel\Passport\Passport;
-use Tests\TestCase;
 
 class PagesTest extends TestCase
 {
     /**
      * Setup the test environment.
-     *
-     * @return void
      */
     protected function setUp(): void
     {
@@ -34,7 +32,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function listEnabledPagesAsGuest200()
+    public function listEnabledPagesAsGuest200(): void
     {
         Page::factory()->withParent()->withChildren()->create();
 
@@ -61,7 +59,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function auditCreatedOnList()
+    public function auditCreatedOnList(): void
     {
         $this->fakeEvents();
 
@@ -75,7 +73,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function listMixedStatePagesAsGuest200()
+    public function listMixedStatePagesAsGuest200(): void
     {
         $page = Page::factory()->withImage()->withParent()->disabled()
             ->create();
@@ -101,7 +99,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function listMixedStatePagesAsGlobalAdmin403()
+    public function listMixedStatePagesAsGlobalAdmin403(): void
     {
         /**
          * @var \App\Models\User $user
@@ -125,7 +123,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function listMixedStatePagesAsContentAdmin200()
+    public function listMixedStatePagesAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -160,7 +158,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function listMixedStatePagesAsGuestFilterByID200()
+    public function listMixedStatePagesAsGuestFilterByID200(): void
     {
         $pages = Page::factory()->count(2)->create();
         $disabledPage = Page::factory()->disabled()->create();
@@ -201,7 +199,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function listMixedStatePagesAsContentAdminFilterByID200()
+    public function listMixedStatePagesAsContentAdminFilterByID200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -250,7 +248,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function listPagesAsGuestFilterByParentID200()
+    public function listPagesAsGuestFilterByParentID200(): void
     {
         $page1 = Page::factory()->withChildren()->create();
         $page2 = Page::factory()->withChildren()->create();
@@ -288,7 +286,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function listLandingPageChildPagesAsGuestFilterByParentID200()
+    public function listLandingPageChildPagesAsGuestFilterByParentID200(): void
     {
         $landingPage = Page::factory()->landingPage()->withChildren()->create();
 
@@ -313,7 +311,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function listPagesAsGuestFilterByTitle200()
+    public function listPagesAsGuestFilterByTitle200(): void
     {
         $page1 = Page::factory()->create(['title' => 'Page One']);
         $page2 = Page::factory()->create(['title' => 'Second Page']);
@@ -349,7 +347,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function listMixedStatePagesAsGuestFilterByLandingPage200()
+    public function listMixedStatePagesAsGuestFilterByLandingPage200(): void
     {
         $page1 = Page::factory()->landingPage()->create();
         $page2 = Page::factory()->disabled()->create();
@@ -377,7 +375,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function listMixedStatePagesAsGuestFilterByInformationPage200()
+    public function listMixedStatePagesAsGuestFilterByInformationPage200(): void
     {
         $page1 = Page::factory()->landingPage()->create();
         $page2 = Page::factory()->disabled()->create();
@@ -405,7 +403,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function listMixedStatePagesAsContentAdminFilterByLandingPage200()
+    public function listMixedStatePagesAsContentAdminFilterByLandingPage200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -441,7 +439,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function listMixedStatePagesAsAdminFilterByInformationPage200()
+    public function listMixedStatePagesAsAdminFilterByInformationPage200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -477,7 +475,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function listPagesAsGuestFilterByTitleAndPageType200()
+    public function listPagesAsGuestFilterByTitleAndPageType200(): void
     {
         $page1 = Page::factory()->create(['title' => 'Page One']);
         $page2 = Page::factory()->create(['title' => 'Second Page']);
@@ -536,7 +534,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function listEnabledPagesAsGuestIncludeParent200()
+    public function listEnabledPagesAsGuestIncludeParent200(): void
     {
         Page::factory()->withParent()->withChildren()->create();
 
@@ -564,11 +562,11 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function listEnabledPagesAsGuestIncludeLandingPage200()
+    public function listEnabledPagesAsGuestIncludeLandingPage200(): void
     {
         Page::factory()->withParent()->withChildren()->create();
 
-        $response = $this->json('GET', '/core/v1/pages/index?include=landing-page-ancestors');
+        $response = $this->json('GET', '/core/v1/pages/index?include=landingPageAncestors');
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonStructure([
             'data' => [
@@ -592,7 +590,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function listEnabledPagesAsGuestIncludeChildren200()
+    public function listEnabledPagesAsGuestIncludeChildren200(): void
     {
         Page::factory()->withParent()->withChildren()->create();
 
@@ -633,7 +631,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function listLandingPageDescendantsAsGuestIncludeParent200()
+    public function listLandingPageDescendantsAsGuestIncludeParent200(): void
     {
         $page = Page::factory()->withImage()->withChildren()->create();
         $parent = Page::factory()->create();
@@ -698,7 +696,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageAsGuest401()
+    public function createPageAsGuest401(): void
     {
         $parentPage = Page::factory()->create();
 
@@ -727,7 +725,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageAsServiceWorker403()
+    public function createPageAsServiceWorker403(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -760,7 +758,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageAsServiceAdmin403()
+    public function createPageAsServiceAdmin403(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -793,7 +791,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageAsOrganisationAdmin403()
+    public function createPageAsOrganisationAdmin403(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -826,7 +824,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageAsGlobalAdmin403()
+    public function createPageAsGlobalAdmin403(): void
     {
         $user = User::factory()->create()->makeGlobalAdmin();
         $parentPage = Page::factory()->create();
@@ -858,7 +856,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageAsContentAdmin200()
+    public function createPageAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -920,7 +918,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageAsSuperAdmin201()
+    public function createPageAsSuperAdmin201(): void
     {
         /**
          * @var \App\Models\User $user
@@ -974,7 +972,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createInformationPageWithMinimalDataAsContentAdmin200()
+    public function createInformationPageWithMinimalDataAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1023,7 +1021,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createLandingPageWithMinimalDataAsContentAdmin200()
+    public function createLandingPageWithMinimalDataAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1085,7 +1083,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageAuditCreated()
+    public function createPageAuditCreated(): void
     {
         $this->fakeEvents();
 
@@ -1127,7 +1125,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageAsContentAdminWithInvalidData422()
+    public function createPageAsContentAdminWithInvalidData422(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1314,7 +1312,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createChildPageAsContentAdmin200()
+    public function createChildPageAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1373,7 +1371,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createChildPageInheritParentStatusAsContentAdmin200()
+    public function createChildPageInheritParentStatusAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1434,7 +1432,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createInformationPageRootAsContentAdmin200()
+    public function createInformationPageRootAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1495,7 +1493,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createLandingPageAsContentAdmin200()
+    public function createLandingPageAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1587,7 +1585,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageAfterSiblingAsContentAdmin200()
+    public function createPageAfterSiblingAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1649,7 +1647,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createFirstChildPageAsContentAdmin200()
+    public function createFirstChildPageAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1712,7 +1710,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageWithImagePNGAsContentAdmin200()
+    public function createPageWithImagePNGAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1783,7 +1781,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageWithImageJPGAsContentAdmin200()
+    public function createPageWithImageJPGAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1854,7 +1852,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageWithImageSVGAsContentAdmin200()
+    public function createPageWithImageSVGAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1925,7 +1923,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createInformationPageWithCollectionsAsContentAdmin422()
+    public function createInformationPageWithCollectionsAsContentAdmin422(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1964,7 +1962,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createLandingPageWithCollectionsAsContentAdmin200()
+    public function createLandingPageWithCollectionsAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -2074,7 +2072,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createInformationPageWithCallToActionAsContentAdmin422()
+    public function createInformationPageWithCallToActionAsContentAdmin422(): void
     {
         /**
          * @var \App\Models\User $user
@@ -2198,7 +2196,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createInformationPageWithCallToActionAsContentAdmin200()
+    public function createInformationPageWithCallToActionAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -2241,7 +2239,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createLandingPageWithCallToActionsAsContentAdmin200()
+    public function createLandingPageWithCallToActionsAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -2325,7 +2323,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageWithSameTitleAsExistingPageIncrementsSlugAsContentAdmin200()
+    public function createPageWithSameTitleAsExistingPageIncrementsSlugAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -2399,7 +2397,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function createPageWithSlugAsContentAdmin201()
+    public function createPageWithSlugAsContentAdmin201(): void
     {
         /**
          * @var \App\Models\User $user
@@ -2453,7 +2451,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function getEnabledInformationPageAsGuest200()
+    public function getEnabledInformationPageAsGuest200(): void
     {
         $page = Page::factory()->withImage()->withParent()->withChildren()->create();
 
@@ -2509,7 +2507,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function getEnabledLandingPageAsGuest200()
+    public function getEnabledLandingPageAsGuest200(): void
     {
         $page = Page::factory()->withImage()->landingPage()->withChildren()->create();
 
@@ -2554,7 +2552,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function getInformationPageBySlugAsGuest200()
+    public function getInformationPageBySlugAsGuest200(): void
     {
         $page = Page::factory()->withImage()->withParent()->withChildren()->create();
 
@@ -2568,7 +2566,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function getEnabledInformationPageWithLandingPageAncestorAsGuest200()
+    public function getEnabledInformationPageWithLandingPageAncestorAsGuest200(): void
     {
         $page = Page::factory()->withImage()->withChildren()->create();
         $parent = Page::factory()->create();
@@ -2643,7 +2641,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function auditCreatedOnShow()
+    public function auditCreatedOnShow(): void
     {
         $this->fakeEvents();
 
@@ -2659,7 +2657,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function getDisabledPageAsGuest403()
+    public function getDisabledPageAsGuest403(): void
     {
         $page = Page::factory()->withImage()->withParent()->withChildren()->disabled()
             ->create();
@@ -2672,7 +2670,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function getDisabledPageAsContentAdmin200()
+    public function getDisabledPageAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -2738,7 +2736,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function getEnabledPageImagePNGAsGuest200()
+    public function getEnabledPageImagePNGAsGuest200(): void
     {
         $parentPage = Page::factory()->create();
 
@@ -2763,7 +2761,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function getEnabledPageImageJPGAsGuest200()
+    public function getEnabledPageImageJPGAsGuest200(): void
     {
         $parentPage = Page::factory()->create();
 
@@ -2788,7 +2786,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function getEnabledPageImageSVGAsGuest200()
+    public function getEnabledPageImageSVGAsGuest200(): void
     {
         $parentPage = Page::factory()->create();
 
@@ -2817,7 +2815,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageAsGuest401()
+    public function updatePageAsGuest401(): void
     {
         $page = Page::factory()->withImage()->withParent()->withChildren()->disabled()
             ->create();
@@ -2834,7 +2832,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageAsServiceWorker403()
+    public function updatePageAsServiceWorker403(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -2854,7 +2852,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageAsServiceAdmin403()
+    public function updatePageAsServiceAdmin403(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -2874,7 +2872,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageAsOrganisationAdmin403()
+    public function updatePageAsOrganisationAdmin403(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -2894,7 +2892,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageAsGlobalAdmin403()
+    public function updatePageAsGlobalAdmin403(): void
     {
         $user = User::factory()->create()->makeGlobalAdmin();
         $page = Page::factory()->withImage()->withParent()->withChildren()->disabled()
@@ -2913,7 +2911,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageAsContentAdmin200()
+    public function updatePageAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -2922,11 +2920,16 @@ class PagesTest extends TestCase
 
         Passport::actingAs($user);
 
-        $page = Page::factory()->withImage()->withParent()->withChildren()->disabled()
+        $page = Page::factory()
+            ->withImage()
+            ->withParent()
+            ->withChildren()
+            ->disabled()
             ->create();
 
         $data = [
             'title' => 'New Title',
+            'enabled' => true,
         ];
 
         $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
@@ -2948,18 +2951,25 @@ class PagesTest extends TestCase
 
         $this->assertEquals($data, $updateRequest->data);
 
+        $this->assertDatabaseHas(table(Page::class), [
+            'id' => $page->id,
+            'title' => $page->title,
+            'enabled' => false,
+        ]);
+
         $this->approveUpdateRequest($updateRequest->id);
 
         $this->assertDatabaseHas(table(Page::class), [
             'id' => $page->id,
             'title' => 'New Title',
+            'enabled' => true,
         ]);
     }
 
     /**
      * @test
      */
-    public function updatePageAsSuperAdmin200()
+    public function updatePageAsSuperAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -2969,11 +2979,16 @@ class PagesTest extends TestCase
 
         Passport::actingAs($user);
 
-        $page = Page::factory()->withImage()->withParent()->withChildren()->disabled()
+        $page = Page::factory()
+            ->withImage()
+            ->withParent()
+            ->withChildren()
+            ->disabled()
             ->create();
 
         $payload = [
             'title' => 'New Title',
+            'enabled' => true,
         ];
 
         $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $payload);
@@ -2996,7 +3011,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageAuditCreated()
+    public function updatePageAuditCreated(): void
     {
         $this->fakeEvents();
 
@@ -3024,7 +3039,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageAsAdminWithInvalidData422()
+    public function updatePageAsAdminWithInvalidData422(): void
     {
         /**
          * @var \App\Models\User $user
@@ -3086,7 +3101,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageAddImageAsContentAdmin200()
+    public function updatePageAddImageAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -3142,7 +3157,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageRemoveImageAsContentAdmin200()
+    public function updatePageRemoveImageAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -3200,7 +3215,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageChangeImageAsContentAdmin200()
+    public function updatePageChangeImageAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -3210,23 +3225,9 @@ class PagesTest extends TestCase
 
         Passport::actingAs($user);
 
-        $imageJpg = File::factory()->create([
-            'filename' => Str::random() . '.jpg',
-            'mime_type' => 'image/jpeg',
-        ]);
+        $imageJpg = File::factory()->imageJpg()->pendingAssignment()->create();
 
-        $imageJpg->uploadBase64EncodedFile(
-            'data:image/jpeg;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.jpg'))
-        );
-
-        $imagePng = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random() . '.png',
-            'mime_type' => 'image/png',
-        ]);
-
-        $imagePng->uploadBase64EncodedFile(
-            'data:image/png;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.png'))
-        );
+        $imagePng = File::factory()->imagePng()->pendingAssignment()->create();
 
         $page = Page::factory()->withParent()->withChildren()->disabled()
             ->create([
@@ -3267,7 +3268,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageChangeParentAsContentAdmin200()
+    public function updatePageChangeParentAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -3319,7 +3320,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageChangeParentInheritStatusAsContentAdmin200()
+    public function updatePageChangeParentInheritStatusAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -3371,7 +3372,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageChangePageTypeAsContentAdmin200()
+    public function updatePageChangePageTypeAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -3432,7 +3433,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageChangeOrderAsContentAdmin200()
+    public function updatePageChangeOrderAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -3498,7 +3499,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageEnablePageAsContentAdmin200()
+    public function updatePageEnablePageAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -3536,7 +3537,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageDisabledCascadestoChildPagesAsContentAdmin200()
+    public function updatePageDisabledCascadestoChildPagesAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -3601,7 +3602,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updateInformationPageAddCollectionsAsContentAdmin422()
+    public function updateInformationPageAddCollectionsAsContentAdmin422(): void
     {
         /**
          * @var \App\Models\User $user
@@ -3626,7 +3627,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updateLandingPageAddCollectionsAsContentAdmin200()
+    public function updateLandingPageAddCollectionsAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -3682,7 +3683,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updateLandingPageUpdateCollectionsAsContentAdmin200()
+    public function updateLandingPageUpdateCollectionsAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -3759,7 +3760,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function updatePageUpdateSlugAsContentAdmin200()
+    public function updatePageUpdateSlugAsContentAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -3840,7 +3841,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function deletePageAsGuest401()
+    public function deletePageAsGuest401(): void
     {
         $page = Page::factory()->create();
 
@@ -3852,7 +3853,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function deletePageAsServiceWorker403()
+    public function deletePageAsServiceWorker403(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -3871,7 +3872,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function deletePageAsServiceAdmin403()
+    public function deletePageAsServiceAdmin403(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -3890,7 +3891,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function deletePageAsOrganisationAdmin403()
+    public function deletePageAsOrganisationAdmin403(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -3909,7 +3910,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function deletePageAsGlobalAdmin403()
+    public function deletePageAsGlobalAdmin403(): void
     {
         $user = User::factory()->create()->makeGlobalAdmin();
 
@@ -3927,7 +3928,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function deletePageAsContentAdmin403()
+    public function deletePageAsContentAdmin403(): void
     {
         /**
          * @var \App\Models\User $user
@@ -3946,7 +3947,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function deletePageAsSuperAdmin200()
+    public function deletePageAsSuperAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -3967,7 +3968,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function deletePageAuditCreated()
+    public function deletePageAuditCreated(): void
     {
         $this->fakeEvents();
 
@@ -3991,7 +3992,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function deletePageWithChildrenAsSuperAdmin422()
+    public function deletePageWithChildrenAsSuperAdmin422(): void
     {
         /**
          * @var \App\Models\User $user
@@ -4021,7 +4022,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function deleteLandingPageWithChildrenAsSuperAdmin422()
+    public function deleteLandingPageWithChildrenAsSuperAdmin422(): void
     {
         /**
          * @var \App\Models\User $user
@@ -4050,7 +4051,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function deletePageWithCollectionsAsSuperAdmin200()
+    public function deletePageWithCollectionsAsSuperAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -4078,7 +4079,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function deleteLandingPageWithCollectionsAsSuperAdmin200()
+    public function deleteLandingPageWithCollectionsAsSuperAdmin200(): void
     {
         /**
          * @var \App\Models\User $user
@@ -4106,7 +4107,7 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function deletePageWithImageAsSuperAdmin200()
+    public function deletePageWithImageAsSuperAdmin200(): void
     {
         /**
          * @var \App\Models\User $user

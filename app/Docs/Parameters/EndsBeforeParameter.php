@@ -8,10 +8,6 @@ use GoldSpecDigital\ObjectOrientedOAS\Objects\Schema;
 
 class EndsBeforeParameter extends Parameter
 {
-    /**
-     * @param string|null $objectId
-     * @return static
-     */
     public static function create(string $objectId = null): BaseObject
     {
         return parent::create($objectId)

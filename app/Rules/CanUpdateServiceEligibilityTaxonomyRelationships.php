@@ -5,10 +5,10 @@ namespace App\Rules;
 use App\Models\Service;
 use App\Models\Taxonomy;
 use App\Models\User;
-use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Arr;
 
-class CanUpdateServiceEligibilityTaxonomyRelationships implements Rule
+class CanUpdateServiceEligibilityTaxonomyRelationships implements ValidationRule
 {
     /**
      * @var \App\Models\User
@@ -22,9 +22,6 @@ class CanUpdateServiceEligibilityTaxonomyRelationships implements Rule
 
     /**
      * Create a new rule instance.
-     *
-     * @param \App\Models\User $user
-     * @param \App\TaxonomyRelationships\HasTaxonomyRelationships $model
      */
     public function __construct(User $user, Service $model)
     {
@@ -35,42 +32,39 @@ class CanUpdateServiceEligibilityTaxonomyRelationships implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param string $attribute
      * @param mixed $value
-     * @return bool
+     * @param mixed $fail
      */
-    public function passes($attribute, $value)
+    public function validate(string $attribute, $value, $fail): void
     {
         // Immediately fail if the value is not an array of strings.
         if (!is_array($value)) {
-            return false;
+            $fail(__('validation.array'));
         }
 
         // Allow changing of taxonomies if service admin.
         if (
-            ($this->model instanceof Service && $this->user->isServiceAdmin($this->model))
+            !($this->model instanceof Service && $this->user->isServiceAdmin($this->model))
         ) {
-            return true;
+
+            // Only pass if the taxonomies remain unchanged.
+            $existingTaxonomyIds = $this->model
+                ->taxonomies()
+                ->pluck(table(Taxonomy::class, 'id'))
+                ->toArray();
+            $existingTaxonomies = Arr::sort($existingTaxonomyIds);
+            $newTaxonomies = Arr::sort($value);
+            if ($existingTaxonomies !== $newTaxonomies) {
+                $fail($this->message());
+            }
+
         }
-
-        // Only pass if the taxonomies remain unchanged.
-        $existingTaxonomyIds = $this->model
-            ->taxonomies()
-            ->pluck(table(Taxonomy::class, 'id'))
-            ->toArray();
-        $existingTaxonomies = Arr::sort($existingTaxonomyIds);
-        $newTaxonomies = Arr::sort($value);
-        $taxonomiesUnchanged = $existingTaxonomies === $newTaxonomies;
-
-        return $taxonomiesUnchanged;
     }
 
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
-    public function message()
+    public function message(): string
     {
         return 'You are not authorised to update this ' . class_basename($this->model) . '\'s category taxonomies.';
     }

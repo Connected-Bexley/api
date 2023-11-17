@@ -2,22 +2,22 @@
 
 namespace Tests\Feature;
 
-use App\Events\EndpointHit;
-use App\Models\Audit;
-use App\Models\Collection;
-use App\Models\CollectionTaxonomy;
+use Tests\TestCase;
 use App\Models\File;
-use App\Models\Organisation;
+use App\Models\User;
+use App\Models\Audit;
 use App\Models\Service;
 use App\Models\Taxonomy;
-use App\Models\User;
+use App\Models\Collection;
+use App\Events\EndpointHit;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Str;
+use App\Models\Organisation;
 use Illuminate\Http\Response;
+use Laravel\Passport\Passport;
+use App\Models\CollectionTaxonomy;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Laravel\Passport\Passport;
-use Tests\TestCase;
 
 class CollectionCategoriesTest extends TestCase
 {
@@ -28,7 +28,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_list_them()
+    public function guest_can_list_them(): void
     {
         $response = $this->json('GET', '/core/v1/collections/categories');
 
@@ -69,7 +69,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_list_all_of_them()
+    public function guest_can_list_all_of_them(): void
     {
         $collectionCategoryCount = Collection::categories()->count();
 
@@ -112,7 +112,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_list_enabled_and_disabled_collections()
+    public function guest_can_list_enabled_and_disabled_collections(): void
     {
         $disabledCollection = Collection::categories()->first();
 
@@ -139,7 +139,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_list_all_enabled_and_disabled_collections()
+    public function guest_can_list_all_enabled_and_disabled_collections(): void
     {
         $disabledCollection = Collection::categories()->first();
 
@@ -166,7 +166,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_listed()
+    public function audit_created_when_listed(): void
     {
         $this->fakeEvents();
 
@@ -184,7 +184,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_create_one()
+    public function guest_cannot_create_one(): void
     {
         $response = $this->json('POST', '/core/v1/collections/categories');
 
@@ -194,7 +194,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_create_one()
+    public function service_worker_cannot_create_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -214,7 +214,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_create_one()
+    public function service_admin_cannot_create_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -234,7 +234,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_create_one()
+    public function organisation_admin_cannot_create_one(): void
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -254,7 +254,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_create_one()
+    public function global_admin_cannot_create_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -272,7 +272,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_create_one()
+    public function super_admin_can_create_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -362,7 +362,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_create_a_disabled_one()
+    public function super_admin_can_create_a_disabled_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -418,7 +418,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_create_a_homepage_one()
+    public function super_admin_can_create_a_homepage_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -474,7 +474,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_cannot_create_one_without_an_image()
+    public function super_admin_cannot_create_one_without_an_image(): void
     {
         /**
          * @var \App\Models\User $user
@@ -542,7 +542,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_cannot_create_one_with_an_assigned_image()
+    public function super_admin_cannot_create_one_with_an_assigned_image(): void
     {
         /**
          * @var \App\Models\User $user
@@ -584,7 +584,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_creating_one_with_an_image_assigns_the_image()
+    public function super_admin_creating_one_with_an_image_assigns_the_image(): void
     {
         /**
          * @var \App\Models\User $user
@@ -593,16 +593,42 @@ class CollectionCategoriesTest extends TestCase
         $user->makeSuperAdmin();
         $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
-        $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random() . '.svg',
-            'mime_type' => 'image/svg+xml',
+        Passport::actingAs($user);
+
+        // SVG
+        $image = File::factory()->pendingAssignment()->imageSvg()->create();
+
+        $response = $this->json('POST', '/core/v1/collections/categories', [
+            'name' => 'Test Category',
+            'intro' => 'Lorem ipsum',
+            'image_file_id' => $image->id,
+            'order' => 1,
+            'enabled' => true,
+            'homepage' => false,
+            'sideboxes' => [
+                [
+                    'title' => 'Sidebox title',
+                    'content' => 'Sidebox content',
+                ],
+            ],
+            'category_taxonomies' => [$randomCategory->id],
         ]);
 
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
+        $response->assertStatus(Response::HTTP_CREATED);
 
-        $image->uploadBase64EncodedFile($base64Image);
+        $collectionArray = $this->getResponseContent($response)['data'];
+        $content = $this->get("/core/v1/collections/categories/{$collectionArray['id']}/image.svg")->content();
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.svg'), $content);
 
-        Passport::actingAs($user);
+        $this->assertEquals($image->id, $collectionArray['image_file_id']);
+
+        $this->assertDatabaseHas($image->getTable(), [
+            'id' => $image->id,
+            'meta' => null,
+        ]);
+
+        // PNG
+        $image = File::factory()->pendingAssignment()->imagePng()->create();
 
         $response = $this->json('POST', '/core/v1/collections/categories', [
             'name' => 'Test Category',
@@ -624,7 +650,39 @@ class CollectionCategoriesTest extends TestCase
 
         $collectionArray = $this->getResponseContent($response)['data'];
         $content = $this->get("/core/v1/collections/categories/{$collectionArray['id']}/image.png")->content();
-        $this->assertEquals(Storage::disk('local')->get('/test-data/image.svg'), $content);
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.png'), $content);
+
+        $this->assertEquals($image->id, $collectionArray['image_file_id']);
+
+        $this->assertDatabaseHas($image->getTable(), [
+            'id' => $image->id,
+            'meta' => null,
+        ]);
+
+        // JPG
+        $image = File::factory()->pendingAssignment()->imageJpg()->create();
+
+        $response = $this->json('POST', '/core/v1/collections/categories', [
+            'name' => 'Test Category',
+            'intro' => 'Lorem ipsum',
+            'image_file_id' => $image->id,
+            'order' => 1,
+            'enabled' => true,
+            'homepage' => false,
+            'sideboxes' => [
+                [
+                    'title' => 'Sidebox title',
+                    'content' => 'Sidebox content',
+                ],
+            ],
+            'category_taxonomies' => [$randomCategory->id],
+        ]);
+
+        $response->assertStatus(Response::HTTP_CREATED);
+
+        $collectionArray = $this->getResponseContent($response)['data'];
+        $content = $this->get("/core/v1/collections/categories/{$collectionArray['id']}/image.jpg")->content();
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.jpg'), $content);
 
         $this->assertEquals($image->id, $collectionArray['image_file_id']);
 
@@ -637,7 +695,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function order_is_updated_when_created_at_beginning()
+    public function order_is_updated_when_created_at_beginning(): void
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
@@ -716,7 +774,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function order_is_updated_when_created_at_middle()
+    public function order_is_updated_when_created_at_middle(): void
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
@@ -795,7 +853,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function order_is_updated_when_created_at_end()
+    public function order_is_updated_when_created_at_end(): void
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
@@ -874,7 +932,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function order_cannot_be_less_than_1_when_created()
+    public function order_cannot_be_less_than_1_when_created(): void
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
@@ -913,7 +971,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function order_cannot_be_greater_than_count_plus_1_when_created()
+    public function order_cannot_be_greater_than_count_plus_1_when_created(): void
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
@@ -976,7 +1034,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_created()
+    public function audit_created_when_created(): void
     {
         $this->fakeEvents();
 
@@ -1023,7 +1081,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_view_one()
+    public function guest_can_view_one(): void
     {
         $collectionCategory = Collection::categories()->inRandomOrder()->firstOrFail();
 
@@ -1073,7 +1131,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_view_one_by_slug()
+    public function guest_can_view_one_by_slug(): void
     {
         $collectionCategory = Collection::categories()->inRandomOrder()->firstOrFail();
 
@@ -1124,7 +1182,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_viewed()
+    public function audit_created_when_viewed(): void
     {
         $this->fakeEvents();
 
@@ -1145,7 +1203,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_view_image_as_svg()
+    public function guest_can_view_image_as_svg(): void
     {
         $collectionCategory = Collection::categories()->inRandomOrder()->firstOrFail();
 
@@ -1173,7 +1231,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_view_image_as_png()
+    public function guest_can_view_image_as_png(): void
     {
         $collectionCategory = Collection::categories()->inRandomOrder()->firstOrFail();
 
@@ -1200,16 +1258,16 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_view_image_as_jpg()
+    public function guest_can_view_image_as_jpg(): void
     {
         $collectionCategory = Collection::categories()->inRandomOrder()->firstOrFail();
 
         $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random() . '.png',
+            'filename' => Str::random() . '.jpg',
             'mime_type' => 'image/jpeg',
         ]);
 
-        $base64Image = 'data:image/png;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.jpg'));
+        $base64Image = 'data:image/jpg;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.jpg'));
 
         $image->uploadBase64EncodedFile($base64Image);
 
@@ -1227,7 +1285,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_image_viewed()
+    public function audit_created_when_image_viewed(): void
     {
         $this->fakeEvents();
 
@@ -1258,7 +1316,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function default_image_returned_when_image_is_not_set()
+    public function default_image_returned_when_image_is_not_set(): void
     {
         $collectionCategory = Collection::categories()->inRandomOrder()->firstOrFail();
 
@@ -1280,7 +1338,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_update_one()
+    public function guest_cannot_update_one(): void
     {
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
 
@@ -1292,7 +1350,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_update_one()
+    public function service_worker_cannot_update_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -1313,7 +1371,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_update_one()
+    public function service_admin_cannot_update_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -1334,7 +1392,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_update_one()
+    public function organisation_admin_cannot_update_one(): void
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -1355,7 +1413,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_update_one()
+    public function global_admin_cannot_update_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1374,7 +1432,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_update_one()
+    public function super_admin_can_update_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1457,7 +1515,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_cannot_update_one_without_an_image()
+    public function super_admin_cannot_update_one_without_an_image(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1510,7 +1568,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_cannot_update_one_with_an_assigned_image()
+    public function super_admin_cannot_update_one_with_an_assigned_image(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1550,7 +1608,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_updating_one_with_a_new_image_assigns_the_image()
+    public function super_admin_updating_one_with_a_new_image_assigns_the_image(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1560,16 +1618,10 @@ class CollectionCategoriesTest extends TestCase
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
         $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
 
-        $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random() . '.svg',
-            'mime_type' => 'image/svg+xml',
-        ]);
-
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
-
-        $image->uploadBase64EncodedFile($base64Image);
-
         Passport::actingAs($user);
+
+        // SVG
+        $image = File::factory()->pendingAssignment()->imageSvg()->create();
 
         $response = $this->json('PUT', "/core/v1/collections/categories/{$category->id}", [
             'name' => 'Test Category',
@@ -1595,12 +1647,68 @@ class CollectionCategoriesTest extends TestCase
             'id' => $image->id,
             'meta' => null,
         ]);
+
+        // PNG
+        $image = File::factory()->pendingAssignment()->imagePng()->create();
+
+        $response = $this->json('PUT', "/core/v1/collections/categories/{$category->id}", [
+            'name' => 'Test Category',
+            'intro' => 'Lorem ipsum',
+            'subtitle' => 'Subtitle here',
+            'image_file_id' => $image->id,
+            'order' => 1,
+            'enabled' => true,
+            'homepage' => false,
+            'sideboxes' => [],
+            'category_taxonomies' => [$taxonomy->id],
+        ]);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $category = $category->fresh();
+        $this->assertEquals($image->id, $category->meta['image_file_id']);
+
+        $content = $this->get("/core/v1/collections/categories/{$category->id}/image.png")->content();
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.png'), $content);
+
+        $this->assertDatabaseHas($image->getTable(), [
+            'id' => $image->id,
+            'meta' => null,
+        ]);
+
+        // JPG
+        $image = File::factory()->pendingAssignment()->imageJpg()->create();
+
+        $response = $this->json('PUT', "/core/v1/collections/categories/{$category->id}", [
+            'name' => 'Test Category',
+            'intro' => 'Lorem ipsum',
+            'subtitle' => 'Subtitle here',
+            'image_file_id' => $image->id,
+            'order' => 1,
+            'enabled' => true,
+            'homepage' => false,
+            'sideboxes' => [],
+            'category_taxonomies' => [$taxonomy->id],
+        ]);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $category = $category->fresh();
+        $this->assertEquals($image->id, $category->meta['image_file_id']);
+
+        $content = $this->get("/core/v1/collections/categories/{$category->id}/image.jpg")->content();
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.jpg'), $content);
+
+        $this->assertDatabaseHas($image->getTable(), [
+            'id' => $image->id,
+            'meta' => null,
+        ]);
     }
 
     /**
      * @test
      */
-    public function super_admin_can_update_one_without_an_image_when_changing_order()
+    public function super_admin_can_update_one_without_an_image_when_changing_order(): void
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
@@ -1668,7 +1776,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_update_status()
+    public function super_admin_can_update_status(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1745,7 +1853,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_update_homepage()
+    public function super_admin_can_update_homepage(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1824,7 +1932,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function order_is_updated_when_updated_to_beginning()
+    public function order_is_updated_when_updated_to_beginning(): void
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
@@ -1902,7 +2010,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function order_is_updated_when_updated_to_middle()
+    public function order_is_updated_when_updated_to_middle(): void
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
@@ -1980,7 +2088,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function order_is_updated_when_updated_to_end()
+    public function order_is_updated_when_updated_to_end(): void
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
@@ -2058,7 +2166,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function order_cannot_be_less_than_1_when_updated()
+    public function order_cannot_be_less_than_1_when_updated(): void
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
@@ -2109,7 +2217,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function order_cannot_be_greater_than_count_plus_1_when_updated()
+    public function order_cannot_be_greater_than_count_plus_1_when_updated(): void
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
@@ -2160,7 +2268,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_updated()
+    public function audit_created_when_updated(): void
     {
         $this->fakeEvents();
 
@@ -2208,7 +2316,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_delete_one()
+    public function guest_cannot_delete_one(): void
     {
         $category = Collection::categories()->inRandomOrder()->firstOrFail();
 
@@ -2220,7 +2328,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_delete_one()
+    public function service_worker_cannot_delete_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -2241,7 +2349,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_delete_one()
+    public function service_admin_cannot_delete_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -2262,7 +2370,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_delete_one()
+    public function organisation_admin_cannot_delete_one(): void
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -2283,7 +2391,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_delete_one()
+    public function global_admin_cannot_delete_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -2302,7 +2410,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_delete_one()
+    public function super_admin_can_delete_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -2327,7 +2435,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_cannot_delete_image()
+    public function super_admin_cannot_delete_image(): void
     {
         /**
          * @var \App\Models\User $user
@@ -2361,7 +2469,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function order_is_updated_when_deleted_at_beginning()
+    public function order_is_updated_when_deleted_at_beginning(): void
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
@@ -2421,7 +2529,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function order_is_updated_when_deleted_at_middle()
+    public function order_is_updated_when_deleted_at_middle(): void
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
@@ -2481,7 +2589,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function order_is_updated_when_deleted_at_end()
+    public function order_is_updated_when_deleted_at_end(): void
     {
         // Delete the existing seeded categories.
         $this->truncateCollectionCategories();
@@ -2541,7 +2649,7 @@ class CollectionCategoriesTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_deleted()
+    public function audit_created_when_deleted(): void
     {
         $this->fakeEvents();
 

@@ -3,13 +3,11 @@
 namespace App\UpdateRequest;
 
 use App\Models\UpdateRequest;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 trait UpdateRequests
 {
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
-     */
-    public function updateRequests()
+    public function updateRequests(): MorphMany
     {
         return $this->morphMany(UpdateRequest::class, 'updateable');
     }

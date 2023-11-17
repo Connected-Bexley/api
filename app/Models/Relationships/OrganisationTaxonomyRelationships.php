@@ -4,21 +4,16 @@ namespace App\Models\Relationships;
 
 use App\Models\Organisation;
 use App\Models\Taxonomy;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait OrganisationTaxonomyRelationships
 {
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function organisation()
+    public function organisation(): BelongsTo
     {
         return $this->belongsTo(Organisation::class);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function taxonomy()
+    public function taxonomy(): BelongsTo
     {
         return $this->belongsTo(Taxonomy::class);
     }

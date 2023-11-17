@@ -4,21 +4,16 @@ namespace App\Models\Relationships;
 
 use App\Models\OrganisationEvent;
 use App\Models\Taxonomy;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait OrganisationEventTaxonomyRelationships
 {
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function organisationEvent()
+    public function organisationEvent(): BelongsTo
     {
         return $this->belongsTo(OrganisationEvent::class);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function taxonomy()
+    public function taxonomy(): BelongsTo
     {
         return $this->belongsTo(Taxonomy::class);
     }

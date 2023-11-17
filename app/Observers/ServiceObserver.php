@@ -13,10 +13,8 @@ class ServiceObserver
 {
     /**
      * Handle the organisation "created" event.
-     *
-     * @param \App\Models\Service $service
      */
-    public function created(Service $service)
+    public function created(Service $service): void
     {
         UserRole::query()
             ->with('user')
@@ -30,10 +28,8 @@ class ServiceObserver
 
     /**
      * Handle the organisation "updated" event.
-     *
-     * @param \App\Models\Service $service
      */
-    public function updated(Service $service)
+    public function updated(Service $service): void
     {
         // Check if the organisation_id was updated.
         if ($service->isDirty('organisation_id')) {
@@ -86,8 +82,6 @@ class ServiceObserver
 
     /**
      * Handle the organisation "deleting" event.
-     *
-     * @param \App\Models\Service $service
      */
     public function deleting(Service $service)
     {

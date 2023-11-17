@@ -42,22 +42,27 @@ class Collection extends Model
         'homepage' => false,
     ];
 
-    /**
-     * @return \App\Models\Collection
-     */
     public function touchServices(): Collection
     {
-        static::services($this)->get()->each->save();
+        static::services($this)->get()->searchable();
 
         return $this;
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Collection $taxonomies
-     * @return \App\Models\Collection
-     */
     public function syncCollectionTaxonomies(EloquentCollection $taxonomies): Collection
     {
+        // Get the affected taxonomies if any
+        $existingTaxonomyIds = $this->collectionTaxonomies()->pluck('taxonomy_id');
+        $newTaxonomyIds = $taxonomies->pluck('id');
+        $removedTaxonomyIds = $existingTaxonomyIds->diff($newTaxonomyIds);
+        $addedTaxonomyIds = $newTaxonomyIds->diff($existingTaxonomyIds);
+        $affectedTaxonomyIds = $removedTaxonomyIds->concat($addedTaxonomyIds)->unique();
+
+        // If no taxonomies affected, return
+        if ($affectedTaxonomyIds->isEmpty()) {
+            return $this;
+        }
+
         // Delete all existing collection taxonomies.
         $this->collectionTaxonomies()->delete();
 
@@ -66,11 +71,18 @@ class Collection extends Model
             $this->collectionTaxonomies()->updateOrCreate(['taxonomy_id' => $taxonomy->id]);
         }
 
+        Taxonomy::query()
+            ->whereIn('id', $affectedTaxonomyIds)
+            ->get()
+            ->each(function ($taxonomy) {
+                $taxonomy->services()->searchable();
+                $taxonomy->organisationEvents()->searchable();
+            });
+
         return $this;
     }
 
     /**
-     * @param int|null $maxDimension
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException|\InvalidArgumentException
      * @return \App\Models\File|\Illuminate\Http\Response|\Illuminate\Contracts\Support\Responsable
      */
@@ -88,7 +100,6 @@ class Collection extends Model
     }
 
     /**
-     * @param int|null $maxDimension
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException|\InvalidArgumentException
      * @return \App\Models\File|\Illuminate\Http\Response|\Illuminate\Contracts\Support\Responsable
      */
@@ -106,7 +117,6 @@ class Collection extends Model
     }
 
     /**
-     * @param int|null $maxDimension
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException|\InvalidArgumentException
      * @return \App\Models\File|\Illuminate\Http\Response|\Illuminate\Contracts\Support\Responsable
      */
@@ -125,10 +135,8 @@ class Collection extends Model
 
     /**
      * Enable the Collection.
-     *
-     * @return \App\Models\Collection
      */
-    public function enable()
+    public function enable(): Collection
     {
         $this->enabled = true;
 
@@ -137,10 +145,8 @@ class Collection extends Model
 
     /**
      * Disable the Collection.
-     *
-     * @return \App\Models\Collection
      */
-    public function disable()
+    public function disable(): Collection
     {
         $this->enabled = false;
 
@@ -149,10 +155,8 @@ class Collection extends Model
 
     /**
      * Add the Collection to the homepage.
-     *
-     * @return \App\Models\Collection
      */
-    public function addToHomepage()
+    public function addToHomepage(): Collection
     {
         $this->homepage = true;
 
@@ -161,10 +165,8 @@ class Collection extends Model
 
     /**
      * Remove the Collection from the homepage.
-     *
-     * @return \App\Models\Collection
      */
-    public function removeFromHomepage()
+    public function removeFromHomepage(): Collection
     {
         $this->homepage = false;
 

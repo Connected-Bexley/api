@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class PageFeedbacksTest extends TestCase
 {
-    public function test_auto_delete_works()
+    public function test_auto_delete_works(): void
     {
         $newPageFeedback = PageFeedback::factory()->create([
             'created_at' => Date::today(),

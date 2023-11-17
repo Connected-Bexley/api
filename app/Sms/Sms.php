@@ -50,9 +50,6 @@ abstract class Sms implements ShouldQueue
 
     /**
      * Sms constructor.
-     *
-     * @param string $to
-     * @param array $values
      */
     public function __construct(string $to, array $values = [])
     {
@@ -65,33 +62,21 @@ abstract class Sms implements ShouldQueue
         $this->senderId = $this->getSenderId();
     }
 
-    /**
-     * @return string|null
-     */
     protected function getTemplateId(): ?string
     {
         return null;
     }
 
-    /**
-     * @return string|null
-     */
     protected function getReference(): ?string
     {
         return null;
     }
 
-    /**
-     * @return string|null
-     */
     protected function getSenderId(): ?string
     {
         return null;
     }
 
-    /**
-     * @return string
-     */
     abstract public function getContent(): string;
 
     public function send()
@@ -101,8 +86,6 @@ abstract class Sms implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @param \App\Contracts\SmsSender $smsSender
      */
     public function handle(SmsSender $smsSender)
     {

@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 class PendingAssignmentFilesTest extends TestCase
 {
-    public function test_auto_delete_works()
+    public function test_auto_delete_works(): void
     {
         $newPendingAssignmentFile = File::factory()->pendingAssignment()
             ->create([
@@ -31,7 +31,7 @@ class PendingAssignmentFilesTest extends TestCase
         $this->assertDatabaseMissing($dueForDeletionFile->getTable(), ['id' => $dueForDeletionFile->id]);
     }
 
-    public function test_auto_delete_leaves_no_orphans()
+    public function test_auto_delete_leaves_no_orphans(): void
     {
         $service = Service::factory()->create();
 

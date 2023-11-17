@@ -9,7 +9,7 @@ return new class() extends Migration {
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('pages', function (Blueprint $table) {
             Page::chunk(50, function ($pages) {
@@ -39,7 +39,7 @@ return new class() extends Migration {
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
         //
     }

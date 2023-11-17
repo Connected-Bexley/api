@@ -17,7 +17,7 @@ class StaleServicesCommandTest extends TestCase
     /*
      * 6 to 12 months.
      */
-    public function test_6_to_12_months_emails_not_sent_after_5_months()
+    public function test_6_to_12_months_emails_not_sent_after_5_months(): void
     {
         Queue::fake();
 
@@ -32,7 +32,7 @@ class StaleServicesCommandTest extends TestCase
         Queue::assertNotPushed(NotifyServiceAdminEmail::class);
     }
 
-    public function test_6_to_12_months_emails_not_sent_after_13_months()
+    public function test_6_to_12_months_emails_not_sent_after_13_months(): void
     {
         Queue::fake();
 
@@ -47,7 +47,7 @@ class StaleServicesCommandTest extends TestCase
         Queue::assertNotPushed(NotifyServiceAdminEmail::class);
     }
 
-    public function test_6_to_12_months_emails_sent_after_6_months()
+    public function test_6_to_12_months_emails_sent_after_6_months(): void
     {
         Queue::fake();
 
@@ -69,7 +69,7 @@ class StaleServicesCommandTest extends TestCase
         });
     }
 
-    public function test_6_to_12_months_emails_sent_after_12_months()
+    public function test_6_to_12_months_emails_sent_after_12_months(): void
     {
         Queue::fake();
 
@@ -91,7 +91,7 @@ class StaleServicesCommandTest extends TestCase
         });
     }
 
-    public function test_6_to_12_months_emails_sent_after_9_months()
+    public function test_6_to_12_months_emails_sent_after_9_months(): void
     {
         Queue::fake();
 
@@ -113,7 +113,7 @@ class StaleServicesCommandTest extends TestCase
         });
     }
 
-    public function test_6_to_12_months_emails_not_sent_to_service_workers()
+    public function test_6_to_12_months_emails_not_sent_to_service_workers(): void
     {
         Queue::fake();
 
@@ -128,7 +128,7 @@ class StaleServicesCommandTest extends TestCase
         Queue::assertNotPushed(NotifyServiceAdminEmail::class);
     }
 
-    public function test_6_to_12_months_emails_not_sent_to_global_admins()
+    public function test_6_to_12_months_emails_not_sent_to_global_admins(): void
     {
         Queue::fake();
 
@@ -147,7 +147,7 @@ class StaleServicesCommandTest extends TestCase
      * After 12 months.
      */
 
-    public function test_after_12_months_emails_not_sent_after_11_months()
+    public function test_after_12_months_emails_not_sent_after_11_months(): void
     {
         Queue::fake();
 
@@ -162,7 +162,7 @@ class StaleServicesCommandTest extends TestCase
         Queue::assertNotPushed(NotifyGlobalAdminEmail::class);
     }
 
-    public function test_after_12_months_emails_not_sent_after_13_months()
+    public function test_after_12_months_emails_not_sent_after_13_months(): void
     {
         Queue::fake();
 
@@ -177,7 +177,7 @@ class StaleServicesCommandTest extends TestCase
         Queue::assertNotPushed(NotifyGlobalAdminEmail::class);
     }
 
-    public function test_after_12_months_emails_sent_after_12_months()
+    public function test_after_12_months_emails_sent_after_12_months(): void
     {
         Queue::fake();
 

@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types=1);
+declare(strict_types=1);
 
 namespace App\Search\ElasticSearch;
 
@@ -31,6 +31,7 @@ class EventEloquentMapper implements EloquentMapper
 
         /**
          * Order the fetched service locations by distance.
+         *
          * @todo Potential solution to the order nested locations in Elasticsearch: https://stackoverflow.com/a/43440405
          */
         $events = $this->orderEventsByLocation($queryRequest, $response->models());
@@ -55,10 +56,6 @@ class EventEloquentMapper implements EloquentMapper
         ]);
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Collection $events
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
     protected function orderEventsByLocation(array $queryRequest, Collection $events): Collection
     {
         $locations = array_filter($queryRequest['body']['sort'] ?? [], function ($key) {

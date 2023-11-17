@@ -10,7 +10,7 @@ class VideoEmbedTest extends TestCase
     /**
      * @test
      */
-    public function it_passes_video_hosting_urls()
+    public function it_passes_video_hosting_urls(): void
     {
         $badUrls = [
             'https://youtube.com',
@@ -26,11 +26,19 @@ class VideoEmbedTest extends TestCase
         $videoEmbedRule = new VideoEmbed();
 
         foreach ($badUrls as $badUrl) {
-            $this->assertFalse($videoEmbedRule->passes('video_embed', $badUrl));
+            $passes = true;
+            $videoEmbedRule->validate('video_embed', $badUrl, function () use (&$passes) {
+                $passes = false;
+            });
+            $this->assertFalse($passes);
         }
 
         foreach ($goodUrls as $goodUrl) {
-            $this->assertTrue($videoEmbedRule->passes('video_embed', $goodUrl));
+            $passes = true;
+            $videoEmbedRule->validate('video_embed', $goodUrl, function () use (&$passes) {
+                $passes = false;
+            });
+            $this->assertTrue($passes);
         }
     }
 }

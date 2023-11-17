@@ -8,10 +8,6 @@ use GoldSpecDigital\ObjectOrientedOAS\Objects\Schema;
 
 class UpdateRequestSchema extends Schema
 {
-    /**
-     * @param string|null $objectId
-     * @return static
-     */
     public static function create(string $objectId = null): BaseObject
     {
         return parent::create($objectId)

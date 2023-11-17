@@ -34,9 +34,8 @@ class OpenActiveTaxonomyImporter
      * Fetch the Open Active taxonomy data and store it as a collection.
      *
      * @param mixed $openActiveDirectoryUrl
-     * @return array
      */
-    public function fetchTaxonomies($openActiveDirectoryUrl)
+    public function fetchTaxonomies($openActiveDirectoryUrl): array
     {
         $client = new Client();
         try {
@@ -55,10 +54,8 @@ class OpenActiveTaxonomyImporter
 
     /**
      * Get the root Open Active category.
-     *
-     * @return \App\Models\Taxonomy
      */
-    public function getOpenActiveCategory()
+    public function getOpenActiveCategory(): Taxonomy
     {
         return Taxonomy::category()
             ->children()
@@ -85,7 +82,6 @@ class OpenActiveTaxonomyImporter
      * Import the formatted taxonomies into the database.
      *
      * @param \App\Models\Taxonomy $rootTaxonomy
-     * @param array $taxonomyImports
      */
     public function importTaxonomies(Taxonomy $openActiveCategory, array $taxonomyImports)
     {
@@ -106,12 +102,10 @@ class OpenActiveTaxonomyImporter
     /**
      * Map the imported data into an import friendly format.
      *
-     * @param \App\Models\Taxonomy $rootTaxonomy
      * @param array openActiveTaxonomyData
      * @param mixed $openActiveTaxonomyData
-     * @return array
      */
-    public function mapOpenActiveTaxonomyImport(Taxonomy $rootTaxonomy, $openActiveTaxonomyData)
+    public function mapOpenActiveTaxonomyImport(Taxonomy $rootTaxonomy, $openActiveTaxonomyData): array
     {
         $nowDateTimeString = Carbon::now()->toDateTimeString();
 
@@ -128,11 +122,8 @@ class OpenActiveTaxonomyImporter
 
     /**
      * Return the uuid component from an Open Active directory url.
-     *
-     * @param string $identifierUrl
-     * @return string
      */
-    private function parseIdentifier(string $identifierUrl)
+    private function parseIdentifier(string $identifierUrl): string
     {
         return mb_substr($identifierUrl, mb_strpos($identifierUrl, '#') + 1);
     }
@@ -140,11 +131,9 @@ class OpenActiveTaxonomyImporter
     /**
      * Convert Open Active taxonomies into Taxonomy model data.
      *
-     * @param \App\Models\Taxonomy $rootTaxonomy
      * @param array openActiveTaxonomyData
-     * @return array
      */
-    private function mapOpenActiveTaxonomyToTaxonomyModelSchema(Taxonomy $rootTaxonomy, array $taxonomyData)
+    private function mapOpenActiveTaxonomyToTaxonomyModelSchema(Taxonomy $rootTaxonomy, array $taxonomyData): array
     {
         $modelData = [
             'id' => $taxonomyData['identifier'],

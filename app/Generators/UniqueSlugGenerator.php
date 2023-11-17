@@ -14,8 +14,6 @@ class UniqueSlugGenerator
 
     /**
      * UniqueSlugGenerator constructor.
-     *
-     * @param \Illuminate\Database\DatabaseManager $db
      */
     public function __construct(DatabaseManager $db)
     {
@@ -24,10 +22,6 @@ class UniqueSlugGenerator
 
     /**
      * @param string $string The string to slugify
-     * @param string $table
-     * @param string $column
-     * @param int $index
-     * @return string
      */
     public function generate(string $string, string $table, string $column = 'slug', int $index = 0): string
     {
@@ -57,10 +51,6 @@ class UniqueSlugGenerator
         return preg_match("/^{$stringSlugRegex}(-[0-9]+)?$/", $slug) === 1;
     }
 
-    /**
-     * @param string $string
-     * @return string
-     */
     protected function slugify(string $string): string
     {
         return Str::slug($string);

@@ -8,6 +8,7 @@ use App\Http\Requests\StatusUpdate\IndexRequest;
 use App\Http\Resources\StatusUpdateResource;
 use App\Models\Referral;
 use App\Models\StatusUpdate;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -23,11 +24,8 @@ class StatusUpdateController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param \App\Http\Requests\StatusUpdate\IndexRequest $request
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index(IndexRequest $request)
+    public function index(IndexRequest $request): AnonymousResourceCollection
     {
         $referral = Referral::findOrFail($request->filter['referral_id']);
 

@@ -40,9 +40,8 @@ class BatchUploadCommand extends Command
      * Execute the console command.
      *
      * @throws \Exception
-     * @return mixed
      */
-    public function handle()
+    public function handle(): void
     {
         $this->line('Uploading file...');
 

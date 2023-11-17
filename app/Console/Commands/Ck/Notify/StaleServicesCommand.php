@@ -86,9 +86,6 @@ class StaleServicesCommand extends Command
             });
     }
 
-    /**
-     * @param \App\Models\Service $service
-     */
     protected function sendUpdatePromptEmailToServiceAdmins(Service $service): void
     {
         // Create a refresh token for the service.
@@ -115,9 +112,6 @@ class StaleServicesCommand extends Command
         }
     }
 
-    /**
-     * @param \App\Models\Service $service
-     */
     protected function sendUpdatePromptEmailToGlobalAdmin(Service $service): void
     {
         // Create a refresh token for the service.

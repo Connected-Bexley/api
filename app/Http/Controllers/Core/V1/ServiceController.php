@@ -19,6 +19,7 @@ use App\Models\Service;
 use App\Models\UpdateRequest as UpdateRequestModel;
 use App\Services\DataPersistence\ServicePersistenceService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\AllowedSort;
@@ -36,11 +37,8 @@ class ServiceController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param \App\Http\Requests\Service\IndexRequest $request
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index(IndexRequest $request)
+    public function index(IndexRequest $request): AnonymousResourceCollection
     {
         $baseQuery = Service::query()
             ->with(
@@ -85,8 +83,6 @@ class ServiceController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param \App\Http\Requests\Service\StoreRequest $request
-     * @param \App\Services\DataPersistence\ServicePersistenceService $persistenceService
      * @return \Illuminate\Http\Response
      */
     public function store(StoreRequest $request, ServicePersistenceService $persistenceService)
@@ -111,12 +107,8 @@ class ServiceController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param \App\Http\Requests\Service\ShowRequest $request
-     * @param \App\Models\Service $service
-     * @return \App\Http\Resources\ServiceResource
      */
-    public function show(ShowRequest $request, Service $service)
+    public function show(ShowRequest $request, Service $service): ServiceResource
     {
         $baseQuery = Service::query()
             ->with(
@@ -138,13 +130,8 @@ class ServiceController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param \App\Http\Requests\Service\UpdateRequest $request
-     * @param \App\Models\Service $service
-     * @param \App\Services\DataPersistence\ServicePersistenceService $persistenceService
-     * @return UpdateRequestReceived
      */
-    public function update(UpdateRequest $request, Service $service, ServicePersistenceService $persistenceService)
+    public function update(UpdateRequest $request, Service $service, ServicePersistenceService $persistenceService): UpdateRequestReceived
     {
         $updateRequest = $persistenceService->update($request, $service);
         event(EndpointHit::onUpdate($request, "Created update request for service [{$service->id}]", $service));
@@ -155,8 +142,6 @@ class ServiceController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param \App\Http\Requests\Service\DestroyRequest $request
-     * @param \App\Models\Service $service
      * @return \Illuminate\Http\Response
      */
     public function destroy(DestroyRequest $request, Service $service)

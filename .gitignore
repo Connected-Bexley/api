@@ -8,6 +8,7 @@
 /public/storage
 /public/mix-manifest.json
 /storage/*.key
+/resources/assets/img/*
 /vendor
 /.idea
 /.vscode

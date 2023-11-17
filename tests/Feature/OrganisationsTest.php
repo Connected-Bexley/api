@@ -2,33 +2,32 @@
 
 namespace Tests\Feature;
 
-use App\Events\EndpointHit;
-use App\Models\Audit;
+use Tests\TestCase;
 use App\Models\File;
-use App\Models\Organisation;
-use App\Models\OrganisationTaxonomy;
 use App\Models\Role;
-use App\Models\Service;
-use App\Models\SocialMedia;
-use App\Models\Taxonomy;
-use App\Models\UpdateRequest;
 use App\Models\User;
+use App\Models\Audit;
+use App\Models\Service;
+use App\Models\Taxonomy;
 use App\Models\UserRole;
+use App\Events\EndpointHit;
+use App\Models\SocialMedia;
 use Carbon\CarbonImmutable;
+use App\Models\Organisation;
+use App\Models\UpdateRequest;
 use Illuminate\Http\Response;
+use Laravel\Passport\Passport;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
+use App\Models\OrganisationTaxonomy;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
-use Laravel\Passport\Passport;
-use Tests\TestCase;
 
 class OrganisationsTest extends TestCase
 {
     /**
      * Create spreadsheets of organisations
      *
-     * @param  Illuminate\Support\Collection  $organisations
      * @return null
      **/
     public function createOrganisationSpreadsheets(Collection $organisations)
@@ -60,7 +59,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_list_them()
+    public function guest_can_list_them(): void
     {
         $organisation = Organisation::factory()->create();
 
@@ -88,7 +87,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_listed()
+    public function audit_created_when_listed(): void
     {
         $this->fakeEvents();
 
@@ -102,7 +101,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_sort_by_name()
+    public function guest_can_sort_by_name(): void
     {
         $organisationOne = Organisation::factory()->create([
             'name' => 'Organisation A',
@@ -127,7 +126,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_create_one()
+    public function guest_cannot_create_one(): void
     {
         $response = $this->json('POST', '/core/v1/organisations');
 
@@ -137,7 +136,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_create_one()
+    public function service_worker_cannot_create_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -157,7 +156,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_create_one()
+    public function service_admin_cannot_create_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -177,7 +176,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_create_one()
+    public function organisation_admin_cannot_create_one(): void
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -197,7 +196,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_can_create_one_with_update_request()
+    public function global_admin_can_create_one_with_update_request(): void
     {
         /**
          * @var \App\Models\User $user
@@ -255,7 +254,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_create_one()
+    public function super_admin_can_create_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -289,7 +288,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_can_create_one_with_single_form_of_contact()
+    public function global_admin_can_create_one_with_single_form_of_contact(): void
     {
         /**
          * @var \App\Models\User $user
@@ -317,7 +316,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_can_create_one_without_contact_details()
+    public function global_admin_can_create_one_without_contact_details(): void
     {
         /**
          * @var \App\Models\User $user
@@ -346,7 +345,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_create_one_with_non_numeric_phone()
+    public function global_admin_cannot_create_one_with_non_numeric_phone(): void
     {
         /**
          * @var \App\Models\User $user
@@ -373,7 +372,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_can_create_one_with_taxonomies()
+    public function global_admin_can_create_one_with_taxonomies(): void
     {
         /**
          * @var \App\Models\User $user
@@ -417,7 +416,88 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function all_global_admins_added_as_organisation_admin_when_one_is_created()
+    public function global_admin_can_create_one_with_logo(): void
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeGlobalAdmin();
+        Passport::actingAs($user);
+
+        // PNG
+        $image = File::factory()->imagePng()->pendingAssignment()->create();
+
+        $payload = [
+            'slug' => 'test-org-1',
+            'name' => 'Test Org 1',
+            'description' => 'Test description',
+            'url' => 'http://test-org-1.example.com',
+            'email' => 'info@test-org-1.example.com',
+            'phone' => null,
+            'category_taxonomies' => [],
+            'logo_file_id' => $image->id,
+        ];
+
+        $response = $this->json('POST', '/core/v1/organisations', $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $response->assertJsonFragment($payload);
+
+        $updateRequest = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
+        $organisation = Organisation::where('slug', 'test-org-1')->firstOrFail();
+        $this->assertEquals($image->id, $organisation->logo_file_id);
+
+        // Get the image for the organisation
+        $content = $this->get("/core/v1/organisations/$organisation->id/logo.png")->content();
+
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.png'), $content);
+
+        // JPG
+        $image = File::factory()->imageJpg()->pendingAssignment()->create();
+
+        $payload = [
+            'slug' => 'test-org-2',
+            'name' => 'Test Org 2',
+            'description' => 'Test description',
+            'url' => 'http://test-org-2.example.com',
+            'email' => 'info@test-org-2.example.com',
+            'phone' => null,
+            'category_taxonomies' => [],
+            'logo_file_id' => $image->id,
+        ];
+
+        $response = $this->json('POST', '/core/v1/organisations', $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $response->assertJsonFragment($payload);
+
+        $updateRequest = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
+        $organisation = Organisation::where('slug', 'test-org-2')->firstOrFail();
+        $this->assertEquals($image->id, $organisation->logo_file_id);
+
+        // Get the image for the organisation
+        $content = $this->get("/core/v1/organisations/$organisation->id/logo.jpg")->content();
+
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.jpg'), $content);
+    }
+
+    /**
+     * @test
+     */
+    public function all_global_admins_added_as_organisation_admin_when_one_is_created(): void
     {
         /**
          * @var \App\Models\User $user
@@ -469,7 +549,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_created()
+    public function audit_created_when_created(): void
     {
         $this->fakeEvents();
 
@@ -511,7 +591,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_view_one()
+    public function guest_can_view_one(): void
     {
         $organisation = Organisation::factory()->create();
 
@@ -549,7 +629,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_view_one_by_slug()
+    public function guest_can_view_one_by_slug(): void
     {
         $organisation = Organisation::factory()->create();
 
@@ -577,7 +657,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_viewed()
+    public function audit_created_when_viewed(): void
     {
         $this->fakeEvents();
 
@@ -598,7 +678,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_update_one()
+    public function guest_cannot_update_one(): void
     {
         $organisation = Organisation::factory()->create();
 
@@ -610,7 +690,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_update_one()
+    public function service_worker_cannot_update_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -626,7 +706,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_update_one()
+    public function service_admin_cannot_update_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -642,7 +722,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_can_update_one()
+    public function organisation_admin_can_update_one(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -676,7 +756,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_can_update_one()
+    public function global_admin_can_update_one(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeGlobalAdmin();
@@ -709,7 +789,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_update_one_with_auto_approval()
+    public function super_admin_can_update_one_with_auto_approval(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeSuperAdmin();
@@ -764,7 +844,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_can_add_social_media_to_one()
+    public function organisation_admin_can_add_social_media_to_one(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -803,7 +883,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_can_remove_social_media_from_one()
+    public function organisation_admin_can_remove_social_media_from_one(): void
     {
         $organisation = Organisation::factory()->socialMedia()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -835,7 +915,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_can_add_additional_social_media_to_one()
+    public function organisation_admin_can_add_additional_social_media_to_one(): void
     {
         $organisation = Organisation::factory()->create();
         $organisation->socialMedias()->create([
@@ -880,7 +960,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_can_update_with_single_form_of_contact()
+    public function organisation_admin_can_update_with_single_form_of_contact(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -914,7 +994,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_update_with_no_form_of_contact()
+    public function organisation_admin_cannot_update_with_no_form_of_contact(): void
     {
         $organisation = Organisation::factory()->create([
             'email' => 'info@test-org.example.com',
@@ -939,7 +1019,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_can_update_without_contact_details()
+    public function global_admin_can_update_without_contact_details(): void
     {
         $organisation = Organisation::factory()->create([
             'url' => 'http://test-org.example.com',
@@ -969,7 +1049,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_update_with_non_numeric_phone()
+    public function global_admin_cannot_update_with_non_numeric_phone(): void
     {
         $organisation = Organisation::factory()->create([
             'url' => 'http://test-org.example.com',
@@ -997,7 +1077,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_can_update_organisation_taxonomies()
+    public function organisation_admin_can_update_organisation_taxonomies(): void
     {
         $organisation = Organisation::factory()->create();
         $taxonomy1 = Taxonomy::factory()->create();
@@ -1046,7 +1126,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_can_update_organisation_taxonomies()
+    public function global_admin_can_update_organisation_taxonomies(): void
     {
         $organisation = Organisation::factory()->create();
         $taxonomy1 = Taxonomy::factory()->create();
@@ -1132,7 +1212,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function only_partial_fields_can_be_updated()
+    public function only_partial_fields_can_be_updated(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -1161,7 +1241,87 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_updated()
+    public function organisationAdminCanUpdateLogo(): void
+    {
+        $organisation = Organisation::factory()->withPngLogo()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
+
+        Passport::actingAs($user);
+
+        // PNG
+        $image = File::factory()->imagePng()->pendingAssignment()->create();
+        $payload = [
+            'logo_file_id' => $image->id,
+        ];
+
+        $response = $this->json('PUT', "/core/v1/organisations/{$organisation->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $response->assertJsonFragment(['data' => $payload]);
+
+        $updateRequest = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
+        // Get the image for the organisation logo
+        $content = $this->get("/core/v1/organisations/$organisation->id/logo.png")->content();
+
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.png'), $content);
+
+        // JPG
+        $image = File::factory()->imageJpg()->pendingAssignment()->create();
+        $payload = [
+            'logo_file_id' => $image->id,
+        ];
+
+        $response = $this->json('PUT', "/core/v1/organisations/{$organisation->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $response->assertJsonFragment(['data' => $payload]);
+
+        $updateRequest = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
+        // Get the image for the organisation logo
+        $content = $this->get("/core/v1/organisations/$organisation->id/logo.jpg")->content();
+
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.jpg'), $content);
+
+        // SVG
+        $image = File::factory()->imageSvg()->pendingAssignment()->create();
+        $payload = [
+            'logo_file_id' => $image->id,
+        ];
+
+        $response = $this->json('PUT', "/core/v1/organisations/{$organisation->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $response->assertJsonFragment(['data' => $payload]);
+
+        $updateRequest = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
+        // Get the image for the organisation logo
+        $content = $this->get("/core/v1/organisations/$organisation->id/logo.svg")->content();
+
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.svg'), $content);
+    }
+
+    /**
+     * @test
+     */
+    public function audit_created_when_updated(): void
     {
         $this->fakeEvents();
 
@@ -1189,7 +1349,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function fields_removed_for_existing_update_requests()
+    public function fields_removed_for_existing_update_requests(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -1223,7 +1383,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_delete_one()
+    public function guest_cannot_delete_one(): void
     {
         $organisation = Organisation::factory()->create();
 
@@ -1235,7 +1395,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_delete_one()
+    public function service_worker_cannot_delete_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -1251,7 +1411,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_delete_one()
+    public function service_admin_cannot_delete_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -1267,7 +1427,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_delete_one()
+    public function organisation_admin_cannot_delete_one(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -1282,7 +1442,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_delete_one()
+    public function global_admin_cannot_delete_one(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeGlobalAdmin();
@@ -1297,7 +1457,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_delete_one()
+    public function super_admin_can_delete_one(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeSuperAdmin();
@@ -1313,7 +1473,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function related_social_media_are_deleted_when_deleting_one()
+    public function related_social_media_are_deleted_when_deleting_one(): void
     {
         $organisation = Organisation::factory()->create();
         $organisation->socialMedias()->create([
@@ -1333,7 +1493,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_deleted()
+    public function audit_created_when_deleted(): void
     {
         $this->fakeEvents();
 
@@ -1358,7 +1518,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_view_logo()
+    public function guest_can_view_logo(): void
     {
         $organisation = Organisation::factory()->create();
 
@@ -1371,7 +1531,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_logo_viewed()
+    public function audit_created_when_logo_viewed(): void
     {
         $this->fakeEvents();
 
@@ -1392,7 +1552,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_can_upload_logo()
+    public function global_admin_can_upload_logo(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1440,7 +1600,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_can_delete_logo()
+    public function organisation_admin_can_delete_logo(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1475,7 +1635,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_bulk_import()
+    public function guest_cannot_bulk_import(): void
     {
         Storage::fake('local');
 
@@ -1494,7 +1654,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_bulk_import()
+    public function service_worker_cannot_bulk_import(): void
     {
         Storage::fake('local');
 
@@ -1520,7 +1680,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_bulk_import()
+    public function service_admin_cannot_bulk_import(): void
     {
         Storage::fake('local');
 
@@ -1546,7 +1706,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_bulk_import()
+    public function organisation_admin_cannot_bulk_import(): void
     {
         Storage::fake('local');
 
@@ -1571,7 +1731,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_bulk_import()
+    public function global_admin_cannot_bulk_import(): void
     {
         Storage::fake('local');
 
@@ -1595,7 +1755,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_bulk_import()
+    public function super_admin_can_bulk_import(): void
     {
         Storage::fake('local');
 
@@ -1619,7 +1779,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_bulk_import_with_minimal_fields()
+    public function super_admin_can_bulk_import_with_minimal_fields(): void
     {
         Storage::fake('local');
 
@@ -1651,7 +1811,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_view_bulk_imported_organisation()
+    public function super_admin_can_view_bulk_imported_organisation(): void
     {
         Storage::fake('local');
 
@@ -1687,7 +1847,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_can_view_bulk_imported_organisation()
+    public function global_admin_can_view_bulk_imported_organisation(): void
     {
         Storage::fake('local');
 
@@ -1744,7 +1904,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function validate_file_import_type()
+    public function validate_file_import_type(): void
     {
         Storage::fake('local');
 
@@ -1807,7 +1967,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function validate_file_import_fields()
+    public function validate_file_import_fields(): void
     {
         Storage::fake('local');
 
@@ -1902,7 +2062,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function organisations_file_import_100rows()
+    public function organisations_file_import_100rows(): void
     {
         Storage::fake('local');
 
@@ -1942,7 +2102,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function organisations_file_import_5krows()
+    public function organisations_file_import_5krows(): void
     {
         Storage::fake('local');
 
@@ -1978,7 +2138,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function duplicate_import_organisation_ids_are_detected()
+    public function duplicate_import_organisation_ids_are_detected(): void
     {
         Storage::fake('local');
 
@@ -2051,7 +2211,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function duplicate_import_organisation_names_are_detected()
+    public function duplicate_import_organisation_names_are_detected(): void
     {
         Storage::fake('local');
 
@@ -2140,7 +2300,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function possible_duplicate_import_organisations_can_be_ignored()
+    public function possible_duplicate_import_organisations_can_be_ignored(): void
     {
         Storage::fake('local');
 
@@ -2198,7 +2358,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function duplicate_rows_in_import_are_detected()
+    public function duplicate_rows_in_import_are_detected(): void
     {
         Storage::fake('local');
 

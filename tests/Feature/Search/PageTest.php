@@ -12,8 +12,6 @@ class PageTest extends TestCase implements UsesElasticsearch
 {
     /**
      * Setup the test environment.
-     *
-     * @return void
      */
     protected function setUp(): void
     {
@@ -28,7 +26,7 @@ class PageTest extends TestCase implements UsesElasticsearch
      * Perform a search for services.
      */
 
-    public function test_guest_can_search()
+    public function test_guest_can_search(): void
     {
         $response = $this->json('POST', '/core/v1/search/pages', [
             'query' => 'test',
@@ -39,7 +37,7 @@ class PageTest extends TestCase implements UsesElasticsearch
         $response->assertStatus(Response::HTTP_OK);
     }
 
-    public function test_query_matches_page_title()
+    public function test_query_matches_page_title(): void
     {
         $page = Page::factory()->create([
             'title' => 'This is a test',
@@ -59,7 +57,7 @@ class PageTest extends TestCase implements UsesElasticsearch
         ]);
     }
 
-    public function test_query_matches_page_content()
+    public function test_query_matches_page_content(): void
     {
         $page = Page::factory()->landingPage()->create();
         sleep(1);
@@ -119,7 +117,7 @@ class PageTest extends TestCase implements UsesElasticsearch
         ]);
     }
 
-    public function test_query_matches_single_word_from_page_content()
+    public function test_query_matches_single_word_from_page_content(): void
     {
         $page = Page::factory()->create([
             'content' => [
@@ -145,7 +143,7 @@ class PageTest extends TestCase implements UsesElasticsearch
         $response->assertJsonFragment(['id' => $page->id]);
     }
 
-    public function test_query_matches_multiple_words_from_page_content()
+    public function test_query_matches_multiple_words_from_page_content(): void
     {
         $page = Page::factory()->create([
             'content' => [
@@ -171,7 +169,7 @@ class PageTest extends TestCase implements UsesElasticsearch
         $response->assertJsonFragment(['id' => $page->id]);
     }
 
-    public function test_query_ranks_page_title_above_page_content()
+    public function test_query_ranks_page_title_above_page_content(): void
     {
         $page1 = Page::factory()->create(['title' => 'This is a test']);
         $page2 = Page::factory()->create([
@@ -209,7 +207,7 @@ class PageTest extends TestCase implements UsesElasticsearch
         $this->assertEquals($page2->id, $data[1]['id']);
     }
 
-    public function test_query_matches_collection_name()
+    public function test_query_matches_collection_name(): void
     {
         $page1 = Page::factory()->create();
         $page1->updateCollections([Collection::factory()->create([
@@ -247,7 +245,7 @@ class PageTest extends TestCase implements UsesElasticsearch
         $response->assertJsonMissing(['id' => $page2->id]);
     }
 
-    public function test_query_matches_partial_collection_name()
+    public function test_query_matches_partial_collection_name(): void
     {
         $page1 = Page::factory()->create();
         $page1->updateCollections([
@@ -289,7 +287,7 @@ class PageTest extends TestCase implements UsesElasticsearch
         $response->assertJsonMissing(['id' => $page2->id]);
     }
 
-    public function test_query_ranks_perfect_match_above_fuzzy_match()
+    public function test_query_ranks_perfect_match_above_fuzzy_match(): void
     {
         $page1 = Page::factory()->create(['title' => 'This is a test']);
         $page2 = Page::factory()->create(['title' => 'Those are tests']);
@@ -316,7 +314,7 @@ class PageTest extends TestCase implements UsesElasticsearch
         $this->assertEquals($page2->id, $data[1]['id']);
     }
 
-    public function test_only_enabled_pages_returned()
+    public function test_only_enabled_pages_returned(): void
     {
         $activePage = Page::factory()->create([
             'title' => 'Testing Page',
@@ -339,7 +337,7 @@ class PageTest extends TestCase implements UsesElasticsearch
         $response->assertJsonMissing(['id' => $inactivePage->id]);
     }
 
-    public function test_query_returns_paginated_result_set()
+    public function test_query_returns_paginated_result_set(): void
     {
         $pages = Page::factory()->count(30)->create([
             'title' => 'Testing Page',

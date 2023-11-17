@@ -7,7 +7,7 @@ return new class() extends Migration {
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         DB::statement('ALTER TABLE `update_requests` MODIFY `updateable_id` CHAR(36) DEFAULT NULL;');
     }
@@ -15,7 +15,7 @@ return new class() extends Migration {
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
         DB::statement('ALTER TABLE `update_requests` MODIFY `updateable_id` CHAR(36);');
     }

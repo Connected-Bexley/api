@@ -65,29 +65,22 @@ class File extends Model implements Responsable
 
     /**
      * Create an HTTP response that represents the object.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @param mixed $request
      */
-    public function toResponse($request)
+    public function toResponse($request): Response
     {
         return response()->make($this->getContent(), Response::HTTP_OK, [
+            'Access-Control-Expose-Headers' => ['Content-Type', 'Content-Disposition'],
             'Content-Type' => $this->mime_type,
             'Content-Disposition' => sprintf('inline; filename="%s"', $this->filename),
         ]);
     }
 
-    /**
-     * @return string
-     */
     public function getContent(): string
     {
         return Storage::disk(config('filesystems.cloud'))->get($this->path());
     }
 
-    /**
-     * @return string
-     */
     public function path(): string
     {
         $directory = $this->is_private ? 'files/private' : 'files/public';
@@ -95,19 +88,12 @@ class File extends Model implements Responsable
         return "/{$directory}/{$this->id}-{$this->filename}";
     }
 
-    /**
-     * @return string
-     */
     protected function visibility(): string
     {
         // S3 requires private visibility
         return config('filesystems.cloud') === 's3' ? 'private' : ($this->is_private ? 'private' : 'public');
     }
 
-    /**
-     * @param string $content
-     * @return \App\Models\File
-     */
     public function upload(string $content): File
     {
         Storage::disk(config('filesystems.cloud'))->put($this->path(), $content, $this->visibility());
@@ -115,9 +101,6 @@ class File extends Model implements Responsable
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function url(): string
     {
         return Storage::disk(config('filesystems.cloud'))->url($this->path());
@@ -131,10 +114,6 @@ class File extends Model implements Responsable
         Storage::disk(config('filesystems.cloud'))->delete($this->path());
     }
 
-    /**
-     * @param string $content
-     * @return \App\Models\File
-     */
     public function uploadBase64EncodedFile(string $content): File
     {
         $data = explode(',', $content);
@@ -145,9 +124,6 @@ class File extends Model implements Responsable
 
     /**
      * @deprecated you should now use the uploadBase64EncodedFile() method instead
-     *
-     * @param string $content
-     * @return \App\Models\File
      */
     public function uploadBase64EncodedPng(string $content): File
     {
@@ -156,9 +132,6 @@ class File extends Model implements Responsable
 
     /**
      * Get a file record which is a resized version of the current instance.
-     *
-     * @param int|null $maxDimension
-     * @return \App\Models\File
      */
     public function resizedVersion(int $maxDimension = null): self
     {
@@ -208,11 +181,8 @@ class File extends Model implements Responsable
     /**
      * Get a file record which is a resized version of the specified placeholder.
      *
-     * @param int $maxDimension
-     * @param string $placeholderFor
      * @throws \InvalidArgumentException
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
-     * @return \App\Models\File
      */
     public static function resizedPlaceholder(int $maxDimension, string $placeholderFor): self
     {
@@ -265,11 +235,6 @@ class File extends Model implements Responsable
         return $file;
     }
 
-    /**
-     * @param string $mimeType
-     * @param bool $withPeriod
-     * @return string
-     */
     public static function extensionFromMime(string $mimeType, bool $withPeriod = true): string
     {
         $map = [
@@ -287,9 +252,6 @@ class File extends Model implements Responsable
         return $withPeriod ? $map[$mimeType] : trim($map[$mimeType], '.');
     }
 
-    /**
-     * @return \App\Models\File
-     */
     public function assigned(): self
     {
         $this->update(['meta' => null]);

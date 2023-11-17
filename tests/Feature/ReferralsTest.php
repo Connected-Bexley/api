@@ -24,7 +24,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_list_them()
+    public function guest_cannot_list_them(): void
     {
         $response = $this->json('GET', '/core/v1/referrals');
 
@@ -34,7 +34,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_list_them()
+    public function global_admin_cannot_list_them(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeGlobalAdmin();
@@ -59,7 +59,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_for_another_service_cannot_list_them()
+    public function service_worker_for_another_service_cannot_list_them(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -81,7 +81,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_can_list_them()
+    public function service_worker_can_list_them(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -133,7 +133,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function only_referrals_user_is_authorised_to_view_are_shown()
+    public function only_referrals_user_is_authorised_to_view_are_shown(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -166,7 +166,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_listed()
+    public function audit_created_when_listed(): void
     {
         $this->fakeEvents();
 
@@ -191,7 +191,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_filter_by_organisation_name()
+    public function super_admin_can_filter_by_organisation_name(): void
     {
         /**
          * @var \App\Models\Organisation $organisationOne
@@ -247,7 +247,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_filter_by_service_name()
+    public function super_admin_can_filter_by_service_name(): void
     {
         /** @var \App\Models\Service $serviceOne */
         $serviceOne = Service::factory()->create([
@@ -294,7 +294,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_sort_by_organisation_name()
+    public function super_admin_can_sort_by_organisation_name(): void
     {
         /**
          * @var \App\Models\Organisation $organisationOne
@@ -354,7 +354,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_sort_by_service_name()
+    public function super_admin_can_sort_by_service_name(): void
     {
         /** @var \App\Models\Service $serviceOne */
         $serviceOne = Service::factory()->create([
@@ -406,7 +406,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_create_referral()
+    public function guest_can_create_referral(): void
     {
         $service = Service::factory()->create([
             'referral_method' => Service::REFERRAL_METHOD_INTERNAL,
@@ -450,7 +450,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_create_self_referral()
+    public function guest_can_create_self_referral(): void
     {
         $service = Service::factory()->create([
             'referral_method' => Service::REFERRAL_METHOD_INTERNAL,
@@ -490,7 +490,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_create_referral_for_a_service_without_a_contact_method()
+    public function guest_can_create_referral_for_a_service_without_a_contact_method(): void
     {
         $service = Service::factory()->create();
 
@@ -531,7 +531,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_created()
+    public function audit_created_when_created(): void
     {
         $this->fakeEvents();
 
@@ -569,7 +569,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_view_one()
+    public function guest_cannot_view_one(): void
     {
         $referral = Referral::factory()->create();
 
@@ -581,7 +581,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_for_another_service_cannot_view_one()
+    public function service_worker_for_another_service_cannot_view_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create();
@@ -598,7 +598,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_view_one()
+    public function global_admin_cannot_view_one(): void
     {
         $user = User::factory()->create()->makeGlobalAdmin();
         $referral = Referral::factory()->create();
@@ -613,7 +613,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_can_view_one()
+    public function service_worker_can_view_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create();
@@ -655,7 +655,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_viewed()
+    public function audit_created_when_viewed(): void
     {
         $this->fakeEvents();
 
@@ -685,7 +685,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_update_one()
+    public function guest_cannot_update_one(): void
     {
         $referral = Referral::factory()->create();
 
@@ -697,7 +697,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_for_another_service_cannot_update_one()
+    public function service_worker_for_another_service_cannot_update_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create();
@@ -717,7 +717,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_update_one()
+    public function global_admin_cannot_update_one(): void
     {
         $user = User::factory()->create()->makeGlobalAdmin();
         $referral = Referral::factory()->create();
@@ -735,7 +735,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_can_update_one()
+    public function service_worker_can_update_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create();
@@ -786,7 +786,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_updated()
+    public function audit_created_when_updated(): void
     {
         $this->fakeEvents();
 
@@ -819,7 +819,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_delete_one()
+    public function guest_cannot_delete_one(): void
     {
         $referral = Referral::factory()->create();
 
@@ -831,7 +831,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_delete_one()
+    public function service_worker_cannot_delete_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create();
@@ -848,7 +848,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_delete_one()
+    public function service_admin_cannot_delete_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create();
@@ -865,7 +865,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_delete_one()
+    public function organisation_admin_cannot_delete_one(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create();
@@ -882,7 +882,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_delete_one()
+    public function global_admin_cannot_delete_one(): void
     {
         $user = User::factory()->create();
         $user->makeGlobalAdmin();
@@ -898,7 +898,7 @@ class ReferralsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_cannot_delete_one()
+    public function super_admin_cannot_delete_one(): void
     {
         $user = User::factory()->create();
         $user->makeSuperAdmin();

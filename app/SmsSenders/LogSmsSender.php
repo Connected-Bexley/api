@@ -8,9 +8,6 @@ use Illuminate\Support\Facades\Date;
 
 class LogSmsSender implements SmsSender
 {
-    /**
-     * @param \App\Sms\Sms $sms
-     */
     public function send(Sms $sms)
     {
         logger()->debug('SMS sent via Log SMS at [' . Date::now()->toDateTimeString() . ']', [

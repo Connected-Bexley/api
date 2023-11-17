@@ -10,7 +10,7 @@ class MailgunServiceProvider extends ServiceProvider
     /**
      * Register services.
      */
-    public function register()
+    public function register(): void
     {
         $this->app->singleton(Mailgun::class, function () {
             return Mailgun::create(
@@ -23,7 +23,7 @@ class MailgunServiceProvider extends ServiceProvider
     /**
      * Bootstrap services.
      */
-    public function boot()
+    public function boot(): void
     {
         //
     }

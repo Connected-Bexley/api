@@ -2,16 +2,15 @@
 
 namespace Database\Factories;
 
+use App\Models\File;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class LocationFactory extends Factory
 {
     /**
      * Define the model's default state.
-     *
-     * @return array
      */
-    public function definition()
+    public function definition(): array
     {
         return [
             'address_line_1' => $this->faker->streetAddress(),
@@ -25,5 +24,23 @@ class LocationFactory extends Factory
             'lat' => mt_rand(-90, 90),
             'lon' => mt_rand(-180, 180),
         ];
+    }
+
+    public function withJpgImage()
+    {
+        return $this->state(function () {
+            return [
+                'image_file_id' => File::factory()->imageJpg()->create(),
+            ];
+        });
+    }
+
+    public function withPngImage()
+    {
+        return $this->state(function () {
+            return [
+                'image_file_id' => File::factory()->imagePng()->create(),
+            ];
+        });
     }
 }

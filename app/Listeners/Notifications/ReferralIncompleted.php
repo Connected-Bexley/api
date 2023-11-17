@@ -14,10 +14,8 @@ class ReferralIncompleted
 {
     /**
      * Handle the event.
-     *
-     * @param EndpointHit $event
      */
-    public function handle(EndpointHit $event)
+    public function handle(EndpointHit $event): void
     {
         // Only handle specific endpoint events.
         if ($event->isntFor(Referral::class, Audit::ACTION_UPDATE)) {
@@ -37,9 +35,6 @@ class ReferralIncompleted
         $this->notifyReferee($event->getModel());
     }
 
-    /**
-     * @param \App\Models\Referral $referral
-     */
     protected function notifyClient(Referral $referral)
     {
         // Only send an email if email address was provided.
@@ -60,9 +55,6 @@ class ReferralIncompleted
         }
     }
 
-    /**
-     * @param \App\Models\Referral $referral
-     */
     protected function notifyReferee(Referral $referral)
     {
         if ($referral->referee_email) {

@@ -7,10 +7,6 @@ use GoldSpecDigital\ObjectOrientedOAS\Objects\ExternalDocs as BaseExternalDocs;
 
 class ExternalDocs extends BaseExternalDocs
 {
-    /**
-     * @param string|null $objectId
-     * @return static
-     */
     public static function create(string $objectId = null): BaseObject
     {
         return parent::create($objectId)

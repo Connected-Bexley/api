@@ -2,9 +2,10 @@
 
 namespace App\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class UkMobilePhoneNumber implements Rule
+class UkMobilePhoneNumber implements ValidationRule
 {
     /**
      * @var string|null
@@ -13,10 +14,8 @@ class UkMobilePhoneNumber implements Rule
 
     /**
      * UkPhoneNumber constructor.
-     *
-     * @param string|null $message
      */
-    public function __construct(?string $message = null)
+    public function __construct(string $message = null)
     {
         $this->message = $message;
     }
@@ -24,38 +23,32 @@ class UkMobilePhoneNumber implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param string $attribute
      * @param mixed $value
-     * @return bool
      */
-    public function passes($attribute, $value)
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         // Immediately fail if the value is not a string.
         if (!is_string($value)) {
-            return false;
+            $fail(__('validation.string'));
         }
 
         $matches = preg_match('/^(07[0-9]{9})$/', $value);
 
-        if ($matches === 1) {
-            return true;
+        if ($matches !== 1) {
+
+            $matches = preg_match('/^(\+447[0-9]{9})$/', $value);
+
+            if ($matches !== 1) {
+                $fail($this->message());
+            }
+
         }
-
-        $matches = preg_match('/^(\+447[0-9]{9})$/', $value);
-
-        if ($matches === 1) {
-            return true;
-        }
-
-        return false;
     }
 
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
-    public function message()
+    public function message(): string
     {
         return $this->message ?? 'The :attribute must be a valid UK mobile phone number.';
     }

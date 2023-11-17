@@ -41,12 +41,7 @@ class Address
 
     /**
      * Address constructor.
-     *
-     * @param $address
-     * @param string $city
-     * @param string $county
-     * @param string $postcode
-     * @param string $country
+     * @param mixed $address
      */
     public function __construct($address, string $city, string $county, string $postcode, string $country)
     {
@@ -59,14 +54,6 @@ class Address
         $this->country = $country;
     }
 
-    /**
-     * @param $address
-     * @param string $city
-     * @param string $county
-     * @param string $postcode
-     * @param string $country
-     * @return \App\Support\Address
-     */
     public static function create($address, string $city, string $county, string $postcode, string $country): Address
     {
         return new static($address, $city, $county, $postcode, $country);
@@ -74,10 +61,8 @@ class Address
 
     /**
      * Return the address data as a string.
-     *
-     * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return implode(', ', array_map(function ($value) {
             return is_array($value) ? $value[0] : $value;

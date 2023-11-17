@@ -40,10 +40,8 @@ class ResetPasswordController extends Controller
 
     /**
      * Get the password reset validation rules.
-     *
-     * @return array
      */
-    protected function rules()
+    protected function rules(): array
     {
         return [
             'token' => ['required'],
@@ -55,11 +53,9 @@ class ResetPasswordController extends Controller
     /**
      * Get the response for a successful password reset.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param string $response
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
      */
-    protected function sendResetResponse(Request $request, $response)
+    protected function sendResetResponse(Request $request, string $response)
     {
         // If OTP is disabled then skip this method.
         if (!config('local.otp_enabled')) {

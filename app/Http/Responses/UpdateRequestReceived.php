@@ -4,6 +4,7 @@ namespace App\Http\Responses;
 
 use App\Models\UpdateRequest;
 use Illuminate\Contracts\Support\Responsable;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 
 class UpdateRequestReceived implements Responsable
@@ -20,9 +21,6 @@ class UpdateRequestReceived implements Responsable
 
     /**
      * UpdateRequestReceived constructor.
-     *
-     * @param \App\Models\UpdateRequest $updateRequest
-     * @param int $code
      */
     public function __construct(UpdateRequest $updateRequest, int $code = Response::HTTP_OK)
     {
@@ -32,11 +30,9 @@ class UpdateRequestReceived implements Responsable
 
     /**
      * Create an HTTP response that represents the object.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @param mixed $request
      */
-    public function toResponse($request)
+    public function toResponse($request): JsonResponse
     {
         return response()->json([
             'message' => $this->updateRequest->isApproved() ? __('updates.pre-approved') : __('updates.pending', ['appname' => config('app.name', 'Laravel')]),

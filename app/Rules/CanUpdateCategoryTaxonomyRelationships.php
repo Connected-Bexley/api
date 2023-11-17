@@ -8,10 +8,10 @@ use App\Models\Service;
 use App\Models\Taxonomy;
 use App\Models\User;
 use App\TaxonomyRelationships\HasTaxonomyRelationships;
-use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Arr;
 
-class CanUpdateCategoryTaxonomyRelationships implements Rule
+class CanUpdateCategoryTaxonomyRelationships implements ValidationRule
 {
     /**
      * @var \App\Models\User
@@ -25,9 +25,6 @@ class CanUpdateCategoryTaxonomyRelationships implements Rule
 
     /**
      * Create a new rule instance.
-     *
-     * @param \App\Models\User $user
-     * @param \App\TaxonomyRelationships\HasTaxonomyRelationships $model
      */
     public function __construct(User $user, HasTaxonomyRelationships $model)
     {
@@ -38,50 +35,47 @@ class CanUpdateCategoryTaxonomyRelationships implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param string $attribute
      * @param mixed $value
-     * @return bool
+     * @param mixed $fail
      */
-    public function passes($attribute, $value)
+    public function validate(string $attribute, $value, $fail): void
     {
         // Immediately fail if the value is not an array of strings.
         if (!is_array($value)) {
-            return false;
+            $fail(__('validation.array'));
         }
 
         foreach ($value as $item) {
             if (!is_string($item)) {
-                return false;
+                $fail(':attribute must be an array of strings');
             }
         }
 
         // Allow changing of taxonomies if global admin.
-        if ($this->user->isSuperAdmin()
+        if (!($this->user->isSuperAdmin()
             || ($this->model instanceof Service && $this->user->isGlobalAdmin())
             || ($this->model instanceof Organisation && $this->user->isOrganisationAdmin($this->model))
-            || ($this->model instanceof OrganisationEvent && $this->user->isOrganisationAdmin($this->model->organisation))
+            || ($this->model instanceof OrganisationEvent && $this->user->isOrganisationAdmin($this->model->organisation)))
         ) {
-            return true;
+
+            // Only pass if the taxonomies remain unchanged.
+            $existingTaxonomyIds = $this->model
+                ->taxonomies()
+                ->pluck(table(Taxonomy::class, 'id'))
+                ->toArray();
+            $existingTaxonomies = array_values(Arr::sort($existingTaxonomyIds));
+            $newTaxonomies = array_values(Arr::sort($value));
+
+            if ($existingTaxonomies !== $newTaxonomies) {
+                $fail($this->message());
+            }
         }
-
-        // Only pass if the taxonomies remain unchanged.
-        $existingTaxonomyIds = $this->model
-            ->taxonomies()
-            ->pluck(table(Taxonomy::class, 'id'))
-            ->toArray();
-        $existingTaxonomies = array_values(Arr::sort($existingTaxonomyIds));
-        $newTaxonomies = array_values(Arr::sort($value));
-        $taxonomiesUnchanged = $existingTaxonomies === $newTaxonomies;
-
-        return $taxonomiesUnchanged;
     }
 
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
-    public function message()
+    public function message(): string
     {
         return 'You are not authorised to update this ' . class_basename($this->model) . '\'s category taxonomies.';
     }

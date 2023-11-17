@@ -27,9 +27,8 @@ class EndActiveServicesCommand extends Command
      * Execute the console command.
      *
      * @throws \Throwable
-     * @return mixed
      */
-    public function handle()
+    public function handle(): void
     {
         // Get all the services and chunk them for performance.
         Service::query()

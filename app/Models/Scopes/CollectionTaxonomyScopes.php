@@ -9,11 +9,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 trait CollectionTaxonomyScopes
 {
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param \App\Models\CollectionTaxonomy $collectionTaxonomy
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function scopeServices(Builder $query, CollectionTaxonomy $collectionTaxonomy): Builder
     {
         $serviceIds = ServiceTaxonomy::query()

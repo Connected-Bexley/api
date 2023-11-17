@@ -9,9 +9,7 @@ use GoldSpecDigital\ObjectOrientedOAS\Objects\Schema;
 class UpdateReferralSchema extends Schema
 {
     /**
-     * @param string|null $objectId
      * @throws \GoldSpecDigital\ObjectOrientedOAS\Exceptions\InvalidArgumentException
-     * @return static
      */
     public static function create(string $objectId = null): BaseObject
     {

@@ -2,9 +2,9 @@
 
 namespace App\BatchImport;
 
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
-use League\Flysystem\FileNotFoundException;
 use Symfony\Component\Mime\MimeTypes;
 
 /**
@@ -42,11 +42,8 @@ trait StoresSpreadsheets
 
     /**
      * Import a base64 encode spreadsheet.
-     *
-     * @param string $spreadsheet
-     * @return array
      */
-    public function processSpreadsheet(string $spreadsheet)
+    public function processSpreadsheet(string $spreadsheet): void
     {
         $filePath = $this->storeBase64FileString($spreadsheet, 'batch-upload');
 
@@ -75,12 +72,9 @@ trait StoresSpreadsheets
     /**
      * Store a Base 64 encoded data string.
      *
-     * @param string $file_data
-     * @param string $path
      * @throws Illuminate\Validation\ValidationException
-     * @return string
      */
-    protected function storeBase64FileString(string $file_data, string $path)
+    protected function storeBase64FileString(string $file_data, string $path): string
     {
         preg_match('/^data:(application\/[a-z\-\.]+);base64,(.*)/', $file_data, $matches);
         if (count($matches) < 3) {
@@ -95,14 +89,8 @@ trait StoresSpreadsheets
 
     /**
      * Store a binary file blob and update the models properties.
-     *
-     * @param string $blob
-     * @param string $path
-     * @param string $mime_type
-     * @param string $ext
-     * @return string
      */
-    protected function storeBinaryUpload(string $blob, string $path, $mime_type = null, $ext = null)
+    protected function storeBinaryUpload(string $blob, string $path, string $mime_type = null, string $ext = null): string
     {
         $path = empty($path) ? '' : trim($path, '/') . '/';
         $mime_type = $mime_type ?? $this->getFileStringMimeType($blob);
@@ -117,10 +105,8 @@ trait StoresSpreadsheets
      * Get the mime type of a binary file string.
      *
      * @var string
-     *
-     * @return string
      */
-    protected function getFileStringMimeType(string $file_str)
+    protected function getFileStringMimeType(string $file_str): string
     {
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mime_type = finfo_buffer($finfo, $file_str);
@@ -131,11 +117,8 @@ trait StoresSpreadsheets
 
     /**
      * Guess the extension for a file from it's mime-type.
-     *
-     * @param string $mime_type
-     * @return string
      */
-    protected function guessFileExtension(string $mime_type)
+    protected function guessFileExtension(string $mime_type): string
     {
         return (new MimeTypes())->getExtensions($mime_type)[0] ?? null;
     }

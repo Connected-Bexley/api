@@ -12,9 +12,6 @@ class ServiceGalleryItem extends Model
     use ServiceGalleryItemRelationships;
     use ServiceGalleryItemScopes;
 
-    /**
-     * @return string
-     */
     public function url(): string
     {
         return route('core.v1.services.gallery-items', [

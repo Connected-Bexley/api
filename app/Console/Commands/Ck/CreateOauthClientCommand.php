@@ -33,8 +33,6 @@ class CreateOauthClientCommand extends Command
 
     /**
      * Create a new command instance.
-     *
-     * @param \Laravel\Passport\ClientRepository $clients
      */
     public function __construct(ClientRepository $clients)
     {
@@ -45,10 +43,8 @@ class CreateOauthClientCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return mixed
      */
-    public function handle()
+    public function handle(): void
     {
         $client = Passport::client()->forceFill([
             'user_id' => null,

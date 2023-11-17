@@ -13,6 +13,7 @@ use App\Http\Requests\TaxonomyOrganisation\UpdateRequest;
 use App\Http\Resources\TaxonomyOrganisationResource;
 use App\Http\Responses\ResourceDeleted;
 use App\Models\Taxonomy;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -28,11 +29,8 @@ class TaxonomyOrganisationController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param \App\Http\Requests\TaxonomyOrganisation\IndexRequest $request
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index(IndexRequest $request)
+    public function index(IndexRequest $request): AnonymousResourceCollection
     {
         $baseQuery = Taxonomy::query()
             ->organisations()
@@ -49,8 +47,6 @@ class TaxonomyOrganisationController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param \App\Http\Requests\TaxonomyOrganisation\StoreRequest $request
-     * @param \App\Generators\UniqueSlugGenerator $slugGenerator
      * @return \Illuminate\Http\Response
      */
     public function store(StoreRequest $request, UniqueSlugGenerator $slugGenerator)
@@ -71,12 +67,8 @@ class TaxonomyOrganisationController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param \App\Http\Requests\TaxonomyOrganisation\ShowRequest $request
-     * @param \App\Models\Taxonomy $taxonomy
-     * @return \App\Http\Resources\TaxonomyOrganisationResource
      */
-    public function show(ShowRequest $request, Taxonomy $taxonomy)
+    public function show(ShowRequest $request, Taxonomy $taxonomy): TaxonomyOrganisationResource
     {
         $baseQuery = Taxonomy::query()
             ->where('id', $taxonomy->id);
@@ -92,8 +84,6 @@ class TaxonomyOrganisationController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \App\Http\Requests\TaxonomyOrganisation\UpdateRequest $request
-     * @param \App\Models\Taxonomy $taxonomy
      * @return \Illuminate\Http\Response
      */
     public function update(UpdateRequest $request, UniqueSlugGenerator $slugGenerator, Taxonomy $taxonomy)
@@ -116,8 +106,6 @@ class TaxonomyOrganisationController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param \App\Http\Requests\TaxonomyOrganisation\DestroyRequest $request
-     * @param \App\Models\Taxonomy $taxonomy
      * @return \Illuminate\Http\Response
      */
     public function destroy(DestroyRequest $request, Taxonomy $taxonomy)

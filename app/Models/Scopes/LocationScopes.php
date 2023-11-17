@@ -8,11 +8,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 trait LocationScopes
 {
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param \App\Support\Coordinate $location
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function scopeOrderByDistance(Builder $query, Coordinate $location): Builder
     {
         $latColumn = table(Location::class, 'lat');

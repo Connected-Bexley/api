@@ -28,11 +28,9 @@ class ThesaurusController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @param \App\Http\Requests\Thesaurus\IndexRequest $request
      * @throws \Exception
-     * @return \App\Http\Responses\Thesaurus
      */
-    public function index(IndexRequest $request)
+    public function index(IndexRequest $request): Thesaurus
     {
         $thesaurus = cache()->rememberForever(static::CACHE_KEY, function (): array {
             $content = Storage::disk(config('filesystems.cloud'))->get('elasticsearch/thesaurus.csv');
@@ -68,11 +66,9 @@ class ThesaurusController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \App\Http\Requests\Thesaurus\UpdateRequest $request
      * @throws \Exception
-     * @return \App\Http\Responses\Thesaurus
      */
-    public function update(UpdateRequest $request)
+    public function update(UpdateRequest $request): Thesaurus
     {
         $synonyms = $request->synonyms;
 

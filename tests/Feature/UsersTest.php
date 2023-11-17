@@ -24,7 +24,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_list_them()
+    public function guest_cannot_list_them(): void
     {
         $response = $this->json('GET', '/core/v1/users');
 
@@ -34,7 +34,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_can_list_them()
+    public function service_worker_can_list_them(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -62,7 +62,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_listed()
+    public function audit_created_when_listed(): void
     {
         $this->fakeEvents();
 
@@ -81,7 +81,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_can_filter_by_highest_role_name()
+    public function service_worker_can_filter_by_highest_role_name(): void
     {
         $service = Service::factory()->create();
         $serviceAdmin = User::factory()->create()->makeServiceAdmin($service);
@@ -102,7 +102,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_can_sort_by_highest_role()
+    public function service_worker_can_sort_by_highest_role(): void
     {
         $service = Service::factory()->create();
         $serviceAdmin = User::factory()->create()->makeServiceAdmin($service);
@@ -121,7 +121,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_can_filter_by_at_organisation()
+    public function service_worker_can_filter_by_at_organisation(): void
     {
         $organisation = Organisation::factory()->create();
         $organisationAdmin = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -142,7 +142,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_can_filter_by_at_service()
+    public function service_worker_can_filter_by_at_service(): void
     {
         $service = Service::factory()->create();
         $serviceAdmin = User::factory()->create()->makeServiceAdmin($service);
@@ -163,7 +163,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_can_filter_by_at_organisation_and_includes_service_workers()
+    public function service_worker_can_filter_by_at_organisation_and_includes_service_workers(): void
     {
         $service = Service::factory()->create();
         $serviceWorker = User::factory()->create()->makeServiceWorker($service);
@@ -184,7 +184,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_can_filter_by_at_organisation_and_excludes_global_admins()
+    public function service_worker_can_filter_by_at_organisation_and_excludes_global_admins(): void
     {
         $organisation = Organisation::factory()->create();
         $organisationAdmin = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -216,7 +216,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_create_one()
+    public function guest_cannot_create_one(): void
     {
         $response = $this->json('POST', '/core/v1/users', $this->getCreateUserPayload([
             ['role' => Role::NAME_SUPER_ADMIN],
@@ -231,7 +231,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_create_one()
+    public function service_worker_cannot_create_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -250,7 +250,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_create_service_worker_for_another_service()
+    public function service_admin_cannot_create_service_worker_for_another_service(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -269,7 +269,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_can_create_service_worker_for_their_service()
+    public function service_admin_can_create_service_worker_for_their_service(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -292,7 +292,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_create_service_admin_for_another_service()
+    public function service_admin_cannot_create_service_admin_for_another_service(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -311,7 +311,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_can_create_service_admin_for_their_service()
+    public function service_admin_can_create_service_admin_for_their_service(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -335,7 +335,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_create_organisation_admin()
+    public function service_admin_cannot_create_organisation_admin(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -357,7 +357,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_create_service_worker_for_another_service()
+    public function organisation_admin_cannot_create_service_worker_for_another_service(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -376,7 +376,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_can_create_service_worker_for_their_service()
+    public function organisation_admin_can_create_service_worker_for_their_service(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -399,7 +399,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_create_service_admin_for_another_service()
+    public function organisation_admin_cannot_create_service_admin_for_another_service(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -418,7 +418,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_can_create_service_admin_for_their_service()
+    public function organisation_admin_can_create_service_admin_for_their_service(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -442,7 +442,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_create_organisation_admin_for_another_organisation()
+    public function organisation_admin_cannot_create_organisation_admin_for_another_organisation(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -461,7 +461,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_can_create_organisation_admin_for_their_organisation()
+    public function organisation_admin_can_create_organisation_admin_for_their_organisation(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -486,7 +486,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_create_content_admin()
+    public function organisation_admin_cannot_create_content_admin(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -502,7 +502,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_create_global_admin()
+    public function organisation_admin_cannot_create_global_admin(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -521,7 +521,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function content_admin_cannot_create_service_worker()
+    public function content_admin_cannot_create_service_worker(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeContentAdmin();
@@ -540,7 +540,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function content_admin_cannot_create_service_admin()
+    public function content_admin_cannot_create_service_admin(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeContentAdmin();
@@ -559,7 +559,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function content_admin_cannot_create_organisation_admin()
+    public function content_admin_cannot_create_organisation_admin(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeContentAdmin();
@@ -578,7 +578,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function content_admin_cannot_create_content_admin()
+    public function content_admin_cannot_create_content_admin(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeContentAdmin();
@@ -594,7 +594,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function content_admin_cannot_create_global_admin()
+    public function content_admin_cannot_create_global_admin(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeContentAdmin();
@@ -610,7 +610,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function content_admin_cannot_create_super_admin()
+    public function content_admin_cannot_create_super_admin(): void
     {
         $user = User::factory()->create()->makeContentAdmin();
         Passport::actingAs($user);
@@ -628,7 +628,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_create_service_worker()
+    public function global_admin_cannot_create_service_worker(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeGlobalAdmin();
@@ -647,7 +647,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_create_service_admin()
+    public function global_admin_cannot_create_service_admin(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeGlobalAdmin();
@@ -666,7 +666,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_create_organisation_admin()
+    public function global_admin_cannot_create_organisation_admin(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeGlobalAdmin();
@@ -685,7 +685,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_create_content_admin()
+    public function global_admin_cannot_create_content_admin(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeGlobalAdmin();
@@ -701,7 +701,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_create_global_admin()
+    public function global_admin_cannot_create_global_admin(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeGlobalAdmin();
@@ -717,7 +717,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_create_super_admin()
+    public function global_admin_cannot_create_super_admin(): void
     {
         $user = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($user);
@@ -736,7 +736,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_create_service_worker()
+    public function super_admin_can_create_service_worker(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeSuperAdmin();
@@ -759,7 +759,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_create_service_admin()
+    public function super_admin_can_create_service_admin(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeSuperAdmin();
@@ -783,7 +783,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_create_organisation_admin()
+    public function super_admin_can_create_organisation_admin(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeSuperAdmin();
@@ -808,7 +808,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_create_content_admin()
+    public function super_admin_can_create_content_admin(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeSuperAdmin();
@@ -832,7 +832,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_create_global_admin()
+    public function super_admin_can_create_global_admin(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeSuperAdmin();
@@ -856,7 +856,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_create_super_admin()
+    public function super_admin_can_create_super_admin(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeSuperAdmin();
@@ -881,7 +881,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_create_super_admin_with_soft_deleted_users_email()
+    public function super_admin_can_create_super_admin_with_soft_deleted_users_email(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
@@ -923,7 +923,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_created()
+    public function audit_created_when_created(): void
     {
         $this->fakeEvents();
 
@@ -950,7 +950,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_view_one()
+    public function guest_cannot_view_one(): void
     {
         Service::factory()->create();
         $user = User::factory()->create()->makeSuperAdmin();
@@ -963,7 +963,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_can_view_self()
+    public function service_worker_can_view_self(): void
     {
         $service = Service::factory()->create();
         $user1 = User::factory()->create()->makeServiceWorker($service);
@@ -1024,7 +1024,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_can_view_their_service_users()
+    public function service_admin_can_view_their_service_users(): void
     {
         $service = Service::factory()->create();
         $user1 = User::factory()->create()->makeServiceAdmin($service);
@@ -1072,7 +1072,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_can_view_their_organisation_users()
+    public function organisation_admin_can_view_their_organisation_users(): void
     {
         $service = Service::factory()->create();
         $user1 = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -1120,7 +1120,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function content_admin_can_view_self()
+    public function content_admin_can_view_self(): void
     {
         $service = Service::factory()->create();
         $user1 = User::factory()->create()->makeContentAdmin();
@@ -1164,7 +1164,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_can_view_self()
+    public function global_admin_can_view_self(): void
     {
         $service = Service::factory()->create();
         $user1 = User::factory()->create()->makeGlobalAdmin();
@@ -1208,7 +1208,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_view_all_users()
+    public function super_admin_can_view_all_users(): void
     {
         $service = Service::factory()->create();
         $user1 = User::factory()->create()->makeSuperAdmin();
@@ -1252,7 +1252,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_viewed()
+    public function audit_created_when_viewed(): void
     {
         $this->fakeEvents();
 
@@ -1278,7 +1278,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_view_logged_in_user()
+    public function guest_cannot_view_logged_in_user(): void
     {
         Service::factory()->create();
 
@@ -1290,7 +1290,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_can_view_logged_in_user()
+    public function service_worker_can_view_logged_in_user(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -1317,7 +1317,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_logged_in_user_viewed()
+    public function audit_created_when_logged_in_user_viewed(): void
     {
         $this->fakeEvents();
 
@@ -1346,7 +1346,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_update_one()
+    public function guest_cannot_update_one(): void
     {
         Service::factory()->create();
         $user = User::factory()->create()->makeSuperAdmin();
@@ -1364,7 +1364,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_update_one()
+    public function service_worker_cannot_update_one(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeServiceWorker($service);
@@ -1382,7 +1382,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_can_update_self()
+    public function service_worker_can_update_self(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeServiceWorker($service);
@@ -1404,7 +1404,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_can_update_service_worker()
+    public function service_admin_can_update_service_worker(): void
     {
         $invoker = User::factory()->create()->makeServiceAdmin(Service::factory()->create());
         Passport::actingAs($invoker);
@@ -1444,7 +1444,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_can_update_service_admin()
+    public function service_admin_can_update_service_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeServiceAdmin($service);
@@ -1492,7 +1492,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_update_organisation_admin()
+    public function service_admin_cannot_update_organisation_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeServiceAdmin($service);
@@ -1531,7 +1531,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_can_update_service_worker()
+    public function organisation_admin_can_update_service_worker(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -1571,7 +1571,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_can_update_service_admin()
+    public function organisation_admin_can_update_service_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -1619,7 +1619,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_can_update_organisation_admin()
+    public function organisation_admin_can_update_organisation_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -1679,7 +1679,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_update_content_admin()
+    public function organisation_admin_cannot_update_content_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -1706,7 +1706,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_update_global_admin()
+    public function organisation_admin_cannot_update_global_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -1749,7 +1749,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function content_admin_cannot_update_service_worker()
+    public function content_admin_cannot_update_service_worker(): void
     {
         $invoker = User::factory()->create()->makeContentAdmin();
         Passport::actingAs($invoker);
@@ -1777,7 +1777,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function content_admin_cannot_update_service_admin()
+    public function content_admin_cannot_update_service_admin(): void
     {
         $invoker = User::factory()->create()->makeContentAdmin();
         Passport::actingAs($invoker);
@@ -1809,7 +1809,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function content_admin_cannot_update_organisation_admin()
+    public function content_admin_cannot_update_organisation_admin(): void
     {
         $invoker = User::factory()->create()->makeContentAdmin();
         Passport::actingAs($invoker);
@@ -1845,7 +1845,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function content_admin_cannot_update_content_admin()
+    public function content_admin_cannot_update_content_admin(): void
     {
         $invoker = User::factory()->create()->makeContentAdmin();
         Passport::actingAs($invoker);
@@ -1870,7 +1870,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function content_admin_cannot_update_global_admin()
+    public function content_admin_cannot_update_global_admin(): void
     {
         $invoker = User::factory()->create()->makeContentAdmin();
         Passport::actingAs($invoker);
@@ -1907,7 +1907,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function content_admin_cannot_update_super_admin()
+    public function content_admin_cannot_update_super_admin(): void
     {
         $invoker = User::factory()->create()->makeContentAdmin();
         Passport::actingAs($invoker);
@@ -1949,7 +1949,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_update_service_worker()
+    public function global_admin_cannot_update_service_worker(): void
     {
         $invoker = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($invoker);
@@ -1977,7 +1977,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_update_service_admin()
+    public function global_admin_cannot_update_service_admin(): void
     {
         $invoker = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($invoker);
@@ -2009,7 +2009,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_update_organisation_admin()
+    public function global_admin_cannot_update_organisation_admin(): void
     {
         $invoker = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($invoker);
@@ -2045,7 +2045,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_update_content_admin()
+    public function global_admin_cannot_update_content_admin(): void
     {
         $invoker = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($invoker);
@@ -2070,7 +2070,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_update_global_admin()
+    public function global_admin_cannot_update_global_admin(): void
     {
         $invoker = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($invoker);
@@ -2107,7 +2107,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_and_organisation_permissions_are_applied_when_updating_to_global_admin()
+    public function service_and_organisation_permissions_are_applied_when_updating_to_global_admin(): void
     {
         $invoker = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($invoker);
@@ -2145,7 +2145,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_update_super_admin()
+    public function global_admin_cannot_update_super_admin(): void
     {
         $invoker = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($invoker);
@@ -2187,7 +2187,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_update_service_worker()
+    public function super_admin_can_update_service_worker(): void
     {
         $invoker = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($invoker);
@@ -2227,7 +2227,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_update_service_admin()
+    public function super_admin_can_update_service_admin(): void
     {
         $invoker = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($invoker);
@@ -2275,7 +2275,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_update_organisation_admin()
+    public function super_admin_can_update_organisation_admin(): void
     {
         $invoker = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($invoker);
@@ -2335,7 +2335,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_update_content_admin()
+    public function super_admin_can_update_content_admin(): void
     {
         $invoker = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($invoker);
@@ -2370,7 +2370,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_update_global_admin()
+    public function super_admin_can_update_global_admin(): void
     {
         $invoker = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($invoker);
@@ -2434,7 +2434,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_update_super_admin()
+    public function super_admin_can_update_super_admin(): void
     {
         $invoker = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($invoker);
@@ -2501,7 +2501,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_updated()
+    public function audit_created_when_updated(): void
     {
         $this->fakeEvents();
 
@@ -2551,7 +2551,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_delete_service_worker()
+    public function guest_cannot_delete_service_worker(): void
     {
         $service = Service::factory()->create();
         $subject = User::factory()->create()->makeServiceWorker($service);
@@ -2564,7 +2564,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_delete_service_worker()
+    public function service_worker_cannot_delete_service_worker(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeServiceWorker($service);
@@ -2579,7 +2579,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_can_delete_service_worker()
+    public function service_admin_can_delete_service_worker(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeServiceAdmin($service);
@@ -2595,7 +2595,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function content_admin_cannot_delete_service_worker()
+    public function content_admin_cannot_delete_service_worker(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeContentAdmin();
@@ -2610,7 +2610,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_delete_service_worker()
+    public function global_admin_cannot_delete_service_worker(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeGlobalAdmin();
@@ -2625,7 +2625,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_delete_service_admin()
+    public function guest_cannot_delete_service_admin(): void
     {
         $service = Service::factory()->create();
         $subject = User::factory()->create()->makeServiceAdmin($service);
@@ -2638,7 +2638,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_delete_service_admin()
+    public function service_worker_cannot_delete_service_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeServiceWorker($service);
@@ -2653,7 +2653,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_can_delete_service_admin()
+    public function service_admin_can_delete_service_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeServiceAdmin($service);
@@ -2669,7 +2669,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function content_admin_cannot_delete_service_admin()
+    public function content_admin_cannot_delete_service_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeContentAdmin();
@@ -2684,7 +2684,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_delete_service_admin()
+    public function global_admin_cannot_delete_service_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeGlobalAdmin();
@@ -2699,7 +2699,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_delete_organisation_admin()
+    public function guest_cannot_delete_organisation_admin(): void
     {
         $service = Service::factory()->create();
         $subject = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -2712,7 +2712,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_delete_organisation_admin()
+    public function service_worker_cannot_delete_organisation_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeServiceWorker($service);
@@ -2727,7 +2727,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_delete_organisation_admin()
+    public function service_admin_cannot_delete_organisation_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeServiceAdmin($service);
@@ -2742,7 +2742,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_can_delete_organisation_admin()
+    public function organisation_admin_can_delete_organisation_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -2758,7 +2758,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function content_admin_cannot_delete_organisation_admin()
+    public function content_admin_cannot_delete_organisation_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeContentAdmin();
@@ -2773,7 +2773,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_delete_organisation_admin()
+    public function global_admin_cannot_delete_organisation_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeGlobalAdmin();
@@ -2788,7 +2788,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_delete_content_admin()
+    public function guest_cannot_delete_content_admin(): void
     {
         $subject = User::factory()->create()->makeContentAdmin();
 
@@ -2800,7 +2800,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_delete_content_admin()
+    public function service_worker_cannot_delete_content_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeServiceWorker($service);
@@ -2815,7 +2815,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_delete_content_admin()
+    public function service_admin_cannot_delete_content_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeServiceAdmin($service);
@@ -2830,7 +2830,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_delete_content_admin()
+    public function organisation_admin_cannot_delete_content_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -2845,7 +2845,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function content_admin_cannot_delete_content_admin()
+    public function content_admin_cannot_delete_content_admin(): void
     {
         $invoker = User::factory()->create()->makeContentAdmin();
         $subject = User::factory()->create()->makeContentAdmin();
@@ -2859,7 +2859,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_delete_content_admin()
+    public function global_admin_cannot_delete_content_admin(): void
     {
         $invoker = User::factory()->create()->makeGlobalAdmin();
         $subject = User::factory()->create()->makeContentAdmin();
@@ -2873,7 +2873,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_delete_content_admin()
+    public function super_admin_can_delete_content_admin(): void
     {
         $invoker = User::factory()->create()->makeSuperAdmin();
         $subject = User::factory()->create()->makeContentAdmin();
@@ -2888,7 +2888,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_delete_global_admin()
+    public function guest_cannot_delete_global_admin(): void
     {
         $subject = User::factory()->create()->makeGlobalAdmin();
 
@@ -2900,7 +2900,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_delete_global_admin()
+    public function service_worker_cannot_delete_global_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeServiceWorker($service);
@@ -2915,7 +2915,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_delete_global_admin()
+    public function service_admin_cannot_delete_global_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeServiceAdmin($service);
@@ -2930,7 +2930,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_delete_global_admin()
+    public function organisation_admin_cannot_delete_global_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -2945,7 +2945,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function content_admin_cannot_delete_global_admin()
+    public function content_admin_cannot_delete_global_admin(): void
     {
         $invoker = User::factory()->create()->makeContentAdmin();
         $subject = User::factory()->create()->makeGlobalAdmin();
@@ -2959,7 +2959,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_delete_global_admin()
+    public function global_admin_cannot_delete_global_admin(): void
     {
         $invoker = User::factory()->create()->makeGlobalAdmin();
         $subject = User::factory()->create()->makeGlobalAdmin();
@@ -2973,7 +2973,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_delete_global_admin()
+    public function super_admin_can_delete_global_admin(): void
     {
         $invoker = User::factory()->create()->makeSuperAdmin();
         $subject = User::factory()->create()->makeGlobalAdmin();
@@ -2988,7 +2988,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_delete_super_admin()
+    public function guest_cannot_delete_super_admin(): void
     {
         $subject = User::factory()->create()->makeGlobalAdmin();
 
@@ -3000,7 +3000,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_delete_super_admin()
+    public function service_worker_cannot_delete_super_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeServiceWorker($service);
@@ -3015,7 +3015,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_delete_super_admin()
+    public function service_admin_cannot_delete_super_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeServiceAdmin($service);
@@ -3030,7 +3030,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_delete_super_admin()
+    public function organisation_admin_cannot_delete_super_admin(): void
     {
         $service = Service::factory()->create();
         $invoker = User::factory()->create()->makeOrganisationAdmin($service->organisation);
@@ -3045,7 +3045,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function content_admin_cannot_delete_super_admin()
+    public function content_admin_cannot_delete_super_admin(): void
     {
         $invoker = User::factory()->create()->makeContentAdmin();
         $subject = User::factory()->create()->makeSuperAdmin();
@@ -3059,7 +3059,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_delete_super_admin()
+    public function global_admin_cannot_delete_super_admin(): void
     {
         $invoker = User::factory()->create()->makeGlobalAdmin();
         $subject = User::factory()->create()->makeSuperAdmin();
@@ -3073,7 +3073,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_delete_super_admin()
+    public function super_admin_can_delete_super_admin(): void
     {
         $invoker = User::factory()->create()->makeSuperAdmin();
         $subject = User::factory()->create()->makeSuperAdmin();
@@ -3088,7 +3088,7 @@ class UsersTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_deleted()
+    public function audit_created_when_deleted(): void
     {
         $this->fakeEvents();
 
@@ -3111,10 +3111,6 @@ class UsersTest extends TestCase
      * ==================================================
      */
 
-    /**
-     * @param  array  $roles
-     * @return array
-     */
     protected function getCreateUserPayload(array $roles): array
     {
         return [
@@ -3127,10 +3123,6 @@ class UsersTest extends TestCase
         ];
     }
 
-    /**
-     * @param  array  $roles
-     * @return array
-     */
     protected function getUpdateUserPayload(array $roles): array
     {
         return [

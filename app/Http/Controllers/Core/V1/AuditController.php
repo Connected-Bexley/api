@@ -9,6 +9,7 @@ use App\Http\Requests\Audit\ShowRequest;
 use App\Http\Resources\AuditResource;
 use App\Http\Sorts\Audit\UserFullNameSort;
 use App\Models\Audit;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -25,11 +26,8 @@ class AuditController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param \App\Http\Requests\Audit\IndexRequest $request
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index(IndexRequest $request)
+    public function index(IndexRequest $request): AnonymousResourceCollection
     {
         $baseQuery = Audit::query()
             ->with('oauthClient');
@@ -59,12 +57,8 @@ class AuditController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param \App\Http\Requests\Audit\ShowRequest $request
-     * @param \App\Models\Audit $audit
-     * @return \App\Http\Resources\AuditResource
      */
-    public function show(ShowRequest $request, Audit $audit)
+    public function show(ShowRequest $request, Audit $audit): AuditResource
     {
         $baseQuery = Audit::query()
             ->with('oauthClient')

@@ -13,7 +13,7 @@ use Tests\TestCase;
 
 class PageFeedbackReceivedTest extends TestCase
 {
-    public function test_email_sent_to_global_admin_email()
+    public function test_email_sent_to_global_admin_email(): void
     {
         Queue::fake();
 

@@ -2,15 +2,33 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Models\User;
-use App\Sms\OtpLoginCode\UserSms;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
+use App\Models\User;
+use Illuminate\Http\Response;
+use App\Sms\OtpLoginCode\UserSms;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Config;
 
 class LoginTest extends TestCase
 {
-    public function test_otp_sms_sent_to_user()
+    /**
+     * @test
+     */
+    public function userCanLogin200(): void
+    {
+        Config::set('local.otp_enabled', false);
+
+        $user = User::factory()->create(['password' => bcrypt('password')]);
+
+        $response = $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $response->assertStatus(Response::HTTP_FOUND);
+    }
+
+    public function test_otp_sms_sent_to_user(): void
     {
         Config::set('local.otp_enabled', true);
 
@@ -18,7 +36,7 @@ class LoginTest extends TestCase
 
         $user = User::factory()->create(['password' => bcrypt('password')]);
 
-        $this->post(route('login'), [
+        $response = $this->post(route('login'), [
             'email' => $user->email,
             'password' => 'password',
         ]);

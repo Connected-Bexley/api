@@ -12,10 +12,8 @@ class PageFeedbackReceived
 {
     /**
      * Handle the event.
-     *
-     * @param EndpointHit $event
      */
-    public function handle(EndpointHit $event)
+    public function handle(EndpointHit $event): void
     {
         // Only handle specific endpoint events.
         if ($event->isntFor(PageFeedback::class, Audit::ACTION_CREATE)) {
@@ -25,9 +23,6 @@ class PageFeedbackReceived
         $this->notifyGlobalAdmins($event->getModel());
     }
 
-    /**
-     * @param \App\Models\PageFeedback $pageFeedback
-     */
     protected function notifyGlobalAdmins(PageFeedback $pageFeedback)
     {
         Notification::sendEmail(

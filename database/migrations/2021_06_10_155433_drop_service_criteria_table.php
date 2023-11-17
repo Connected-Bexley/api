@@ -8,7 +8,7 @@ return new class() extends Migration {
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('service_criteria', function (Blueprint $table) {
             $table->dropForeign(['service_id']);
@@ -20,7 +20,7 @@ return new class() extends Migration {
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
         Schema::create('service_criteria', function (Blueprint $table) {
             $table->uuid('id')->primary();
