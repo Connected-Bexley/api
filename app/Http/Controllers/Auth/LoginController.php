@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class LoginController extends Controller
 {
@@ -45,8 +47,6 @@ class LoginController extends Controller
     /**
      * The user has been authenticated.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\User $user
      * @return mixed
      */
     protected function authenticated(Request $request, User $user)
@@ -73,10 +73,8 @@ class LoginController extends Controller
 
     /**
      * Show the one time password form.
-     *
-     * @return \Illuminate\Http\Response
      */
-    public function showOtpForm()
+    public function showOtpForm(): View
     {
         $userId = session()->get('otp.user_id');
         $user = User::findOrFail($userId);
@@ -101,7 +99,6 @@ EOT;
     }
 
     /**
-     * @param \Illuminate\Http\Request $request
      * @throws \Illuminate\Validation\ValidationException
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\Response|\Illuminate\Http\JsonResponse
      */
@@ -141,8 +138,6 @@ EOT;
     /**
      * Redirect the user after determining they are locked out.
      *
-     * @param \Illuminate\Http\Request $request
-     *
      * @throws \Illuminate\Validation\ValidationException
      */
     protected function sendOtpLockoutResponse(Request $request)
@@ -159,11 +154,9 @@ EOT;
     /**
      * Get the failed login response instance.
      *
-     * @param \Illuminate\Http\Request $request
      * @throws \Illuminate\Validation\ValidationException
-     * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function sendFailedOtpResponse(Request $request)
+    protected function sendFailedOtpResponse(Request $request): Response
     {
         throw ValidationException::withMessages([
             'token' => ['The token provided is incorrect.'],
@@ -172,11 +165,8 @@ EOT;
 
     /**
      * Get the throttle key for the given request.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return string
      */
-    protected function throttleKey(Request $request)
+    protected function throttleKey(Request $request): string
     {
         $key = session()->get(
             'otp.user_id',

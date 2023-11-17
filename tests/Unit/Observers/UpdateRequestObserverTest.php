@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 class UpdateRequestObserverTest extends TestCase
 {
-    public function test_emails_sent_for_existing_organisation()
+    public function test_emails_sent_for_existing_organisation(): void
     {
         Queue::fake();
 
@@ -61,7 +61,7 @@ class UpdateRequestObserverTest extends TestCase
         );
     }
 
-    public function test_emails_sent_for_new_organisation()
+    public function test_emails_sent_for_new_organisation(): void
     {
         Queue::fake();
 

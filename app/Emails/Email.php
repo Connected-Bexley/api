@@ -50,9 +50,6 @@ abstract class Email implements ShouldQueue
 
     /**
      * Email constructor.
-     *
-     * @param string $to
-     * @param array $values
      */
     public function __construct(string $to, array $values = [])
     {
@@ -65,38 +62,23 @@ abstract class Email implements ShouldQueue
         $this->replyTo = $this->getReplyTo();
     }
 
-    /**
-     * @return string|null
-     */
     protected function getTemplateId(): ?string
     {
         return null;
     }
 
-    /**
-     * @return string|null
-     */
     protected function getReference(): ?string
     {
         return null;
     }
 
-    /**
-     * @return string|null
-     */
     protected function getReplyTo(): ?string
     {
         return null;
     }
 
-    /**
-     * @return string
-     */
     abstract public function getSubject(): string;
 
-    /**
-     * @return string
-     */
     abstract public function getContent(): string;
 
     /**
@@ -109,8 +91,6 @@ abstract class Email implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @param \App\Contracts\EmailSender $emailSender
      */
     public function handle(EmailSender $emailSender)
     {

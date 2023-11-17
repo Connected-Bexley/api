@@ -23,10 +23,8 @@ class UpdateRequest extends FormRequest
 
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         if ($this->user()->canUpdate($this->user)) {
             return true;
@@ -35,9 +33,6 @@ class UpdateRequest extends FormRequest
         return false;
     }
 
-    /**
-     * @return array
-     */
     protected function getExistingRoles(): array
     {
         if ($this->existingRoles === null) {
@@ -62,10 +57,6 @@ class UpdateRequest extends FormRequest
         return $this->existingRoles;
     }
 
-    /**
-     * @param array $roles
-     * @return array
-     */
     protected function parseRoles(array $roles): array
     {
         foreach ($roles as &$role) {
@@ -88,17 +79,11 @@ class UpdateRequest extends FormRequest
         return $roles;
     }
 
-    /**
-     * @return array
-     */
     public function getNewRoles(): array
     {
         return array_diff_multi($this->parseRoles($this->roles), $this->getExistingRoles());
     }
 
-    /**
-     * @return array
-     */
     public function getDeletedRoles(): array
     {
         return array_diff_multi($this->getExistingRoles(), $this->parseRoles($this->roles));
@@ -106,9 +91,6 @@ class UpdateRequest extends FormRequest
 
     /**
      * Orders the roles array with the highest first.
-     *
-     * @param array $roles
-     * @return array
      */
     public function orderRoles(array $roles): array
     {
@@ -133,9 +115,6 @@ class UpdateRequest extends FormRequest
         });
     }
 
-    /**
-     * @return bool
-     */
     public function rolesHaveBeenUpdated(): bool
     {
         $hasNewRoles = count($this->getNewRoles()) > 0;
@@ -146,10 +125,8 @@ class UpdateRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'first_name' => ['required', 'string', 'min:1', 'max:255'],

@@ -3,13 +3,11 @@
 namespace App\Models\Relationships;
 
 use App\Models\Service;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait UsefulInfoRelationships
 {
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function service()
+    public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);
     }

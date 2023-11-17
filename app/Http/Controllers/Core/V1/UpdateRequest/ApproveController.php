@@ -23,8 +23,6 @@ class ApproveController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \App\Http\Requests\UpdateRequest\Approve\UpdateRequest $request
-     * @param \App\Models\UpdateRequest $updateRequest
      * @throws \Exception
      * @return \Illuminate\Http\Response
      */

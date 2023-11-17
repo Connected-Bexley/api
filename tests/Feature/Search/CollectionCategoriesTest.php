@@ -13,8 +13,6 @@ class CollectionCategoriesTest extends TestCase implements UsesElasticsearch
 {
     /**
      * Setup the test environment.
-     *
-     * @return void
      */
     protected function setUp(): void
     {
@@ -29,7 +27,7 @@ class CollectionCategoriesTest extends TestCase implements UsesElasticsearch
      * Perform a search for services.
      */
 
-    public function test_guest_can_search()
+    public function test_guest_can_search(): void
     {
         $collectionCategory = Collection::create([
             'type' => Collection::TYPE_CATEGORY,
@@ -48,7 +46,7 @@ class CollectionCategoriesTest extends TestCase implements UsesElasticsearch
         $response->assertStatus(Response::HTTP_OK);
     }
 
-    public function test_filter_by_categories_works()
+    public function test_filter_by_categories_works(): void
     {
         $service1 = Service::factory()->create();
         $service2 = Service::factory()->create();
@@ -105,7 +103,7 @@ class CollectionCategoriesTest extends TestCase implements UsesElasticsearch
         $response->assertJsonFragment(['id' => $service2->id]);
     }
 
-    public function test_services_with_more_taxonomies_in_a_category_collection_are_more_relevant()
+    public function test_services_with_more_taxonomies_in_a_category_collection_are_more_relevant(): void
     {
         // Create 3 taxonomies
         $taxonomy1 = Taxonomy::category()->children()->create([

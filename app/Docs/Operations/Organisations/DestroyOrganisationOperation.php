@@ -15,9 +15,7 @@ use GoldSpecDigital\ObjectOrientedOAS\Objects\Schema;
 class DestroyOrganisationOperation extends Operation
 {
     /**
-     * @param string|null $objectId
      * @throws \GoldSpecDigital\ObjectOrientedOAS\Exceptions\InvalidArgumentException
-     * @return static
      */
     public static function create(string $objectId = null): BaseObject
     {

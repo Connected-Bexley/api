@@ -12,9 +12,6 @@ class ServiceTaxonomy extends Model
     use ServiceTaxonomyRelationships;
     use ServiceTaxonomyScopes;
 
-    /**
-     * @return \App\Models\ServiceTaxonomy
-     */
     public function touchService(): ServiceTaxonomy
     {
         $this->service->save();

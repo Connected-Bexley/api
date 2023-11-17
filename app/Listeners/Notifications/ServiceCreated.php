@@ -13,10 +13,8 @@ class ServiceCreated
 {
     /**
      * Handle the event.
-     *
-     * @param EndpointHit $event
      */
-    public function handle(EndpointHit $event)
+    public function handle(EndpointHit $event): void
     {
         // Only handle specific endpoint events.
         if ($event->isntFor(Service::class, Audit::ACTION_CREATE)) {
@@ -29,10 +27,6 @@ class ServiceCreated
         }
     }
 
-    /**
-     * @param \App\Models\Service $service
-     * @param \App\Models\User $user
-     */
     protected function notifyGlobalAdmins(Service $service, User $user)
     {
         Notification::sendEmail(

@@ -6,9 +6,9 @@ use App\Models\Organisation;
 use App\Models\Role;
 use App\Models\Service;
 use App\Models\User;
-use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class CanAssignRoleToUser implements Rule
+class CanAssignRoleToUser implements ValidationRule
 {
     /**
      * @var \App\Models\User
@@ -22,9 +22,6 @@ class CanAssignRoleToUser implements Rule
 
     /**
      * CanAssignRoleToUser constructor.
-     *
-     * @param \App\Models\User $user
-     * @param array|null $newRoles
      */
     public function __construct(User $user, array $newRoles = null)
     {
@@ -35,78 +32,72 @@ class CanAssignRoleToUser implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param string $attribute
      * @param mixed $role
-     * @return bool
+     * @param mixed $fail
      */
-    public function passes($attribute, $role)
+    public function validate(string $attribute, $role, $fail): void
     {
         // Immediately fail if the value is not an array.
-        if (!$this->validate($role)) {
-            return false;
+        if (!$this->validateRole($role)) {
+            $fail(':attribute must be an array with a role key and if required a service_id or organisation_id key');
         }
 
         // Skip if the role is not provided in the new roles array.
-        if ($this->shouldSkip($role)) {
-            return true;
-        }
+        if (!$this->shouldSkip($role)) {
 
-        switch ($role['role']) {
-            case Role::NAME_SERVICE_WORKER:
-                $service = Service::findOrFail($role['service_id']);
-                if (!$this->user->canMakeServiceWorker($service)) {
-                    return false;
-                }
-                break;
-            case Role::NAME_SERVICE_ADMIN:
-                $service = Service::findOrFail($role['service_id']);
-                if (!$this->user->canMakeServiceAdmin($service)) {
-                    return false;
-                }
-                break;
-            case Role::NAME_ORGANISATION_ADMIN:
-                $organisation = Organisation::findOrFail($role['organisation_id']);
-                if (!$this->user->canMakeOrganisationAdmin($organisation)) {
-                    return false;
-                }
-                break;
-            case Role::NAME_CONTENT_ADMIN:
-                if (!$this->user->canMakeContentAdmin()) {
-                    return false;
-                }
-                break;
-            case Role::NAME_GLOBAL_ADMIN:
-                if (!$this->user->canMakeGlobalAdmin()) {
-                    return false;
-                }
-                break;
-            case Role::NAME_SUPER_ADMIN:
-                if (!$this->user->canMakeSuperAdmin()) {
-                    return false;
-                }
-                break;
-        }
+            switch ($role['role']) {
+                case Role::NAME_SERVICE_WORKER:
+                    $service = Service::findOrFail($role['service_id']);
+                    if (!$this->user->canMakeServiceWorker($service)) {
+                        $fail($this->message('Service Worker'));
+                    }
+                    break;
+                case Role::NAME_SERVICE_ADMIN:
+                    $service = Service::findOrFail($role['service_id']);
+                    if (!$this->user->canMakeServiceAdmin($service)) {
+                        $fail($this->message('Service Admin'));
+                    }
+                    break;
+                case Role::NAME_ORGANISATION_ADMIN:
+                    $organisation = Organisation::findOrFail($role['organisation_id']);
+                    if (!$this->user->canMakeOrganisationAdmin($organisation)) {
+                        $fail($this->message('Organisation Admin'));
+                    }
+                    break;
+                case Role::NAME_CONTENT_ADMIN:
+                    if (!$this->user->canMakeContentAdmin()) {
+                        $fail($this->message('Content Admin'));
+                    }
+                    break;
+                case Role::NAME_GLOBAL_ADMIN:
+                    if (!$this->user->canMakeGlobalAdmin()) {
+                        $fail($this->message('Global Admin'));
+                    }
+                    break;
+                case Role::NAME_SUPER_ADMIN:
+                    if (!$this->user->canMakeSuperAdmin()) {
+                        $fail($this->message('Super Admin'));
+                    }
+                    break;
+            }
 
-        return true;
+        }
     }
 
     /**
      * Get the validation error message.
-     *
-     * @return string
+     * @param mixed $role
      */
-    public function message()
+    public function message($role): string
     {
-        return 'You are unauthorised to assign these roles to this user.';
+        return "You are unauthorised to assign $role roles to this user.";
     }
 
     /**
      * Validates the value.
-     *
-     * @param $role
-     * @return bool
+     * @param mixed $role
      */
-    protected function validate($role): bool
+    protected function validateRole($role): bool
     {
         // check if array.
         if (!is_array($role)) {
@@ -136,10 +127,6 @@ class CanAssignRoleToUser implements Rule
         return true;
     }
 
-    /**
-     * @param array $role
-     * @return bool
-     */
     protected function shouldSkip(array $role): bool
     {
         // If no new roles where provided then don't skip.
@@ -161,10 +148,6 @@ class CanAssignRoleToUser implements Rule
         return true;
     }
 
-    /**
-     * @param array $roles
-     * @return array
-     */
     protected function parseRoles(array $roles): array
     {
         $rolesCopy = isset($roles['role']) ? [$roles] : $roles;
@@ -174,6 +157,7 @@ class CanAssignRoleToUser implements Rule
                 case Role::NAME_ORGANISATION_ADMIN:
                     unset($role['service_id']);
                     break;
+                case Role::NAME_CONTENT_ADMIN:
                 case Role::NAME_GLOBAL_ADMIN:
                 case Role::NAME_SUPER_ADMIN:
                     unset($role['service_id'], $role['organisation_id']);

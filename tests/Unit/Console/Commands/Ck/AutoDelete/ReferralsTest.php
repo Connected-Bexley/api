@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class ReferralsTest extends TestCase
 {
-    public function test_auto_delete_works()
+    public function test_auto_delete_works(): void
     {
         $newReferral = Referral::factory()->create([
             'email' => 'test@example.com',
@@ -34,7 +34,7 @@ class ReferralsTest extends TestCase
         $this->assertDatabaseMissing($dueForDeletionReferral->getTable(), ['id' => $dueForDeletionReferral->id]);
     }
 
-    public function test_old_incompleted_referrals_are_not_deleted()
+    public function test_old_incompleted_referrals_are_not_deleted(): void
     {
         $dueForDeletionReferral = Referral::factory()->create([
             'email' => 'test@example.com',

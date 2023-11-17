@@ -29,10 +29,8 @@ class StoreRequest extends FormRequest
 
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         if ($this->user()->isOrganisationAdmin()) {
             return true;
@@ -43,10 +41,8 @@ class StoreRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'organisation_id' => [
@@ -207,7 +203,7 @@ class StoreRequest extends FormRequest
             'gallery_items.*.file_id' => [
                 'required_with:gallery_items.*',
                 'exists:files,id',
-                new FileIsMimeType(File::MIME_TYPE_PNG, File::MIME_TYPE_JPG, File::MIME_TYPE_JPEG),
+                new FileIsMimeType(File::MIME_TYPE_PNG, File::MIME_TYPE_SVG, File::MIME_TYPE_JPG, File::MIME_TYPE_JPEG),
                 new FileIsPendingAssignment(),
             ],
 
@@ -232,7 +228,7 @@ class StoreRequest extends FormRequest
             'logo_file_id' => [
                 'nullable',
                 'exists:files,id',
-                new FileIsMimeType(File::MIME_TYPE_PNG, File::MIME_TYPE_JPG, File::MIME_TYPE_JPEG),
+                new FileIsMimeType(File::MIME_TYPE_PNG, File::MIME_TYPE_SVG, File::MIME_TYPE_JPG, File::MIME_TYPE_JPEG),
                 new FileIsPendingAssignment(),
             ],
             'score' => [
@@ -273,9 +269,6 @@ class StoreRequest extends FormRequest
         ];
     }
 
-    /**
-     * @return array
-     */
     protected function categoryTaxonomiesRules(): array
     {
         // If global admin and above.
@@ -290,7 +283,7 @@ class StoreRequest extends FormRequest
     /**
      * {@inheritDoc}
      */
-    public function messages()
+    public function messages(): array
     {
         $type = $this->input('type', Service::TYPE_SERVICE);
 

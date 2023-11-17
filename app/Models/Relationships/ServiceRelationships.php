@@ -18,86 +18,58 @@ use App\Models\Taxonomy;
 use App\Models\UsefulInfo;
 use App\Models\User;
 use App\Models\UserRole;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 trait ServiceRelationships
 {
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function organisation()
+    public function organisation(): BelongsTo
     {
         return $this->belongsTo(Organisation::class);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function logoFile()
+    public function logoFile(): BelongsTo
     {
         return $this->belongsTo(File::class, 'logo_file_id');
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function referrals()
+    public function referrals(): HasMany
     {
         return $this->hasMany(Referral::class);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function serviceLocations()
+    public function serviceLocations(): HasMany
     {
         return $this->hasMany(ServiceLocation::class);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function locations()
+    public function locations(): BelongsToMany
     {
         return $this->belongsToMany(Location::class, (new ServiceLocation())->getTable());
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
-     */
-    public function socialMedias()
+    public function socialMedias(): MorphMany
     {
         return $this->morphMany(SocialMedia::class, 'sociable');
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function usefulInfos()
+    public function usefulInfos(): HasMany
     {
         return $this->hasMany(UsefulInfo::class);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function offerings()
+    public function offerings(): HasMany
     {
         return $this->hasMany(Offering::class)->orderBy('order', 'asc');
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function serviceTaxonomies()
+    public function serviceTaxonomies(): HasMany
     {
         return $this->hasMany(ServiceTaxonomy::class);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
     public function taxonomies(): BelongsToMany
     {
         return $this->belongsToMany(Taxonomy::class, (new ServiceTaxonomy())->getTable());
@@ -108,41 +80,26 @@ trait ServiceRelationships
         return $this->hasMany(ServiceEligibility::class);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
     public function eligibilities(): BelongsToMany
     {
         return $this->belongsToMany(Taxonomy::class, (new ServiceEligibility())->getTable());
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function userRoles()
+    public function userRoles(): HasMany
     {
         return $this->hasMany(UserRole::class);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function users()
+    public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, table(UserRole::class));
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function serviceGalleryItems()
+    public function serviceGalleryItems(): HasMany
     {
         return $this->hasMany(ServiceGalleryItem::class);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
     public function serviceRefreshTokens(): HasMany
     {
         return $this->hasMany(ServiceRefreshToken::class);
@@ -150,10 +107,8 @@ trait ServiceRelationships
 
     /**
      * The tags that belong to the service.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function tags()
+    public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class);
     }

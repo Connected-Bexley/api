@@ -15,6 +15,7 @@ use App\Http\Responses\UpdateRequestReceived;
 use App\Models\Page;
 use App\Models\UpdateRequest as UpdateRequestModel;
 use App\Services\DataPersistence\PagePersistenceService;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\AllowedInclude;
@@ -32,11 +33,8 @@ class PageController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param \App\Http\Requests\Page\IndexRequest $request
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index(IndexRequest $request)
+    public function index(IndexRequest $request): AnonymousResourceCollection
     {
         $orderByCol = (new Page())->getLftName();
         $baseQuery = Page::query()
@@ -51,7 +49,7 @@ class PageController extends Controller
             ->allowedIncludes([
                 'parent',
                 'children',
-                AllowedInclude::relationship('landing-page-ancestors', 'landingPageAncestors'),
+                AllowedInclude::relationship('landingPageAncestors', 'landingPageAncestors'),
             ])
             ->allowedFilters([
                 AllowedFilter::scope('landing_page', 'pageDescendants'),
@@ -71,10 +69,6 @@ class PageController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param \App\Http\Requests\Page\StoreRequest $request
-     * @param \App\Services\DataPersistence\PagePersistenceService $persistenceService
-     * @return \App\Http\Resources\OrganisationResource
      */
     public function store(StoreRequest $request, PagePersistenceService $persistenceService)
     {
@@ -95,12 +89,8 @@ class PageController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param \App\Http\Requests\Page\ShowRequest $request
-     * @param \App\Models\Page $page
-     * @return \App\Http\Resources\OrganisationResource
      */
-    public function show(ShowRequest $request, Page $page)
+    public function show(ShowRequest $request, Page $page): PageResource
     {
         $baseQuery = Page::query()
             ->with(['landingPageAncestors', 'parent', 'children', 'collectionCategories', 'collectionPersonas'])
@@ -116,13 +106,8 @@ class PageController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param \App\Http\Requests\Page\UpdateRequest $request
-     * @param \App\Models\Page $page
-     * @param \App\Services\DataPersistence\PagePersistenceService $persistenceService
-     * @return \App\Http\Resources\OrganisationResource
      */
-    public function update(UpdateRequest $request, Page $page, PagePersistenceService $persistenceService)
+    public function update(UpdateRequest $request, Page $page, PagePersistenceService $persistenceService): UpdateRequestReceived
     {
         $updateRequest = $persistenceService->update($request, $page);
 
@@ -134,8 +119,6 @@ class PageController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param \App\Http\Requests\Organisation\DestroyRequest $request
-     * @param \App\Models\Page $page
      * @return \Illuminate\Http\Response
      */
     public function destroy(DestroyRequest $request, Page $page)

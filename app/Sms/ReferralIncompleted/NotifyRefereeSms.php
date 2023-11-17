@@ -6,17 +6,11 @@ use App\Sms\Sms;
 
 class NotifyRefereeSms extends Sms
 {
-    /**
-     * @return string
-     */
     protected function getTemplateId(): string
     {
         return config('gov_uk_notify.notifications_template_ids.referral_incompleted.notify_referee.sms');
     }
 
-    /**
-     * @return string
-     */
     public function getContent(): string
     {
         return 'sms.referral.incompleted.notify_referee';

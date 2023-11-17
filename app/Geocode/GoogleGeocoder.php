@@ -29,9 +29,6 @@ class GoogleGeocoder extends Geocoder
 
     /**
      * Convert a a textual address into a coordinate.
-     *
-     * @param \App\Support\Address $address
-     * @return \App\Support\Coordinate
      */
     public function geocode(Address $address): Coordinate
     {

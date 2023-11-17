@@ -10,20 +10,16 @@ class StoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return $this->user()->isSuperAdmin();
     }
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         $parentId = $this->parent_id ?? Taxonomy::serviceEligibility()->id;
         $siblingTaxonomiesCount = Taxonomy::where('parent_id', $parentId)->count() + 1;

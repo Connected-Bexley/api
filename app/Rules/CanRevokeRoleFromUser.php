@@ -6,9 +6,9 @@ use App\Models\Organisation;
 use App\Models\Role;
 use App\Models\Service;
 use App\Models\User;
-use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class CanRevokeRoleFromUser implements Rule
+class CanRevokeRoleFromUser implements ValidationRule
 {
     /**
      * @var \App\Models\User
@@ -27,10 +27,6 @@ class CanRevokeRoleFromUser implements Rule
 
     /**
      * CanAssignRoleToUser constructor.
-     *
-     * @param \App\Models\User $user
-     * @param \App\Models\User $subject
-     * @param array|null $revokedRoles
      */
     public function __construct(User $user, User $subject, array $revokedRoles = null)
     {
@@ -42,73 +38,72 @@ class CanRevokeRoleFromUser implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param string $attribute
      * @param mixed $role
-     * @return bool
+     * @param mixed $fail
      */
-    public function passes($attribute, $role)
+    public function validate(string $attribute, $role, $fail): void
     {
         // Immediately fail if the value is not an array.
-        if (!$this->validate($role)) {
-            return false;
+        if (!$this->validateRole($role)) {
+            $fail(':attribute must be an array with a role key and if required a service_id or organisation_id key');
         }
 
         // Skip if the role is not provided in the revoked roles array.
-        if ($this->shouldSkip($role)) {
-            return true;
-        }
+        if (!$this->shouldSkip($role)) {
 
-        switch ($role['role']) {
-            case Role::NAME_SERVICE_WORKER:
-                $service = Service::query()->findOrFail($role['service_id']);
-                if (!$this->user->canRevokeServiceWorker($this->subject, $service)) {
-                    return false;
-                }
-                break;
-            case Role::NAME_SERVICE_ADMIN:
-                $service = Service::query()->findOrFail($role['service_id']);
-                if (!$this->user->canRevokeServiceAdmin($this->subject, $service)) {
-                    return false;
-                }
-                break;
-            case Role::NAME_ORGANISATION_ADMIN:
-                $organisation = Organisation::query()->findOrFail($role['organisation_id']);
-                if (!$this->user->canRevokeOrganisationAdmin($this->subject, $organisation)) {
-                    return false;
-                }
-                break;
-            case Role::NAME_GLOBAL_ADMIN:
-                if (!$this->user->canRevokeGlobalAdmin($this->subject)) {
-                    return false;
-                }
-                break;
-            case Role::NAME_SUPER_ADMIN:
-                if (!$this->user->canRevokeSuperAdmin($this->subject)) {
-                    return false;
-                }
-                break;
-        }
+            switch ($role['role']) {
+                case Role::NAME_SERVICE_WORKER:
+                    $service = Service::query()->findOrFail($role['service_id']);
+                    if (!$this->user->canRevokeServiceWorker($this->subject, $service)) {
+                        $fail($this->message('Service Worker'));
+                    }
+                    break;
+                case Role::NAME_SERVICE_ADMIN:
+                    $service = Service::query()->findOrFail($role['service_id']);
+                    if (!$this->user->canRevokeServiceAdmin($this->subject, $service)) {
+                        $fail($this->message('Service Admin'));
+                    }
+                    break;
+                case Role::NAME_ORGANISATION_ADMIN:
+                    $organisation = Organisation::query()->findOrFail($role['organisation_id']);
+                    if (!$this->user->canRevokeOrganisationAdmin($this->subject, $organisation)) {
+                        $fail($this->message('Organisation Admin'));
+                    }
+                    break;
+                case Role::NAME_CONTENT_ADMIN:
+                    if (!$this->user->canRevokeContentAdmin($this->subject)) {
+                        $fail($this->message('Content Admin'));
+                    }
+                    break;
+                case Role::NAME_GLOBAL_ADMIN:
+                    if (!$this->user->canRevokeGlobalAdmin($this->subject)) {
+                        $fail($this->message('Global Admin'));
+                    }
+                    break;
+                case Role::NAME_SUPER_ADMIN:
+                    if (!$this->user->canRevokeSuperAdmin($this->subject)) {
+                        $fail($this->message('Super Admin'));
+                    }
+                    break;
+            }
 
-        return true;
+        }
     }
 
     /**
      * Get the validation error message.
-     *
-     * @return string
+     * @param mixed $role
      */
-    public function message()
+    public function message($role): string
     {
-        return 'You are unauthorised to revoke these roles for this user.';
+        return "You are unauthorised to revoke $role roles for this user.";
     }
 
     /**
      * Validates the value.
-     *
-     * @param $role
-     * @return bool
+     * @param mixed $role
      */
-    protected function validate($role): bool
+    protected function validateRole($role): bool
     {
         // check if array.
         if (!is_array($role)) {
@@ -138,10 +133,6 @@ class CanRevokeRoleFromUser implements Rule
         return true;
     }
 
-    /**
-     * @param array $role
-     * @return bool
-     */
     protected function shouldSkip(array $role): bool
     {
         // If no revoked roles where provided then don't skip.
@@ -163,10 +154,6 @@ class CanRevokeRoleFromUser implements Rule
         return true;
     }
 
-    /**
-     * @param array $roles
-     * @return array
-     */
     protected function parseRoles(array $roles): array
     {
         $rolesCopy = isset($roles['role']) ? [$roles] : $roles;
@@ -176,6 +163,7 @@ class CanRevokeRoleFromUser implements Rule
                 case Role::NAME_ORGANISATION_ADMIN:
                     unset($role['service_id']);
                     break;
+                case Role::NAME_CONTENT_ADMIN:
                 case Role::NAME_GLOBAL_ADMIN:
                 case Role::NAME_SUPER_ADMIN:
                     unset($role['service_id'], $role['organisation_id']);

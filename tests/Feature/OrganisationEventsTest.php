@@ -31,7 +31,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function getAllOrganisationEventsAsGuest200()
+    public function getAllOrganisationEventsAsGuest200(): void
     {
         $organisationEvent = OrganisationEvent::factory()->create();
 
@@ -98,7 +98,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function getAllOrganisationEventsFilterByOrganisationAsGuest200()
+    public function getAllOrganisationEventsFilterByOrganisationAsGuest200(): void
     {
         $organisationEvent1 = OrganisationEvent::factory()->create();
         $organisationEvent2 = OrganisationEvent::factory()->create();
@@ -113,7 +113,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function getAllOrganisationEventsFilterByHomepageAsGuest200()
+    public function getAllOrganisationEventsFilterByHomepageAsGuest200(): void
     {
         $organisationEvent1 = OrganisationEvent::factory()->homepage()->create();
         $organisationEvent2 = OrganisationEvent::factory()->create();
@@ -128,7 +128,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function getAllOrganisationEventsOnlyPastEventsAsGuest200()
+    public function getAllOrganisationEventsOnlyPastEventsAsGuest200(): void
     {
         $future = $this->faker->dateTimeBetween('+1 week', '+3 weeks')->format('Y-m-d');
         $past = $this->faker->dateTimeBetween('-1 week', '-1 day')->format('Y-m-d');
@@ -166,7 +166,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function getAllOrganisationEventsOnlyPastEventsAsOrganisationAdmin200()
+    public function getAllOrganisationEventsOnlyPastEventsAsOrganisationAdmin200(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -208,7 +208,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function getAllOrganisationEventsDateOrderDescendingAsGuest200()
+    public function getAllOrganisationEventsDateOrderDescendingAsGuest200(): void
     {
         $date1 = $this->faker->dateTimeBetween('+2 weeks', '+3 weeks')->format('Y-m-d');
         $date2 = $this->faker->dateTimeBetween('+1 week', '+2 weeks')->format('Y-m-d');
@@ -252,7 +252,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function getAllOrganisationEventsFilterByDatesAsGuest200()
+    public function getAllOrganisationEventsFilterByDatesAsGuest200(): void
     {
         $date1 = $this->faker->dateTimeBetween('+2 days', '+1 weeks');
         $date2 = $this->faker->dateTimeBetween('+2 week', '+3 weeks');
@@ -306,7 +306,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function getAllOrganisationEventsFilterByAccessibilityAsGuest200()
+    public function getAllOrganisationEventsFilterByAccessibilityAsGuest200(): void
     {
         $organisationEvent1 = OrganisationEvent::factory()->create([
             'is_virtual' => false,
@@ -388,7 +388,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function getAllOrganisationEventsFilterByCollectionAsGuest200()
+    public function getAllOrganisationEventsFilterByCollectionAsGuest200(): void
     {
         $organisationEventCollection1 = Collection::factory()->typeOrganisationEvent()->create();
         $organisationEventCollection2 = Collection::factory()->typeOrganisationEvent()->create();
@@ -426,7 +426,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function getAllOrganisationEventsOnlyRelatedOrganisationsAsOrganisationAdmin200()
+    public function getAllOrganisationEventsOnlyRelatedOrganisationsAsOrganisationAdmin200(): void
     {
         $organisation1 = Organisation::factory()->create();
         $organisation2 = Organisation::factory()->create();
@@ -451,7 +451,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function getAllOrganisationEventsCreatesAuditAsGuest200()
+    public function getAllOrganisationEventsCreatesAuditAsGuest200(): void
     {
         $this->fakeEvents();
 
@@ -471,7 +471,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventAsGuest401()
+    public function postCreateOrganisationEventAsGuest401(): void
     {
         $response = $this->json('POST', '/core/v1/organisation-events');
 
@@ -481,7 +481,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventAsServiceWorker403()
+    public function postCreateOrganisationEventAsServiceWorker403(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -496,7 +496,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventAsServiceAdmin403()
+    public function postCreateOrganisationEventAsServiceAdmin403(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -511,7 +511,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventAsOrganisationAdmin200()
+    public function postCreateOrganisationEventAsOrganisationAdmin200(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -523,7 +523,7 @@ class OrganisationEventsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
+            'file' => 'data:image/png;base64,'.base64_encode($image),
         ]);
 
         $date = $this->faker->dateTimeBetween('tomorrow', '+6 weeks')->format('Y-m-d');
@@ -613,7 +613,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventAsGlobalAdmin200()
+    public function postCreateOrganisationEventAsGlobalAdmin200(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -678,7 +678,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventAsSuperAdmin201()
+    public function postCreateOrganisationEventAsSuperAdmin201(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -729,7 +729,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventAsOtherOrganisationAdmin403()
+    public function postCreateOrganisationEventAsOtherOrganisationAdmin403(): void
     {
         $organisation1 = Organisation::factory()->create();
         $organisation2 = Organisation::factory()->create();
@@ -773,7 +773,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateHomepageOrganisationEventAsOrganisationAdmin422()
+    public function postCreateHomepageOrganisationEventAsOrganisationAdmin422(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -816,7 +816,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateHomepageOrganisationEventAsGlobalAdmin200()
+    public function postCreateHomepageOrganisationEventAsGlobalAdmin200(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -881,7 +881,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateHomepageOrganisationEventAsSuperAdmin201()
+    public function postCreateHomepageOrganisationEventAsSuperAdmin201(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -929,7 +929,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventWithTaxonomiesAsOrganisationAdmin422()
+    public function postCreateOrganisationEventWithTaxonomiesAsOrganisationAdmin422(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -973,7 +973,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventWithTaxonomiesAsGlobalAdmin200()
+    public function postCreateOrganisationEventWithTaxonomiesAsGlobalAdmin200(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -1045,7 +1045,7 @@ class OrganisationEventsTest extends TestCase
             'taxonomy_id' => $taxonomy->parent_id,
         ]);
 
-        $response = $this->getJson('/core/v1/organisation-events/' . $organisationEvent->id);
+        $response = $this->getJson('/core/v1/organisation-events/'.$organisationEvent->id);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -1074,7 +1074,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventWithTaxonomiesAsSuperAdmin201()
+    public function postCreateOrganisationEventWithTaxonomiesAsSuperAdmin201(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -1149,7 +1149,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventCreatesAuditAsOrganisationAdmin201()
+    public function postCreateOrganisationEventCreatesAuditAsOrganisationAdmin201(): void
     {
         $this->fakeEvents();
 
@@ -1199,7 +1199,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventWithImageAsGlobalAdmin200()
+    public function postCreateOrganisationEventWithImageAsGlobalAdmin200(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -1211,7 +1211,7 @@ class OrganisationEventsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
+            'file' => 'data:image/png;base64,'.base64_encode($image),
         ]);
 
         $date = $this->faker->dateTimeBetween('tomorrow', '+6 weeks')->format('Y-m-d');
@@ -1277,7 +1277,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventWithImageAsOrganisationAdmin201()
+    public function postCreateOrganisationEventWithImageAsOrganisationAdmin201(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -1289,7 +1289,7 @@ class OrganisationEventsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
+            'file' => 'data:image/png;base64,'.base64_encode($image),
         ]);
 
         $date = $this->faker->dateTimeBetween('tomorrow', '+6 weeks')->format('Y-m-d');
@@ -1382,7 +1382,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventMinimumFieldsAsOrganisationAdmin201()
+    public function postCreateOrganisationEventMinimumFieldsAsOrganisationAdmin201(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -1425,7 +1425,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventRequiredFieldsAsOrganisationAdmin422()
+    public function postCreateOrganisationEventRequiredFieldsAsOrganisationAdmin422(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -1506,7 +1506,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventIfNotFreeRequiresFeeDataAsOrganisationAdmin201()
+    public function postCreateOrganisationEventIfNotFreeRequiresFeeDataAsOrganisationAdmin201(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -1567,7 +1567,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventWithOrganiserRequiresOrganiserContactAsOrganisationAdmin201()
+    public function postCreateOrganisationEventWithOrganiserRequiresOrganiserContactAsOrganisationAdmin201(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -1636,7 +1636,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function postCreateOrganisationEventWithBookingDetailsRequiresAllBookingFieldsAsOrganisationAdmin201()
+    public function postCreateOrganisationEventWithBookingDetailsRequiresAllBookingFieldsAsOrganisationAdmin201(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -1707,7 +1707,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function getSingleOrganisationEventAsGuest200()
+    public function getSingleOrganisationEventAsGuest200(): void
     {
         $organisationEvent = OrganisationEvent::factory()->create();
 
@@ -1751,7 +1751,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function getSingleOrganisationEventAsGuestCreatesAudit200()
+    public function getSingleOrganisationEventAsGuestCreatesAudit200(): void
     {
         $this->fakeEvents();
 
@@ -1770,7 +1770,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function getSingleOrganisationEventImageAsGuest200()
+    public function getSingleOrganisationEventImageAsGuest200(): void
     {
         $organisationEvent = OrganisationEvent::factory()->withImage()->create();
 
@@ -1783,7 +1783,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function getSingleOrganisationEventImageCreatesAuditAsGuest200()
+    public function getSingleOrganisationEventImageCreatesAuditAsGuest200(): void
     {
         $this->fakeEvents();
 
@@ -1800,7 +1800,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function getSingleOrganisationEventIcalAsGuest200()
+    public function getSingleOrganisationEventIcalAsGuest200(): void
     {
         $organisationEvent = OrganisationEvent::factory()->notVirtual()->withOrganiser()->create();
 
@@ -1820,24 +1820,24 @@ class OrganisationEventsTest extends TestCase
             'VERSION:2.0',
             'PRODID:-//hacksw/handcal//NONSGML v1.0//EN',
             'BEGIN:VEVENT',
-            'UID:' . $organisationEvent->id,
-            'DTSTAMP:' . $now->format('Ymd\\THis\\Z'),
-            'ORGANIZER;CN=' . $organisationEvent->organiser_name . ':MAILTO:' . $organisationEvent->organiser_email,
-            'DTSTART:' . $start->format('Ymd\\THis\\Z'),
-            'DTEND:' . $end->format('Ymd\\THis\\Z'),
-            'SUMMARY:' . $organisationEvent->title,
-            'DESCRIPTION:' . $organisationEvent->intro,
-            'GEO:' . $organisationEvent->location->lat . ';' . $organisationEvent->location->lon,
-            'LOCATION:' . str_ireplace(',', '\,', $organisationEvent->location->toAddress()->__toString()),
+            'UID:'.$organisationEvent->id,
+            'DTSTAMP:'.$now->format('Ymd\\THis\\Z'),
+            'ORGANIZER;CN='.$organisationEvent->organiser_name.':MAILTO:'.$organisationEvent->organiser_email,
+            'DTSTART:'.$start->format('Ymd\\THis\\Z'),
+            'DTEND:'.$end->format('Ymd\\THis\\Z'),
+            'SUMMARY:'.$organisationEvent->title,
+            'DESCRIPTION:'.$organisationEvent->intro,
+            'GEO:'.$organisationEvent->location->lat.';'.$organisationEvent->location->lon,
+            'LOCATION:'.str_ireplace(',', '\,', $organisationEvent->location->toAddress()->__toString()),
             'END:VEVENT',
             'END:VCALENDAR',
         ]);
 
-        $this->assertEquals('https://calendar.google.com/calendar/render?action=TEMPLATE&dates=' . urlencode($start->format('Ymd\\THis\\Z') . '/' . $end->format('Ymd\\THis\\Z')) . '&details=' . $urlsafeTitle . '&location=' . $urlsafeLocation . '&text=' . $urlsafeIntro, $organisationEvent->googleCalendarlink);
+        $this->assertEquals('https://calendar.google.com/calendar/render?action=TEMPLATE&dates='.urlencode($start->format('Ymd\\THis\\Z').'/'.$end->format('Ymd\\THis\\Z')).'&details='.$urlsafeTitle.'&location='.$urlsafeLocation.'&text='.$urlsafeIntro, $organisationEvent->googleCalendarlink);
 
-        $this->assertEquals('https://outlook.office.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&rru=addevent&startdt=' . urlencode($start->format(DateTime::ATOM)) . '&enddt=' . urlencode($end->format(DateTime::ATOM)) . '&subject=' . $urlsafeTitle . '&location=' . $urlsafeLocation . '&body=' . $urlsafeIntro, $organisationEvent->microsoftCalendarLink);
+        $this->assertEquals('https://outlook.office.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&rru=addevent&startdt='.urlencode($start->format(DateTime::ATOM)).'&enddt='.urlencode($end->format(DateTime::ATOM)).'&subject='.$urlsafeTitle.'&location='.$urlsafeLocation.'&body='.$urlsafeIntro, $organisationEvent->microsoftCalendarLink);
 
-        $this->assertEquals(secure_url('/core/v1/organisation-events/' . $organisationEvent->id . '/event.ics'), $organisationEvent->appleCalendarLink);
+        $this->assertEquals(secure_url('/core/v1/organisation-events/'.$organisationEvent->id.'/event.ics'), $organisationEvent->appleCalendarLink);
 
         $response = $this->get($organisationEvent->appleCalendarLink);
 
@@ -1854,7 +1854,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function putUpdateOrganisationEventAsGuest401()
+    public function putUpdateOrganisationEventAsGuest401(): void
     {
         $organisationEvent = OrganisationEvent::factory()->create();
 
@@ -1866,7 +1866,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function putUpdateOrganisationEventAsServiceWorker403()
+    public function putUpdateOrganisationEventAsServiceWorker403(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -1883,7 +1883,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function putUpdateOrganisationEventAsServiceAdmin403()
+    public function putUpdateOrganisationEventAsServiceAdmin403(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -1900,7 +1900,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function putUpdateOrganisationEventAsOrganisationAdmin200()
+    public function putUpdateOrganisationEventAsOrganisationAdmin200(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -1975,7 +1975,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function putUpdateOrganisationEventAsGlobalAdmin200()
+    public function putUpdateOrganisationEventAsGlobalAdmin200(): void
     {
         $location = Location::factory()->create();
         $user = User::factory()->create()->makeGlobalAdmin();
@@ -2063,7 +2063,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function putUpdateOrganisationEventAutoApprovedAsSuperAdmin200()
+    public function putUpdateOrganisationEventAutoApprovedAsSuperAdmin200(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -2133,7 +2133,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function putUpdateOrganisationEventAsOrganisationAdminCreatesAudit200()
+    public function putUpdateOrganisationEventAsOrganisationAdminCreatesAudit200(): void
     {
         $this->fakeEvents();
 
@@ -2188,7 +2188,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function putUpdateOrganisationEventAsGlobalAdminAddImage200()
+    public function putUpdateOrganisationEventAsGlobalAdminAddImage200(): void
     {
         $user = User::factory()->create()->makeGlobalAdmin();
         $image = Storage::disk('local')->get('/test-data/image.png');
@@ -2198,7 +2198,7 @@ class OrganisationEventsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
+            'file' => 'data:image/png;base64,'.base64_encode($image),
         ]);
 
         $organisationEvent = OrganisationEvent::factory()->create();
@@ -2228,7 +2228,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function putUpdateOrganisationEventAsGlobalAdminRemoveImage200()
+    public function putUpdateOrganisationEventAsGlobalAdminRemoveImage200(): void
     {
         $user = User::factory()->create()->makeGlobalAdmin();
 
@@ -2261,7 +2261,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function putUpdateOrganisationEventAsOtherOrganisationAdmin403()
+    public function putUpdateOrganisationEventAsOtherOrganisationAdmin403(): void
     {
         $organisation1 = Organisation::factory()->create();
         $organisation2 = Organisation::factory()->create();
@@ -2308,7 +2308,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function putUpdateOrganisationEventAddToHomepageAsOrganisationAdmin422()
+    public function putUpdateOrganisationEventAddToHomepageAsOrganisationAdmin422(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -2354,7 +2354,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function putUpdateOrganisationEventAddToHomepageAsGlobalAdmin200()
+    public function putUpdateOrganisationEventAddToHomepageAsGlobalAdmin200(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -2410,7 +2410,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function putUpdateOrganisationEventUpdateTaxonomiesAsOrganisationAdmin200()
+    public function putUpdateOrganisationEventUpdateTaxonomiesAsOrganisationAdmin200(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -2487,7 +2487,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function putUpdateOrganisationEventUpdateTaxonomiesAsGlobalAdmin200()
+    public function putUpdateOrganisationEventUpdateTaxonomiesAsGlobalAdmin200(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -2606,7 +2606,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function putUpdateOrganisationEventUpdateTaxonomiesAsSuperAdmin200()
+    public function putUpdateOrganisationEventUpdateTaxonomiesAsSuperAdmin200(): void
     {
         $organisation = Organisation::factory()->create();
         $location = Location::factory()->create();
@@ -2716,7 +2716,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function deleteRemoveOrganisationEventAsGuest401()
+    public function deleteRemoveOrganisationEventAsGuest401(): void
     {
         $organisationEvent = OrganisationEvent::factory()->create();
 
@@ -2728,7 +2728,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function deleteRemoveOrganisationEventAsServiceWorker403()
+    public function deleteRemoveOrganisationEventAsServiceWorker403(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -2745,7 +2745,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function deleteRemoveOrganisationEventAsServiceAdmin403()
+    public function deleteRemoveOrganisationEventAsServiceAdmin403(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -2762,7 +2762,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function deleteRemoveOrganisationEventAsOrganisationAdmin403()
+    public function deleteRemoveOrganisationEventAsOrganisationAdmin403(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -2782,7 +2782,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function deleteRemoveOrganisationEventAsGlobalAdmin403()
+    public function deleteRemoveOrganisationEventAsGlobalAdmin403(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeGlobalAdmin($organisation);
@@ -2800,7 +2800,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function deleteRemoveOrganisationEventAsSuperAdmin200()
+    public function deleteRemoveOrganisationEventAsSuperAdmin200(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeSuperAdmin($organisation);
@@ -2818,7 +2818,7 @@ class OrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function deleteRemoveOrganisationEventAsSuperAdminCreatesAudit200()
+    public function deleteRemoveOrganisationEventAsSuperAdminCreatesAudit200(): void
     {
         $this->fakeEvents();
 

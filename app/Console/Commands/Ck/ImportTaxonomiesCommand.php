@@ -120,6 +120,7 @@ class ImportTaxonomiesCommand extends Command
 
     /**
      * Create a new command instance.
+     *
      * @param mixed|null $params
      */
     public function __construct($params = null)
@@ -138,9 +139,8 @@ class ImportTaxonomiesCommand extends Command
      * Execute the console command.
      *
      * @throws \Exception
-     * @return mixed
      */
-    public function handle()
+    public function handle(): void
     {
         if (!$this->manageParameters()) {
             return;
@@ -247,11 +247,9 @@ class ImportTaxonomiesCommand extends Command
      * Get all the Category Taxonomy IDs.
      *
      * @param array $rootId
-     * @param array $taxonomyIds
      * @param mixed $rootIds
-     * @return array
      */
-    public function getDescendantTaxonomyIds($rootIds, $taxonomyIds = []): array
+    public function getDescendantTaxonomyIds($rootIds, array $taxonomyIds = []): array
     {
         $childIds = DB::table((new Taxonomy())->getTable())->whereIn('parent_id', $rootIds)->pluck('id');
 
@@ -268,10 +266,9 @@ class ImportTaxonomiesCommand extends Command
     /**
      * Get the Taxonomy records to import.
      *
-     * @param string $csvUrl
      * @return array || Null
      */
-    public function fetchTaxonomyRecords(string $csvUrl)
+    public function fetchTaxonomyRecords(string $csvUrl): array
     {
         $this->line('Fetching ' . $csvUrl);
         $client = new Client();
@@ -294,13 +291,11 @@ class ImportTaxonomiesCommand extends Command
      * Unlike php built in csv parsing functions, this will work with fields containing quotes and new lines.
      *
      * @param mixed $csv_string
-     * @param string $delimiter
-     * @param bool $skip_empty_lines
-     * @param bool $trim_fields
      * @return string[]|false
+     *
      * @author https://www.php.net/manual/en/function.str-getcsv.php#111665
      */
-    protected function parse_csv($csv_string, $delimiter = ',', $skip_empty_lines = true, $trim_fields = true)
+    protected function parse_csv($csv_string, string $delimiter = ',', bool $skip_empty_lines = true, bool $trim_fields = true)
     {
         $enc = preg_replace('/(?<!")""/', '!!Q!!', $csv_string);
         $enc = preg_replace_callback(
@@ -330,7 +325,6 @@ class ImportTaxonomiesCommand extends Command
     /**
      * Import the Taxonomy records into the database.
      *
-     * @param array $taxonomyRecords
      * @return bool|int
      */
     public function importTaxonomyRecords(array $taxonomyRecords)
@@ -376,9 +370,6 @@ class ImportTaxonomiesCommand extends Command
 
     /**
      * Sanity check the records before converting them to format for import.
-     *
-     * @param array $records
-     * @return array
      */
     public function prepareImports(array $records): array
     {
@@ -424,10 +415,6 @@ class ImportTaxonomiesCommand extends Command
 
     /**
      * Does the taxonomy exist in the database.
-     *
-     * @param array $record
-     * @param \illuminate\Support\Collection $taxonomyNames
-     * @return bool
      */
     public function taxonomyExists(array $record, Collection $taxonomyNames): bool
     {
@@ -452,9 +439,6 @@ class ImportTaxonomiesCommand extends Command
 
     /**
      * Get the ancestors of a taxonomy.
-     *
-     * @param string $taxonomyId
-     * @return array
      */
     public function taxonomyAncestors(string $taxonomyId): array
     {
@@ -483,9 +467,6 @@ class ImportTaxonomiesCommand extends Command
 
     /**
      * Convert the flat array to a collection of associative array with UUID keys.
-     *
-     * @param array $records
-     * @return array
      */
     public function mapToUuidKeys(array $records): array
     {
@@ -519,9 +500,6 @@ class ImportTaxonomiesCommand extends Command
 
     /**
      * Calculate the depth of each Taxonomy record.
-     *
-     * @param array $records
-     * @return array
      */
     public function mapTaxonomyDepth(array $records): array
     {
@@ -531,13 +509,8 @@ class ImportTaxonomiesCommand extends Command
     /**
      * Walk through the levels of child records and record the depth.
      * Caution: recursive.
-     *
-     * @param array $parentIds
-     * @param array $records
-     * @param int $depth
-     * @return array
      */
-    public function calculateTaxonomyDepth($parentIds, &$records, $depth): array
+    public function calculateTaxonomyDepth(array $parentIds, array &$records, int $depth): array
     {
         $newParentIds = [];
         $depth++;
@@ -562,8 +535,6 @@ class ImportTaxonomiesCommand extends Command
 
     /**
      * Show the failed rows.
-     *
-     * @param array $records
      */
     public function showfailedRows(array $records)
     {

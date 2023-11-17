@@ -64,10 +64,8 @@ class Page extends Model implements AppliesUpdateRequests
 
     /**
      * Get the indexable data array for the model.
-     *
-     * @return array
      */
-    public function toSearchableArray()
+    public function toSearchableArray(): array
     {
         $contentSections = [];
         foreach ($this->content as $sectionLabel => $sectionContent) {
@@ -103,10 +101,8 @@ class Page extends Model implements AppliesUpdateRequests
 
     /**
      * Enable the Page.
-     *
-     * @return \App\Models\Page
      */
-    public function enable()
+    public function enable(): Page
     {
         $this->enabled = static::ENABLED;
 
@@ -115,10 +111,8 @@ class Page extends Model implements AppliesUpdateRequests
 
     /**
      * Disable the Page.
-     *
-     * @return \App\Models\Page
      */
-    public function disable()
+    public function disable(): Page
     {
         $this->enabled = static::DISABLED;
 
@@ -127,18 +121,14 @@ class Page extends Model implements AppliesUpdateRequests
 
     /**
      * Get the parent id key name.
-     *
-     * @return string
      */
-    public function getParentIdName()
+    public function getParentIdName(): string
     {
         return static::PARENT_KEY;
     }
 
     /**
      * Set the page_type to 'landing'.
-     *
-     * @return \App\Models\Page
      */
     public function asLandingPage(): self
     {
@@ -149,8 +139,6 @@ class Page extends Model implements AppliesUpdateRequests
 
     /**
      * Set the page_type to 'information'.
-     *
-     * @return \App\Models\Page
      */
     public function asInformationPage(): self
     {
@@ -165,7 +153,6 @@ class Page extends Model implements AppliesUpdateRequests
      * Children do not inherit enabled status, but must be enabled individually.
      *
      * @param mixed $status
-     * @return \App\Models\Page
      */
     public function updateStatus($status): self
     {
@@ -187,11 +174,8 @@ class Page extends Model implements AppliesUpdateRequests
 
     /**
      * Update the parent relationship.
-     *
-     * @param string $parentId
-     * @return \App\Models\Page
      */
-    public function updateParent($parentId = false): self
+    public function updateParent(?string $parentId = null): self
     {
         // If parent_id is null save as root node
         if (is_null($parentId)) {
@@ -205,11 +189,8 @@ class Page extends Model implements AppliesUpdateRequests
 
     /**
      * Update the sibling order for the page.
-     *
-     * @param int $order
-     * @return \App\Models\Page
      */
-    public function updateOrder($order): self
+    public function updateOrder(?int $order): self
     {
         if (!is_null($order)) {
             $siblingAtIndex = $this->siblingAtIndex($order)->first();
@@ -222,11 +203,8 @@ class Page extends Model implements AppliesUpdateRequests
     /**
      * Update the image relationship.
      * Can be passed either null, the current image id or a new image id.
-     *
-     * @param string $imageId
-     * @return \App\Models\Page
      */
-    public function updateImage($imageId)
+    public function updateImage(?string $imageId): Page
     {
         if ($imageId !== $this->image_file_id) {
             $currentImage = $this->image;
@@ -258,11 +236,9 @@ class Page extends Model implements AppliesUpdateRequests
     /**
      * Update the collections relationship.
      *
-     * @param array $collectionIds
      * @param mixed $collections
-     * @return \App\Models\Page
      */
-    public function updateCollections($collectionIds)
+    public function updateCollections(?array $collectionIds): Page
     {
         if (is_array($collectionIds)) {
             $this->collections()->sync($collectionIds);
@@ -274,9 +250,6 @@ class Page extends Model implements AppliesUpdateRequests
 
     /**
      * Check if the update request is valid.
-     *
-     * @param \App\Models\UpdateRequest $updateRequest
-     * @return \Illuminate\Contracts\Validation\Validator
      */
     public function validateUpdateRequest(UpdateRequest $updateRequest): Validator
     {
@@ -301,9 +274,6 @@ class Page extends Model implements AppliesUpdateRequests
 
     /**
      * Apply the update request.
-     *
-     * @param \App\Models\UpdateRequest $updateRequest
-     * @return \App\Models\UpdateRequest
      */
     public function applyUpdateRequest(UpdateRequest $updateRequest): UpdateRequest
     {
@@ -353,9 +323,6 @@ class Page extends Model implements AppliesUpdateRequests
     /**
      * Custom logic for returning the data. Useful when wanting to transform
      * or modify the data before returning it, e.g. removing passwords.
-     *
-     * @param array $data
-     * @return array
      */
     public function getData(array $data): array
     {

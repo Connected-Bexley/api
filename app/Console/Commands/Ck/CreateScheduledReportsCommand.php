@@ -56,10 +56,8 @@ class CreateScheduledReportsCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return mixed
      */
-    public function handle()
+    public function handle(): void
     {
         $this->count = ReportSchedule::query()->count();
 
@@ -91,9 +89,6 @@ class CreateScheduledReportsCommand extends Command
         }
     }
 
-    /**
-     * @param \App\Models\ReportSchedule $reportSchedule
-     */
     protected function handleWeekly(ReportSchedule $reportSchedule)
     {
         // Skip if not a Monday.
@@ -132,9 +127,6 @@ class CreateScheduledReportsCommand extends Command
         }
     }
 
-    /**
-     * @param \App\Models\ReportSchedule $reportSchedule
-     */
     protected function handleMonthly(ReportSchedule $reportSchedule)
     {
         // Skip if not the first day of the month.

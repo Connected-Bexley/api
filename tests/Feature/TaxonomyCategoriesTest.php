@@ -42,9 +42,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function guest_can_list_them()
+    public function guest_can_list_them(): void
     {
         $response = $this->json('GET', '/core/v1/taxonomies/categories');
 
@@ -76,9 +75,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function audit_created_when_listed()
+    public function audit_created_when_listed(): void
     {
         $this->fakeEvents();
 
@@ -95,9 +93,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function guest_cannot_create_one()
+    public function guest_cannot_create_one(): void
     {
         $response = $this->json('POST', '/core/v1/taxonomies/categories');
 
@@ -106,9 +103,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function service_worker_cannot_create_one()
+    public function service_worker_cannot_create_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -122,9 +118,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function service_admin_cannot_create_one()
+    public function service_admin_cannot_create_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -138,9 +133,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function organisation_admin_cannot_create_one()
+    public function organisation_admin_cannot_create_one(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -154,9 +148,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function global_admin_cannot_create_one()
+    public function global_admin_cannot_create_one(): void
     {
         $user = User::factory()->create()->makeGlobalAdmin();
 
@@ -169,9 +162,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function super_admin_can_create_one()
+    public function super_admin_can_create_one(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
         $siblingCount = Taxonomy::category()->children()->count();
@@ -190,9 +182,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function order_is_updated_when_created_at_beginning()
+    public function order_is_updated_when_created_at_beginning(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
 
@@ -225,9 +216,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function order_is_updated_when_created_at_middle()
+    public function order_is_updated_when_created_at_middle(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
 
@@ -267,9 +257,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function order_is_updated_when_created_at_end()
+    public function order_is_updated_when_created_at_end(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
 
@@ -302,9 +291,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function order_cannot_be_less_than_1_when_created()
+    public function order_cannot_be_less_than_1_when_created(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
         $payload = [
@@ -321,9 +309,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function order_cannot_be_greater_than_count_plus_1_when_created()
+    public function order_cannot_be_greater_than_count_plus_1_when_created(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
         $siblingCount = Taxonomy::category()->children()->count();
@@ -341,9 +328,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function audit_created_when_created()
+    public function audit_created_when_created(): void
     {
         $this->fakeEvents();
 
@@ -370,9 +356,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function guest_can_view_one()
+    public function guest_can_view_one(): void
     {
         $randomTaxonomy = null;
         Taxonomy::chunk(200, function (Collection $taxonomies) use (&$randomTaxonomy) {
@@ -404,9 +389,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function guest_can_view_one_by_slug()
+    public function guest_can_view_one_by_slug(): void
     {
         $randomTaxonomy = null;
         Taxonomy::chunk(200, function (Collection $taxonomies) use (&$randomTaxonomy) {
@@ -438,9 +422,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function audit_created_when_viewed()
+    public function audit_created_when_viewed(): void
     {
         $this->fakeEvents();
 
@@ -469,9 +452,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function guest_cannot_update_one()
+    public function guest_cannot_update_one(): void
     {
         $category = $this->getRandomCategoryWithoutChildren();
 
@@ -482,9 +464,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function service_worker_cannot_update_one()
+    public function service_worker_cannot_update_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -498,9 +479,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function service_admin_cannot_update_one()
+    public function service_admin_cannot_update_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -514,9 +494,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function organisation_admin_cannot_update_one()
+    public function organisation_admin_cannot_update_one(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -530,9 +509,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function global_admin_cannot_update_one()
+    public function global_admin_cannot_update_one(): void
     {
         $user = User::factory()->create()->makeGlobalAdmin();
         $category = $this->getRandomCategoryWithoutChildren();
@@ -545,9 +523,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function super_admin_can_update_one()
+    public function super_admin_can_update_one(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
         $category = Taxonomy::factory()->create([
@@ -569,9 +546,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function order_is_updated_when_updated_to_beginning()
+    public function order_is_updated_when_updated_to_beginning(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
@@ -610,9 +586,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function order_is_updated_when_updated_to_middle()
+    public function order_is_updated_when_updated_to_middle(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
@@ -651,9 +626,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function order_is_updated_when_updated_to_end()
+    public function order_is_updated_when_updated_to_end(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
@@ -692,9 +666,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function order_is_updated_when_updated_to_beginning_of_another_parent()
+    public function order_is_updated_when_updated_to_beginning_of_another_parent(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
@@ -788,9 +761,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function order_is_updated_when_updated_to_middle_of_another_parent()
+    public function order_is_updated_when_updated_to_middle_of_another_parent(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
@@ -884,9 +856,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function order_is_updated_when_updated_to_end_of_another_parent()
+    public function order_is_updated_when_updated_to_end_of_another_parent(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
@@ -980,9 +951,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function order_cannot_be_less_than_1_when_updated()
+    public function order_cannot_be_less_than_1_when_updated(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
@@ -1000,9 +970,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function order_cannot_be_greater_than_count_plus_1_when_updated()
+    public function order_cannot_be_greater_than_count_plus_1_when_updated(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
@@ -1021,9 +990,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function audit_created_when_updated()
+    public function audit_created_when_updated(): void
     {
         $this->fakeEvents();
 
@@ -1053,9 +1021,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function guest_cannot_delete_one()
+    public function guest_cannot_delete_one(): void
     {
         $category = $this->getRandomCategoryWithoutChildren();
 
@@ -1066,9 +1033,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function service_worker_cannot_delete_one()
+    public function service_worker_cannot_delete_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -1082,9 +1048,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function service_admin_cannot_delete_one()
+    public function service_admin_cannot_delete_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -1098,9 +1063,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function organisation_admin_cannot_delete_one()
+    public function organisation_admin_cannot_delete_one(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -1114,9 +1078,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function global_admin_cannot_delete_one()
+    public function global_admin_cannot_delete_one(): void
     {
         $user = User::factory()->create()->makeGlobalAdmin();
         $category = $this->getRandomCategoryWithoutChildren();
@@ -1129,9 +1092,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function super_admin_can_delete_one()
+    public function super_admin_can_delete_one(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
         $category = $this->getRandomCategoryWithChildren();
@@ -1145,9 +1107,8 @@ class TaxonomyCategoriesTest extends TestCase
 
     /**
      * @test
-     *
      */
-    public function audit_created_when_deleted()
+    public function audit_created_when_deleted(): void
     {
         $this->fakeEvents();
 
@@ -1168,9 +1129,6 @@ class TaxonomyCategoriesTest extends TestCase
      * Helpers.
      */
 
-    /**
-     * @return \App\Models\Taxonomy
-     */
     protected function getRandomCategoryWithoutChildren(): Taxonomy
     {
         $randomTaxonomy = null;
@@ -1188,17 +1146,11 @@ class TaxonomyCategoriesTest extends TestCase
         return $randomTaxonomy;
     }
 
-    /**
-     * @return \App\Models\Taxonomy
-     */
     protected function getRandomCategoryWithChildren(): Taxonomy
     {
         return Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
     }
 
-    /**
-     * @return \App\Models\Taxonomy
-     */
     protected function createTopLevelCategory(int $index = null): Taxonomy
     {
         $topLevelCount = Taxonomy::category()->children()->count();

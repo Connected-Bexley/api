@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 class ServiceCreatedTest extends TestCase
 {
-    public function test_email_sent_to_global_admin_email()
+    public function test_email_sent_to_global_admin_email(): void
     {
         Queue::fake();
 
@@ -55,7 +55,7 @@ class ServiceCreatedTest extends TestCase
         );
     }
 
-    public function test_email_not_sent_to_global_admin_email_when_created_by_global_admin()
+    public function test_email_not_sent_to_global_admin_email_when_created_by_global_admin(): void
     {
         Queue::fake();
 

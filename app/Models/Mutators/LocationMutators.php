@@ -4,9 +4,6 @@ namespace App\Models\Mutators;
 
 trait LocationMutators
 {
-    /**
-     * @return string
-     */
     public function getFullAddressAttribute(): string
     {
         $parts = [

@@ -13,9 +13,7 @@ use GoldSpecDigital\ObjectOrientedOAS\Objects\Response;
 class IndexTagOperation extends Operation
 {
     /**
-     * @param string|null $objectId
      * @throws \GoldSpecDigital\ObjectOrientedOAS\Exceptions\InvalidArgumentException
-     * @return static
      */
     public static function create(string $objectId = null): BaseObject
     {

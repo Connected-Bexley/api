@@ -17,7 +17,7 @@ use Tests\TestCase;
 
 class UserRolesUpdatedTest extends TestCase
 {
-    public function test_emails_sent_out()
+    public function test_emails_sent_out(): void
     {
         Queue::fake();
 
@@ -47,7 +47,7 @@ class UserRolesUpdatedTest extends TestCase
         });
     }
 
-    public function test_revoked_roles_method_works_from_super_admin_to_global_admin()
+    public function test_revoked_roles_method_works_from_super_admin_to_global_admin(): void
     {
         /** @var \App\Models\User $user */
         $user = User::factory()->create();
@@ -78,7 +78,7 @@ class UserRolesUpdatedTest extends TestCase
         $this->assertEquals(Role::superAdmin()->id, $revokedRoles->first()->role_id);
     }
 
-    public function test_revoked_roles_method_works_from_global_admin_to_super_admin()
+    public function test_revoked_roles_method_works_from_global_admin_to_super_admin(): void
     {
         /** @var \App\Models\User $user */
         $user = User::factory()->create();
@@ -107,7 +107,7 @@ class UserRolesUpdatedTest extends TestCase
         $this->assertEquals(0, $revokedRoles->count());
     }
 
-    public function test_revoked_roles_method_works_from_global_admin_to_organisation_admin()
+    public function test_revoked_roles_method_works_from_global_admin_to_organisation_admin(): void
     {
         /** @var \App\Models\User $user */
         $user = User::factory()->create();
@@ -156,7 +156,7 @@ class UserRolesUpdatedTest extends TestCase
         $this->assertNotNull($revokedRoles->firstWhere('id', '=', $organisationTwoAdminUserRole->id));
     }
 
-    public function test_added_roles_method_works_from_global_admin_to_super_admin()
+    public function test_added_roles_method_works_from_global_admin_to_super_admin(): void
     {
         /** @var \App\Models\User $user */
         $user = User::factory()->create();

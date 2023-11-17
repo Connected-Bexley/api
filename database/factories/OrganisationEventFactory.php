@@ -11,10 +11,8 @@ class OrganisationEventFactory extends Factory
 {
     /**
      * Define the model's default state.
-     *
-     * @return array
      */
-    public function definition()
+    public function definition(): array
     {
         $date = $this->faker->dateTimeBetween('+1 week', '+6 weeks');
         $endtime = $this->faker->time('H:i:s');

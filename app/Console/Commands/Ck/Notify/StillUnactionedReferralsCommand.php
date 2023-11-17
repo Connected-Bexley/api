@@ -30,10 +30,8 @@ class StillUnactionedReferralsCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return mixed
      */
-    public function handle()
+    public function handle(): void
     {
         $this->getReferralQuery()->chunk(200, function (Collection $referrals) {
             $referrals->each(function (Referral $referral) {
@@ -42,9 +40,6 @@ class StillUnactionedReferralsCommand extends Command
         });
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     protected function getReferralQuery(): Builder
     {
         return Referral::query()
@@ -52,9 +47,6 @@ class StillUnactionedReferralsCommand extends Command
             ->unactioned($this->option('working-days'));
     }
 
-    /**
-     * @param \App\Models\Referral $referral
-     */
     protected function sendEmail(Referral $referral)
     {
         try {

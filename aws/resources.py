@@ -193,7 +193,13 @@ def create_uploads_bucket_resource(template, uploads_bucket_name_variable):
         s3.Bucket(
             'UploadsBucket',
             BucketName=uploads_bucket_name_variable,
-            AccessControl='Private'
+            OwnershipControls=s3.OwnershipControls(
+                Rules=[
+                    s3.OwnershipControlsRule(
+                        ObjectOwnership='BucketOwnerEnforced'
+                    )
+                ]
+            )
         )
     )
 

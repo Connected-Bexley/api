@@ -22,6 +22,7 @@ use App\Models\Role;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -40,11 +41,8 @@ class UserController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param \App\Http\Requests\User\IndexRequest $request
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index(IndexRequest $request)
+    public function index(IndexRequest $request): AnonymousResourceCollection
     {
         // Check if the request has asked for user roles to be included.
         $userRolesIncluded = Str::contains($request->include, 'user-roles');
@@ -92,7 +90,6 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param \App\Http\Requests\User\StoreRequest $request
      * @return \Illuminate\Http\Response
      */
     public function store(StoreRequest $request)
@@ -145,12 +142,8 @@ class UserController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param \App\Http\Requests\User\ShowRequest $request
-     * @param \App\Models\User $user
-     * @return \App\Http\Resources\UserResource
      */
-    public function show(ShowRequest $request, User $user)
+    public function show(ShowRequest $request, User $user): UserResource
     {
         // Check if the request has asked for user roles to be included.
         $userRolesIncluded = Str::contains($request->include, 'user-roles');
@@ -176,11 +169,8 @@ class UserController extends Controller
 
     /**
      * Display the logged in user.
-     *
-     * @param \App\Http\Requests\User\ShowRequest $request
-     * @return \App\Http\Resources\UserResource
      */
-    public function user(ShowRequest $request)
+    public function user(ShowRequest $request): UserResource
     {
         return $this->show($request, $request->user());
     }
@@ -188,8 +178,6 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \App\Http\Requests\User\UpdateRequest $request
-     * @param \App\Models\User $user
      * @return \Illuminate\Http\Response
      */
     public function update(UpdateRequest $request, User $user)
@@ -288,8 +276,6 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param \App\Http\Requests\User\DestroyRequest $request
-     * @param \App\Models\User $user
      * @return \Illuminate\Http\Response
      */
     public function destroy(DestroyRequest $request, User $user)

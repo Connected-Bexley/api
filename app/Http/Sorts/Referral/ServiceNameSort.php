@@ -8,12 +8,6 @@ use Spatie\QueryBuilder\Sorts\Sort;
 
 class ServiceNameSort implements Sort
 {
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param $descending
-     * @param string $property
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function __invoke(Builder $query, $descending, string $property): Builder
     {
         $descending = $descending ? 'DESC' : 'ASC';

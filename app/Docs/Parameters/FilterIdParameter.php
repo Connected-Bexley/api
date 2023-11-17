@@ -7,11 +7,6 @@ use GoldSpecDigital\ObjectOrientedOAS\Objects\Schema;
 
 class FilterIdParameter extends FilterParameter
 {
-    /**
-     * @param string|null $objectId
-     * @param string $field
-     * @return static
-     */
     public static function create(string $objectId = null, string $field = 'id'): BaseObject
     {
         return parent::create($objectId, $field)

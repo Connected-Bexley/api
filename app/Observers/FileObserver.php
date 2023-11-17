@@ -8,8 +8,6 @@ class FileObserver
 {
     /**
      * Handle the file "deleting" event.
-     *
-     * @param \App\Models\File $file
      */
     public function deleting(File $file)
     {
@@ -21,10 +19,8 @@ class FileObserver
 
     /**
      * Handle the file "deleted" event.
-     *
-     * @param \App\Models\File $file
      */
-    public function deleted(File $file)
+    public function deleted(File $file): void
     {
         $file->deleteFromDisk();
     }

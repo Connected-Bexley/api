@@ -58,58 +58,36 @@ class UpdateRequest extends Model
         'deleted_at' => 'datetime',
     ];
 
-    /**
-     * @return bool
-     */
     public function isNew(): bool
     {
         return $this->updateable_id === null;
     }
 
-    /**
-     * @return bool
-     */
     public function isExisting(): bool
     {
         return !$this->isNew();
     }
 
-    /**
-     * @return bool
-     */
     public function isApproved(): bool
     {
         return $this->approved_at !== null;
     }
 
-    /**
-     * @return bool
-     */
     public function isDeclined(): bool
     {
         return $this->deleted_at !== null;
     }
 
-    /**
-     * @return \Illuminate\Support\MessageBag
-     */
     public function getValidationErrors(): MessageBag
     {
         return $this->getUpdateable()->validateUpdateRequest($this)->errors();
     }
 
-    /**
-     * @return bool
-     */
     public function validate(): bool
     {
         return $this->getUpdateable()->validateUpdateRequest($this)->fails() === false;
     }
 
-    /**
-     * @param \App\Models\User|null $user
-     * @return \App\Models\UpdateRequest
-     */
     public function apply(User $user = null): self
     {
         $this->getUpdateable()->applyUpdateRequest($this);
@@ -122,11 +100,9 @@ class UpdateRequest extends Model
     }
 
     /**
-     * @param \App\Models\User|null $user
      * @throws \Exception
-     * @return bool|null
      */
-    public function delete(User $user = null)
+    public function delete(User $user = null): ?bool
     {
         if ($user) {
             $this->update(['actioning_user_id' => $user->id]);
@@ -135,9 +111,6 @@ class UpdateRequest extends Model
         return parent::delete();
     }
 
-    /**
-     * @return \App\UpdateRequest\AppliesUpdateRequests
-     */
     public function getUpdateable(): AppliesUpdateRequests
     {
         return $this->isExisting()
@@ -145,9 +118,6 @@ class UpdateRequest extends Model
         : $this->createUpdateableInstance();
     }
 
-    /**
-     * @return \App\UpdateRequest\AppliesUpdateRequests
-     */
     protected function createUpdateableInstance(): AppliesUpdateRequests
     {
         $className = '\\App\\UpdateRequest\\' . Str::studly($this->updateable_type);

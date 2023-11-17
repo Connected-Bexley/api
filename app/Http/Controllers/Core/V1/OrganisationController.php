@@ -16,6 +16,7 @@ use App\Http\Responses\UpdateRequestReceived;
 use App\Models\Organisation;
 use App\Models\UpdateRequest as UpdateRequestModel;
 use App\Services\DataPersistence\OrganisationPersistenceService;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -32,11 +33,8 @@ class OrganisationController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param \App\Http\Requests\Organisation\IndexRequest $request
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index(IndexRequest $request)
+    public function index(IndexRequest $request): AnonymousResourceCollection
     {
         $baseQuery = Organisation::query();
 
@@ -58,7 +56,6 @@ class OrganisationController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param \App\Http\Requests\Organisation\StoreRequest $request
      * @return \Illuminate\Http\Response
      */
     public function store(StoreRequest $request, OrganisationPersistenceService $persistenceService)
@@ -78,12 +75,8 @@ class OrganisationController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param \App\Http\Requests\Organisation\ShowRequest $request
-     * @param \App\Models\Organisation $organisation
-     * @return \App\Http\Resources\OrganisationResource
      */
-    public function show(ShowRequest $request, Organisation $organisation)
+    public function show(ShowRequest $request, Organisation $organisation): OrganisationResource
     {
         $baseQuery = Organisation::query()
             ->where('id', $organisation->id);
@@ -99,8 +92,6 @@ class OrganisationController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \App\Http\Requests\Organisation\UpdateRequest $request
-     * @param \App\Models\Organisation $organisation
      * @param \app\Services\DataPersistence\OrganisationPersistenceService
      * @return \Illuminate\Http\Response
      */
@@ -116,8 +107,6 @@ class OrganisationController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param \App\Http\Requests\Organisation\DestroyRequest $request
-     * @param \App\Models\Organisation $organisation
      * @return \Illuminate\Http\Response
      */
     public function destroy(DestroyRequest $request, Organisation $organisation)

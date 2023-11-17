@@ -22,10 +22,8 @@ class RelationshipsCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return mixed
      */
-    public function handle()
+    public function handle(): void
     {
         $fileContents = $this->getTemplate();
         $this->saveToFile($fileContents);
@@ -33,9 +31,6 @@ class RelationshipsCommand extends Command
         $this->info('Model relationships trait created successfully.');
     }
 
-    /**
-     * @return string
-     */
     protected function getTemplate(): string
     {
         $model = $this->argument('model');
@@ -53,10 +48,6 @@ trait {$model}Relationships
 EOT;
     }
 
-    /**
-     * @param string $contents
-     * @return bool
-     */
     protected function saveToFile(string $contents): bool
     {
         $model = $this->argument('model');

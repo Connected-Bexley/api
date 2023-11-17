@@ -6,9 +6,6 @@ use App\Emails\Email;
 
 class NotifyServiceAdminEmail extends Email
 {
-    /**
-     * @return string
-     */
     protected function getTemplateId(): string
     {
         return config('gov_uk_notify.notifications_template_ids.service_update_prompt.notify_service_admin.email');

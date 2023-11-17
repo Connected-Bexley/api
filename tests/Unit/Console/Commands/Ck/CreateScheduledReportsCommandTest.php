@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 class CreateScheduledReportsCommandTest extends TestCase
 {
-    public function test_weekly_report_generated()
+    public function test_weekly_report_generated(): void
     {
         Queue::fake();
 
@@ -42,7 +42,7 @@ class CreateScheduledReportsCommandTest extends TestCase
         });
     }
 
-    public function test_monthly_report_generated()
+    public function test_monthly_report_generated(): void
     {
         Queue::fake();
 

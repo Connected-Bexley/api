@@ -3,23 +3,26 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\ThrottleRequests as BaseThrottleRequests;
+use Symfony\Component\HttpFoundation\Response;
 
 class ThrottleRequests extends BaseThrottleRequests
 {
     /**
      * Handle an incoming request.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \Closure $next
      * @param int|string $maxAttempts
      * @param float|int $decayMinutes
      * @param mixed $prefix
+     * @param mixed $request
+     *
      * @throws \Illuminate\Http\Exceptions\ThrottleRequestsException
-     * @return mixed
      */
-    public function handle($request, Closure $next, $maxAttempts = 60, $decayMinutes = 1, $prefix = '')
+    public function handle($request, Closure $next, $maxAttempts = null, $decayMinutes = 1, $prefix = ''): Response
     {
+        $maxAttempts = $maxAttempts ?: config('local.api_rate_limit');
+
         // If not testing environment, then delegate to original logic in parent class.
         if (app()->environment() !== 'testing') {
             return parent::handle($request, $next, $maxAttempts, $decayMinutes, $prefix);

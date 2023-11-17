@@ -14,8 +14,6 @@ class ImageController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param \App\Http\Requests\Location\Image\ShowRequest $request
-     * @param \App\Models\Location $location
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      * @return \Illuminate\Http\Response
      */

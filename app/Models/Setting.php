@@ -36,10 +36,6 @@ class Setting extends Model implements Responsable
      */
     public $timestamps = false;
 
-    /**
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function toResponse($request): JsonResponse
     {
         $data = static::all()
@@ -55,9 +51,6 @@ class Setting extends Model implements Responsable
 
     /**
      * Transform the response.
-     *
-     * @param array $value
-     * @return array
      */
     protected function transform(array $value): array
     {
@@ -77,9 +70,6 @@ class Setting extends Model implements Responsable
         return $value;
     }
 
-    /**
-     * @return \App\Models\Setting
-     */
     public static function cms(): self
     {
         return static::findOrFail('cms');

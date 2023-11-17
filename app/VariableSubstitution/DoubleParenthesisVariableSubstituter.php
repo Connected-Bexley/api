@@ -26,9 +26,6 @@ class DoubleParenthesisVariableSubstituter implements VariableSubstituter
         return $content;
     }
 
-    /**
-     * @param array $variables
-     */
     protected function validateVariables(array $variables): void
     {
         foreach ($variables as $key => $value) {

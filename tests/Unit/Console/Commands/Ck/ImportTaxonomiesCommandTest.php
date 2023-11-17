@@ -12,7 +12,7 @@ class ImportTaxonomiesCommandTest extends TestCase
 {
     public $taxonomyRecords = [];
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -55,7 +55,7 @@ class ImportTaxonomiesCommandTest extends TestCase
     /**
      * @test
      */
-    public function it_can_convert_an_indexed_array_to_an_associative_array()
+    public function it_can_convert_an_indexed_array_to_an_associative_array(): void
     {
         $params = [
             'taxonomyIdColumn' => 0,
@@ -73,7 +73,7 @@ class ImportTaxonomiesCommandTest extends TestCase
                 [
                     'id' => $record['id'],
                     'name' => $this->taxonomyRecords[$recordKey][1],
-                    'slug' => Str::slug($this->taxonomyRecords[$recordKey][1] . ' ' . $this->taxonomyRecords[$recordKey][0]),
+                    'slug' => Str::slug($this->taxonomyRecords[$recordKey][1].' '.$this->taxonomyRecords[$recordKey][0]),
                     'parent_id' => $parentUuid,
                     'order' => 0,
                     'depth' => 1,
@@ -88,7 +88,7 @@ class ImportTaxonomiesCommandTest extends TestCase
     /**
      * @test
      */
-    public function it_can_calculate_taxonomy_depth()
+    public function it_can_calculate_taxonomy_depth(): void
     {
         $records = [
             'level-0-0' => [
@@ -150,7 +150,7 @@ class ImportTaxonomiesCommandTest extends TestCase
     /**
      * @test
      */
-    public function it_builds_a_taxonomy_tree_from_a_flat_array()
+    public function it_builds_a_taxonomy_tree_from_a_flat_array(): void
     {
         $params = [
             'taxonomyIdColumn' => 0,
@@ -174,9 +174,10 @@ class ImportTaxonomiesCommandTest extends TestCase
      * In Laravel 8.x the deleteAllTaxonomies command will end the active transaction
      * through Schema disableForeignKeyConstraints and enableForeignKeyConstraints
      * This throws a no active transaction error when refreshDatabase in tearDown
+     *
      * @test
      */
-    public function it_can_delete_all_taxonomies()
+    public function it_can_delete_all_taxonomies(): void
     {
         $cmd = new ImportTaxonomiesCommand();
 
@@ -201,7 +202,7 @@ class ImportTaxonomiesCommandTest extends TestCase
     /**
      * @test
      */
-    public function it_can_import_an_array_of_taxonomy_data()
+    public function it_can_import_an_array_of_taxonomy_data(): void
     {
         $faker = Faker::create('en_GB');
         $params = [
@@ -241,7 +242,7 @@ class ImportTaxonomiesCommandTest extends TestCase
     /**
      * @test
      */
-    public function it_can_delete_existing_taxonomies_and_import_an_array_of_taxonomy_data()
+    public function it_can_delete_existing_taxonomies_and_import_an_array_of_taxonomy_data(): void
     {
         $faker = Faker::create('en_GB');
         $params = [

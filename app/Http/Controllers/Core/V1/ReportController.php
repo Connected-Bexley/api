@@ -12,6 +12,7 @@ use App\Http\Resources\ReportResource;
 use App\Http\Responses\ResourceDeleted;
 use App\Models\Report;
 use App\Models\ReportType;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -29,11 +30,8 @@ class ReportController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param \App\Http\Requests\Report\IndexRequest $request
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index(IndexRequest $request)
+    public function index(IndexRequest $request): AnonymousResourceCollection
     {
         $baseQuery = Report::query()
             ->orderByDesc('created_at');
@@ -52,7 +50,6 @@ class ReportController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param \App\Http\Requests\Report\StoreRequest $request
      * @return \Illuminate\Http\Response
      */
     public function store(StoreRequest $request)
@@ -75,12 +72,8 @@ class ReportController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param \App\Http\Requests\Report\ShowRequest $request
-     * @param \App\Models\Report $report
-     * @return \App\Http\Resources\ReportResource
      */
-    public function show(ShowRequest $request, Report $report)
+    public function show(ShowRequest $request, Report $report): ReportResource
     {
         $baseQuery = Report::query()
             ->where('id', $report->id);
@@ -96,8 +89,6 @@ class ReportController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param \App\Http\Requests\Report\DestroyRequest $request
-     * @param \App\Models\Report $report
      * @return \Illuminate\Http\Response
      */
     public function destroy(DestroyRequest $request, Report $report)

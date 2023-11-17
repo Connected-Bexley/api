@@ -2,23 +2,23 @@
 
 namespace Tests\Feature;
 
-use App\Events\EndpointHit;
-use App\Models\Audit;
+use Tests\TestCase;
 use App\Models\File;
-use App\Models\HolidayOpeningHour;
-use App\Models\Location;
-use App\Models\RegularOpeningHour;
-use App\Models\Service;
-use App\Models\ServiceLocation;
-use App\Models\UpdateRequest;
 use App\Models\User;
+use App\Models\Audit;
+use App\Models\Service;
+use App\Models\Location;
+use App\Events\EndpointHit;
 use Carbon\CarbonImmutable;
+use App\Models\UpdateRequest;
 use Illuminate\Http\Response;
+use Laravel\Passport\Passport;
+use App\Models\ServiceLocation;
+use App\Models\HolidayOpeningHour;
+use App\Models\RegularOpeningHour;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
-use Laravel\Passport\Passport;
-use Tests\TestCase;
 
 class ServiceLocationsTest extends TestCase
 {
@@ -26,7 +26,7 @@ class ServiceLocationsTest extends TestCase
      * List all the service locations.
      */
 
-    public function test_guest_can_list_them()
+    public function test_guest_can_list_them(): void
     {
         $location = Location::factory()->create();
         $service = Service::factory()->create();
@@ -48,7 +48,7 @@ class ServiceLocationsTest extends TestCase
         ]);
     }
 
-    public function test_guest_can_list_them_for_service()
+    public function test_guest_can_list_them_for_service(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $anotherServiceLocation = ServiceLocation::factory()->create();
@@ -61,7 +61,7 @@ class ServiceLocationsTest extends TestCase
         $response->assertJsonMissing(['id' => $anotherServiceLocation->id]);
     }
 
-    public function test_guest_can_list_them_with_opening_hours()
+    public function test_guest_can_list_them_with_opening_hours(): void
     {
         Date::setTestNow(Date::now()->setTime(18, 0));
 
@@ -109,7 +109,7 @@ class ServiceLocationsTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_listed()
+    public function test_audit_created_when_listed(): void
     {
         $this->fakeEvents();
 
@@ -124,14 +124,14 @@ class ServiceLocationsTest extends TestCase
      * Create a service location.
      */
 
-    public function test_guest_cannot_create_one()
+    public function test_guest_cannot_create_one(): void
     {
         $response = $this->json('POST', '/core/v1/service-locations');
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_create_one()
+    public function test_service_worker_cannot_create_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -143,7 +143,7 @@ class ServiceLocationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_for_another_service_cannot_create_one()
+    public function test_service_admin_for_another_service_cannot_create_one(): void
     {
         $location = Location::factory()->create();
         $service = Service::factory()->create();
@@ -163,7 +163,7 @@ class ServiceLocationsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_service_admin_can_create_one()
+    public function test_service_admin_can_create_one(): void
     {
         $location = Location::factory()->create();
         $service = Service::factory()->create();
@@ -190,7 +190,7 @@ class ServiceLocationsTest extends TestCase
         ]);
     }
 
-    public function test_service_admin_can_create_one_with_opening_hours()
+    public function test_service_admin_can_create_one_with_opening_hours(): void
     {
         $location = Location::factory()->create();
         $service = Service::factory()->create();
@@ -247,51 +247,84 @@ class ServiceLocationsTest extends TestCase
         ]);
     }
 
-    public function test_service_admin_can_create_one_with_an_image()
+    public function test_service_admin_can_create_one_with_an_image(): void
     {
-        $location = Location::factory()->create();
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
-        $image = Storage::disk('local')->get('/test-data/image.png');
 
         Passport::actingAs($user);
 
-        $imageResponse = $this->json('POST', '/core/v1/files', [
-            'is_private' => false,
-            'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
-        ]);
+        // SVG
+        $image = File::factory()->pendingAssignment()->imageSvg()->create();
 
         $payload = [
             'service_id' => $service->id,
-            'location_id' => $location->id,
+            'location_id' => Location::factory()->create()->id,
             'name' => null,
             'regular_opening_hours' => [],
             'holiday_opening_hours' => [],
-            'image_file_id' => $this->getResponseContent($imageResponse, 'data.id'),
+            'image_file_id' => $image->id,
         ];
 
         $response = $this->json('POST', '/core/v1/service-locations', $payload);
 
         $response->assertStatus(Response::HTTP_CREATED);
-        $response->assertJsonFragment([
-            'service_id' => $service->id,
-            'location_id' => $location->id,
-            'has_image' => true,
-            'name' => null,
-            'regular_opening_hours' => [],
-            'holiday_opening_hours' => [],
-        ]);
 
         $serviceLocationId = $this->getResponseContent($response, 'data.id');
 
         // Get the event image for the service location
-        $response = $this->get("/core/v1/service-locations/$serviceLocationId/image.png");
+        $content = $this->get("/core/v1/service-locations/$serviceLocationId/image.svg")->content();
 
-        $this->assertEquals($image, $response->content());
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.svg'), $content);
+
+        // PNG
+        $image = File::factory()->pendingAssignment()->imagePng()->create();
+
+        $payload = [
+            'service_id' => $service->id,
+            'location_id' => Location::factory()->create()->id,
+            'name' => null,
+            'regular_opening_hours' => [],
+            'holiday_opening_hours' => [],
+            'image_file_id' => $image->id,
+        ];
+
+        $response = $this->json('POST', '/core/v1/service-locations', $payload);
+
+        $response->assertStatus(Response::HTTP_CREATED);
+
+        $serviceLocationId = $this->getResponseContent($response, 'data.id');
+
+        // Get the event image for the service location
+        $content = $this->get("/core/v1/service-locations/$serviceLocationId/image.png")->content();
+
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.png'), $content);
+
+        // JPG
+        $image = File::factory()->pendingAssignment()->imageJpg()->create();
+
+        $payload = [
+            'service_id' => $service->id,
+            'location_id' => Location::factory()->create()->id,
+            'name' => null,
+            'regular_opening_hours' => [],
+            'holiday_opening_hours' => [],
+            'image_file_id' => $image->id,
+        ];
+
+        $response = $this->json('POST', '/core/v1/service-locations', $payload);
+
+        $response->assertStatus(Response::HTTP_CREATED);
+
+        $serviceLocationId = $this->getResponseContent($response, 'data.id');
+
+        // Get the event image for the service location
+        $content = $this->get("/core/v1/service-locations/$serviceLocationId/image.jpg")->content();
+
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.jpg'), $content);
     }
 
-    public function test_audit_created_when_created()
+    public function test_audit_created_when_created(): void
     {
         $this->fakeEvents();
 
@@ -320,7 +353,7 @@ class ServiceLocationsTest extends TestCase
      * Get a specific service location.
      */
 
-    public function test_guest_can_view_one()
+    public function test_guest_can_view_one(): void
     {
         $location = Location::factory()->create();
         $service = Service::factory()->create();
@@ -342,7 +375,7 @@ class ServiceLocationsTest extends TestCase
         ]);
     }
 
-    public function test_guest_can_view_one_with_opening_hours()
+    public function test_guest_can_view_one_with_opening_hours(): void
     {
         Date::setTestNow(Date::now()->setTime(18, 0));
 
@@ -390,7 +423,7 @@ class ServiceLocationsTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_viewed()
+    public function test_audit_created_when_viewed(): void
     {
         $this->fakeEvents();
 
@@ -410,7 +443,7 @@ class ServiceLocationsTest extends TestCase
      * Update a specific service location.
      */
 
-    public function test_guest_cannot_update_one()
+    public function test_guest_cannot_update_one(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
 
@@ -419,7 +452,7 @@ class ServiceLocationsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_update_one()
+    public function test_service_worker_cannot_update_one(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($serviceLocation->service);
@@ -431,7 +464,7 @@ class ServiceLocationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_can_update_one()
+    public function test_service_admin_can_update_one(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($serviceLocation->service);
@@ -466,7 +499,84 @@ class ServiceLocationsTest extends TestCase
         $this->assertEquals($data, $payload);
     }
 
-    public function test_audit_created_when_updated()
+    public function test_service_admin_can_update_the_image(): void
+    {
+        $serviceLocation = ServiceLocation::factory()->create();
+        $user = User::factory()->create()->makeServiceAdmin($serviceLocation->service);
+
+        Passport::actingAs($user);
+
+        // SVG
+        $image = File::factory()->pendingAssignment()->imageSvg()->create();
+
+        $payload = [
+            'image_file_id' => $image->id,
+        ];
+        $response = $this->json('PUT', "/core/v1/service-locations/{$serviceLocation->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $response->assertJsonFragment(['data' => $payload]);
+
+        $updateRequest = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
+        // Get the event image for the service location
+        $content = $this->get("/core/v1/service-locations/$serviceLocation->id/image.svg")->content();
+
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.svg'), $content);
+
+        // PNG
+        $image = File::factory()->pendingAssignment()->imagePng()->create();
+
+        $payload = [
+            'image_file_id' => $image->id,
+        ];
+        $response = $this->json('PUT', "/core/v1/service-locations/{$serviceLocation->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $response->assertJsonFragment(['data' => $payload]);
+
+        $updateRequest = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
+        // Get the event image for the service location
+        $content = $this->get("/core/v1/service-locations/$serviceLocation->id/image.png")->content();
+
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.png'), $content);
+
+        // JPG
+        $image = File::factory()->pendingAssignment()->imageJpg()->create();
+
+        $payload = [
+            'image_file_id' => $image->id,
+        ];
+        $response = $this->json('PUT', "/core/v1/service-locations/{$serviceLocation->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $response->assertJsonFragment(['data' => $payload]);
+
+        $updateRequest = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
+        // Get the event image for the service location
+        $content = $this->get("/core/v1/service-locations/$serviceLocation->id/image.jpg")->content();
+
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.jpg'), $content);
+    }
+
+    public function test_audit_created_when_updated(): void
     {
         $this->fakeEvents();
 
@@ -488,7 +598,7 @@ class ServiceLocationsTest extends TestCase
         });
     }
 
-    public function test_only_partial_fields_can_be_updated()
+    public function test_only_partial_fields_can_be_updated(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($serviceLocation->service);
@@ -506,7 +616,7 @@ class ServiceLocationsTest extends TestCase
         $this->assertEquals($data, $payload);
     }
 
-    public function test_fields_removed_for_existing_update_requests()
+    public function test_fields_removed_for_existing_update_requests(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($serviceLocation->service);
@@ -535,7 +645,7 @@ class ServiceLocationsTest extends TestCase
      * Delete a specific service location.
      */
 
-    public function test_guest_cannot_delete_one()
+    public function test_guest_cannot_delete_one(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
 
@@ -544,7 +654,7 @@ class ServiceLocationsTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_delete_one()
+    public function test_service_worker_cannot_delete_one(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($serviceLocation->service);
@@ -556,7 +666,7 @@ class ServiceLocationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_delete_one()
+    public function test_service_admin_cannot_delete_one(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($serviceLocation->service);
@@ -568,7 +678,7 @@ class ServiceLocationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_delete_one()
+    public function test_organisation_admin_cannot_delete_one(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($serviceLocation->service->organisation);
@@ -580,7 +690,7 @@ class ServiceLocationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_cannot_delete_one()
+    public function test_global_admin_cannot_delete_one(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $user = User::factory()->create()->makeGlobalAdmin();
@@ -592,7 +702,7 @@ class ServiceLocationsTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_super_admin_can_delete_one()
+    public function test_super_admin_can_delete_one(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $user = User::factory()->create()->makeSuperAdmin();
@@ -605,7 +715,7 @@ class ServiceLocationsTest extends TestCase
         $this->assertDatabaseMissing((new ServiceLocation())->getTable(), ['id' => $serviceLocation->id]);
     }
 
-    public function test_audit_created_when_deleted()
+    public function test_audit_created_when_deleted(): void
     {
         $this->fakeEvents();
 
@@ -627,7 +737,7 @@ class ServiceLocationsTest extends TestCase
      * Get a specific service location's image.
      */
 
-    public function test_guest_can_view_image()
+    public function test_guest_can_view_image(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
 
@@ -637,7 +747,7 @@ class ServiceLocationsTest extends TestCase
         $response->assertHeader('Content-Type', 'image/png');
     }
 
-    public function test_audit_created_when_image_viewed()
+    public function test_audit_created_when_image_viewed(): void
     {
         $this->fakeEvents();
 
@@ -655,7 +765,7 @@ class ServiceLocationsTest extends TestCase
      * Upload a specific service location's image.
      */
 
-    public function test_organisation_admin_can_upload_image()
+    public function test_organisation_admin_can_upload_image(): void
     {
         /** @var \App\Models\User $user */
         $user = User::factory()->create()->makeGlobalAdmin();
@@ -693,7 +803,7 @@ class ServiceLocationsTest extends TestCase
      * Delete a specific service location's image.
      */
 
-    public function test_organisation_admin_can_delete_image()
+    public function test_organisation_admin_can_delete_image(): void
     {
         /**
          * @var \App\Models\User $user
@@ -720,7 +830,7 @@ class ServiceLocationsTest extends TestCase
         $this->assertEquals(null, $updateRequest->data['image_file_id']);
     }
 
-    public function test_global_admin_can_update_one()
+    public function test_global_admin_can_update_one(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $user = User::factory()->create()->makeGlobalAdmin();

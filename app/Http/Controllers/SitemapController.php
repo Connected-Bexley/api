@@ -8,6 +8,7 @@ use App\Models\Page;
 use App\Models\Service;
 use DateTime;
 use DOMDocument;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 
 class SitemapController extends Controller
@@ -19,10 +20,7 @@ class SitemapController extends Controller
      */
     protected $sitemap;
 
-    /**
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function __invoke()
+    public function __invoke(): Response
     {
         $sitemap = Cache::remember('sitemap', (60 * 60), function () {
             $this->sitemap = new DOMDocument('1.0', 'UTF-8');
@@ -202,10 +200,9 @@ class SitemapController extends Controller
     /**
      * Create a frontend url for the given environment.
      *
-     * @param string $path
      * @return string
      */
-    public function frontendUrl($path = '')
+    public function frontendUrl(string $path = '')
     {
         return str_replace('://api.', '://', url($path));
     }

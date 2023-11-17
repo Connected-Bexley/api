@@ -38,7 +38,7 @@ class ModelServiceProvider extends ServiceProvider
     /**
      * Bootstrap services.
      */
-    public function boot()
+    public function boot(): void
     {
         Collection::observe(CollectionObserver::class);
         CollectionTaxonomy::observe(CollectionTaxonomyObserver::class);
@@ -69,7 +69,7 @@ class ModelServiceProvider extends ServiceProvider
     /**
      * Register services.
      */
-    public function register()
+    public function register(): void
     {
         //
     }

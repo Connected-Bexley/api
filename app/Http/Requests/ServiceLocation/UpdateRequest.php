@@ -16,10 +16,8 @@ class UpdateRequest extends FormRequest
 
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         if ($this->user()->isServiceAdmin($this->service_location->service)) {
             return true;
@@ -30,10 +28,8 @@ class UpdateRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'name' => ['nullable', 'string', 'min:1', 'max:255'],
@@ -64,7 +60,7 @@ class UpdateRequest extends FormRequest
             'image_file_id' => [
                 'nullable',
                 'exists:files,id',
-                new FileIsMimeType(File::MIME_TYPE_PNG),
+                new FileIsMimeType(File::MIME_TYPE_PNG, File::MIME_TYPE_SVG, File::MIME_TYPE_JPG, File::MIME_TYPE_JPEG),
                 new FileIsPendingAssignment(),
             ],
         ];

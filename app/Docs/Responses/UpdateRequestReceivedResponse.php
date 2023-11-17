@@ -10,11 +10,6 @@ use Illuminate\Http\Response as LaravelResponse;
 
 class UpdateRequestReceivedResponse extends Response
 {
-    /**
-     * @param string|null $objectId
-     * @param \GoldSpecDigital\ObjectOrientedOAS\Objects\Schema|null $data
-     * @return static
-     */
     public static function create(string $objectId = null, Schema $data = null): BaseObject
     {
         return parent::create($objectId)

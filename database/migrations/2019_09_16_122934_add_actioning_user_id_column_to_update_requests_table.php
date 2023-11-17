@@ -8,7 +8,7 @@ return new class() extends Migration {
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('update_requests', function (Blueprint $table) {
             $table->uuid('actioning_user_id')->nullable()->after('user_id');
@@ -19,7 +19,7 @@ return new class() extends Migration {
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
         Schema::table('update_requests', function (Blueprint $table) {
             $table->dropForeign(['actioning_user_id']);

@@ -18,6 +18,7 @@ use App\Http\Sorts\Referral\ServiceNameSort;
 use App\Models\Referral;
 use App\Models\Service;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -36,11 +37,8 @@ class ReferralController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param \App\Http\Requests\Referral\IndexRequest $request
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index(IndexRequest $request)
+    public function index(IndexRequest $request): AnonymousResourceCollection
     {
         // Check if the request has asked for the service to be included.
         $serviceIncluded = $request->contains('include', 'service');
@@ -92,7 +90,6 @@ class ReferralController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param \App\Http\Requests\Referral\StoreRequest $request
      * @return \Illuminate\Http\Response
      */
     public function store(StoreRequest $request)
@@ -132,12 +129,8 @@ class ReferralController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param \App\Http\Requests\Referral\ShowRequest $request
-     * @param \App\Models\Referral $referral
-     * @return \App\Http\Resources\ReferralResource
      */
-    public function show(ShowRequest $request, Referral $referral)
+    public function show(ShowRequest $request, Referral $referral): ReferralResource
     {
         // Check if the request has asked for user roles to be included.
         $serviceIncluded = $request->contains('include', 'service');
@@ -166,8 +159,6 @@ class ReferralController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \App\Http\Requests\Referral\UpdateRequest $request
-     * @param \App\Models\Referral $referral
      * @return \Illuminate\Http\Response
      */
     public function update(UpdateRequest $request, Referral $referral)
@@ -186,8 +177,6 @@ class ReferralController extends Controller
     }
 
     /**
-     * @param \App\Http\Requests\Referral\DestroyRequest $request
-     * @param \App\Models\Referral $referral
      * @return \Illuminate\Http\Response
      */
     public function destroy(DestroyRequest $request, Referral $referral)

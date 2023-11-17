@@ -17,10 +17,8 @@ class UpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         if ($this->user()->isSuperAdmin()) {
             return true;
@@ -31,10 +29,8 @@ class UpdateRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'name' => ['required', 'string', 'min:1', 'max:255'],
@@ -61,7 +57,7 @@ class UpdateRequest extends FormRequest
             'image_file_id' => [
                 'required_if:order,' . $this->collection->order,
                 'exists:files,id',
-                new FileIsMimeType(File::MIME_TYPE_PNG, File::MIME_TYPE_JPG, File::MIME_TYPE_SVG),
+                new FileIsMimeType(File::MIME_TYPE_PNG, File::MIME_TYPE_JPG, File::MIME_TYPE_JPEG, File::MIME_TYPE_SVG),
                 new FileIsPendingAssignment(function ($file) {
                     return $file->id === ($this->collection->meta['image_file_id'] ?? null);
                 }),

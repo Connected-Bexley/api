@@ -9,10 +9,6 @@ use Illuminate\Support\Facades\DB;
 
 trait UserScopes
 {
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function scopeGlobalAdmins(Builder $query): Builder
     {
         return $query->whereHas('userRoles', function (Builder $query) {
@@ -20,10 +16,6 @@ trait UserScopes
         });
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function scopeContentAdmins(Builder $query): Builder
     {
         return $query->whereHas('userRoles', function (Builder $query) {
@@ -31,11 +23,6 @@ trait UserScopes
         });
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $alias
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function scopeWithHighestRoleOrder(Builder $query, string $alias = 'highest_role_order'): Builder
     {
         $sql = $this->getHighestRoleOrderSql();
@@ -55,8 +42,6 @@ trait UserScopes
     /**
      * This SQL query is placed into its own method as it is referenced
      * in multiple places.
-     *
-     * @return array
      */
     public function getHighestRoleOrderSql(): array
     {

@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class LogoutTest extends TestCase
 {
-    public function test_logged_in_user_can_logout()
+    public function test_logged_in_user_can_logout(): void
     {
         Config::set('local.otp_enabled', false);
 

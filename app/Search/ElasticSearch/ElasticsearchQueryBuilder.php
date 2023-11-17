@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types=1);
+declare(strict_types=1);
 
 namespace App\Search\ElasticSearch;
 
@@ -47,8 +47,6 @@ abstract class ElasticsearchQueryBuilder
     /**
      * Add a match query.
      *
-     * @param string $field
-     * @param string $term
      * @param int $boost
      * @param mixed $fuzziness
      * @param string $operator
@@ -73,8 +71,6 @@ abstract class ElasticsearchQueryBuilder
     /**
      * Add a match_phrase query.
      *
-     * @param string $field
-     * @param string $term
      * @param int $boost
      */
     protected function addMatchPhrase(string $field, string $term, string $path = null, $boost = 1): void
@@ -95,8 +91,6 @@ abstract class ElasticsearchQueryBuilder
     /**
      * Add a term query.
      *
-     * @param string $field
-     * @param string $term
      * @param int $boost
      */
     protected function addTerm(string $field, string $term, string $path = null, $boost = 1): void
@@ -117,7 +111,6 @@ abstract class ElasticsearchQueryBuilder
     /**
      * Add a terms query.
      *
-     * @param string $field
      * @param string $term
      * @param int $boost
      */
@@ -137,7 +130,6 @@ abstract class ElasticsearchQueryBuilder
     /**
      * Add a filter.
      *
-     * @param string $field
      * @param mixed $value
      */
     public function addFilter(string $field, $value): void

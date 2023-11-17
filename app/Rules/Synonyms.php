@@ -2,39 +2,34 @@
 
 namespace App\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Arr;
 
-class Synonyms implements Rule
+class Synonyms implements ValidationRule
 {
     /**
      * Determine if the validation rule passes.
      *
-     * @param string $attribute
      * @param mixed $value
-     * @return bool
      */
-    public function passes($attribute, $value)
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         foreach ($value as $synonym) {
             if (!is_string($synonym)) {
-                return false;
+                $fail(__('validation.string'));
             }
         }
 
         if (preg_match('/\s/', Arr::last($value))) {
-            return false;
+            $fail($this->message());
         }
-
-        return true;
     }
 
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
-    public function message()
+    public function message(): string
     {
         return 'The last synonym must be a single word.';
     }

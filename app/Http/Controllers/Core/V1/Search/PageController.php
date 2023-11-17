@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types=1);
+declare(strict_types=1);
 
 namespace App\Http\Controllers\Core\V1\Search;
 
@@ -12,13 +12,6 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class PageController
 {
-    /**
-     * @param \App\Http\Requests\Search\Page\Request $request
-     * @param \App\Search\SearchCriteriaQuery $criteria
-     * @param \App\Search\ElasticSearch\PageQueryBuilder $builder
-     * @param \App\Search\ElasticSearch\PageEloquentMapper $mapper
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
-     */
     public function __invoke(
         Request $request,
         SearchCriteriaQuery $criteria,

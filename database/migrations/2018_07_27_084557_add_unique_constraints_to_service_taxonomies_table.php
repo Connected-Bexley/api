@@ -8,7 +8,7 @@ return new class() extends Migration {
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('service_taxonomies', function (Blueprint $table) {
             $table->unique(['service_id', 'taxonomy_id']);
@@ -18,7 +18,7 @@ return new class() extends Migration {
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
         Schema::table('service_taxonomies', function (Blueprint $table) {
             $table->dropUnique(['service_id', 'taxonomy_id']);

@@ -8,7 +8,7 @@ return new class() extends Migration {
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('audits', function (Blueprint $table) {
             $table->unsignedInteger('oauth_client_id')->nullable()->after('user_id');
@@ -19,7 +19,7 @@ return new class() extends Migration {
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
         Schema::table('audits', function (Blueprint $table) {
             $table->dropForeign(['oauth_client_id']);

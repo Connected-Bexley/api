@@ -17,6 +17,7 @@ use App\Models\OrganisationEvent;
 use App\Models\UpdateRequest as UpdateRequestModel;
 use App\Services\DataPersistence\OrganisationEventPersistenceService;
 use DateTime;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -33,11 +34,8 @@ class OrganisationEventController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param \App\Http\Requests\OrganisationEvent\IndexRequest $request
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index(IndexRequest $request)
+    public function index(IndexRequest $request): AnonymousResourceCollection
     {
         $baseQuery = OrganisationEvent::query();
 
@@ -79,8 +77,6 @@ class OrganisationEventController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param \App\Http\Requests\OrganisationEvent\StoreRequest $request
-     * @param \App\Services\DataPersistence\OrganisationEventPersistenceService $persistenceService
      * @return \Illuminate\Http\Response
      */
     public function store(StoreRequest $request, OrganisationEventPersistenceService $persistenceService)
@@ -103,12 +99,8 @@ class OrganisationEventController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param \App\Http\Requests\OrganisationEvent\ShowRequest $request
-     * @param \App\Models\OrganisationEvent $organisationEvent
-     * @return \App\Http\Resources\OrganisationEventResource
      */
-    public function show(ShowRequest $request, OrganisationEvent $organisationEvent)
+    public function show(ShowRequest $request, OrganisationEvent $organisationEvent): OrganisationEventResource
     {
         $baseQuery = OrganisationEvent::query()
             ->where('id', $organisationEvent->id);
@@ -124,17 +116,12 @@ class OrganisationEventController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param \App\Http\Requests\OrganisationEvent\UpdateRequest $request
-     * @param \App\Models\OrganisationEvent $organisationEvent
-     * @param \App\Services\DataPersistence\OrganisationEventPersistenceService $persistenceService
-     * @return UpdateRequestReceived
      */
     public function update(
         UpdateRequest $request,
         OrganisationEvent $organisationEvent,
         OrganisationEventPersistenceService $persistenceService
-    ) {
+    ): UpdateRequestReceived {
         $updateRequest = $persistenceService->update($request, $organisationEvent);
 
         event(EndpointHit::onUpdate($request, "Updated organisation event [{$organisationEvent->id}]", $organisationEvent));
@@ -145,8 +132,6 @@ class OrganisationEventController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param \App\Http\Requests\OrganisationEvent\DestroyRequest $request
-     * @param \App\Models\OrganisationEvent $organisationEvent
      * @return \Illuminate\Http\Response
      */
     public function destroy(DestroyRequest $request, OrganisationEvent $organisationEvent)

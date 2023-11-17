@@ -29,7 +29,7 @@ class ReportTest extends TestCase
      * Users export.
      */
 
-    public function test_users_export_works_with_super_admin()
+    public function test_users_export_works_with_super_admin(): void
     {
         // Create a single user.
         $user = User::factory()->create()->makeSuperAdmin();
@@ -66,7 +66,7 @@ class ReportTest extends TestCase
         ], $csv[1]);
     }
 
-    public function test_users_export_works_with_organisation_admin()
+    public function test_users_export_works_with_organisation_admin(): void
     {
         // Create an organisation.
         $organisation = Organisation::factory()->create();
@@ -106,7 +106,7 @@ class ReportTest extends TestCase
         ], $csv[1]);
     }
 
-    public function test_users_export_works_with_service_admin()
+    public function test_users_export_works_with_service_admin(): void
     {
         // Create a service.
         $service = Service::factory()->create();
@@ -146,7 +146,7 @@ class ReportTest extends TestCase
         ], $csv[1]);
     }
 
-    public function test_users_export_works_with_organisation_and_service_admin()
+    public function test_users_export_works_with_organisation_and_service_admin(): void
     {
         // Create an organisation.
         $organisation = Organisation::factory()->create();
@@ -220,7 +220,7 @@ class ReportTest extends TestCase
      * Services export.
      */
 
-    public function test_services_export_works()
+    public function test_services_export_works(): void
     {
         // Create a single service.
         $service = Service::factory()->create();
@@ -275,7 +275,7 @@ class ReportTest extends TestCase
      * Organisations export.
      */
 
-    public function test_organisations_export_works()
+    public function test_organisations_export_works(): void
     {
         // Create a single organisation.
         $organisation = Organisation::factory()->create();
@@ -358,7 +358,7 @@ class ReportTest extends TestCase
      * Locations export.
      */
 
-    public function test_locations_export_works()
+    public function test_locations_export_works(): void
     {
         // Create a single location.
         $location = Location::factory()->create();
@@ -435,7 +435,7 @@ class ReportTest extends TestCase
      * Referrals export.
      */
 
-    public function test_referrals_export_works()
+    public function test_referrals_export_works(): void
     {
         // Create a single referral.
         $referral = Referral::factory()->create(['referral_consented_at' => Date::now()]);
@@ -476,7 +476,7 @@ class ReportTest extends TestCase
         ], $csv[1]);
     }
 
-    public function test_referrals_export_works_when_completed()
+    public function test_referrals_export_works_when_completed(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
 
@@ -523,7 +523,7 @@ class ReportTest extends TestCase
         ], $csv[1]);
     }
 
-    public function test_referrals_export_works_with_date_range()
+    public function test_referrals_export_works_with_date_range(): void
     {
         // Create an in range referral.
         $referralInRange = Referral::factory()->create([
@@ -576,7 +576,7 @@ class ReportTest extends TestCase
         ], $csv[1]);
     }
 
-    public function test_referrals_export_works_with_organistion_name()
+    public function test_referrals_export_works_with_organistion_name(): void
     {
         // Create a single referral.
         $referral = Referral::factory()->create([
@@ -627,7 +627,7 @@ class ReportTest extends TestCase
      * Feedback export.
      */
 
-    public function test_feedback_export_works()
+    public function test_feedback_export_works(): void
     {
         // Create a single feedback.
         $feedback = PageFeedback::factory()->create();
@@ -656,7 +656,7 @@ class ReportTest extends TestCase
         ], $csv[1]);
     }
 
-    public function test_feedback_export_works_with_date_range()
+    public function test_feedback_export_works_with_date_range(): void
     {
         // Create a single feedback.
         $feedbackWithinRange = PageFeedback::factory()->create();
@@ -694,7 +694,7 @@ class ReportTest extends TestCase
      * Audit logs export.
      */
 
-    public function test_audit_logs_export_works()
+    public function test_audit_logs_export_works(): void
     {
         // Create a single audit log.
         $audit = Audit::factory()->create();
@@ -729,7 +729,7 @@ class ReportTest extends TestCase
         ], $csv[1]);
     }
 
-    public function test_audit_logs_export_work_with_date_range()
+    public function test_audit_logs_export_work_with_date_range(): void
     {
         // Create a single audit log.
         $auditWithinRange = Audit::factory()->create();
@@ -773,7 +773,7 @@ class ReportTest extends TestCase
      * Search histories export.
      */
 
-    public function test_search_histories_export_works()
+    public function test_search_histories_export_works(): void
     {
         $criteria = new SearchCriteriaQuery();
         $criteria->setQuery('Health and Social');
@@ -813,7 +813,7 @@ class ReportTest extends TestCase
         ], $csv[1]);
     }
 
-    public function test_search_histories_export_works_with_location()
+    public function test_search_histories_export_works_with_location(): void
     {
         $criteria = new SearchCriteriaQuery();
         $criteria->setQuery('Health and Social');
@@ -855,7 +855,7 @@ class ReportTest extends TestCase
         ], $csv[1]);
     }
 
-    public function test_search_histories_export_works_with_date_range()
+    public function test_search_histories_export_works_with_date_range(): void
     {
         $criteria = new SearchCriteriaQuery();
         $criteria->setQuery('Health and Social');
@@ -904,7 +904,7 @@ class ReportTest extends TestCase
         ], $csv[1]);
     }
 
-    public function test_search_histories_without_query_are_omitted()
+    public function test_search_histories_without_query_are_omitted(): void
     {
         $criteria = new SearchCriteriaQuery();
         $criteria->setCategories(['self-help']);
@@ -940,7 +940,7 @@ class ReportTest extends TestCase
      * Historic update requests export.
      */
 
-    public function test_historic_update_requests_export_works()
+    public function test_historic_update_requests_export_works(): void
     {
         // Create an admin user.
         /** @var \App\Models\User $user */

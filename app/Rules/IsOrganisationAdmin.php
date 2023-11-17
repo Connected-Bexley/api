@@ -4,9 +4,9 @@ namespace App\Rules;
 
 use App\Models\Organisation;
 use App\Models\User;
-use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class IsOrganisationAdmin implements Rule
+class IsOrganisationAdmin implements ValidationRule
 {
     /**
      * @var \App\Models\User
@@ -15,8 +15,6 @@ class IsOrganisationAdmin implements Rule
 
     /**
      * Create a new rule instance.
-     *
-     * @param \App\Models\User $user
      */
     public function __construct(User $user)
     {
@@ -26,28 +24,27 @@ class IsOrganisationAdmin implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param string $attribute
      * @param mixed $value
-     * @return bool
+     * @param mixed $fail
      */
-    public function passes($attribute, $value)
+    public function validate(string $attribute, $value, $fail): void
     {
         // Immediately fail if the value is not a string.
         if (!is_string($value)) {
-            return false;
+            $fail(__('validation.string'));
         }
 
         $organisation = Organisation::query()->find($value);
 
-        return $organisation ? $this->user->isOrganisationAdmin($organisation) : false;
+        if (!$organisation || !$this->user->isOrganisationAdmin($organisation)) {
+            $fail($this->message());
+        }
     }
 
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
-    public function message()
+    public function message(): string
     {
         return 'The :attribute field must contain an ID for an organisation you are an organisation admin for.';
     }

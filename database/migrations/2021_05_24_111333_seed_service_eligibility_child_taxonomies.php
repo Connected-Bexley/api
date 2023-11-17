@@ -9,7 +9,7 @@ return new class() extends Migration {
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         $this->now = Date::now();
         $taxonomies = $this->loadServiceEligibilityTaxonomies();
@@ -29,7 +29,7 @@ return new class() extends Migration {
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
         DB::table('service_eligibilities')->truncate();
     }
@@ -38,7 +38,6 @@ return new class() extends Migration {
      * Load the Service Eligibility taxonomies into an array.
      *
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
-     * @return array
      */
     protected function loadServiceEligibilityTaxonomies(): array
     {

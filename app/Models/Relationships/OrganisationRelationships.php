@@ -11,54 +11,39 @@ use App\Models\Taxonomy;
 use App\Models\User;
 use App\Models\UserRole;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 trait OrganisationRelationships
 {
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function logoFile()
+    public function logoFile(): BelongsTo
     {
         return $this->belongsTo(File::class, 'logo_file_id');
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function userRoles()
+    public function userRoles(): HasMany
     {
         return $this->hasMany(UserRole::class);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function users()
+    public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, (new UserRole())->getTable())->withTrashed();
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function services()
+    public function services(): HasMany
     {
         return $this->hasMany(Service::class);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
-     */
-    public function socialMedias()
+    public function socialMedias(): MorphMany
     {
         return $this->morphMany(SocialMedia::class, 'sociable');
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function nonAdminUsers()
+    public function nonAdminUsers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, (new UserRole())->getTable())
             ->withTrashed()
@@ -67,17 +52,11 @@ trait OrganisationRelationships
             });
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function organisationTaxonomies()
+    public function organisationTaxonomies(): HasMany
     {
         return $this->hasMany(OrganisationTaxonomy::class);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
     public function taxonomies(): BelongsToMany
     {
         return $this->belongsToMany(Taxonomy::class, (new OrganisationTaxonomy())->getTable());

@@ -9,61 +9,43 @@ use App\Models\Referral;
 use App\Models\Service;
 use App\Models\ServiceTaxonomy;
 use App\Models\Taxonomy;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 trait TaxonomyRelationships
 {
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function parent()
+    public function parent(): BelongsTo
     {
         return $this->belongsTo(static::class, 'parent_id');
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function children()
+    public function children(): HasMany
     {
         return $this->hasMany(Taxonomy::class, 'parent_id')->orderBy('order');
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function collectionTaxonomies()
+    public function collectionTaxonomies(): HasMany
     {
         return $this->hasMany(CollectionTaxonomy::class);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function serviceTaxonomies()
+    public function serviceTaxonomies(): HasMany
     {
         return $this->hasMany(ServiceTaxonomy::class);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function referrals()
+    public function referrals(): HasMany
     {
         return $this->hasMany(Referral::class, 'organisation_taxonomy_id');
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function services()
+    public function services(): BelongsToMany
     {
         return $this->belongsToMany(Service::class, (new ServiceTaxonomy())->getTable());
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function organisationEvents()
+    public function organisationEvents(): BelongsToMany
     {
         return $this->belongsToMany(OrganisationEvent::class, (new OrganisationEventTaxonomy())->getTable());
     }

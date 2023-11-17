@@ -11,52 +11,27 @@ use Illuminate\Support\Facades\DB;
 
 trait OrganisationEventScopes
 {
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $dateString
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeEndsAfter(Builder $query, $dateString): Builder
+    public function scopeEndsAfter(Builder $query, string $dateString): Builder
     {
         return $query->whereDate('end_date', '>=', $dateString);
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $dateString
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeEndsBefore(Builder $query, $dateString): Builder
+    public function scopeEndsBefore(Builder $query, string $dateString): Builder
     {
         return $query->whereDate('end_date', '<=', $dateString);
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $dateString
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeStartsAfter(Builder $query, $dateString): Builder
+    public function scopeStartsAfter(Builder $query, string $dateString): Builder
     {
         return $query->whereDate('start_date', '>=', $dateString);
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $dateString
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeStartsBefore(Builder $query, $dateString): Builder
+    public function scopeStartsBefore(Builder $query, string $dateString): Builder
     {
         return $query->whereDate('start_date', '<=', $dateString);
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param bool $required
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeHasWheelchairAccess(Builder $query, $required): Builder
+    public function scopeHasWheelchairAccess(Builder $query, bool $required): Builder
     {
         return $query->whereExists(function ($query) use ($required) {
             $locationsTable = (new Location())->getTable();
@@ -67,12 +42,7 @@ trait OrganisationEventScopes
         });
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param bool $required
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeHasInductionLoop(Builder $query, $required): Builder
+    public function scopeHasInductionLoop(Builder $query, bool $required): Builder
     {
         return $query->whereExists(function ($query) use ($required) {
             $locationsTable = (new Location())->getTable();
@@ -84,9 +54,7 @@ trait OrganisationEventScopes
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
      * @param bool $required
-     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeInCollections(Builder $query, ...$collectionIds): Builder
     {
@@ -100,10 +68,6 @@ trait OrganisationEventScopes
         });
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function scopeCollectionTaxonomies(Builder $query): Builder
     {
         return $query->from((new CollectionTaxonomy())->getTable())->whereIn('taxonomy_id', function ($query) {
@@ -114,9 +78,7 @@ trait OrganisationEventScopes
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
      * @param \App\Models\OrganisationEvent $organisationEvent
-     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeCollections(Builder $query): Builder
     {

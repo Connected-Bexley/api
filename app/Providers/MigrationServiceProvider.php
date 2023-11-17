@@ -10,7 +10,7 @@ class MigrationServiceProvider extends ServiceProvider
     /**
      * Bootstrap services.
      */
-    public function boot()
+    public function boot(): void
     {
         /*
          * ID Foreign Key Helper.
@@ -46,7 +46,7 @@ class MigrationServiceProvider extends ServiceProvider
     /**
      * Register services.
      */
-    public function register()
+    public function register(): void
     {
         //
     }

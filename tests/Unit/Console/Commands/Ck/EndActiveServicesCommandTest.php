@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class EndActiveServicesCommandTest extends TestCase
 {
-    public function test_active_services_past_there_end_date_are_made_inactive()
+    public function test_active_services_past_there_end_date_are_made_inactive(): void
     {
         /** @var \App\Models\Service $service */
         $service = Service::factory()->create([
@@ -25,7 +25,7 @@ class EndActiveServicesCommandTest extends TestCase
         $this->assertTrue($service->status === Service::STATUS_INACTIVE);
     }
 
-    public function test_active_services_with_future_end_date_are_not_made_inactive()
+    public function test_active_services_with_future_end_date_are_not_made_inactive(): void
     {
         /** @var \App\Models\Service $service */
         $service = Service::factory()->create([
@@ -40,7 +40,7 @@ class EndActiveServicesCommandTest extends TestCase
         $this->assertTrue($service->status === Service::STATUS_ACTIVE);
     }
 
-    public function test_active_services_with_null_end_date_are_not_made_inactive()
+    public function test_active_services_with_null_end_date_are_not_made_inactive(): void
     {
         /** @var \App\Models\Service $service */
         $service = Service::factory()->create([

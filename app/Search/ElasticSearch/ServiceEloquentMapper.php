@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types=1);
+declare(strict_types=1);
 
 namespace App\Search\ElasticSearch;
 
@@ -34,6 +34,7 @@ class ServiceEloquentMapper implements EloquentMapper
 
         /**
          * Order the fetched service locations by distance.
+         *
          * @todo Potential solution to the order nested locations in Elasticsearch: https://stackoverflow.com/a/43440405
          */
         $services = $this->orderServicesByLocation($queryRequest, $response->models());

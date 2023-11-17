@@ -12,12 +12,9 @@ class CollectionTaxonomy extends Model
     use CollectionTaxonomyRelationships;
     use CollectionTaxonomyScopes;
 
-    /**
-     * @return \App\Models\CollectionTaxonomy
-     */
     public function touchServices(): CollectionTaxonomy
     {
-        static::services($this)->get()->each->save();
+        static::services($this)->get()->searchable();
 
         return $this;
     }

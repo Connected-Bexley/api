@@ -12,7 +12,7 @@ use Tests\TestCase;
 
 class UserCreatedTest extends TestCase
 {
-    public function test_emails_sent_out()
+    public function test_emails_sent_out(): void
     {
         Queue::fake();
 

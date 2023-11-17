@@ -10,10 +10,8 @@ class StoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         if ($this->user()) {
             return true;
@@ -24,14 +22,12 @@ class StoreRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'is_private' => ['required', 'boolean'],
-            'mime_type' => ['required', Rule::in([File::MIME_TYPE_PNG, File::MIME_TYPE_JPG, File::MIME_TYPE_SVG])],
+            'mime_type' => ['required', Rule::in([File::MIME_TYPE_PNG, File::MIME_TYPE_JPG, File::MIME_TYPE_JPEG, File::MIME_TYPE_SVG])],
             'file' => ['required', 'string'],
         ];
     }

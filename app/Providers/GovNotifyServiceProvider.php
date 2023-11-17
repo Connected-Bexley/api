@@ -10,7 +10,7 @@ class GovNotifyServiceProvider extends ServiceProvider
     /**
      * Bootstrap services.
      */
-    public function boot()
+    public function boot(): void
     {
         $this->app->singleton(\Alphagov\Notifications\Client::class, function () {
             return new \Alphagov\Notifications\Client([
@@ -23,7 +23,7 @@ class GovNotifyServiceProvider extends ServiceProvider
     /**
      * Register services.
      */
-    public function register()
+    public function register(): void
     {
         //
     }

@@ -12,17 +12,12 @@ class UserRolesUpdated
 {
     /**
      * Handle the event.
-     *
-     * @param \App\Events\UserRolesUpdated $event
      */
-    public function handle(UserRolesUpdatedEvent $event)
+    public function handle(UserRolesUpdatedEvent $event): void
     {
         $this->notifyUser($event);
     }
 
-    /**
-     * @param \App\Events\UserRolesUpdated $event
-     */
     protected function notifyUser(UserRolesUpdatedEvent $event)
     {
         // Eager load needed relationships.
@@ -70,11 +65,6 @@ class UserRolesUpdated
         ]));
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Collection $oldRoles
-     * @param \Illuminate\Database\Eloquent\Collection $newRoles
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
     protected function getRevokedRoles(Collection $oldRoles, Collection $newRoles): Collection
     {
         // Reject roles that also exist in the new roles collection.
@@ -89,11 +79,6 @@ class UserRolesUpdated
         });
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Collection $oldRoles
-     * @param \Illuminate\Database\Eloquent\Collection $newRoles
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
     protected function getAddedRoles(Collection $oldRoles, Collection $newRoles): Collection
     {
         // Reject roles that also exist in the old roles collection.
@@ -108,10 +93,6 @@ class UserRolesUpdated
         });
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Collection $roles
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
     protected function filterHighestRoles(Collection $roles): Collection
     {
         return $roles->filter(function (UserRole $userRole) use ($roles) {

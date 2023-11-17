@@ -10,7 +10,7 @@ class DatabaseServiceProvider extends ServiceProvider
     /**
      * Bootstrap services.
      */
-    public function boot()
+    public function boot(): void
     {
         // Unset the MySQL SSL certificate path if it is not provided.
         $databaseConfigOptionsKey = 'database.connections.mysql.options';
@@ -31,7 +31,7 @@ class DatabaseServiceProvider extends ServiceProvider
     /**
      * Register services.
      */
-    public function register()
+    public function register(): void
     {
         //
     }

@@ -9,10 +9,8 @@ trait OrganisationEventMutators
 {
     /**
      * Get the Start date time as a Carbon instance.
-     *
-     * @return Carbon/CarbonImmutable
      */
-    public function getStartDateTimeAttribute()
+    public function getStartDateTimeAttribute(): Carbon
     {
         $start = new Carbon($this->start_date);
         [$startHour, $startMinute, $startSecond] = explode(':', $this->start_time);
@@ -23,10 +21,8 @@ trait OrganisationEventMutators
 
     /**
      * Get the End date time as a Carbon instance.
-     *
-     * @return Carbon/CarbonImmutable
      */
-    public function getEndDateTimeAttribute()
+    public function getEndDateTimeAttribute(): Carbon
     {
         $end = new Carbon($this->end_date);
         [$endHour, $endMinute, $endSecond] = explode(':', $this->end_time);
@@ -37,10 +33,8 @@ trait OrganisationEventMutators
 
     /**
      * Return a link which will add the event to a Google calendar.
-     *
-     * @return string
      */
-    public function getGoogleCalendarLinkAttribute()
+    public function getGoogleCalendarLinkAttribute(): string
     {
         return sprintf(
             'https://calendar.google.com/calendar/render?action=TEMPLATE&dates=%s%%2F%s&details=%s&location=%s&text=%s',
@@ -54,10 +48,8 @@ trait OrganisationEventMutators
 
     /**
      * Return a link which will add the event to a Microsoft calendar.
-     *
-     * @return string
      */
-    public function getMicrosoftCalendarLinkAttribute()
+    public function getMicrosoftCalendarLinkAttribute(): string
     {
         return sprintf(
             'https://outlook.office.com/calendar/0/deeplink/compose?path=%%2Fcalendar%%2Faction%%2Fcompose&rru=addevent&startdt=%s&enddt=%s&subject=%s&location=%s&body=%s',
@@ -71,10 +63,8 @@ trait OrganisationEventMutators
 
     /**
      * Return a link which will return the .ics file which can be added to an Apple calendar.
-     *
-     * @return string
      */
-    public function getAppleCalendarLinkAttribute()
+    public function getAppleCalendarLinkAttribute(): string
     {
         return secure_url('/core/v1/organisation-events/' . $this->id . '/event.ics');
     }

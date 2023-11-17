@@ -20,22 +20,14 @@ class SettingController extends Controller
         $this->middleware('auth:api')->except('index');
     }
 
-    /**
-     * @param \App\Http\Requests\Setting\IndexRequest $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function index(IndexRequest $request)
+    public function index(IndexRequest $request): Setting
     {
         event(EndpointHit::onRead($request, 'Viewed all settings'));
 
         return new Setting();
     }
 
-    /**
-     * @param \App\Http\Requests\Setting\UpdateRequest $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function update(UpdateRequest $request)
+    public function update(UpdateRequest $request): Setting
     {
         return DB::transaction(function () use ($request) {
             Setting::cms()

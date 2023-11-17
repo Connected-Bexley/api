@@ -34,7 +34,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_list_them()
+    public function guest_cannot_list_them(): void
     {
         $response = $this->json('GET', '/core/v1/update-requests');
 
@@ -44,7 +44,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_list_them()
+    public function service_worker_cannot_list_them(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -58,7 +58,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_list_them()
+    public function service_admin_cannot_list_them(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -72,7 +72,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_list_them()
+    public function organisation_admin_cannot_list_them(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -86,7 +86,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_list_them()
+    public function global_admin_cannot_list_them(): void
     {
         $user = User::factory()->create()->makeGlobalAdmin();
 
@@ -99,7 +99,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_list_them()
+    public function super_admin_can_list_them(): void
     {
         $organisation = Organisation::factory()->create();
         $orgAdminUser = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -146,7 +146,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function can_list_them_for_location()
+    public function can_list_them_for_location(): void
     {
         $organisation = Organisation::factory()->create();
         $orgAdminUser = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -190,7 +190,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_listed()
+    public function audit_created_when_listed(): void
     {
         $this->fakeEvents();
 
@@ -208,7 +208,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function can_filter_by_entry()
+    public function can_filter_by_entry(): void
     {
         $organisation = Organisation::factory()->create([
             'name' => 'Name with, comma',
@@ -252,7 +252,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function can_sort_by_entry()
+    public function can_sort_by_entry(): void
     {
         $location = Location::factory()->create([
             'address_line_1' => 'Entry A',
@@ -302,7 +302,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_view_one()
+    public function guest_cannot_view_one(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $updateRequest = $serviceLocation->updateRequests()->create([
@@ -318,7 +318,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_view_one()
+    public function service_worker_cannot_view_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -338,7 +338,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_can_view_one()
+    public function service_admin_can_view_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -366,7 +366,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_can_view_one()
+    public function organisation_admin_can_view_one(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -394,7 +394,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_can_view_one()
+    public function global_admin_can_view_one(): void
     {
         $user = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($user);
@@ -421,7 +421,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_view_one()
+    public function super_admin_can_view_one(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
@@ -448,7 +448,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_viewed()
+    public function audit_created_when_viewed(): void
     {
         $this->fakeEvents();
 
@@ -477,7 +477,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_delete_one()
+    public function guest_cannot_delete_one(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $updateRequest = $serviceLocation->updateRequests()->create([
@@ -493,7 +493,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_delete_one()
+    public function service_worker_cannot_delete_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -513,7 +513,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_delete_one()
+    public function service_admin_cannot_delete_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -533,7 +533,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_delete_one()
+    public function organisation_admin_cannot_delete_one(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -553,7 +553,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_delete_one()
+    public function global_admin_cannot_delete_one(): void
     {
         $user = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($user);
@@ -572,7 +572,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_delete_one()
+    public function super_admin_can_delete_one(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
@@ -595,7 +595,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_deleted()
+    public function audit_created_when_deleted(): void
     {
         $this->fakeEvents();
 
@@ -624,7 +624,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_approve_one_for_service_location()
+    public function guest_cannot_approve_one_for_service_location(): void
     {
         $serviceLocation = ServiceLocation::factory()->create();
         $updateRequest = $serviceLocation->updateRequests()->create([
@@ -640,7 +640,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_approve_one_for_service_location()
+    public function service_worker_cannot_approve_one_for_service_location(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -660,7 +660,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_approve_one_for_service_location()
+    public function service_admin_cannot_approve_one_for_service_location(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -680,7 +680,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_approve_one_for_service_location()
+    public function organisation_admin_cannot_approve_one_for_service_location(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -700,7 +700,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_approve_one_for_service_location()
+    public function global_admin_cannot_approve_one_for_service_location(): void
     {
         $user = User::factory()->create()->makeGlobalAdmin();
         Passport::actingAs($user);
@@ -719,7 +719,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_approve_one_for_service_location()
+    public function super_admin_can_approve_one_for_service_location(): void
     {
         $now = Date::now();
         Date::setTestNow($now);
@@ -754,7 +754,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_approve_one_for_organisation()
+    public function super_admin_can_approve_one_for_organisation(): void
     {
         $now = Date::now();
         Date::setTestNow($now);
@@ -797,7 +797,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_approve_one_for_location()
+    public function super_admin_can_approve_one_for_location(): void
     {
         $now = Date::now();
         Date::setTestNow($now);
@@ -848,7 +848,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_approve_one_for_service()
+    public function super_admin_can_approve_one_for_service(): void
     {
         $now = Date::now();
         Date::setTestNow($now);
@@ -906,7 +906,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_approve_one_for_new_service()
+    public function super_admin_can_approve_one_for_new_service(): void
     {
         $now = Date::now();
         Date::setTestNow($now);
@@ -920,7 +920,7 @@ class UpdateRequestsTest extends TestCase
         $imagePayload = [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . self::BASE64_ENCODED_PNG,
+            'file' => 'data:image/png;base64,'.self::BASE64_ENCODED_PNG,
         ];
 
         $response = $this->json('POST', '/core/v1/files', $imagePayload);
@@ -1014,7 +1014,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_approve_one_for_organisation_sign_up_form()
+    public function super_admin_can_approve_one_for_organisation_sign_up_form(): void
     {
         $now = Date::now();
         Date::setTestNow($now);
@@ -1137,7 +1137,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_approve_one_for_organisation_sign_up_form_without_service()
+    public function super_admin_can_approve_one_for_organisation_sign_up_form_without_service(): void
     {
         $now = Date::now();
         Date::setTestNow($now);
@@ -1203,7 +1203,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_approve_one_for_organisation_sign_up_form_with_existing_organisation()
+    public function super_admin_can_approve_one_for_organisation_sign_up_form_with_existing_organisation(): void
     {
         $now = Date::now();
         Date::setTestNow($now);
@@ -1257,7 +1257,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_approved()
+    public function audit_created_when_approved(): void
     {
         $this->fakeEvents();
 
@@ -1286,7 +1286,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function user_roles_correctly_updated_when_service_assigned_to_different_organisation()
+    public function user_roles_correctly_updated_when_service_assigned_to_different_organisation(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
@@ -1336,7 +1336,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function last_modified_at_is_set_to_now_when_service_updated()
+    public function last_modified_at_is_set_to_now_when_service_updated(): void
     {
         $oldNow = Date::now()->subMonths(6);
         $newNow = Date::now();

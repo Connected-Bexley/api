@@ -44,8 +44,8 @@ Route::prefix('/core/v1')
                     'update' => 'collection-categories.update',
                     'destroy' => 'collection-categories.destroy',
                 ]);
-            Route::get('/collections/categories/{collection}/image.{suffix}', Core\V1\CollectionCategory\ImageController::class)
-                ->where('suffix', 'png|jpg|jpeg|svg')
+            Route::get('/collections/categories/{collection}/image{suffix?}', Core\V1\CollectionCategory\ImageController::class)
+                ->where('suffix', '.png|.jpg|.jpeg|.svg')
                 ->name('collection-categories.image');
 
             // Collection Organisation Events.
@@ -60,8 +60,8 @@ Route::prefix('/core/v1')
                     'update' => 'collection-organisation-events.update',
                     'destroy' => 'collection-organisation-events.destroy',
                 ]);
-            Route::get('/collections/organisation-events/{collection}/image.{suffix}', Core\V1\CollectionOrganisationEvent\ImageController::class)
-                ->where('suffix', 'png|jpg|jpeg|svg')
+            Route::get('/collections/organisation-events/{collection}/image{suffix?}', Core\V1\CollectionOrganisationEvent\ImageController::class)
+                ->where('suffix', '.png|.jpg|.jpeg|.svg')
                 ->name('collection-organisation-events.image');
 
             // Collection Personas.
@@ -76,7 +76,8 @@ Route::prefix('/core/v1')
                     'update' => 'collection-personas.update',
                     'destroy' => 'collection-personas.destroy',
                 ]);
-            Route::get('/collections/personas/{collection}/image.png', Core\V1\CollectionPersona\ImageController::class)
+            Route::get('/collections/personas/{collection}/image{suffix?}', Core\V1\CollectionPersona\ImageController::class)
+                ->where('suffix', '.png|.jpg|.jpeg|.svg')
                 ->name('collection-personas.image');
 
             // Files.
@@ -86,7 +87,8 @@ Route::prefix('/core/v1')
             // Locations.
             Route::match(['GET', 'POST'], '/locations/index', [Core\V1\LocationController::class, 'index']);
             Route::apiResource('/locations', Core\V1\LocationController::class);
-            Route::get('/locations/{location}/image.png', Core\V1\Location\ImageController::class)
+            Route::get('/locations/{location}/image{suffix?}', Core\V1\Location\ImageController::class)
+                ->where('suffix', '.png|.jpg|.jpeg|.svg')
                 ->name('locations.image');
 
             // Notifications.
@@ -97,7 +99,8 @@ Route::prefix('/core/v1')
             // Organisations.
             Route::match(['GET', 'POST'], '/organisations/index', [Core\V1\OrganisationController::class, 'index']);
             Route::apiResource('/organisations', Core\V1\OrganisationController::class);
-            Route::get('/organisations/{organisation}/logo.png', Core\V1\Organisation\LogoController::class)
+            Route::get('/organisations/{organisation}/logo{suffix?}', Core\V1\Organisation\LogoController::class)
+                ->where('suffix', '.png|.jpg|.jpeg|.svg')
                 ->name('organisations.logo');
             Route::post('/organisations/import', Core\V1\Organisation\ImportController::class)
                 ->name('organisations.import');
@@ -105,11 +108,11 @@ Route::prefix('/core/v1')
             // Organisation Events.
             Route::match(['GET', 'POST'], '/organisation-events/index', [Core\V1\OrganisationEventController::class, 'index']);
             Route::apiResource('/organisation-events', Core\V1\OrganisationEventController::class);
-            Route::get('/organisation-events/new/image.{suffix}', [Core\V1\OrganisationEvent\ImageController::class, 'showNew'])
-                ->where('suffix', 'png|jpg|jpeg|svg')
+            Route::get('/organisation-events/new/image{suffix?}', [Core\V1\OrganisationEvent\ImageController::class, 'showNew'])
+                ->where('suffix', '.png|.jpg|.jpeg|.svg')
                 ->name('organisation-events.image-new');
-            Route::get('/organisation-events/{organisationEvent}/image.{suffix}', [Core\V1\OrganisationEvent\ImageController::class, 'show'])
-                ->where('suffix', 'png|jpg|jpeg|svg')
+            Route::get('/organisation-events/{organisationEvent}/image{suffix?}', [Core\V1\OrganisationEvent\ImageController::class, 'show'])
+                ->where('suffix', '.png|.jpg|.jpeg|.svg')
                 ->name('organisation-events.image');
             Route::get('/organisation-events/{organisationEvent}/event.ics', Core\V1\OrganisationEvent\CalendarController::class);
 
@@ -120,11 +123,11 @@ Route::prefix('/core/v1')
             // Pages.
             Route::match(['GET', 'POST'], '/pages/index', [Core\V1\PageController::class, 'index']);
             Route::apiResource('/pages', Core\V1\PageController::class);
-            Route::get('/pages/new/image.{suffix}', [Core\V1\Page\ImageController::class, 'showNew'])
-                ->where('suffix', 'png|jpg|jpeg|svg')
+            Route::get('/pages/new/image{suffix?}', [Core\V1\Page\ImageController::class, 'showNew'])
+                ->where('suffix', '.png|.jpg|.jpeg|.svg')
                 ->name('pages.image-new');
-            Route::get('/pages/{page}/image.{suffix}', [Core\V1\Page\ImageController::class, 'show'])
-                ->where('suffix', 'png|jpg|jpeg|svg')
+            Route::get('/pages/{page}/image{suffix?}', [Core\V1\Page\ImageController::class, 'show'])
+                ->where('suffix', '.png|.jpg|.jpeg|.svg')
                 ->name('pages.image');
 
             // Page Feedbacks.
@@ -159,7 +162,8 @@ Route::prefix('/core/v1')
             // Service Locations.
             Route::match(['GET', 'POST'], '/service-locations/index', [Core\V1\ServiceLocationController::class, 'index']);
             Route::apiResource('/service-locations', Core\V1\ServiceLocationController::class);
-            Route::get('/service-locations/{service_location}/image.png', Core\V1\ServiceLocation\ImageController::class)
+            Route::get('/service-locations/{service_location}/image{suffix?}', Core\V1\ServiceLocation\ImageController::class)
+                ->where('suffix', '.png|.jpg|.jpeg|.svg')
                 ->name('service-locations.image');
 
             // Services.
@@ -171,9 +175,11 @@ Route::prefix('/core/v1')
                 ->name('services.refresh');
             Route::get('/services/{service}/related', Core\V1\Service\RelatedController::class)
                 ->name('services.related');
-            Route::get('/services/new/logo.png', [Core\V1\Service\LogoController::class, 'showNew'])
+            Route::get('/services/new/logo{suffix?}', [Core\V1\Service\LogoController::class, 'showNew'])
+                ->where('suffix', '.png|.jpg|.jpeg|.svg')
                 ->name('services.logo-new');
-            Route::get('/services/{service}/logo.png', [Core\V1\Service\LogoController::class, 'show'])
+            Route::get('/services/{service}/logo{suffix?}', [Core\V1\Service\LogoController::class, 'show'])
+                ->where('suffix', '.png|.jpg|.jpeg|.svg')
                 ->name('services.logo');
             Route::get('/services/{service}/gallery-items/{file}', Core\V1\Service\GalleryItemController::class)
                 ->name('services.gallery-items');
@@ -185,7 +191,8 @@ Route::prefix('/core/v1')
                 ->name('settings.index');
             Route::put('/settings', [Core\V1\SettingController::class, 'update'])
                 ->name('settings.update');
-            Route::get('/settings/banner-image.png', Core\V1\Setting\BannerImageController::class)
+            Route::get('/settings/banner-image{suffix?}', Core\V1\Setting\BannerImageController::class)
+                ->where('suffix', '.png|.jpg|.jpeg|.svg')
                 ->name('settings.banner-image');
 
             // Status Updates.

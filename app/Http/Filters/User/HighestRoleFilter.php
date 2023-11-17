@@ -9,12 +9,6 @@ use Spatie\QueryBuilder\Filters\Filter;
 
 class HighestRoleFilter implements Filter
 {
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param $value
-     * @param string $property
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function __invoke(Builder $query, $value, string $property): Builder
     {
         $sql = (new User())->getHighestRoleOrderSql();
@@ -37,10 +31,6 @@ EOT;
         return $query->whereRaw($subQuery, $bindings);
     }
 
-    /**
-     * @param string $roles
-     * @return string
-     */
     protected function getQuotedRoleIds(string $roles): string
     {
         // Split the role names string into an array of names.

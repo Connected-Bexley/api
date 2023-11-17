@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class ForgotPasswordTest extends TestCase
 {
-    public function test_email_sent_to_user()
+    public function test_email_sent_to_user(): void
     {
         Queue::fake();
 

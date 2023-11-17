@@ -13,8 +13,6 @@ class ImageController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param \App\Http\Requests\CollectionPersona\Image\ShowRequest $request
-     * @param \App\Models\Collection $collection
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      * @return \Illuminate\Http\Response
      */

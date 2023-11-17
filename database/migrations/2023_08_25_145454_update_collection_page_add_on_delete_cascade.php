@@ -8,7 +8,7 @@ return new class() extends Migration {
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('collection_page', function (Blueprint $table) {
             $table->dropForeign(['page_id']);
@@ -23,7 +23,7 @@ return new class() extends Migration {
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
         Schema::table('collection_page', function (Blueprint $table) {
             $table->dropForeign(['page_id']);

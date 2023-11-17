@@ -2,23 +2,23 @@
 
 namespace Tests\Feature;
 
-use App\Events\EndpointHit;
-use App\Models\Audit;
-use App\Models\Collection;
-use App\Models\CollectionTaxonomy;
+use Tests\TestCase;
 use App\Models\File;
-use App\Models\Organisation;
-use App\Models\OrganisationEvent;
+use App\Models\User;
+use App\Models\Audit;
 use App\Models\Service;
 use App\Models\Taxonomy;
-use App\Models\User;
+use App\Models\Collection;
+use App\Events\EndpointHit;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Str;
+use App\Models\Organisation;
 use Illuminate\Http\Response;
+use Laravel\Passport\Passport;
+use App\Models\OrganisationEvent;
+use App\Models\CollectionTaxonomy;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Laravel\Passport\Passport;
-use Tests\TestCase;
 
 class CollectionOrganisationEventsTest extends TestCase
 {
@@ -48,7 +48,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_list_them()
+    public function guest_can_list_them(): void
     {
         $response = $this->json('GET', '/core/v1/collections/organisation-events');
 
@@ -88,7 +88,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_list_all_of_them()
+    public function guest_can_list_all_of_them(): void
     {
         $response = $this->json('GET', '/core/v1/collections/organisation-events/all');
 
@@ -130,7 +130,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_list_enabled_and_disabled_collections()
+    public function guest_can_list_enabled_and_disabled_collections(): void
     {
         $disabledCollection = Collection::organisationEvents()->first();
 
@@ -157,7 +157,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_list_all_enabled_and_disabled_collections()
+    public function guest_can_list_all_enabled_and_disabled_collections(): void
     {
         $disabledCollection = Collection::organisationEvents()->first();
 
@@ -184,7 +184,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_listed()
+    public function audit_created_when_listed(): void
     {
         $this->fakeEvents();
 
@@ -202,7 +202,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_create_one()
+    public function guest_cannot_create_one(): void
     {
         $response = $this->json('POST', '/core/v1/collections/organisation-events');
 
@@ -212,7 +212,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_create_one()
+    public function service_worker_cannot_create_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -232,7 +232,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_create_one()
+    public function service_admin_cannot_create_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -252,7 +252,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_create_one()
+    public function organisation_admin_cannot_create_one(): void
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -272,7 +272,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_create_one()
+    public function global_admin_cannot_create_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -290,7 +290,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_create_one()
+    public function super_admin_can_create_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -366,7 +366,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_create_a_disabled_one()
+    public function super_admin_can_create_a_disabled_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -420,7 +420,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function order_is_updated_when_created_at_beginning()
+    public function order_is_updated_when_created_at_beginning(): void
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionOrganisationEvents();
@@ -495,7 +495,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function order_is_updated_when_created_at_middle()
+    public function order_is_updated_when_created_at_middle(): void
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionOrganisationEvents();
@@ -570,7 +570,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function order_is_updated_when_created_at_end()
+    public function order_is_updated_when_created_at_end(): void
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionOrganisationEvents();
@@ -645,7 +645,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function order_cannot_be_less_than_1_when_created()
+    public function order_cannot_be_less_than_1_when_created(): void
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionOrganisationEvents();
@@ -683,7 +683,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function order_cannot_be_greater_than_count_plus_1_when_created()
+    public function order_cannot_be_greater_than_count_plus_1_when_created(): void
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionOrganisationEvents();
@@ -743,7 +743,100 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_created()
+    public function super_admin_can_create_one_and_assign_an_image(): void
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeSuperAdmin();
+        $randomCategory = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
+
+        Passport::actingAs($user);
+
+        // SVG
+        $image = File::factory()->pendingAssignment()->imageSvg()->create();
+
+        $response = $this->json('POST', '/core/v1/collections/organisation-events', [
+            'name' => 'Test Organisation Event',
+            'intro' => 'Lorem ipsum',
+            'image_file_id' => $image->id,
+            'order' => 1,
+            'enabled' => true,
+            'sideboxes' => [],
+            'category_taxonomies' => [$randomCategory->id],
+        ]);
+
+        $response->assertStatus(Response::HTTP_CREATED);
+
+        $collectionArray = $this->getResponseContent($response)['data'];
+        $response = $this->get("/core/v1/collections/organisation-events/{$collectionArray['id']}/image.svg");
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.svg'), $response->content());
+
+        $this->assertEquals($image->id, $collectionArray['image_file_id']);
+
+        $this->assertDatabaseHas($image->getTable(), [
+            'id' => $image->id,
+            'meta' => null,
+        ]);
+
+        // PNG
+        $image = File::factory()->pendingAssignment()->imagePng()->create();
+
+        $response = $this->json('POST', '/core/v1/collections/organisation-events', [
+            'name' => 'Test Organisation Event',
+            'intro' => 'Lorem ipsum',
+            'image_file_id' => $image->id,
+            'order' => 1,
+            'enabled' => true,
+            'sideboxes' => [],
+            'category_taxonomies' => [$randomCategory->id],
+        ]);
+
+        $response->assertStatus(Response::HTTP_CREATED);
+
+        $collectionArray = $this->getResponseContent($response)['data'];
+        $response = $this->get("/core/v1/collections/organisation-events/{$collectionArray['id']}/image.png");
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.png'), $response->content());
+
+        $this->assertEquals($image->id, $collectionArray['image_file_id']);
+
+        $this->assertDatabaseHas($image->getTable(), [
+            'id' => $image->id,
+            'meta' => null,
+        ]);
+
+        // JPG
+        $image = File::factory()->pendingAssignment()->imageJpg()->create();
+
+        $response = $this->json('POST', '/core/v1/collections/organisation-events', [
+            'name' => 'Test Organisation Event',
+            'intro' => 'Lorem ipsum',
+            'image_file_id' => $image->id,
+            'order' => 1,
+            'enabled' => true,
+            'sideboxes' => [],
+            'category_taxonomies' => [$randomCategory->id],
+        ]);
+
+        $response->assertStatus(Response::HTTP_CREATED);
+
+        $collectionArray = $this->getResponseContent($response)['data'];
+        $response = $this->get("/core/v1/collections/organisation-events/{$collectionArray['id']}/image.jpg");
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.jpg'), $response->content());
+
+        $this->assertEquals($image->id, $collectionArray['image_file_id']);
+
+        $this->assertDatabaseHas($image->getTable(), [
+            'id' => $image->id,
+            'meta' => null,
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function audit_created_when_created(): void
     {
         $this->fakeEvents();
 
@@ -789,7 +882,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_view_one()
+    public function guest_can_view_one(): void
     {
         $organisationEvent = Collection::organisationEvents()->inRandomOrder()->firstOrFail();
 
@@ -837,7 +930,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_view_one_by_slug()
+    public function guest_can_view_one_by_slug(): void
     {
         $organisationEvent = Collection::organisationEvents()->inRandomOrder()->firstOrFail();
 
@@ -885,7 +978,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_viewed()
+    public function audit_created_when_viewed(): void
     {
         $this->fakeEvents();
 
@@ -906,7 +999,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_update_one()
+    public function guest_cannot_update_one(): void
     {
         $organisationEvent = Collection::organisationEvents()->inRandomOrder()->firstOrFail();
 
@@ -918,7 +1011,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_update_one()
+    public function service_worker_cannot_update_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -939,7 +1032,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_update_one()
+    public function service_admin_cannot_update_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -960,7 +1053,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_update_one()
+    public function organisation_admin_cannot_update_one(): void
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -981,7 +1074,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_update_one()
+    public function global_admin_cannot_update_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1000,7 +1093,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_update_one()
+    public function super_admin_can_update_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1072,7 +1165,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_update_status()
+    public function super_admin_can_update_status(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1136,7 +1229,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function order_is_updated_when_updated_to_beginning()
+    public function order_is_updated_when_updated_to_beginning(): void
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionOrganisationEvents();
@@ -1204,7 +1297,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function order_is_updated_when_updated_to_middle()
+    public function order_is_updated_when_updated_to_middle(): void
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionOrganisationEvents();
@@ -1272,7 +1365,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function order_is_updated_when_updated_to_end()
+    public function order_is_updated_when_updated_to_end(): void
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionOrganisationEvents();
@@ -1340,7 +1433,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function order_cannot_be_less_than_1_when_updated()
+    public function order_cannot_be_less_than_1_when_updated(): void
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionOrganisationEvents();
@@ -1381,7 +1474,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function order_cannot_be_greater_than_count_plus_1_when_updated()
+    public function order_cannot_be_greater_than_count_plus_1_when_updated(): void
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionOrganisationEvents();
@@ -1422,7 +1515,101 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_updated()
+    public function super_admin_can_update_and_assign_an_image(): void
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeSuperAdmin();
+        $organisationEvent = Collection::organisationEvents()->inRandomOrder()->firstOrFail();
+        $taxonomy = Taxonomy::category()->children()->inRandomOrder()->firstOrFail();
+
+        Passport::actingAs($user);
+
+        // SVG
+        $image = File::factory()->pendingAssignment()->imageSvg()->create();
+
+        $response = $this->json('PUT', "/core/v1/collections/organisation-events/{$organisationEvent->id}", [
+            'name' => 'Test Organisation Event',
+            'intro' => 'Lorem ipsum',
+            'image_file_id' => $image->id,
+            'order' => 1,
+            'enabled' => true,
+            'sideboxes' => [],
+            'category_taxonomies' => [$taxonomy->id],
+        ]);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $organisationEvent = $organisationEvent->fresh();
+        $this->assertEquals($image->id, $organisationEvent->meta['image_file_id']);
+
+        $content = $this->get("/core/v1/collections/organisation-events/{$organisationEvent->id}/image.svg")->content();
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.svg'), $content);
+
+        $this->assertDatabaseHas($image->getTable(), [
+            'id' => $image->id,
+            'meta' => null,
+        ]);
+
+        // PNG
+        $image = File::factory()->pendingAssignment()->imagePng()->create();
+
+        $response = $this->json('PUT', "/core/v1/collections/organisation-events/{$organisationEvent->id}", [
+            'name' => 'Test Organisation Event',
+            'intro' => 'Lorem ipsum',
+            'image_file_id' => $image->id,
+            'order' => 1,
+            'enabled' => true,
+            'sideboxes' => [],
+            'category_taxonomies' => [$taxonomy->id],
+        ]);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $organisationEvent = $organisationEvent->fresh();
+        $this->assertEquals($image->id, $organisationEvent->meta['image_file_id']);
+
+        $content = $this->get("/core/v1/collections/organisation-events/{$organisationEvent->id}/image.png")->content();
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.png'), $content);
+
+        $this->assertDatabaseHas($image->getTable(), [
+            'id' => $image->id,
+            'meta' => null,
+        ]);
+
+        // JPG
+        $image = File::factory()->pendingAssignment()->imageJpg()->create();
+
+        $response = $this->json('PUT', "/core/v1/collections/organisation-events/{$organisationEvent->id}", [
+            'name' => 'Test Organisation Event',
+            'intro' => 'Lorem ipsum',
+            'image_file_id' => $image->id,
+            'order' => 1,
+            'enabled' => true,
+            'sideboxes' => [],
+            'category_taxonomies' => [$taxonomy->id],
+        ]);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $organisationEvent = $organisationEvent->fresh();
+        $this->assertEquals($image->id, $organisationEvent->meta['image_file_id']);
+
+        $content = $this->get("/core/v1/collections/organisation-events/{$organisationEvent->id}/image.jpg")->content();
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.jpg'), $content);
+
+        $this->assertDatabaseHas($image->getTable(), [
+            'id' => $image->id,
+            'meta' => null,
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function audit_created_when_updated(): void
     {
         $this->fakeEvents();
 
@@ -1460,7 +1647,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_delete_one()
+    public function guest_cannot_delete_one(): void
     {
         $organisationEvent = Collection::organisationEvents()->inRandomOrder()->firstOrFail();
 
@@ -1472,7 +1659,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function service_worker_cannot_delete_one()
+    public function service_worker_cannot_delete_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -1493,7 +1680,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_cannot_delete_one()
+    public function service_admin_cannot_delete_one(): void
     {
         /**
          * @var \App\Models\Service $service
@@ -1514,7 +1701,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_cannot_delete_one()
+    public function organisation_admin_cannot_delete_one(): void
     {
         /**
          * @var \App\Models\Organisation $organisation
@@ -1535,7 +1722,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function global_admin_cannot_delete_one()
+    public function global_admin_cannot_delete_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1554,7 +1741,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_delete_one()
+    public function super_admin_can_delete_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1575,7 +1762,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function order_is_updated_when_deleted_at_beginning()
+    public function order_is_updated_when_deleted_at_beginning(): void
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionOrganisationEvents();
@@ -1632,7 +1819,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function order_is_updated_when_deleted_at_middle()
+    public function order_is_updated_when_deleted_at_middle(): void
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionOrganisationEvents();
@@ -1689,7 +1876,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function order_is_updated_when_deleted_at_end()
+    public function order_is_updated_when_deleted_at_end(): void
     {
         // Delete the existing seeded personas.
         $this->truncateCollectionOrganisationEvents();
@@ -1746,7 +1933,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_deleted()
+    public function audit_created_when_deleted(): void
     {
         $this->fakeEvents();
 
@@ -1775,7 +1962,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_view_image()
+    public function guest_can_view_image(): void
     {
         $organisationEventCollection = Collection::organisationEvents()->inRandomOrder()->firstOrFail();
 
@@ -1788,7 +1975,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function audit_created_when_image_viewed()
+    public function audit_created_when_image_viewed(): void
     {
         $this->fakeEvents();
 
@@ -1809,7 +1996,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_upload_image()
+    public function super_admin_can_upload_image(): void
     {
         /**
          * @var \App\Models\User $user
@@ -1850,7 +2037,7 @@ class CollectionOrganisationEventsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_cannot_delete_image()
+    public function super_admin_cannot_delete_image(): void
     {
         /**
          * @var \App\Models\User $user

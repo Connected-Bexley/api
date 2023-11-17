@@ -9,11 +9,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 trait ServiceScopes
 {
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param \App\Models\Service $service
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function scopeCollectionTaxonomies(Builder $query, Service $service): Builder
     {
         $taxonomyIds = $service->serviceTaxonomies()->pluck('taxonomy_id')->toArray();
@@ -21,11 +16,6 @@ trait ServiceScopes
         return CollectionTaxonomy::query()->whereIn('taxonomy_id', $taxonomyIds);
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param \App\Models\Service $service
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function scopeCollections(Builder $query, Service $service): Builder
     {
         $taxonomyIds = $service->serviceTaxonomies()

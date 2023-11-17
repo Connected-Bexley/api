@@ -6,7 +6,7 @@ use Tests\TestCase;
 
 class ArrayDiffMultiTest extends TestCase
 {
-    public function test_added_elements_works()
+    public function test_added_elements_works(): void
     {
         $arrayA = [
             ['name' => 'John', 'age' => 21],
@@ -23,7 +23,7 @@ class ArrayDiffMultiTest extends TestCase
         ], $difference);
     }
 
-    public function test_removed_elements_works()
+    public function test_removed_elements_works(): void
     {
         $arrayA = [
             ['name' => 'John', 'age' => 21],
@@ -40,7 +40,7 @@ class ArrayDiffMultiTest extends TestCase
         ], $difference);
     }
 
-    public function test_added_and_removed_elements_works()
+    public function test_added_and_removed_elements_works(): void
     {
         $arrayA = [
             ['name' => 'John', 'age' => 21],

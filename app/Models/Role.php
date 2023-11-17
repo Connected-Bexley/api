@@ -24,9 +24,6 @@ class Role extends Model
 
     const NAME_SUPER_ADMIN = 'Super Admin';
 
-    /**
-     * @return \App\Models\Role
-     */
     public static function serviceWorker(): self
     {
         return cache()->rememberForever('Role::serviceWorker', function () {
@@ -34,9 +31,6 @@ class Role extends Model
         });
     }
 
-    /**
-     * @return \App\Models\Role
-     */
     public static function serviceAdmin(): self
     {
         return cache()->rememberForever('Role::serviceAdmin', function () {
@@ -44,9 +38,6 @@ class Role extends Model
         });
     }
 
-    /**
-     * @return \App\Models\Role
-     */
     public static function organisationAdmin(): self
     {
         return cache()->rememberForever('Role::organisationAdmin', function () {
@@ -54,9 +45,6 @@ class Role extends Model
         });
     }
 
-    /**
-     * @return \App\Models\Role
-     */
     public static function contentAdmin(): self
     {
         return cache()->rememberForever('Role::contentAdmin', function () {
@@ -64,9 +52,6 @@ class Role extends Model
         });
     }
 
-    /**
-     * @return \App\Models\Role
-     */
     public static function globalAdmin(): self
     {
         return cache()->rememberForever('Role::globalAdmin', function () {
@@ -74,9 +59,6 @@ class Role extends Model
         });
     }
 
-    /**
-     * @return \App\Models\Role
-     */
     public static function superAdmin(): self
     {
         return cache()->rememberForever('Role::superAdmin', function () {

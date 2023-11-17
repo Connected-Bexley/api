@@ -12,9 +12,6 @@ class OrganisationTaxonomy extends Model
     use OrganisationTaxonomyRelationships;
     use OrganisationTaxonomyScopes;
 
-    /**
-     * @return \App\Models\OrganisationTaxonomy
-     */
     public function touchOrganisation(): OrganisationTaxonomy
     {
         $this->organisation->save();

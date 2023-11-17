@@ -2,10 +2,11 @@
 
 namespace App\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Parsedown;
 
-class MarkdownMinLength implements Rule
+class MarkdownMinLength implements ValidationRule
 {
     /**
      * @var int
@@ -19,11 +20,8 @@ class MarkdownMinLength implements Rule
 
     /**
      * MarkdownMaxLength constructor.
-     *
-     * @param int $minLength
-     * @param string|null $message
      */
-    public function __construct(int $minLength, ?string $message = null)
+    public function __construct(int $minLength, string $message = null)
     {
         $this->minLength = $minLength;
         $this->message = $message;
@@ -32,16 +30,16 @@ class MarkdownMinLength implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param string $attribute
      * @param mixed $value
-     * @return bool
      */
-    public function passes($attribute, $value)
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $html = (new Parsedown())->text(sanitize_markdown($value));
         $text = strip_tags($html);
 
-        return mb_strlen($text) >= $this->minLength;
+        if (mb_strlen($text) < $this->minLength) {
+            $fail($this->message());
+        }
     }
 
     /**

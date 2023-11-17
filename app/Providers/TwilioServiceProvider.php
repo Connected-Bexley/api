@@ -10,7 +10,7 @@ class TwilioServiceProvider extends ServiceProvider
     /**
      * Register services.
      */
-    public function register()
+    public function register(): void
     {
         $this->app->singleton(Client::class, function () {
             return new Client(
@@ -23,7 +23,7 @@ class TwilioServiceProvider extends ServiceProvider
     /**
      * Bootstrap services.
      */
-    public function boot()
+    public function boot(): void
     {
         //
     }

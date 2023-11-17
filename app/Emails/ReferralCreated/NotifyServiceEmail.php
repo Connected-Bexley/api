@@ -6,9 +6,6 @@ use App\Emails\Email;
 
 class NotifyServiceEmail extends Email
 {
-    /**
-     * @return string
-     */
     protected function getTemplateId(): string
     {
         return config('gov_uk_notify.notifications_template_ids.referral_created.notify_service.email');

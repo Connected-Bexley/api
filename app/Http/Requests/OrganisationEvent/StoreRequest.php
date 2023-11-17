@@ -25,10 +25,8 @@ class StoreRequest extends FormRequest
 
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         if ($this->user()->isOrganisationAdmin(Organisation::find($this->organisation_id))) {
             return true;
@@ -39,10 +37,8 @@ class StoreRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'organisation_id' => [
@@ -185,8 +181,6 @@ class StoreRequest extends FormRequest
 
     /**
      * Check if the user requested only a preview of the update request.
-     *
-     * @return bool
      */
     public function isPreview(): bool
     {
@@ -196,7 +190,7 @@ class StoreRequest extends FormRequest
     /**
      * {@inheritDoc}
      */
-    public function messages()
+    public function messages(): array
     {
         $urlMessage = 'Please enter a valid web address in the correct format (starting with https:// or http://).';
 

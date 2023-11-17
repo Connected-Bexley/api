@@ -19,9 +19,6 @@ class DownloadController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param \App\Http\Requests\Report\Download\ShowRequest $request
-     * @param \App\Models\Report $report
      */
     public function show(ShowRequest $request, Report $report)
     {

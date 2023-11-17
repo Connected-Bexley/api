@@ -7,7 +7,7 @@ return new class() extends Migration {
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         $uncleanPhoneNumbers = DB::table('organisations')
             ->whereRaw('id not in (select id from organisations where phone REGEXP ?)', ['^(0[0-9]{10})$'])
@@ -38,7 +38,7 @@ return new class() extends Migration {
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
         //
     }

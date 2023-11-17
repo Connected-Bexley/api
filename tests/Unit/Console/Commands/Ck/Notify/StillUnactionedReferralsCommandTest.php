@@ -12,7 +12,7 @@ use Tests\TestCase;
 
 class StillUnactionedReferralsCommandTest extends TestCase
 {
-    public function test_emails_sent()
+    public function test_emails_sent(): void
     {
         Queue::fake();
 

@@ -9,11 +9,9 @@ class CollectionObserver
     /**
      * Handle the collection "created" event.
      *
-     * @param \App\Models\Collection $collection
-     *
      * @throws \Exception
      */
-    public function created(Collection $collection)
+    public function created(Collection $collection): void
     {
         // Updates the order for all other collections of the same type.
         Collection::query()
@@ -25,8 +23,6 @@ class CollectionObserver
 
     /**
      * Handle the collection "updating" event.
-     *
-     * @param \App\Models\Collection $collection
      *
      * @throws \Exception
      */
@@ -62,19 +58,15 @@ class CollectionObserver
     /**
      * Handle the collection "updated" event.
      *
-     * @param \App\Models\Collection $collection
-     *
      * @throws \Exception
      */
-    public function updated(Collection $collection)
+    public function updated(Collection $collection): void
     {
         $collection->touchServices();
     }
 
     /**
      * Handle the organisation "deleting" event.
-     *
-     * @param \App\Models\Collection $collection
      */
     public function deleting(Collection $collection)
     {
@@ -84,11 +76,9 @@ class CollectionObserver
     /**
      * Handle the collection "deleted" event.
      *
-     * @param \App\Models\Collection $collection
-     *
      * @throws \Exception
      */
-    public function deleted(Collection $collection)
+    public function deleted(Collection $collection): void
     {
         // Updates the order for all other collections of the same type.
         Collection::query()

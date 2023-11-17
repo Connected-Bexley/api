@@ -33,10 +33,6 @@ class Notification extends Model
         'updated_at' => 'datetime',
     ];
 
-    /**
-     * @param \App\Emails\Email $email
-     * @param \App\Notifications\Notifiable|null $notifiable
-     */
     public static function sendEmail(Email $email, Notifiable $notifiable = null)
     {
         DB::transaction(function () use ($email, $notifiable) {
@@ -56,10 +52,6 @@ class Notification extends Model
         });
     }
 
-    /**
-     * @param \App\Sms\Sms $sms
-     * @param \App\Notifications\Notifiable|null $notifiable
-     */
     public static function sendSms(Sms $sms, Notifiable $notifiable = null)
     {
         DB::transaction(function () use ($sms, $notifiable) {

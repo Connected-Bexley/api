@@ -3,9 +3,10 @@
 namespace App\Rules;
 
 use App\Models\UpdateRequest;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class UserEmailNotInPendingSignupRequest implements Rule
+class UserEmailNotInPendingSignupRequest implements ValidationRule
 {
     /**
      * @var string|null
@@ -16,9 +17,8 @@ class UserEmailNotInPendingSignupRequest implements Rule
      * Create a new rule instance.
      *
      * @param \App\Models\User|null $excludedUser
-     * @param string|null $message
      */
-    public function __construct(?string $message = null)
+    public function __construct(string $message = null)
     {
         $this->message = $message;
     }
@@ -26,28 +26,26 @@ class UserEmailNotInPendingSignupRequest implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param string $attribute
      * @param mixed $email
-     * @return bool
      */
-    public function passes($attribute, $email)
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (!is_string($email)) {
-            return false;
+        if (!is_string($value)) {
+            $fail(__('validation.string'));
         }
 
-        return UpdateRequest::query()
+        if (UpdateRequest::query()
             ->where('updateable_type', UpdateRequest::NEW_TYPE_ORGANISATION_SIGN_UP_FORM)
-            ->where('data->user->email', $email)
-            ->doesntExist();
+            ->where('data->user->email', $value)
+            ->exists()) {
+            $fail($this->message());
+        }
     }
 
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
-    public function message()
+    public function message(): string
     {
         return $this->message ?? 'This email address exists for a user pending approval.';
     }

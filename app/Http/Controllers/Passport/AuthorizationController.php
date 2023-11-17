@@ -13,10 +13,6 @@ class AuthorizationController extends BaseAuthorizationController
     /**
      * Authorize a client to access the user's account.
      *
-     * @param \Psr\Http\Message\ServerRequestInterface $psrRequest
-     * @param \Illuminate\Http\Request $request
-     * @param \Laravel\Passport\ClientRepository $clients
-     * @param \Laravel\Passport\TokenRepository $tokens
      * @return \Illuminate\Http\Response
      */
     public function authorize(

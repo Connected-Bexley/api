@@ -8,11 +8,6 @@ use Illuminate\Support\Facades\Date;
 
 trait ReferralScopes
 {
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $workingDays
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function scopeUnactioned(Builder $query, int $workingDays): Builder
     {
         return $query
@@ -21,10 +16,6 @@ trait ReferralScopes
             ->where('created_at', '<=', Date::now()->subWeekdays($workingDays));
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function scopeDueForDeletion(Builder $query): Builder
     {
         $date = Date::today()->subMonths(Referral::AUTO_DELETE_MONTHS);
@@ -34,11 +25,6 @@ trait ReferralScopes
             ->where('status', '=', Referral::STATUS_COMPLETED);
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $alias
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function scopeWithStatusLastUpdatedAt(Builder $query, string $alias = 'status_last_updated_at'): Builder
     {
         /*

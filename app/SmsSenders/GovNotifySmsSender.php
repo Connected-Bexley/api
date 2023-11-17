@@ -22,9 +22,6 @@ class GovNotifySmsSender implements SmsSender
         $globalValues['CONTACT_EMAIL'] = config('local.global_admin.email');
     }
 
-    /**
-     * @param \App\Sms\Sms $sms
-     */
     public function send(Sms $sms)
     {
         /** @var \Alphagov\Notifications\Client $client */

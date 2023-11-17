@@ -239,11 +239,8 @@ class ServicePersistenceService implements DataPersistenceService
 
     /**
      * Return a unique version of the proposed slug.
-     *
-     * @param string $slug
-     * @return string
      */
-    public function uniqueSlug($slug)
+    public function uniqueSlug(string $slug): string
     {
         $uniqueSlug = $baseSlug = preg_replace('|\-\d$|', '', $slug);
         $suffix = 1;

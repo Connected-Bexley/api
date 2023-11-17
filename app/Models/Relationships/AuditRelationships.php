@@ -3,22 +3,17 @@
 namespace App\Models\Relationships;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Laravel\Passport\Client;
 
 trait AuditRelationships
 {
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class)->withTrashed();
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function oauthClient()
+    public function oauthClient(): BelongsTo
     {
         return $this->belongsTo(Client::class);
     }

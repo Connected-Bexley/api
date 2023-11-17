@@ -3,13 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Docs\OpenApi;
+use Illuminate\Contracts\Support\Responsable;
+use Illuminate\View\View;
 
 class DocsController extends Controller
 {
     /**
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function index()
+    public function index(): View
     {
         return view('docs.index');
     }
@@ -18,9 +20,8 @@ class DocsController extends Controller
      * Parse the specified YAML file through Blade.
      *
      * @throws \Throwable
-     * @return \Illuminate\Contracts\Support\Responsable
      */
-    public function show()
+    public function show(): Responsable
     {
         return OpenApi::create();
     }

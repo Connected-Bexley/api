@@ -18,7 +18,7 @@ class OrganisationSignUpFormTest extends TestCase
 {
     // Store.
 
-    public function test_guest_can_create_one()
+    public function test_guest_can_create_one(): void
     {
         $response = $this->json('POST', '/core/v1/organisation-sign-up-forms', [
             'user' => [
@@ -77,7 +77,7 @@ class OrganisationSignUpFormTest extends TestCase
         $response->assertStatus(Response::HTTP_CREATED);
     }
 
-    public function test_guest_can_create_one_with_single_form_of_contact()
+    public function test_guest_can_create_one_with_single_form_of_contact(): void
     {
         $response = $this->json('POST', '/core/v1/organisation-sign-up-forms', [
             'user' => [
@@ -139,7 +139,7 @@ class OrganisationSignUpFormTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_sign_up_to_existing_organisation()
+    public function guest_can_sign_up_to_existing_organisation(): void
     {
         $this->fakeEvents();
 
@@ -186,7 +186,7 @@ class OrganisationSignUpFormTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_sign_up_with_existing_email()
+    public function guest_cannot_sign_up_with_existing_email(): void
     {
         $this->fakeEvents();
 
@@ -217,7 +217,7 @@ class OrganisationSignUpFormTest extends TestCase
     /**
      * @test
      */
-    public function guest_must_sign_up_with_uk_mobile_phone_number()
+    public function guest_must_sign_up_with_uk_mobile_phone_number(): void
     {
         $this->fakeEvents();
 
@@ -261,7 +261,7 @@ class OrganisationSignUpFormTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_sign_up_with_email_in_existing_signup_request()
+    public function guest_cannot_sign_up_with_email_in_existing_signup_request(): void
     {
         $this->fakeEvents();
 
@@ -305,7 +305,7 @@ class OrganisationSignUpFormTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_sign_up_to_non_existing_organisation()
+    public function guest_cannot_sign_up_to_non_existing_organisation(): void
     {
         $userSubmission = [
             'first_name' => $this->faker->firstName(),
@@ -327,7 +327,7 @@ class OrganisationSignUpFormTest extends TestCase
     /**
      * @test
      */
-    public function guest_can_sign_up_with_new_organisation_without_service()
+    public function guest_can_sign_up_with_new_organisation_without_service(): void
     {
         $this->fakeEvents();
 
@@ -371,7 +371,7 @@ class OrganisationSignUpFormTest extends TestCase
     /**
      * @test
      */
-    public function guest_cannot_sign_up_with_new_organisation_which_matches_existing_organisation()
+    public function guest_cannot_sign_up_with_new_organisation_which_matches_existing_organisation(): void
     {
         $organisation = Organisation::factory()->create();
 
@@ -398,7 +398,7 @@ class OrganisationSignUpFormTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_service_worker_cannot_create_one()
+    public function test_service_worker_cannot_create_one(): void
     {
         /** @var \App\Models\Service $service */
         $service = Service::factory()->create();
@@ -413,7 +413,7 @@ class OrganisationSignUpFormTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_create_one()
+    public function test_service_admin_cannot_create_one(): void
     {
         /** @var \App\Models\Service $service */
         $service = Service::factory()->create();
@@ -428,7 +428,7 @@ class OrganisationSignUpFormTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_create_one()
+    public function test_organisation_admin_cannot_create_one(): void
     {
         /** @var \App\Models\Organisation $organisation */
         $organisation = Organisation::factory()->create();
@@ -443,7 +443,7 @@ class OrganisationSignUpFormTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_cannot_create_one()
+    public function test_global_admin_cannot_create_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -458,7 +458,7 @@ class OrganisationSignUpFormTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_super_admin_cannot_create_one()
+    public function test_super_admin_cannot_create_one(): void
     {
         /**
          * @var \App\Models\User $user
@@ -473,7 +473,7 @@ class OrganisationSignUpFormTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_audit_created_when_created()
+    public function test_audit_created_when_created(): void
     {
         $this->fakeEvents();
 

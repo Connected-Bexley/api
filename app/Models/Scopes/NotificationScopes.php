@@ -6,11 +6,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 trait NotificationScopes
 {
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $id
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function scopeReferralId(Builder $query, string $id): Builder
     {
         $ids = explode(',', $id);
@@ -20,11 +15,6 @@ trait NotificationScopes
             ->whereIn('notifiable_id', $ids);
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $id
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function scopeServiceId(Builder $query, string $id): Builder
     {
         $ids = explode(',', $id);
@@ -34,11 +24,6 @@ trait NotificationScopes
             ->whereIn('notifiable_id', $ids);
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $id
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function scopeUserId(Builder $query, string $id): Builder
     {
         $ids = explode(',', $id);

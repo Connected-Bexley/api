@@ -7,10 +7,6 @@ use Illuminate\Support\Facades\DB;
 
 trait SearchHistoryScopes
 {
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function scopeWithFilledQuery(Builder $query): Builder
     {
         return $query->whereNotNull(
@@ -26,8 +22,8 @@ trait SearchHistoryScopes
     protected function ifNull(string $field, string ...$fallbacks): string
     {
         $fallback = count($fallbacks) > 1
-            ? $this->ifNull($field, ...array_slice($fallbacks, 1))
-            : $fallbacks[0];
+        ? $this->ifNull($field, ...array_slice($fallbacks, 1))
+        : $fallbacks[0];
 
         return sprintf('IFNULL(%s, %s)', $field, $fallback);
     }

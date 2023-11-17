@@ -6,9 +6,6 @@ use App\Emails\Email;
 
 class NotifyGlobalAdminEmail extends Email
 {
-    /**
-     * @return string
-     */
     protected function getTemplateId(): string
     {
         return config('gov_uk_notify.notifications_template_ids.service_created.notify_global_admin.email');

@@ -21,14 +21,14 @@ class ReportSchedulesTest extends TestCase
      * List all the report schedules.
      */
 
-    public function test_guest_cannot_list_them()
+    public function test_guest_cannot_list_them(): void
     {
         $response = $this->json('GET', '/core/v1/report-schedules');
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_list_them()
+    public function test_service_worker_cannot_list_them(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create();
@@ -41,7 +41,7 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_list_them()
+    public function test_service_admin_cannot_list_them(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create();
@@ -54,7 +54,7 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_list_them()
+    public function test_organisation_admin_cannot_list_them(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create();
@@ -67,7 +67,7 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_list_them()
+    public function test_global_admin_can_list_them(): void
     {
         $user = User::factory()->create();
         $user->makeGlobalAdmin();
@@ -89,7 +89,7 @@ class ReportSchedulesTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_listed()
+    public function test_audit_created_when_listed(): void
     {
         $this->fakeEvents();
 
@@ -110,14 +110,14 @@ class ReportSchedulesTest extends TestCase
      * Create a report schedule.
      */
 
-    public function test_guest_cannot_create_one()
+    public function test_guest_cannot_create_one(): void
     {
         $response = $this->json('POST', '/core/v1/report-schedules');
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_create_one()
+    public function test_service_worker_cannot_create_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create();
@@ -130,7 +130,7 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_create_one()
+    public function test_service_admin_cannot_create_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create();
@@ -143,7 +143,7 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_create_one()
+    public function test_organisation_admin_cannot_create_one(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create();
@@ -156,7 +156,7 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_can_create_one()
+    public function test_global_admin_can_create_one(): void
     {
         $user = User::factory()->create();
         $user->makeGlobalAdmin();
@@ -179,7 +179,7 @@ class ReportSchedulesTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_created()
+    public function test_audit_created_when_created(): void
     {
         $this->fakeEvents();
 
@@ -204,7 +204,7 @@ class ReportSchedulesTest extends TestCase
      * Get a specific report schedule.
      */
 
-    public function test_guest_cannot_view_one()
+    public function test_guest_cannot_view_one(): void
     {
         $reportSchedule = ReportSchedule::factory()->create();
 
@@ -213,7 +213,7 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_view_one()
+    public function test_service_worker_cannot_view_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -226,7 +226,7 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_view_one()
+    public function test_service_admin_cannot_view_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -239,7 +239,7 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_view_one()
+    public function test_organisation_admin_cannot_view_one(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -252,7 +252,7 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_cannot_view_one()
+    public function test_global_admin_cannot_view_one(): void
     {
         $user = User::factory()->create()->makeGlobalAdmin();
         $reportSchedule = ReportSchedule::factory()->create();
@@ -264,7 +264,7 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_super_admin_can_view_one()
+    public function test_super_admin_can_view_one(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
         $reportSchedule = ReportSchedule::factory()->create();
@@ -284,7 +284,7 @@ class ReportSchedulesTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_viewed()
+    public function test_audit_created_when_viewed(): void
     {
         $this->fakeEvents();
 
@@ -306,7 +306,7 @@ class ReportSchedulesTest extends TestCase
      * Update a specific report schedule.
      */
 
-    public function test_guest_cannot_update_one()
+    public function test_guest_cannot_update_one(): void
     {
         $reportSchedule = ReportSchedule::factory()->create();
 
@@ -315,7 +315,7 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_update_one()
+    public function test_service_worker_cannot_update_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -328,7 +328,7 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_update_one()
+    public function test_service_admin_cannot_update_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -341,7 +341,7 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_update_one()
+    public function test_organisation_admin_cannot_update_one(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -354,7 +354,7 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_cannot_update_one()
+    public function test_global_admin_cannot_update_one(): void
     {
         $user = User::factory()->create()->makeGlobalAdmin();
         $reportSchedule = ReportSchedule::factory()->create();
@@ -366,7 +366,7 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_super_admin_can_update_one()
+    public function test_super_admin_can_update_one(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
         $reportSchedule = ReportSchedule::factory()->create([
@@ -391,7 +391,7 @@ class ReportSchedulesTest extends TestCase
         ]);
     }
 
-    public function test_audit_created_when_updated()
+    public function test_audit_created_when_updated(): void
     {
         $this->fakeEvents();
 
@@ -418,7 +418,7 @@ class ReportSchedulesTest extends TestCase
      * Delete a specific report schedule.
      */
 
-    public function test_guest_cannot_delete_one()
+    public function test_guest_cannot_delete_one(): void
     {
         $reportSchedule = ReportSchedule::factory()->create();
 
@@ -427,7 +427,7 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
-    public function test_service_worker_cannot_delete_one()
+    public function test_service_worker_cannot_delete_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceWorker($service);
@@ -440,7 +440,7 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_service_admin_cannot_delete_one()
+    public function test_service_admin_cannot_delete_one(): void
     {
         $service = Service::factory()->create();
         $user = User::factory()->create()->makeServiceAdmin($service);
@@ -453,7 +453,7 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_organisation_admin_cannot_delete_one()
+    public function test_organisation_admin_cannot_delete_one(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -466,7 +466,7 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_global_admin_cannot_delete_one()
+    public function test_global_admin_cannot_delete_one(): void
     {
         $user = User::factory()->create()->makeGlobalAdmin();
         $reportSchedule = ReportSchedule::factory()->create();
@@ -478,7 +478,7 @@ class ReportSchedulesTest extends TestCase
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    public function test_super_admin_can_delete_one()
+    public function test_super_admin_can_delete_one(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
         $reportSchedule = ReportSchedule::factory()->create();
@@ -491,7 +491,7 @@ class ReportSchedulesTest extends TestCase
         $this->assertDatabaseMissing((new ReportSchedule())->getTable(), ['id' => $reportSchedule->id]);
     }
 
-    public function test_audit_created_when_deleted()
+    public function test_audit_created_when_deleted(): void
     {
         $this->fakeEvents();
 

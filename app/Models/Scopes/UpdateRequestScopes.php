@@ -8,30 +8,17 @@ use Illuminate\Support\Facades\DB;
 
 trait UpdateRequestScopes
 {
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function scopeNew(Builder $query): Builder
     {
         return $query->whereNull('updateable_id');
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function scopeExisting(Builder $query): Builder
     {
         return $query->whereNotNull('updateable_id');
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $id
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeServiceId(Builder $query, $id): Builder
+    public function scopeServiceId(Builder $query, string $id): Builder
     {
         $ids = explode(',', $id);
 
@@ -40,12 +27,7 @@ trait UpdateRequestScopes
             ->whereIn('updateable_id', $ids);
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $id
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeServiceLocationId(Builder $query, $id): Builder
+    public function scopeServiceLocationId(Builder $query, string $id): Builder
     {
         $ids = explode(',', $id);
 
@@ -54,12 +36,7 @@ trait UpdateRequestScopes
             ->whereIn('updateable_id', $ids);
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $id
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeLocationId(Builder $query, $id): Builder
+    public function scopeLocationId(Builder $query, string $id): Builder
     {
         $ids = explode(',', $id);
 
@@ -68,12 +45,7 @@ trait UpdateRequestScopes
             ->whereIn('updateable_id', $ids);
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $id
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeOrganisationId(Builder $query, $id): Builder
+    public function scopeOrganisationId(Builder $query, string $id): Builder
     {
         $ids = explode(',', $id);
 
@@ -82,12 +54,7 @@ trait UpdateRequestScopes
             ->whereIn('updateable_id', $ids);
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $id
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeOrganisationEventId(Builder $query, $id): Builder
+    public function scopeOrganisationEventId(Builder $query, string $id): Builder
     {
         $ids = explode(',', $id);
 
@@ -96,12 +63,7 @@ trait UpdateRequestScopes
             ->whereIn('updateable_id', $ids);
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $id
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopePageId(Builder $query, $id): Builder
+    public function scopePageId(Builder $query, string $id): Builder
     {
         $ids = explode(',', $id);
 
@@ -110,11 +72,6 @@ trait UpdateRequestScopes
             ->whereIn('updateable_id', $ids);
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $alias
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function scopeWithEntry(Builder $query, string $alias = 'entry'): Builder
     {
         return $query->addSelect(DB::raw("({$this->getEntrySql()}) AS `{$alias}`"));
@@ -123,8 +80,6 @@ trait UpdateRequestScopes
     /**
      * This SQL query is placed into its own method as it is referenced
      * in multiple places.
-     *
-     * @return string
      */
     public function getEntrySql(): string
     {
@@ -212,10 +167,6 @@ END
 EOT;
     }
 
-    /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function scopePending(Builder $query): Builder
     {
         return $query

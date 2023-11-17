@@ -12,7 +12,7 @@ class TagsTest extends TestCase
     /**
      * @test
      */
-    public function indexTagsAsGuest200()
+    public function indexTagsAsGuest200(): void
     {
         $tags = Tag::factory()->count(5)->create();
 

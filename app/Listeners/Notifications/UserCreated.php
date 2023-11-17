@@ -13,10 +13,8 @@ class UserCreated
 {
     /**
      * Handle the event.
-     *
-     * @param EndpointHit $event
      */
-    public function handle(EndpointHit $event)
+    public function handle(EndpointHit $event): void
     {
         // Only handle specific endpoint events.
         if ($event->isntFor(User::class, Audit::ACTION_CREATE)) {
@@ -26,9 +24,6 @@ class UserCreated
         $this->notifyUser($event->getModel());
     }
 
-    /**
-     * @param \App\Models\User $user
-     */
     protected function notifyUser(User $user)
     {
         $permissions = $user

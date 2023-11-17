@@ -11,7 +11,7 @@ return new class() extends Migration {
      *
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      */
-    public function up()
+    public function up(): void
     {
         $thesaurus = Storage::disk('local')->get('elasticsearch/thesaurus.csv');
         Storage::cloud()->put('elasticsearch/thesaurus.csv', $thesaurus);
@@ -22,7 +22,7 @@ return new class() extends Migration {
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
         Storage::cloud()->delete('elasticsearch/thesaurus.csv');
 

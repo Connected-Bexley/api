@@ -3,9 +3,10 @@
 namespace App\Rules;
 
 use App\Models\Taxonomy;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class RootTaxonomyIs implements Rule
+class RootTaxonomyIs implements ValidationRule
 {
     /**
      * @var string
@@ -14,8 +15,6 @@ class RootTaxonomyIs implements Rule
 
     /**
      * Create a new rule instance.
-     *
-     * @param string $rootTaxonomyName
      */
     public function __construct(string $rootTaxonomyName)
     {
@@ -25,28 +24,26 @@ class RootTaxonomyIs implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param string $attribute
      * @param mixed $value
-     * @return bool
      */
-    public function passes($attribute, $value)
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         // Immediately fail if the value is not a string.
         if (!is_string($value)) {
-            return false;
+            $fail(__('validation.string'));
         }
 
         $taxonomy = Taxonomy::query()->find($value);
 
-        return $taxonomy ? $taxonomy->rootIsCalled($this->rootTaxonomyName) : false;
+        if (!$taxonomy || !$taxonomy->rootIsCalled($this->rootTaxonomyName)) {
+            $fail($this->message());
+        }
     }
 
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
-    public function message()
+    public function message(): string
     {
         return "The root taxonomy must be called [{$this->rootTaxonomyName}].";
     }

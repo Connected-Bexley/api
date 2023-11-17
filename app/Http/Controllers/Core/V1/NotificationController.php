@@ -8,6 +8,7 @@ use App\Http\Requests\Notification\IndexRequest;
 use App\Http\Requests\Notification\ShowRequest;
 use App\Http\Resources\NotificationResource;
 use App\Models\Notification;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -23,11 +24,8 @@ class NotificationController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param \App\Http\Requests\Notification\IndexRequest $request
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index(IndexRequest $request)
+    public function index(IndexRequest $request): AnonymousResourceCollection
     {
         $baseQuery = Notification::query()
             ->orderByDesc('created_at');
@@ -48,12 +46,8 @@ class NotificationController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param \App\Http\Requests\Notification\ShowRequest $request
-     * @param \App\Models\Notification $notification
-     * @return \App\Http\Resources\NotificationResource
      */
-    public function show(ShowRequest $request, Notification $notification)
+    public function show(ShowRequest $request, Notification $notification): NotificationResource
     {
         $baseQuery = Notification::query()
             ->where('id', $notification->id);

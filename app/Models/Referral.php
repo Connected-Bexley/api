@@ -48,9 +48,7 @@ class Referral extends Model implements Notifiable
     const REFERENCE_MAX_TRIES = 10;
 
     /**
-     * @param int $tries
      * @throws \Exception
-     * @return string
      */
     public function generateReference(int $tries = 0): string
     {
@@ -70,33 +68,21 @@ class Referral extends Model implements Notifiable
         return $reference;
     }
 
-    /**
-     * @param \App\Emails\Email $email
-     */
     public function sendEmailToClient(Email $email)
     {
         Notification::sendEmail($email, $this);
     }
 
-    /**
-     * @param \App\Sms\Sms $sms
-     */
     public function sendSmsToClient(Sms $sms)
     {
         Notification::sendSms($sms, $this);
     }
 
-    /**
-     * @param \App\Emails\Email $email
-     */
     public function sendEmailToReferee(Email $email)
     {
         Notification::sendEmail($email, $this);
     }
 
-    /**
-     * @param \App\Sms\Sms $sms
-     */
     public function sendSmsToReferee(Sms $sms)
     {
         Notification::sendSms($sms, $this);
@@ -104,8 +90,6 @@ class Referral extends Model implements Notifiable
 
     /**
      * Get the initials of the client.
-     *
-     * @return string
      */
     public function initials(): string
     {
@@ -122,28 +106,17 @@ class Referral extends Model implements Notifiable
 
     /**
      * Determines whether this is a self referral or not.
-     *
-     * @return bool
      */
     public function isSelfReferral(): bool
     {
         return $this->referee_name === null;
     }
 
-    /**
-     * @return bool
-     */
     public function isCompleted(): bool
     {
         return $this->status === static::STATUS_COMPLETED;
     }
 
-    /**
-     * @param \App\Models\User $user
-     * @param string $to
-     * @param string|null $comments
-     * @return \App\Models\StatusUpdate
-     */
     public function updateStatus(User $user, string $to, string $comments = null): StatusUpdate
     {
         /** @var \App\Models\StatusUpdate $statusUpdate */
@@ -159,9 +132,6 @@ class Referral extends Model implements Notifiable
         return $statusUpdate;
     }
 
-    /**
-     * @return string
-     */
     public function organisationName(): string
     {
         return $this->organisation ?? $this->organisationTaxonomy->name;

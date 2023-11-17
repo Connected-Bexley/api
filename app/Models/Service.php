@@ -96,10 +96,8 @@ class Service extends Model implements AppliesUpdateRequests, Notifiable, HasTax
 
     /**
      * Get the indexable data array for the model.
-     *
-     * @return array
      */
-    public function toSearchableArray()
+    public function toSearchableArray(): array
     {
         $serviceEligibilities = $this->eligibilities;
         $serviceEligibilityIds = $serviceEligibilities->pluck('id')->toArray();
@@ -142,8 +140,6 @@ class Service extends Model implements AppliesUpdateRequests, Notifiable, HasTax
 
     /**
      * Return the ServiceTaxonomy relationship.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function taxonomyRelationship(): HasMany
     {
@@ -152,9 +148,6 @@ class Service extends Model implements AppliesUpdateRequests, Notifiable, HasTax
 
     /**
      * Check if the update request is valid.
-     *
-     * @param \App\Models\UpdateRequest $updateRequest
-     * @return \Illuminate\Contracts\Validation\Validator
      */
     public function validateUpdateRequest(UpdateRequest $updateRequest): Validator
     {
@@ -170,12 +163,12 @@ class Service extends Model implements AppliesUpdateRequests, Notifiable, HasTax
         $rules['gallery_items.*.file_id'] = [
             'required_with:gallery_items.*',
             'exists:files,id',
-            new FileIsMimeType(File::MIME_TYPE_PNG),
+            new FileIsMimeType(File::MIME_TYPE_PNG, File::MIME_TYPE_SVG, File::MIME_TYPE_JPG, File::MIME_TYPE_JPEG),
         ];
         $rules['logo_file_id'] = [
             'nullable',
             'exists:files,id',
-            new FileIsMimeType(File::MIME_TYPE_PNG),
+            new FileIsMimeType(File::MIME_TYPE_PNG, File::MIME_TYPE_SVG, File::MIME_TYPE_JPG, File::MIME_TYPE_JPEG),
         ];
 
         return ValidatorFacade::make($updateRequest->data, $rules);
@@ -183,9 +176,6 @@ class Service extends Model implements AppliesUpdateRequests, Notifiable, HasTax
 
     /**
      * Apply the update request.
-     *
-     * @param \App\Models\UpdateRequest $updateRequest
-     * @return \App\Models\UpdateRequest
      */
     public function applyUpdateRequest(UpdateRequest $updateRequest): UpdateRequest
     {
@@ -331,9 +321,6 @@ class Service extends Model implements AppliesUpdateRequests, Notifiable, HasTax
     /**
      * Custom logic for returning the data. Useful when wanting to transform
      * or modify the data before returning it, e.g. removing passwords.
-     *
-     * @param array $data
-     * @return array
      */
     public function getData(array $data): array
     {
@@ -342,8 +329,6 @@ class Service extends Model implements AppliesUpdateRequests, Notifiable, HasTax
 
     /**
      * Ensures conditional fields are reset to expected values.
-     *
-     * @return \App\Models\Service
      */
     public function resetConditionalFields(): Service
     {
@@ -374,26 +359,16 @@ class Service extends Model implements AppliesUpdateRequests, Notifiable, HasTax
         return $this;
     }
 
-    /**
-     * @param \App\Emails\Email $email
-     */
     public function sendEmailToContact(Email $email)
     {
         Notification::sendEmail($email, $this);
     }
 
-    /**
-     * @param \App\Sms\Sms $sms
-     */
     public function sendSmsToContact(Sms $sms)
     {
         Notification::sendSms($sms, $this);
     }
 
-    /**
-     * @param string $waitTime
-     * @return bool
-     */
     public static function waitTimeIsValid(string $waitTime): bool
     {
         return in_array($waitTime, [
@@ -405,16 +380,12 @@ class Service extends Model implements AppliesUpdateRequests, Notifiable, HasTax
         ]);
     }
 
-    /**
-     * @return bool
-     */
     public function hasLogo(): bool
     {
         return $this->logo_file_id !== null;
     }
 
     /**
-     * @param int|null $maxDimension
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException|\InvalidArgumentException
      * @return \App\Models\File|\Illuminate\Http\Response|\Illuminate\Contracts\Support\Responsable
      */

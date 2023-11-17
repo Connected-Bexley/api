@@ -10,11 +10,6 @@ use Illuminate\Http\Response as LaravelResponse;
 
 class ResourceDeletedResponse extends Response
 {
-    /**
-     * @param string|null $objectId
-     * @param string|null $resource
-     * @return static
-     */
     public static function create(string $objectId = null, string $resource = null): BaseObject
     {
         return parent::create($objectId)

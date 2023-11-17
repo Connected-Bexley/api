@@ -12,7 +12,7 @@ use Tests\TestCase;
 
 class ServiceObserverTest extends TestCase
 {
-    public function test_service_disabled_email_sent_when_over_12_month_stale_service_updated_to_become_disabled()
+    public function test_service_disabled_email_sent_when_over_12_month_stale_service_updated_to_become_disabled(): void
     {
         Queue::fake();
 

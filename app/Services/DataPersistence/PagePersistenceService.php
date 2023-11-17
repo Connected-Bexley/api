@@ -29,7 +29,6 @@ class PagePersistenceService implements DataPersistenceService
     /**
      * Store the model.
      *
-     * @param \Illuminate\Foundation\Http\FormRequest $request
      * @return \App\Models\UpdateRequest|\App\Models\OrganisationEvent
      */
     public function store(FormRequest $request)
@@ -41,22 +40,16 @@ class PagePersistenceService implements DataPersistenceService
 
     /**
      * Update the model.
-     *
-     * @param \Illuminate\Foundation\Http\FormRequest $request
-     * @return \App\Models\UpdateRequest
      */
-    public function update(FormRequest $request, Model $model)
+    public function update(FormRequest $request, Model $model): UpdateRequestModel
     {
         return $this->processAsUpdateRequest($request, $model);
     }
 
     /**
      * Create a new model from the provided request.
-     *
-     * @param Illuminate\Foundation\Http\FormRequest $request
-     * @return \App\Models\Page
      */
-    public function processAsNewEntity(FormRequest $request)
+    public function processAsNewEntity(FormRequest $request): Page
     {
         return DB::transaction(function () use ($request) {
             // Create the Page.
@@ -89,12 +82,8 @@ class PagePersistenceService implements DataPersistenceService
 
     /**
      * Process the requested changes and either update the model or store an update request.
-     *
-     * @param Illuminate\Foundation\Http\FormRequest $request
-     * @param \App\Models\Page $page
-     * @return \App\Models\UpdateRequest
      */
-    public function processAsUpdateRequest(FormRequest $request, ?Page $page)
+    public function processAsUpdateRequest(FormRequest $request, ?Page $page): UpdateRequestModel
     {
         return DB::transaction(function () use ($request, $page) {
             $data = array_filter_missing([

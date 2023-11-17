@@ -16,8 +16,6 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 {
     /**
      * Setup the test environment.
-     *
-     * @return void
      */
     protected function setUp(): void
     {
@@ -32,7 +30,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
      * Perform a search for services.
      */
 
-    public function test_guest_can_search()
+    public function test_guest_can_search(): void
     {
         Service::factory()->create(['name' => 'This is a test']);
 
@@ -47,55 +45,55 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response->assertJsonStructure([
             'data' => [
                 [
-                    "id",
-                    "organisation_id",
-                    "has_logo",
-                    "slug",
-                    "name",
-                    "type",
-                    "status",
-                    "intro",
-                    "description",
-                    "wait_time",
-                    "is_free",
-                    "fees_text",
-                    "fees_url",
-                    "testimonial",
-                    "video_embed",
-                    "url",
-                    "contact_name",
-                    "contact_phone",
-                    "contact_email",
-                    "show_referral_disclaimer",
-                    "referral_method",
-                    "referral_button_text",
-                    "referral_email",
-                    "referral_url",
-                    "useful_infos",
-                    "offerings",
-                    "gallery_items",
-                    "tags",
-                    "category_taxonomies",
-                    "eligibility_types" => [
-                        "custom" => [
-                            "age_group",
-                            "disability",
-                            "ethnicity",
-                            "gender",
-                            "income",
-                            "language",
-                            "housing",
-                            "other",
+                    'id',
+                    'organisation_id',
+                    'has_logo',
+                    'slug',
+                    'name',
+                    'type',
+                    'status',
+                    'intro',
+                    'description',
+                    'wait_time',
+                    'is_free',
+                    'fees_text',
+                    'fees_url',
+                    'testimonial',
+                    'video_embed',
+                    'url',
+                    'contact_name',
+                    'contact_phone',
+                    'contact_email',
+                    'show_referral_disclaimer',
+                    'referral_method',
+                    'referral_button_text',
+                    'referral_email',
+                    'referral_url',
+                    'useful_infos',
+                    'offerings',
+                    'gallery_items',
+                    'tags',
+                    'category_taxonomies',
+                    'eligibility_types' => [
+                        'custom' => [
+                            'age_group',
+                            'disability',
+                            'ethnicity',
+                            'gender',
+                            'income',
+                            'language',
+                            'housing',
+                            'other',
                         ],
-                        "taxonomies",
+                        'taxonomies',
                     ],
-                    "score",
-                    "ends_at",
-                    "last_modified_at",
-                    "created_at",
-                    "updated_at",
-                    "service_locations",
-                    "cqc_location_id",
+                    'score',
+                    'ends_at',
+                    'last_modified_at',
+                    'created_at',
+                    'updated_at',
+                    'service_locations',
+                    'cqc_location_id',
                 ],
             ],
             'links',
@@ -103,7 +101,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         ]);
     }
 
-    public function test_query_matches_service_name()
+    public function test_query_matches_service_name(): void
     {
         $service1 = Service::factory()->create(['name' => 'This is a test']);
         $service2 = Service::factory()->create(['name' => 'Should not match']);
@@ -132,7 +130,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         ]);
     }
 
-    public function test_query_matches_service_description()
+    public function test_query_matches_service_description(): void
     {
         $service1 = Service::factory()->create(['description' => 'This is a test']);
         $service2 = Service::factory()->create(['description' => 'Should not match']);
@@ -161,7 +159,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         ]);
     }
 
-    public function test_query_matches_taxonomy_name()
+    public function test_query_matches_taxonomy_name(): void
     {
         $service1 = Service::factory()->create();
         $taxonomy = Taxonomy::category()->children()->create([
@@ -201,7 +199,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response->assertJsonFragment(['id' => $service1->id]);
     }
 
-    public function test_query_matches_partial_taxonomy_name()
+    public function test_query_matches_partial_taxonomy_name(): void
     {
         $service1 = Service::factory()->create();
         $taxonomy = Taxonomy::category()->children()->create([
@@ -241,7 +239,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response->assertJsonFragment(['id' => $service1->id]);
     }
 
-    public function test_query_matches_organisation_name()
+    public function test_query_matches_organisation_name(): void
     {
         $organisation1 = Organisation::factory()->create(['name' => 'This is a test']);
         $organisation2 = Organisation::factory()->create(['name' => 'Should not match']);
@@ -270,7 +268,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response->assertJsonFragment(['id' => $service1->id]);
     }
 
-    public function test_query_ranks_service_name_equivalent_to_organisation_name()
+    public function test_query_ranks_service_name_equivalent_to_organisation_name(): void
     {
         $organisation = Organisation::factory()->create(['name' => 'This is a test']);
         $serviceWithRelevantOrganisationName = Service::factory()->create([
@@ -326,7 +324,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $this->assertTrue(in_array($serviceWithRelevantOrganisationName->id, [$data[0]['id'], $data[1]['id']]));
     }
 
-    public function test_query_ranks_perfect_match_above_fuzzy_match()
+    public function test_query_ranks_perfect_match_above_fuzzy_match(): void
     {
         $service1 = Service::factory()->create(['name' => 'This is a test']);
         $service2 = Service::factory()->create(['name' => 'These tests']);
@@ -352,7 +350,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $this->assertEquals($service2->id, $data[1]['id']);
     }
 
-    public function test_query_matches_service_intro()
+    public function test_query_matches_service_intro(): void
     {
         $service1 = Service::factory()->create([
             'intro' => 'This is a service that helps the homeless find temporary housing.',
@@ -386,7 +384,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         ]);
     }
 
-    public function test_query_matches_single_word_from_service_description()
+    public function test_query_matches_single_word_from_service_description(): void
     {
         $service = Service::factory()->create([
             'description' => 'This is a service that helps to homeless find temporary housing.',
@@ -402,7 +400,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response->assertJsonFragment(['id' => $service->id]);
     }
 
-    public function test_query_matches_multiple_words_from_service_description()
+    public function test_query_matches_multiple_words_from_service_description(): void
     {
         $service1 = Service::factory()->create([
             'description' => 'This is a service that helps to homeless find temporary housing.',
@@ -432,7 +430,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response->assertJsonFragment(['id' => $service1->id]);
     }
 
-    public function test_filter_by_wait_time_works()
+    public function test_filter_by_wait_time_works(): void
     {
         $oneMonthWaitTimeService = Service::factory()->create(['wait_time' => Service::WAIT_TIME_MONTH]);
         $twoWeeksWaitTimeService = Service::factory()->create(['wait_time' => Service::WAIT_TIME_TWO_WEEKS]);
@@ -450,7 +448,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response->assertJsonMissing(['id' => $oneMonthWaitTimeService->id]);
     }
 
-    public function test_filter_by_is_free_works()
+    public function test_filter_by_is_free_works(): void
     {
         $paidService = Service::factory()->create(['is_free' => false]);
         $freeService = Service::factory()->create(['is_free' => true]);
@@ -466,7 +464,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response->assertJsonMissing(['id' => $paidService->id]);
     }
 
-    public function test_order_by_location_works()
+    public function test_order_by_location_works(): void
     {
         $service = Service::factory()->create();
         $serviceLocation = ServiceLocation::factory()->create(['service_id' => $service->id]);
@@ -502,7 +500,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $this->assertEquals($service3->id, $hits[2]['id']);
     }
 
-    public function test_query_and_filter_works()
+    public function test_query_and_filter_works(): void
     {
         $service = Service::factory()->create(['name' => 'Ayup Digital']);
         $collection = Collection::create([
@@ -552,7 +550,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response->assertJsonMissing(['id' => $differentService->id]);
     }
 
-    public function test_query_and_filter_works_when_query_does_not_match()
+    public function test_query_and_filter_works_when_query_does_not_match(): void
     {
         $service = Service::factory()->create(['name' => 'Ayup Digital']);
         $collection = Collection::create([
@@ -601,7 +599,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response->assertJsonCount(0, 'data');
     }
 
-    public function test_only_active_services_returned()
+    public function test_only_active_services_returned(): void
     {
         $activeService = Service::factory()->create([
             'name' => 'Testing Service',
@@ -623,7 +621,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response->assertJsonMissing(['id' => $inactiveService->id]);
     }
 
-    public function test_order_by_location_return_services_less_than_limited_miles_away()
+    public function test_order_by_location_return_services_less_than_limited_miles_away(): void
     {
         $service1 = Service::factory()->create();
         $serviceLocation = ServiceLocation::factory()->create(['service_id' => $service1->id]);
@@ -656,7 +654,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response->assertJsonMissing(['id' => $service3->id]);
     }
 
-    public function test_order_by_location_return_services_less_than_1_mile_away()
+    public function test_order_by_location_return_services_less_than_1_mile_away(): void
     {
         // > 1 mile
         $service1 = Service::factory()->create();
@@ -693,7 +691,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response->assertJsonMissing(['id' => $service3->id]);
     }
 
-    public function test_order_by_relevance_with_location_return_services_less_than_limited_miles_away()
+    public function test_order_by_relevance_with_location_return_services_less_than_limited_miles_away(): void
     {
         $service1 = Service::factory()->create();
         $serviceLocation = ServiceLocation::factory()->create(['service_id' => $service1->id]);
@@ -739,7 +737,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $this->assertTrue(in_array($service3->id, [$data[0]['id'], $data[1]['id']]));
     }
 
-    public function test_order_by_relevance_with_location_return_services_less_than_1_mile_away()
+    public function test_order_by_relevance_with_location_return_services_less_than_1_mile_away(): void
     {
         // Not relevant > 1 mile
         $service1 = Service::factory()->create();
@@ -790,7 +788,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $this->assertEquals($service2->id, $data[1]['id']);
     }
 
-    public function test_searches_are_carried_out_in_specified_collections()
+    public function test_searches_are_carried_out_in_specified_collections(): void
     {
         $collection1 = Collection::create([
             'type' => Collection::TYPE_CATEGORY,
@@ -871,7 +869,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response->assertJsonMissing(['id' => $service1->id]);
     }
 
-    public function test_location_searches_are_carried_out_in_specified_collections()
+    public function test_location_searches_are_carried_out_in_specified_collections(): void
     {
         $collection1 = Collection::create([
             'type' => Collection::TYPE_CATEGORY,
@@ -941,7 +939,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response->assertJsonMissing(['id' => $service3->id]);
     }
 
-    public function test_location_searches_and_queries_are_carried_out_in_specified_collections()
+    public function test_location_searches_and_queries_are_carried_out_in_specified_collections(): void
     {
         $collection1 = Collection::create([
             'type' => Collection::TYPE_CATEGORY,
@@ -1036,7 +1034,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response->assertJsonMissing(['id' => $service3->id]);
     }
 
-    public function test_query_matches_eligibility_name()
+    public function test_query_matches_eligibility_name(): void
     {
         // Given a service has an eligibility age group taxonomy of 12 - 15 years
         $service = Service::factory()
@@ -1072,7 +1070,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response->assertJsonFragment(['id' => $service->id]);
     }
 
-    public function test_no_results_when_query_does_not_match_eligibility_name()
+    public function test_no_results_when_query_does_not_match_eligibility_name(): void
     {
         // Given a service has an eligibility age group taxonomy of 12 - 15 years
         $service = Service::factory()
@@ -1106,7 +1104,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response->assertJsonMissing(['id' => $service->id]);
     }
 
-    public function test_service_returned_in_result_if_it_has_no_eligibility_taxonomies_related_to_parent_of_searched_eligibility()
+    public function test_service_returned_in_result_if_it_has_no_eligibility_taxonomies_related_to_parent_of_searched_eligibility(): void
     {
         $service = Service::factory()
             ->create();
@@ -1126,7 +1124,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response->assertJsonFragment(['id' => $service->id]);
     }
 
-    public function test_query_results_filtered_when_eligibity_filter_applied()
+    public function test_query_results_filtered_when_eligibity_filter_applied(): void
     {
         $serviceEligibility1 = Taxonomy::where('name', '12 - 15 years')->firstOrFail();
         $serviceEligibility2 = Taxonomy::where('name', '16 - 18 years')->firstOrFail();
@@ -1181,7 +1179,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response->assertJsonMissing(['id' => $service2->id]);
     }
 
-    public function test_service_ranks_higher_if_eligibility_match()
+    public function test_service_ranks_higher_if_eligibility_match(): void
     {
         // Given a service called Alpha Ltd has no eligibility age group taxonomies specified
         $serviceA = Service::factory()
@@ -1234,7 +1232,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $this->assertEquals($serviceA->id, $data[1]['id']);
     }
 
-    public function test_ranking_for_eligibility_higher_for_single_matching_eligibility_over_multiple_or_all()
+    public function test_ranking_for_eligibility_higher_for_single_matching_eligibility_over_multiple_or_all(): void
     {
         $parentTaxonomy = Taxonomy::serviceEligibility()
             ->children()
@@ -1313,7 +1311,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $this->assertEquals($serviceD->id, $data[3]['id']);
     }
 
-    public function test_search_ranking_given_more_relevant_matches_versus_less_hits_or_no_eligibilities_attached()
+    public function test_search_ranking_given_more_relevant_matches_versus_less_hits_or_no_eligibilities_attached(): void
     {
         $parentTaxonomy = Taxonomy::serviceEligibility()
             ->children()
@@ -1409,7 +1407,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $response->assertJsonMissing(['id' => $serviceIA->id]);
     }
 
-    public function test_services_with_a_higher_score_are_more_relevant()
+    public function test_services_with_a_higher_score_are_more_relevant(): void
     {
         $organisation = \App\Models\Organisation::factory()->create();
         $serviceParams = [
@@ -1436,7 +1434,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $this->assertEquals($service0->id, $data[2]['id']);
     }
 
-    public function test_service_scores_are_secondary_to_distance()
+    public function test_service_scores_are_secondary_to_distance(): void
     {
         $organisation = \App\Models\Organisation::factory()->create();
         $serviceParams = [

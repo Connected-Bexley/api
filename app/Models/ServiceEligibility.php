@@ -8,9 +8,6 @@ class ServiceEligibility extends Model
 {
     use ServiceEligibilityRelationships;
 
-    /**
-     * @return \App\Models\ServiceEligibility
-     */
     public function touchService(): ServiceEligibility
     {
         $this->service->save();

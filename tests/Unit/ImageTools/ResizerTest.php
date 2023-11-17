@@ -12,7 +12,7 @@ class ResizerTest extends TestCase
 
     const HEIGHT = 1;
 
-    public function test_resize_works()
+    public function test_resize_works(): void
     {
         $srcContent = Storage::disk('local')->get('test-data/image.png');
 

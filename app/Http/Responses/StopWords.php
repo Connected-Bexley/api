@@ -3,6 +3,7 @@
 namespace App\Http\Responses;
 
 use Illuminate\Contracts\Support\Responsable;
+use Illuminate\Http\JsonResponse;
 
 class StopWords implements Responsable
 {
@@ -13,8 +14,6 @@ class StopWords implements Responsable
 
     /**
      * StopWords constructor.
-     *
-     * @param array $stopWords
      */
     public function __construct(array $stopWords)
     {
@@ -23,11 +22,9 @@ class StopWords implements Responsable
 
     /**
      * Create an HTTP response that represents the object.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @param mixed $request
      */
-    public function toResponse($request)
+    public function toResponse($request): JsonResponse
     {
         return response()->json(['data' => $this->stopWords]);
     }

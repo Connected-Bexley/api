@@ -6,38 +6,27 @@ use App\Models\Location;
 use App\Models\Organisation;
 use App\Models\OrganisationEventTaxonomy;
 use App\Models\Taxonomy;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 trait OrganisationEventRelationships
 {
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function organisation()
+    public function organisation(): BelongsTo
     {
         return $this->belongsTo(Organisation::class);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function location()
+    public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
     public function taxonomies(): BelongsToMany
     {
         return $this->belongsToMany(Taxonomy::class, (new OrganisationEventTaxonomy())->getTable());
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
     public function organisationEventTaxonomies(): HasMany
     {
         return $this->hasMany(OrganisationEventTaxonomy::class);
@@ -45,8 +34,6 @@ trait OrganisationEventRelationships
 
     /**
      * Return the OrganisationEventTaxonomy relationship.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function taxonomyRelationship(): HasMany
     {

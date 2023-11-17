@@ -8,7 +8,7 @@ return new class() extends Migration {
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('notifications', function (Blueprint $table) {
             $table->timestamp('sent_at')->nullable()->after('message');
@@ -18,7 +18,7 @@ return new class() extends Migration {
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
         Schema::table('notifications', function (Blueprint $table) {
             $table->dropColumn('sent_at');

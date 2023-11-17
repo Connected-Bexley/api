@@ -30,8 +30,6 @@ class Organisation extends Model implements AppliesUpdateRequests, HasTaxonomyRe
 
     /**
      * Return the OrganisationTaxonomy relationship.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function taxonomyRelationship(): HasMany
     {
@@ -40,9 +38,6 @@ class Organisation extends Model implements AppliesUpdateRequests, HasTaxonomyRe
 
     /**
      * Check if the update request is valid.
-     *
-     * @param \App\Models\UpdateRequest $updateRequest
-     * @return \Illuminate\Contracts\Validation\Validator
      */
     public function validateUpdateRequest(UpdateRequest $updateRequest): Validator
     {
@@ -57,7 +52,7 @@ class Organisation extends Model implements AppliesUpdateRequests, HasTaxonomyRe
         $rules['logo_file_id'] = [
             'nullable',
             'exists:files,id',
-            new FileIsMimeType(File::MIME_TYPE_PNG),
+            new FileIsMimeType(File::MIME_TYPE_PNG, File::MIME_TYPE_JPG, File::MIME_TYPE_JPEG, File::MIME_TYPE_SVG),
         ];
 
         return ValidatorFacade::make($updateRequest->data, $rules);
@@ -65,9 +60,6 @@ class Organisation extends Model implements AppliesUpdateRequests, HasTaxonomyRe
 
     /**
      * Apply the update request.
-     *
-     * @param \App\Models\UpdateRequest $updateRequest
-     * @return \App\Models\UpdateRequest
      */
     public function applyUpdateRequest(UpdateRequest $updateRequest): UpdateRequest
     {
@@ -105,10 +97,8 @@ class Organisation extends Model implements AppliesUpdateRequests, HasTaxonomyRe
 
     /**
      * Delete polymorphic relationships when deleting.
-     *
-     * @return bool|null
      */
-    public function delete()
+    public function delete(): ?bool
     {
         $this->socialMedias()->delete();
 
@@ -118,35 +108,25 @@ class Organisation extends Model implements AppliesUpdateRequests, HasTaxonomyRe
     /**
      * Custom logic for returning the data. Useful when wanting to transform
      * or modify the data before returning it, e.g. removing passwords.
-     *
-     * @param array $data
-     * @return array
      */
     public function getData(array $data): array
     {
         return $data;
     }
 
-    /**
-     * @return \App\Models\Organisation
-     */
     public function touchServices(): Organisation
     {
-        $this->services()->get()->each->save();
+        $this->services()->get()->searchable();
 
         return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function hasLogo(): bool
     {
         return $this->logo_file_id !== null;
     }
 
     /**
-     * @param int|null $maxDimension
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException|\InvalidArgumentException
      * @return \App\Models\File|\Illuminate\Http\Response|\Illuminate\Contracts\Support\Responsable
      */

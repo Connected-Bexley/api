@@ -11,7 +11,7 @@ return new class() extends Migration {
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         $content = DB::table('information_pages')->pluck('content', 'id');
 
@@ -43,7 +43,7 @@ return new class() extends Migration {
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
         $content = DB::table('pages')->pluck('content', 'id')->all();
 
