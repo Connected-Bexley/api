@@ -49,6 +49,7 @@ class PageController extends Controller
             ->allowedIncludes([
                 'parent',
                 'children',
+                'ancestors',
                 AllowedInclude::relationship('landingPageAncestors', 'landingPageAncestors'),
             ])
             ->allowedFilters([
@@ -82,7 +83,7 @@ class PageController extends Controller
 
         event(EndpointHit::onCreate($request, "Created page [{$entity->id}]", $entity));
 
-        $entity->load('landingPageAncestors', 'parent', 'children', 'collectionCategories', 'collectionPersonas');
+        $entity->load('landingPageAncestors', 'parent', 'children', 'ancestors', 'collectionCategories', 'collectionPersonas');
 
         return new PageResource($entity);
     }
@@ -93,7 +94,7 @@ class PageController extends Controller
     public function show(ShowRequest $request, Page $page): PageResource
     {
         $baseQuery = Page::query()
-            ->with(['landingPageAncestors', 'parent', 'children', 'collectionCategories', 'collectionPersonas'])
+            ->with(['landingPageAncestors', 'parent', 'children', 'ancestors', 'collectionCategories', 'collectionPersonas'])
             ->where('id', $page->id);
 
         $page = QueryBuilder::for($baseQuery)
@@ -101,7 +102,7 @@ class PageController extends Controller
 
         event(EndpointHit::onRead($request, "Viewed page [{$page->id}]", $page));
 
-        return new pageResource($page);
+        return new PageResource($page);
     }
 
     /**

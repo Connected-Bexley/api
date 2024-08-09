@@ -37,7 +37,7 @@ class Report extends Model
      * Created a report record and a file record.
      * Then delegates the physical file creation to a `generateReportName` method.
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public static function generate(
         ReportType $type,

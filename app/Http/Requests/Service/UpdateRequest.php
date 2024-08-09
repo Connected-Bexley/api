@@ -6,6 +6,7 @@ use App\Http\Requests\HasMissingValues;
 use App\Models\File;
 use App\Models\Role;
 use App\Models\Service;
+use App\Models\SocialMedia;
 use App\Models\Taxonomy;
 use App\Models\UserRole;
 use App\Rules\CanUpdateCategoryTaxonomyRelationships;
@@ -62,7 +63,6 @@ class UpdateRequest extends FormRequest
                 'string',
                 'min:1',
                 'max:255',
-                Rule::unique(table(Service::class), 'slug')->ignoreModel($this->service),
                 new Slug(),
                 new UserHasRole(
                     $this->user('api'),
@@ -100,7 +100,7 @@ class UpdateRequest extends FormRequest
             'description' => [
                 'string',
                 new MarkdownMinLength(1),
-                new MarkdownMaxLength(3000, 'Description tab - The long description must be 3000 characters or fewer.'),
+                new MarkdownMaxLength(config('local.service_description_max_chars'), 'Description tab - The long description must be ' . config('local.service_description_max_chars') . ' characters or fewer.'),
             ],
             'wait_time' => [
                 'nullable',
@@ -117,7 +117,7 @@ class UpdateRequest extends FormRequest
             'fees_url' => ['nullable', 'url', 'max:255'],
             'testimonial' => ['nullable', 'string', 'min:1', 'max:255'],
             'video_embed' => ['nullable', 'string', 'url', 'max:255', new VideoEmbed()],
-            'url' => ['url', 'max:255'],
+            'url' => ['nullable', 'url', 'max:255'],
             'contact_name' => ['nullable', 'string', 'min:1', 'max:255'],
             'contact_phone' => [
                 'nullable',
@@ -218,7 +218,7 @@ class UpdateRequest extends FormRequest
             'useful_infos' => ['array'],
             'useful_infos.*' => ['array'],
             'useful_infos.*.title' => ['required_with:useful_infos.*', 'string', 'min:1', 'max:255'],
-            'useful_infos.*.description' => ['required_with:useful_infos.*', 'string', new MarkdownMinLength(1), new MarkdownMaxLength(10000)],
+            'useful_infos.*.description' => ['required_with:useful_infos.*', 'string', new MarkdownMinLength(1), new MarkdownMaxLength(config('local.useful_info_description_max_chars'))],
             'useful_infos.*.order' => [
                 'required_with:useful_infos.*',
                 'integer',
@@ -229,7 +229,7 @@ class UpdateRequest extends FormRequest
                 )),
             ],
 
-            'offerings' => ['array'],
+            'offerings' => ['nullable', 'array'],
             'offerings.*' => ['array'],
             'offerings.*.offering' => ['required_with:offerings.*', 'string', 'min:1', 'max:255'],
             'offerings.*.order' => [
@@ -242,9 +242,23 @@ class UpdateRequest extends FormRequest
                 )),
             ],
 
-            'social_medias' => ['nullable', 'size:0'],
+            'social_medias' => ['array'],
+            'social_medias.*' => ['array'],
+            'social_medias.*.type' => [
+                'required_with:social_medias.*',
+                Rule::in([
+                    SocialMedia::TYPE_FACEBOOK,
+                    SocialMedia::TYPE_INSTAGRAM,
+                    SocialMedia::TYPE_OTHER,
+                    SocialMedia::TYPE_TIKTOK,
+                    SocialMedia::TYPE_TWITTER,
+                    SocialMedia::TYPE_SNAPCHAT,
+                    SocialMedia::TYPE_YOUTUBE,
+                ]),
+            ],
+            'social_medias.*.url' => ['required_with:social_medias.*', 'url', 'max:255'],
 
-            'gallery_items' => ['array'],
+            'gallery_items' => ['array', 'max:' . config('local.max_gallery_images')],
             'gallery_items.*' => ['array'],
             'gallery_items.*.file_id' => [
                 'required_with:gallery_items.*',
@@ -400,6 +414,7 @@ class UpdateRequest extends FormRequest
             'contact_email.email' => "Additional Info tab -  Please enter an email address users can use to contact your {$type} (eg. name@example.com).",
             'useful_infos.*.title.required_with' => 'Good to know tab - Please select a title.',
             'useful_infos.*.description.required_with' => 'Good to know tab - Please enter a description.',
+            'social_medias.*.url.url' => 'Additional info tab - Please enter a valid social media web address (eg. https://www.youtube.com/watch?v=h-2sgpokvGI).',
         ];
     }
 }

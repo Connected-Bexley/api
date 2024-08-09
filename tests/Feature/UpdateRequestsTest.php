@@ -2,26 +2,27 @@
 
 namespace Tests\Feature;
 
-use App\Events\EndpointHit;
+use Tests\TestCase;
+use App\Models\Role;
+use App\Models\User;
 use App\Models\Audit;
+use App\Models\Service;
 use App\Models\Location;
 use App\Models\Offering;
-use App\Models\Organisation;
-use App\Models\Role;
-use App\Models\Service;
-use App\Models\ServiceLocation;
-use App\Models\SocialMedia;
 use App\Models\Taxonomy;
-use App\Models\UpdateRequest;
-use App\Models\UsefulInfo;
-use App\Models\User;
 use App\Models\UserRole;
-use Carbon\CarbonImmutable;
+use App\Models\UsefulInfo;
+use App\Events\EndpointHit;
+use App\Models\SocialMedia;
+use App\Models\Organisation;
+use App\Models\UpdateRequest;
 use Illuminate\Http\Response;
+use Laravel\Passport\Passport;
+use App\Models\ServiceLocation;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Event;
-use Laravel\Passport\Passport;
-use Tests\TestCase;
+use Illuminate\Support\Facades\Queue;
 
 class UpdateRequestsTest extends TestCase
 {
@@ -243,6 +244,51 @@ class UpdateRequestsTest extends TestCase
         $superAdminUser = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($superAdminUser);
         $response = $this->json('GET', "/core/v1/update-requests?filter[entry]={$organisation->name}");
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonMissing(['id' => $locationUpdateRequest->id]);
+        $response->assertJsonFragment(['id' => $organisationUpdateRequest->id]);
+    }
+
+    /**
+     * @test
+     */
+    public function getFilterUpdateRequestsByTypeAsSuperAdmin200(): void
+    {
+        $organisation = Organisation::factory()->create([
+            'name' => 'Name with, comma',
+        ]);
+        $creatingUser = User::factory()->create()->makeOrganisationAdmin($organisation);
+
+        $location = Location::factory()->create();
+        $locationUpdateRequest = $location->updateRequests()->create([
+            'user_id' => $creatingUser->id,
+            'data' => [
+                'address_line_1' => $this->faker->streetAddress(),
+                'address_line_2' => null,
+                'address_line_3' => null,
+                'city' => $this->faker->city(),
+                'county' => 'West Yorkshire',
+                'postcode' => $this->faker->postcode(),
+                'country' => 'United Kingdom',
+                'accessibility_info' => null,
+            ],
+        ]);
+
+        $organisationUpdateRequest = $organisation->updateRequests()->create([
+            'user_id' => $creatingUser->id,
+            'data' => [
+                'name' => 'Test Name',
+                'description' => 'Lorem ipsum',
+                'url' => 'https://example.com',
+                'email' => 'phpunit@example.com',
+                'phone' => '07700000000',
+            ],
+        ]);
+
+        $superAdminUser = User::factory()->create()->makeSuperAdmin();
+        Passport::actingAs($superAdminUser);
+        $response = $this->json('GET', '/core/v1/update-requests?filter[type]=' . UpdateRequest::EXISTING_TYPE_ORGANISATION);
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonMissing(['id' => $locationUpdateRequest->id]);
@@ -485,7 +531,7 @@ class UpdateRequestsTest extends TestCase
             'data' => ['name' => 'Test Name'],
         ]);
 
-        $response = $this->json('DELETE', "/core/v1/update-requests/{$updateRequest->id}");
+        $response = $this->json('PUT', "/core/v1/update-requests/{$updateRequest->id}/reject", ['message' => 'Rejection Message']);
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
@@ -505,7 +551,7 @@ class UpdateRequestsTest extends TestCase
             'data' => ['name' => 'Test Name'],
         ]);
 
-        $response = $this->json('DELETE', "/core/v1/update-requests/{$updateRequest->id}");
+        $response = $this->json('PUT', "/core/v1/update-requests/{$updateRequest->id}/reject", ['message' => 'Rejection Message']);
 
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
@@ -525,7 +571,7 @@ class UpdateRequestsTest extends TestCase
             'data' => ['name' => 'Test Name'],
         ]);
 
-        $response = $this->json('DELETE', "/core/v1/update-requests/{$updateRequest->id}");
+        $response = $this->json('PUT', "/core/v1/update-requests/{$updateRequest->id}/reject", ['message' => 'Rejection Message']);
 
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
@@ -545,7 +591,7 @@ class UpdateRequestsTest extends TestCase
             'data' => ['name' => 'Test Name'],
         ]);
 
-        $response = $this->json('DELETE', "/core/v1/update-requests/{$updateRequest->id}");
+        $response = $this->json('PUT', "/core/v1/update-requests/{$updateRequest->id}/reject", ['message' => 'Rejection Message']);
 
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
@@ -564,7 +610,7 @@ class UpdateRequestsTest extends TestCase
             'data' => ['name' => 'Test Name'],
         ]);
 
-        $response = $this->json('DELETE', "/core/v1/update-requests/{$updateRequest->id}");
+        $response = $this->json('PUT', "/core/v1/update-requests/{$updateRequest->id}/reject", ['message' => 'Rejection Message']);
 
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
@@ -572,7 +618,7 @@ class UpdateRequestsTest extends TestCase
     /**
      * @test
      */
-    public function super_admin_can_delete_one(): void
+    public function super_admin_cannot_delete_one_without_a_rejection_message(): void
     {
         $user = User::factory()->create()->makeSuperAdmin();
         Passport::actingAs($user);
@@ -583,7 +629,107 @@ class UpdateRequestsTest extends TestCase
             'data' => ['name' => 'Test Name'],
         ]);
 
-        $response = $this->json('DELETE', "/core/v1/update-requests/{$updateRequest->id}");
+        $response = $this->json('PUT', "/core/v1/update-requests/{$updateRequest->id}/reject");
+
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+        $this->assertDatabaseHas((new UpdateRequest())->getTable(), [
+            'id' => $updateRequest->id,
+            'actioning_user_id' => null,
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function super_admin_can_delete_one_with_a_rejection_message(): void
+    {
+        $user = User::factory()->create()->makeSuperAdmin();
+        Passport::actingAs($user);
+
+        $serviceLocation = ServiceLocation::factory()->create();
+        $updateRequest = $serviceLocation->updateRequests()->create([
+            'user_id' => User::factory()->create()->id,
+            'data' => ['name' => 'Test Name'],
+        ]);
+
+        $response = $this->json('PUT', "/core/v1/update-requests/{$updateRequest->id}/reject", ['message' => 'Rejection Message']);
+
+        $response->assertStatus(Response::HTTP_OK);
+        $this->assertSoftDeleted((new UpdateRequest())->getTable(), [
+            'id' => $updateRequest->id,
+            'actioning_user_id' => $user->id,
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function super_admin_can_delete_one_for_an_organisation_signup_form_with_a_rejection_message(): void
+    {
+        Queue::fake();
+
+        $user = User::factory()->create()->makeSuperAdmin();
+        Passport::actingAs($user);
+
+        /** @var \App\Models\UpdateRequest $updateRequest */
+        $updateRequest = UpdateRequest::create([
+            'updateable_type' => UpdateRequest::NEW_TYPE_ORGANISATION_SIGN_UP_FORM,
+            'data' => [
+                'user' => [
+                    'first_name' => 'John',
+                    'last_name' => 'Doe',
+                    'email' => 'john.doe@example.com',
+                    'phone' => '07700000000',
+                    'password' => 'P@55w0rd.',
+                ],
+                'organisation' => [
+                    'slug' => 'test-org',
+                    'name' => 'Test Org',
+                    'description' => 'Test description',
+                    'url' => 'http://test-org.example.com',
+                    'email' => 'info@test-org.example.com',
+                    'phone' => '07700000000',
+                ],
+                'service' => [
+                    'slug' => 'test-service',
+                    'name' => 'Test Service',
+                    'type' => Service::TYPE_SERVICE,
+                    'intro' => 'This is a test intro',
+                    'description' => 'Lorem ipsum',
+                    'wait_time' => null,
+                    'is_free' => true,
+                    'fees_text' => null,
+                    'fees_url' => null,
+                    'testimonial' => null,
+                    'video_embed' => null,
+                    'url' => 'https://example.com',
+                    'contact_name' => 'Foo Bar',
+                    'contact_phone' => '01130000000',
+                    'contact_email' => 'foo.bar@example.com',
+                    'useful_infos' => [
+                        [
+                            'title' => 'Did you know?',
+                            'description' => 'Lorem ipsum',
+                            'order' => 1,
+                        ],
+                    ],
+                    'offerings' => [
+                        [
+                            'offering' => 'Weekly club',
+                            'order' => 1,
+                        ],
+                    ],
+                    'social_medias' => [
+                        [
+                            'type' => SocialMedia::TYPE_INSTAGRAM,
+                            'url' => 'https://www.instagram.com/ayupdigital',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $response = $this->json('PUT', "/core/v1/update-requests/{$updateRequest->id}/reject", ['message' => 'Rejection Message']);
 
         $response->assertStatus(Response::HTTP_OK);
         $this->assertSoftDeleted((new UpdateRequest())->getTable(), [
@@ -608,7 +754,7 @@ class UpdateRequestsTest extends TestCase
             'data' => ['name' => 'Test Name'],
         ]);
 
-        $this->json('DELETE', "/core/v1/update-requests/{$updateRequest->id}");
+        $this->json('PUT', "/core/v1/update-requests/{$updateRequest->id}/reject", ['message' => 'Rejection Message']);
 
         Event::assertDispatched(EndpointHit::class, function (EndpointHit $event) use ($user, $updateRequest) {
             return ($event->getAction() === Audit::ACTION_DELETE) &&
@@ -885,6 +1031,7 @@ class UpdateRequestsTest extends TestCase
                 'referral_email' => $service->referral_email,
                 'referral_url' => $service->referral_url,
                 'useful_infos' => [],
+                'social_medias' => [],
                 'category_taxonomies' => $service->taxonomies()->pluck('taxonomies.id')->toArray(),
             ],
         ]);
@@ -920,7 +1067,8 @@ class UpdateRequestsTest extends TestCase
         $imagePayload = [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,'.self::BASE64_ENCODED_PNG,
+            'alt_text' => 'image description',
+            'file' => 'data:image/png;base64,' . self::BASE64_ENCODED_PNG,
         ];
 
         $response = $this->json('POST', '/core/v1/files', $imagePayload);
@@ -971,6 +1119,7 @@ class UpdateRequestsTest extends TestCase
                 ],
             ],
             'logo_file_id' => $logoImage['id'],
+            'social_medias' => [],
             'gallery_items' => [
                 [
                     'file_id' => $galleryImage1['id'],
@@ -995,20 +1144,142 @@ class UpdateRequestsTest extends TestCase
             ->where('updateable_id', null)
             ->firstOrFail();
 
-        $globalAdminUser = User::factory()->create()->makeSuperAdmin();
-        Passport::actingAs($globalAdminUser);
+        $superAdminUser = User::factory()->create()->makeSuperAdmin();
+        Passport::actingAs($superAdminUser);
 
         $response = $this->json('PUT', "/core/v1/update-requests/{$updateRequest->id}/approve");
 
         $response->assertStatus(Response::HTTP_OK);
+
         $this->assertDatabaseHas((new UpdateRequest())->getTable(), [
             'id' => $updateRequest->id,
-            'actioning_user_id' => $globalAdminUser->id,
+            'actioning_user_id' => $superAdminUser->id,
             'approved_at' => $now,
         ]);
 
         $this->assertNotEmpty(Service::all());
         $this->assertEquals(1, Service::all()->count());
+    }
+
+    /**
+     * @test
+     */
+    public function putApproveAndEditNewServiceUpdateRequestAsSuperAdmin200(): void
+    {
+        $now = Date::now();
+        Date::setTestNow($now);
+
+        $organisation = Organisation::factory()->create();
+        $taxonomy = Taxonomy::factory()->create();
+        $user = User::factory()->create()->makeGlobalAdmin();
+
+        //Given an organisation admin is logged in
+        Passport::actingAs($user);
+
+        $imagePayload = [
+            'is_private' => false,
+            'mime_type' => 'image/png',
+            'alt_text' => 'image description',
+            'file' => 'data:image/png;base64,' . self::BASE64_ENCODED_PNG,
+        ];
+
+        $response = $this->json('POST', '/core/v1/files', $imagePayload);
+        $logoImage = $this->getResponseContent($response, 'data');
+
+        $response = $this->json('POST', '/core/v1/files', $imagePayload);
+        $galleryImage1 = $this->getResponseContent($response, 'data');
+
+        $response = $this->json('POST', '/core/v1/files', $imagePayload);
+        $galleryImage2 = $this->getResponseContent($response, 'data');
+
+        $payload = [
+            'organisation_id' => $organisation->id,
+            'slug' => 'test-service',
+            'name' => 'Test Service',
+            'type' => Service::TYPE_SERVICE,
+            'status' => Service::STATUS_ACTIVE,
+            'intro' => 'This is a test intro',
+            'description' => 'Lorem ipsum',
+            'wait_time' => null,
+            'is_free' => true,
+            'fees_text' => null,
+            'fees_url' => null,
+            'testimonial' => null,
+            'video_embed' => null,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
+            'contact_phone' => random_uk_phone(),
+            'contact_email' => $this->faker->safeEmail(),
+            'cqc_location_id' => $this->faker->numerify('#-#########'),
+            'show_referral_disclaimer' => false,
+            'referral_method' => Service::REFERRAL_METHOD_NONE,
+            'referral_button_text' => null,
+            'referral_email' => null,
+            'referral_url' => null,
+            'ends_at' => null,
+            'useful_infos' => [
+                [
+                    'title' => 'Did you know?',
+                    'description' => 'Lorem ipsum',
+                    'order' => 1,
+                ],
+            ],
+            'offerings' => [
+                [
+                    'offering' => 'Weekly club',
+                    'order' => 1,
+                ],
+            ],
+            'logo_file_id' => $logoImage['id'],
+            'social_medias' => [],
+            'gallery_items' => [
+                [
+                    'file_id' => $galleryImage1['id'],
+                ],
+                [
+                    'file_id' => $galleryImage2['id'],
+                ],
+            ],
+            'tags' => [],
+            'category_taxonomies' => [
+                $taxonomy->id,
+            ],
+        ];
+
+        //When they create a service
+        $response = $this->json('POST', '/core/v1/services', $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonFragment($payload);
+
+        //Then an update request should be created for the new service
+        $updateRequest = UpdateRequest::query()
+            ->where('updateable_type', UpdateRequest::NEW_TYPE_SERVICE_GLOBAL_ADMIN)
+            ->where('updateable_id', null)
+            ->firstOrFail();
+
+        $superAdminUser = User::factory()->create()->makeSuperAdmin();
+        Passport::actingAs($superAdminUser);
+
+        // Call approve endpoint with action edit flag
+        $response = $this->json('PUT', "/core/v1/update-requests/{$updateRequest->id}/approve?action=edit");
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $this->assertDatabaseHas((new UpdateRequest())->getTable(), [
+            'id' => $updateRequest->id,
+            'actioning_user_id' => $superAdminUser->id,
+            'approved_at' => $now,
+        ]);
+
+        $this->assertNotEmpty(Service::all());
+        $this->assertEquals(1, Service::all()->count());
+
+        // Service should be disabled
+        $this->assertDatabaseHas('services', [
+            'slug' => 'test-service',
+            'status' => Service::STATUS_INACTIVE,
+        ]);
     }
 
     /**
@@ -1350,6 +1621,7 @@ class UpdateRequestsTest extends TestCase
             'created_at' => $oldNow,
             'updated_at' => $oldNow,
         ]);
+
         $updateRequest = $service->updateRequests()->create([
             'user_id' => User::factory()->create()->id,
             'data' => [
@@ -1361,7 +1633,49 @@ class UpdateRequestsTest extends TestCase
 
         $response->assertStatus(Response::HTTP_OK);
         $this->assertDatabaseHas($service->getTable(), [
-            'last_modified_at' => $newNow->format(CarbonImmutable::ISO8601),
+            'last_modified_at' => $newNow->toDateTimeString(),
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function lastModifiedAtIsUpdatedWhenServiceUpdatedByUpdateRequest()
+    {
+        $oldNow = Date::now()->subMonths(6);
+        $newNow = Date::now();
+        Date::setTestNow($newNow);
+
+        $service = Service::factory()->create([
+            'slug' => 'test-service',
+            'status' => Service::STATUS_ACTIVE,
+            'last_modified_at' => $oldNow,
+            'created_at' => $oldNow,
+            'updated_at' => $oldNow,
+        ]);
+        $taxonomy = Taxonomy::factory()->create();
+        $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
+        $user = User::factory()->create()->makeServiceAdmin($service);
+
+        Passport::actingAs($user);
+
+        $payload = [
+            'name' => 'Test Service',
+        ];
+        $response = $this->json('PUT', "/core/v1/services/{$service->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonFragment(['data' => $payload]);
+
+        $updateRequest = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
+        $this->assertDatabaseHas($service->getTable(), [
+            'id' => $service->id,
+            'last_modified_at' => $newNow->toDateTimeString(),
         ]);
     }
 }

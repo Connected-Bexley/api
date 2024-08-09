@@ -9,7 +9,7 @@ return new class() extends Migration {
     /**
      * Run the migrations.
      *
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     * @throws Illuminate\Contracts\Filesystem\FileNotFoundException
      */
     public function up(): void
     {

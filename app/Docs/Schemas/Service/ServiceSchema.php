@@ -33,6 +33,14 @@ class ServiceSchema extends Schema
                     ->enum(Service::STATUS_ACTIVE, Service::STATUS_INACTIVE),
                 Schema::string('intro'),
                 Schema::string('description'),
+                Schema::object('image')
+                    ->properties(
+                        Schema::string('id'),
+                        Schema::string('mime_type'),
+                        Schema::string('alt_text'),
+                        Schema::string('url')
+                    )
+                    ->nullable(),
                 Schema::string('wait_time')
                     ->enum(
                         Service::WAIT_TIME_ONE_WEEK,
@@ -75,6 +83,8 @@ class ServiceSchema extends Schema
                     ->items(UsefulInfoSchema::create()),
                 Schema::array('offerings')
                     ->items(OfferingSchema::create()),
+                Schema::array('social_medias')
+                    ->items(SocialMediaSchema::create()),
                 Schema::array('gallery_items')
                     ->items(GalleryItemSchema::create()),
                 Schema::array('tags')

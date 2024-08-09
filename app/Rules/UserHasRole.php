@@ -11,12 +11,12 @@ use Illuminate\Contracts\Validation\ValidationRule;
 class UserHasRole implements ValidationRule
 {
     /**
-     * @var \App\Models\User
+     * @var User
      */
     protected $user;
 
     /**
-     * @var \App\Models\Role
+     * @var Role
      */
     protected $userRole;
 

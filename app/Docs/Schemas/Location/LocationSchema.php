@@ -28,6 +28,14 @@ class LocationSchema extends Schema
                     ->format(Schema::FORMAT_FLOAT),
                 Schema::number('lon')
                     ->format(Schema::FORMAT_FLOAT),
+                Schema::object('image')
+                    ->properties(
+                        Schema::string('id'),
+                        Schema::string('mime_type'),
+                        Schema::string('alt_text'),
+                        Schema::string('url')
+                    )
+                    ->nullable(),
                 Schema::string('accessibility_info')
                     ->nullable(),
                 Schema::boolean('has_wheelchair_access'),

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Set the docker-compose files to use.
-COMPOSE="docker-compose"
+COMPOSE="docker compose"
 
 # Set script scope environment variables to be used in testing
 export APP_PORT=${APP_PORT:-80}

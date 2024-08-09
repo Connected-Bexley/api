@@ -48,7 +48,7 @@ class Referral extends Model implements Notifiable
     const REFERENCE_MAX_TRIES = 10;
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function generateReference(int $tries = 0): string
     {
@@ -119,7 +119,7 @@ class Referral extends Model implements Notifiable
 
     public function updateStatus(User $user, string $to, string $comments = null): StatusUpdate
     {
-        /** @var \App\Models\StatusUpdate $statusUpdate */
+        /** @var StatusUpdate $statusUpdate */
         $statusUpdate = $this->statusUpdates()->create([
             'user_id' => $user->id,
             'from' => $this->status,

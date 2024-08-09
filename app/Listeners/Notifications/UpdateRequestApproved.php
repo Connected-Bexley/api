@@ -27,7 +27,7 @@ class UpdateRequestApproved
             return;
         }
 
-        /** @var \App\Models\UpdateRequest $updateRequest */
+        /** @var UpdateRequest $updateRequest */
         $updateRequest = $event->getModel();
 
         if ($updateRequest->isExisting()) {

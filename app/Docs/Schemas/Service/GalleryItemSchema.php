@@ -15,6 +15,8 @@ class GalleryItemSchema extends Schema
                 Schema::string('file_id')
                     ->format(Schema::FORMAT_UUID),
                 Schema::string('url'),
+                Schema::string('mime_type'),
+                Schema::string('alt_text'),
                 Schema::string('created_at')
                     ->format(Schema::FORMAT_DATE_TIME)
                     ->nullable(),

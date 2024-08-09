@@ -11,7 +11,7 @@ use Illuminate\Support\Arr;
 class CanUpdateServiceEligibilityTaxonomyRelationships implements ValidationRule
 {
     /**
-     * @var \App\Models\User
+     * @var User
      */
     protected $user;
 

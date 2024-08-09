@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 
 namespace App\Search\ElasticSearch;
 
@@ -25,10 +25,10 @@ class CollectionCategoryQueryBuilder extends ElasticsearchQueryBuilder implement
                 ],
                 'functions' => [
                     [
-                        'field_value_factor' => [
-                            'field' => 'score',
-                            'missing' => 1,
-                            'modifier' => 'ln1p',
+                        'script_score' => [
+                            'script' => [
+                                'source' => "doc['score'].size() == 0 ? 1 : ((doc['score'].value + 1) * 0.1) + 1",
+                            ],
                         ],
                     ],
                 ],

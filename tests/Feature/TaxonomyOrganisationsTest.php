@@ -2,17 +2,17 @@
 
 namespace Tests\Feature;
 
-use App\Events\EndpointHit;
+use Tests\TestCase;
+use App\Models\User;
 use App\Models\Audit;
-use App\Models\Organisation;
 use App\Models\Service;
 use App\Models\Taxonomy;
-use App\Models\User;
+use App\Events\EndpointHit;
 use Carbon\CarbonImmutable;
+use App\Models\Organisation;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Event;
 use Laravel\Passport\Passport;
-use Tests\TestCase;
+use Illuminate\Support\Facades\Event;
 
 class TaxonomyOrganisationsTest extends TestCase
 {
@@ -280,6 +280,40 @@ class TaxonomyOrganisationsTest extends TestCase
     /**
      * @test
      */
+    public function createTaxonomyOrganisationWithUniqueSlugAsSuperAdmin201(): void
+    {
+        $user = User::factory()->create()->makeSuperAdmin();
+        $siblingCount = Taxonomy::organisation()->children()->count();
+        $payload = [
+            'name' => 'Taxonomy Slug Test',
+            'order' => $siblingCount + 1,
+        ];
+
+        Passport::actingAs($user);
+        $response = $this->json('POST', '/core/v1/taxonomies/organisations', $payload);
+
+        $response->assertStatus(Response::HTTP_CREATED);
+        $this->assertDatabaseHas('taxonomies', [
+            'id' => $response->json('data.id'),
+            'name' => 'Taxonomy Slug Test',
+            'slug' => 'taxonomy-slug-test',
+        ]);
+
+        $payload['order']++;
+
+        $response = $this->json('POST', '/core/v1/taxonomies/organisations', $payload);
+
+        $response->assertStatus(Response::HTTP_CREATED);
+        $this->assertDatabaseHas('taxonomies', [
+            'id' => $response->json('data.id'),
+            'name' => 'Taxonomy Slug Test',
+            'slug' => 'taxonomy-slug-test-1',
+        ]);
+    }
+
+    /**
+     * @test
+     */
     public function audit_created_when_created(): void
     {
         $this->fakeEvents();
@@ -542,6 +576,42 @@ class TaxonomyOrganisationsTest extends TestCase
         ]);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    /**
+     * @test
+     */
+    public function updateTaxonomyOrganisationWithUniqueSlugAsSuperAdmin200(): void
+    {
+        $user = User::factory()->create()->makeSuperAdmin();
+        $category1 = $this->createTaxonomyOrganisation([
+            'name' => 'Taxonomy Slug Test',
+            'slug' => 'taxonomy-slug-test',
+        ]);
+        $category2 = $this->createTaxonomyOrganisation([
+            'name' => 'Other Taxonomy',
+            'slug' => 'other-taxonomy',
+        ]);
+        $payload = [
+            'name' => 'Taxonomy Slug Test',
+            'order' => 2,
+        ];
+
+        $this->assertDatabaseHas('taxonomies', [
+            'id' => $category1->id,
+            'name' => 'Taxonomy Slug Test',
+            'slug' => 'taxonomy-slug-test',
+        ]);
+
+        Passport::actingAs($user);
+        $response = $this->json('PUT', "/core/v1/taxonomies/organisations/{$category2->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+        $this->assertDatabaseHas('taxonomies', [
+            'id' => $category2->id,
+            'name' => 'Taxonomy Slug Test',
+            'slug' => 'taxonomy-slug-test-1',
+        ]);
     }
 
     /**

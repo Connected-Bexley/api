@@ -22,6 +22,7 @@ class ServiceLocationResource extends JsonResource
             'is_open_now' => $this->isOpenNow(),
             'regular_opening_hours' => RegularOpeningHourResource::collection($this->regularOpeningHours),
             'holiday_opening_hours' => HolidayOpeningHourResource::collection($this->holidayOpeningHours),
+            'next_occurs' => $this->nextOccurs(),
             'created_at' => $this->created_at->format(CarbonImmutable::ISO8601),
             'updated_at' => $this->updated_at->format(CarbonImmutable::ISO8601),
 

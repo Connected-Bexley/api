@@ -61,7 +61,7 @@ class MailgunEmailSender implements EmailSender
      */
     public function send(Email $email)
     {
-        /** @var \Mailgun\Mailgun $client */
+        /** @var Mailgun $client */
         $client = resolve(Mailgun::class);
 
         $fromName = config('mail.from.name');

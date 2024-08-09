@@ -17,7 +17,7 @@ class LandingPageCannotHaveParent implements ValidationRule
     /**
      * Create a new rule instance.
      *
-     * @param \App\Models\Page $page
+     * @param Page $page
      * @param mixed $parentId
      */
     public function __construct($parentId)

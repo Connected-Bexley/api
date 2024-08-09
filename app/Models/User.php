@@ -301,7 +301,7 @@ class User extends Authenticatable implements Notifiable
     /**
      * Check if this user can view the record of another user.
      *
-     * @param \App\Models\User
+     * @param User
      */
     public function canView(User $user): bool
     {
@@ -407,7 +407,7 @@ class User extends Authenticatable implements Notifiable
     }
 
     /**
-     * @throws \App\Exceptions\CannotRevokeRoleException
+     * @throws CannotRevokeRoleException
      */
     public function revokeServiceWorker(Service $service): User
     {
@@ -419,7 +419,7 @@ class User extends Authenticatable implements Notifiable
     }
 
     /**
-     * @throws \App\Exceptions\CannotRevokeRoleException
+     * @throws CannotRevokeRoleException
      */
     public function revokeServiceAdmin(Service $service): User
     {
@@ -433,7 +433,7 @@ class User extends Authenticatable implements Notifiable
     }
 
     /**
-     * @throws \App\Exceptions\CannotRevokeRoleException
+     * @throws CannotRevokeRoleException
      */
     public function revokeOrganisationAdmin(Organisation $organisation): User
     {
@@ -447,7 +447,7 @@ class User extends Authenticatable implements Notifiable
     }
 
     /**
-     * @throws \App\Exceptions\CannotRevokeRoleException
+     * @throws CannotRevokeRoleException
      */
     public function revokeContentAdmin(): User
     {
@@ -461,7 +461,7 @@ class User extends Authenticatable implements Notifiable
     }
 
     /**
-     * @throws \App\Exceptions\CannotRevokeRoleException
+     * @throws CannotRevokeRoleException
      */
     public function revokeGlobalAdmin(): User
     {

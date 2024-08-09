@@ -49,13 +49,18 @@ EOT
                 StartsAfterParameter::create(),
                 EndsBeforeParameter::create(),
                 EndsAfterParameter::create(),
-                FilterParameter::create(null, 'wheelchair')
+                FilterParameter::create(null, 'has_wheelchair_access')
                     ->description('Has a wheelchair accessible location')
                     ->schema(
                         Schema::boolean()
                     ),
-                FilterParameter::create(null, 'induction-loop')
+                FilterParameter::create(null, 'has_induction_loop')
                     ->description('Has a location with an induction loop')
+                    ->schema(
+                        Schema::boolean()
+                    ),
+                FilterParameter::create(null, 'has_accessible_toilet')
+                    ->description('Has a location with an accessible toilet')
                     ->schema(
                         Schema::boolean()
                     ),

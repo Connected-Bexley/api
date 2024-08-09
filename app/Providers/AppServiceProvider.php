@@ -83,6 +83,9 @@ class AppServiceProvider extends ServiceProvider
                 case 'tags':
                     $flagged = config('flags.service_tags');
                     break;
+                case 'offerings':
+                    $flagged = config('flags.offerings');
+                    break;
                 default:
                     $flagged = false;
                     break;

@@ -9,7 +9,7 @@ use GuzzleHttp\Client;
 class NominatimGeocoder extends Geocoder
 {
     /**
-     * @var \GuzzleHttp\Client
+     * @var Client
      */
     protected $client;
 

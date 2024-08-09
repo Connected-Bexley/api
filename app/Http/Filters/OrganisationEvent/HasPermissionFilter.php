@@ -11,8 +11,14 @@ class HasPermissionFilter implements Filter
 {
     public function __invoke(Builder $query, $value, string $property): Builder
     {
-        $organisationIds = [];
         $user = request()->user('api');
+
+        // If Global or Super Admin, apply no filter
+        if ($user && $user->isGlobalAdmin()) {
+            return $query;
+        }
+
+        $organisationIds = [];
 
         if ($user && $user->isOrganisationAdmin()) {
             $organisationIds = $user->organisations()

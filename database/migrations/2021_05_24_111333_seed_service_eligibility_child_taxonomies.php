@@ -37,7 +37,7 @@ return new class() extends Migration {
     /**
      * Load the Service Eligibility taxonomies into an array.
      *
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     * @throws Illuminate\Contracts\Filesystem\FileNotFoundException
      */
     protected function loadServiceEligibilityTaxonomies(): array
     {

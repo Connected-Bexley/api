@@ -42,7 +42,7 @@ return new class() extends Migration {
     }
 
     /**
-     * @param \stdClass $taxonomy
+     * @param stdClass $taxonomy
      */
     protected function getDepth(stdClass $taxonomy): int
     {

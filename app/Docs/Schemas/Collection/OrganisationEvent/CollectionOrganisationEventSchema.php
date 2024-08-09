@@ -28,6 +28,14 @@ class CollectionOrganisationEventSchema extends Schema
                             Schema::string('content')
                         )
                     ),
+                Schema::object('image')
+                    ->properties(
+                        Schema::string('id'),
+                        Schema::string('mime_type'),
+                        Schema::string('alt_text'),
+                        Schema::string('url')
+                    )
+                    ->nullable(),
                 Schema::array('category_taxonomies')
                     ->items(TaxonomyCategorySchema::create()),
                 Schema::string('created_at')

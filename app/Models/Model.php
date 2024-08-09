@@ -81,8 +81,13 @@ abstract class Model extends BaseModel
      *
      * @author
      */
-    public function onlyAlphaNumeric($string)
+    public function makeSearchable($string)
     {
-        return preg_replace('/[^\w\d\s]+/i', '', $string);
+        $string = mb_strtolower($string);
+        preg_match_all('/(?:\b([A-Z,a-z]+)\b)/i', $string, $words);
+
+        return implode(' ', array_filter($words[1], function ($word) {
+            return mb_strlen($word) > 2;
+        }));
     }
 }

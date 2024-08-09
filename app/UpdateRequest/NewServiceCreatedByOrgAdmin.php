@@ -4,9 +4,11 @@ namespace App\UpdateRequest;
 
 use App\Contracts\AppliesUpdateRequests;
 use App\Http\Requests\Service\StoreRequest;
+use App\Models\File;
 use App\Models\Service;
 use App\Models\Taxonomy;
 use App\Models\UpdateRequest;
+use App\Services\DataPersistence\HasUniqueSlug;
 use Carbon\Carbon;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Support\Arr;
@@ -15,6 +17,8 @@ use Illuminate\Support\Facades\Validator as ValidatorFacade;
 
 class NewServiceCreatedByOrgAdmin implements AppliesUpdateRequests
 {
+    use HasUniqueSlug;
+
     /**
      * Check if the update request is valid.
      */
@@ -40,7 +44,7 @@ class NewServiceCreatedByOrgAdmin implements AppliesUpdateRequests
 
         $insert = [
             'organisation_id' => $data->get('organisation_id'),
-            'slug' => $data->get('slug'),
+            'slug' => $this->uniqueSlug($data->get('slug', $data->get('name')), (new Service())),
             'name' => $data->get('name'),
             'type' => $data->get('type'),
             'status' => $data->get('status'),
@@ -68,7 +72,33 @@ class NewServiceCreatedByOrgAdmin implements AppliesUpdateRequests
             'last_modified_at' => Carbon::now(),
         ];
 
+        // Add the custom elegibility types
+        if ($data->has('eligibility_types') && $data['eligibility_types']['custom'] ?? null) {
+            // Create the custom fields
+            foreach ($data['eligibility_types']['custom'] as $customEligibilityType => $value) {
+                $fieldName = 'eligibility_' . $customEligibilityType . '_custom';
+                $insert[$fieldName] = $value;
+            }
+        }
+
         $service = Service::create($insert);
+
+        // Create the service eligibility taxonomy records
+        if ($data->has('eligibility_types') && $data['eligibility_types']['taxonomies'] ?? null) {
+            $eligibilityTypes = Taxonomy::whereIn('id', $data['eligibility_types']['taxonomies'])->get();
+            $service->syncEligibilityRelationships($eligibilityTypes);
+        }
+
+        // Update the logo file
+        if ($data->get('logo_file_id')) {
+            /** @var File $file */
+            $file = File::findOrFail($data['logo_file_id'])->assigned();
+
+            // Create resized version for common dimensions.
+            foreach (config('local.cached_image_dimensions') as $maxDimension) {
+                $file->resizedVersion($maxDimension);
+            }
+        }
 
         if ($data->has('useful_infos')) {
             $service->usefulInfos()->delete();
@@ -92,6 +122,17 @@ class NewServiceCreatedByOrgAdmin implements AppliesUpdateRequests
             }
         }
 
+        // Update the social media records.
+        if ($data->has('social_medias')) {
+            $service->socialMedias()->delete();
+            foreach ($data['social_medias'] as $socialMedia) {
+                $service->socialMedias()->create([
+                    'type' => $socialMedia['type'],
+                    'url' => $socialMedia['url'],
+                ]);
+            }
+        }
+
         // Update the gallery item records.
         if ($data->has('gallery_items')) {
             $service->serviceGalleryItems()->delete();
@@ -110,6 +151,8 @@ class NewServiceCreatedByOrgAdmin implements AppliesUpdateRequests
 
         // Ensure conditional fields are reset if needed.
         $service->resetConditionalFields();
+
+        $updateRequest->updateable_id = $service->id;
 
         return $updateRequest;
     }

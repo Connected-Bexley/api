@@ -29,6 +29,7 @@ class StoreRequest extends FormRequest
             'is_private' => ['required', 'boolean'],
             'mime_type' => ['required', Rule::in([File::MIME_TYPE_PNG, File::MIME_TYPE_JPG, File::MIME_TYPE_JPEG, File::MIME_TYPE_SVG])],
             'file' => ['required', 'string'],
+            'alt_text' => ['required', 'string', 'min:1'],
         ];
     }
 }

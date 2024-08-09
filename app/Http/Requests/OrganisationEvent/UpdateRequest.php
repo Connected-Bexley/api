@@ -15,6 +15,7 @@ use App\Rules\MarkdownMaxLength;
 use App\Rules\MarkdownMinLength;
 use App\Rules\NullableIf;
 use App\Rules\RootTaxonomyIs;
+use App\Rules\Slug;
 use App\Rules\UkPhoneNumber;
 use App\Rules\UserHasRole;
 use Illuminate\Foundation\Http\FormRequest;
@@ -43,15 +44,29 @@ class UpdateRequest extends FormRequest
     {
         return [
             'title' => ['string', 'min:1', 'max:255'],
-            'start_date' => ['date_format:Y-m-d', 'after:today', new DateSanity($this)],
-            'end_date' => ['date_format:Y-m-d', new DateSanity($this)],
+            'slug' => [
+                'string',
+                'min:1',
+                'max:255',
+                new Slug(),
+                new UserHasRole(
+                    $this->user('api'),
+                    new UserRole([
+                        'user_id' => $this->user('api')->id,
+                        'role_id' => Role::organisationAdmin()->id,
+                    ]),
+                    $this->organisation_event->slug
+                ),
+            ],
+            'start_date' => ['date_format:Y-m-d', new DateSanity($this)],
+            'end_date' => ['date_format:Y-m-d', 'after_or_equal:today', new DateSanity($this)],
             'start_time' => ['date_format:H:i:s', new DateSanity($this)],
             'end_time' => ['date_format:H:i:s', new DateSanity($this)],
             'intro' => ['string', 'min:1', 'max:300'],
             'description' => [
                 'string',
                 new MarkdownMinLength(1),
-                new MarkdownMaxLength(3000, 'Description tab - The long description must be 3000 characters or fewer.'),
+                new MarkdownMaxLength(config('local.event_description_max_chars'), 'Description tab - The long description must be ' . config('local.event_description_max_chars') . ' characters or fewer.'),
             ],
             'is_free' => ['boolean'],
             'fees_text' => ['nullable', 'string', 'min:1', 'max:255', 'required_if:is_free,false'],
@@ -148,7 +163,7 @@ class UpdateRequest extends FormRequest
             'image_file_id' => [
                 'nullable',
                 'exists:files,id',
-                new FileIsMimeType(File::MIME_TYPE_PNG),
+                new FileIsMimeType(File::MIME_TYPE_PNG, File::MIME_TYPE_JPG, File::MIME_TYPE_JPEG, File::MIME_TYPE_SVG),
                 new FileIsPendingAssignment(),
             ],
             'category_taxonomies' => [

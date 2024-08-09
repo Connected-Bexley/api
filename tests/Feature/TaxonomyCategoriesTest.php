@@ -2,18 +2,18 @@
 
 namespace Tests\Feature;
 
-use App\Events\EndpointHit;
+use Tests\TestCase;
+use App\Models\User;
 use App\Models\Audit;
-use App\Models\Organisation;
 use App\Models\Service;
 use App\Models\Taxonomy;
-use App\Models\User;
+use App\Events\EndpointHit;
 use Carbon\CarbonImmutable;
-use Illuminate\Database\Eloquent\Collection;
+use App\Models\Organisation;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Event;
 use Laravel\Passport\Passport;
-use Tests\TestCase;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Database\Eloquent\Collection;
 
 class TaxonomyCategoriesTest extends TestCase
 {
@@ -324,6 +324,41 @@ class TaxonomyCategoriesTest extends TestCase
         $response = $this->json('POST', '/core/v1/taxonomies/categories', $payload);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    /**
+     * @test
+     */
+    public function createTaxonomyCategoryWithUniqueSlugAsSuperAdmin201(): void
+    {
+        $user = User::factory()->create()->makeSuperAdmin();
+        $siblingCount = Taxonomy::category()->children()->count();
+        $payload = [
+            'parent_id' => null,
+            'name' => 'Taxonomy Slug Test',
+            'order' => $siblingCount + 1,
+        ];
+
+        Passport::actingAs($user);
+        $response = $this->json('POST', '/core/v1/taxonomies/categories', $payload);
+
+        $response->assertStatus(Response::HTTP_CREATED);
+        $this->assertDatabaseHas('taxonomies', [
+            'id' => $response->json('data.id'),
+            'name' => 'Taxonomy Slug Test',
+            'slug' => 'taxonomy-slug-test',
+        ]);
+
+        $payload['order']++;
+
+        $response = $this->json('POST', '/core/v1/taxonomies/categories', $payload);
+
+        $response->assertStatus(Response::HTTP_CREATED);
+        $this->assertDatabaseHas('taxonomies', [
+            'id' => $response->json('data.id'),
+            'name' => 'Taxonomy Slug Test',
+            'slug' => 'taxonomy-slug-test-1',
+        ]);
     }
 
     /**
@@ -986,6 +1021,47 @@ class TaxonomyCategoriesTest extends TestCase
         ]);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    /**
+     * @test
+     */
+    public function updateTaxonomyCategoryWithUniqueSlugAsSuperAdmin200(): void
+    {
+        $user = User::factory()->create()->makeSuperAdmin();
+        $category1 = Taxonomy::factory()->create([
+            'parent_id' => $this->testCategoryRoot->id,
+            'name' => 'Taxonomy Slug Test',
+            'slug' => 'taxonomy-slug-test',
+            'order' => 1,
+        ]);
+        $category2 = Taxonomy::factory()->create([
+            'parent_id' => $this->testCategoryRoot->id,
+            'name' => 'Other Taxonomy',
+            'slug' => 'other-taxonomy',
+            'order' => 2,
+        ]);
+        $payload = [
+            'parent_id' => $this->testCategoryRoot->id,
+            'name' => 'Taxonomy Slug Test',
+            'order' => 2,
+        ];
+
+        $this->assertDatabaseHas('taxonomies', [
+            'id' => $category1->id,
+            'name' => 'Taxonomy Slug Test',
+            'slug' => 'taxonomy-slug-test',
+        ]);
+
+        Passport::actingAs($user);
+        $response = $this->json('PUT', "/core/v1/taxonomies/categories/{$category2->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+        $this->assertDatabaseHas('taxonomies', [
+            'id' => $category2->id,
+            'name' => 'Taxonomy Slug Test',
+            'slug' => 'taxonomy-slug-test-1',
+        ]);
     }
 
     /**

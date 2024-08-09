@@ -16,13 +16,17 @@ class UpdateRequestsApprovePath extends PathItem
     public static function create(string $objectId = null): BaseObject
     {
         return parent::create($objectId)
-            ->route('/update-requests/{update_request}/approve')
+            ->route('/update-requests/{update_request}/approve?action={action}')
             ->parameters(
                 Parameter::path()
                     ->name('update_request')
                     ->description('The ID of the update request')
                     ->required()
-                    ->schema(Schema::string()->format(Schema::FORMAT_UUID))
+                    ->schema(Schema::string()->format(Schema::FORMAT_UUID)),
+                Parameter::query()
+                    ->name('action')
+                    ->description('The follow on action after approving')
+                    ->schema(Schema::string()->enum('show', 'edit'))
             )
             ->operations(
                 ApproveUpdateRequestOperation::create()

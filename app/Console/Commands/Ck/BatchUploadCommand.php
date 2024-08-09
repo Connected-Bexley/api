@@ -22,7 +22,7 @@ class BatchUploadCommand extends Command
     protected $description = 'Uploads an xlsx spreadsheet to the database';
 
     /**
-     * @var \App\BatchImport\BatchUploader
+     * @var BatchUploader
      */
     protected $batchUploader;
 

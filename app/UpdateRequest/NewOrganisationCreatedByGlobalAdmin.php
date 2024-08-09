@@ -9,6 +9,7 @@ use App\Models\Organisation;
 use App\Models\Taxonomy;
 use App\Models\UpdateRequest;
 use App\Rules\FileIsMimeType;
+use App\Services\DataPersistence\HasUniqueSlug;
 use App\Services\DataPersistence\ResizesImages;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Support\Arr;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Validator as ValidatorFacade;
 class NewOrganisationCreatedByGlobalAdmin implements AppliesUpdateRequests
 {
     use ResizesImages;
+    use HasUniqueSlug;
 
     /**
      * Check if the update request is valid.
@@ -50,7 +52,7 @@ class NewOrganisationCreatedByGlobalAdmin implements AppliesUpdateRequests
         $data = collect($updateRequest->data);
 
         $organisation = Organisation::create([
-            'slug' => $data->get('slug'),
+            'slug' => $this->uniqueSlug($data->get('slug', $data->get('name')), (new Organisation())),
             'name' => $data->get('name'),
             'description' => sanitize_markdown(
                 $data->get('description')
@@ -80,6 +82,8 @@ class NewOrganisationCreatedByGlobalAdmin implements AppliesUpdateRequests
             $taxonomies = Taxonomy::whereIn('id', $data->get('category_taxonomies'))->get();
             $organisation->syncTaxonomyRelationships($taxonomies);
         }
+
+        $updateRequest->updateable_id = $organisation->id;
 
         return $updateRequest;
     }

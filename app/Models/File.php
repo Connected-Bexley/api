@@ -8,6 +8,7 @@ use App\Models\Relationships\FileRelationships;
 use App\Models\Scopes\FileScopes;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\MassAssignmentException;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 
@@ -31,6 +32,8 @@ class File extends Model implements Responsable
     const META_TYPE_RESIZED_IMAGE = 'resized_image';
 
     const META_TYPE_PENDING_ASSIGNMENT = 'pending_assignment';
+
+    const META_TYPE_ASSIGNED = 'assigned';
 
     const META_PLACEHOLDER_FOR_ORGANISATION = 'organisation';
 
@@ -61,6 +64,7 @@ class File extends Model implements Responsable
         'is_private' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'meta' => 'array',
     ];
 
     /**
@@ -103,7 +107,7 @@ class File extends Model implements Responsable
 
     public function url(): string
     {
-        return Storage::disk(config('filesystems.cloud'))->url($this->path());
+        return route('core.v1.image.display', ['filename' => $this->filename]);
     }
 
     /**
@@ -153,10 +157,10 @@ class File extends Model implements Responsable
 
         // Create the resized version if it doesn't exist.
         if ($file === null) {
-            /** @var \App\ImageTools\Resizer $resizer */
+            /** @var Resizer $resizer */
             $resizer = resolve(Resizer::class);
 
-            /** @var \App\Models\File $file */
+            /** @var File $file */
             $file = static::create([
                 'filename' => $this->filename,
                 'mime_type' => $this->mime_type,
@@ -209,10 +213,10 @@ class File extends Model implements Responsable
 
         // Create the resized version if it doesn't exist.
         if ($file === null) {
-            /** @var \App\ImageTools\Resizer $resizer */
+            /** @var Resizer $resizer */
             $resizer = resolve(Resizer::class);
 
-            /** @var \App\Models\File $file */
+            /** @var File $file */
             $file = static::create([
                 'filename' => "$placeholderFor.png",
                 'mime_type' => static::MIME_TYPE_PNG,
@@ -252,9 +256,17 @@ class File extends Model implements Responsable
         return $withPeriod ? $map[$mimeType] : trim($map[$mimeType], '.');
     }
 
+    /**
+     * Set the pending_assignment / assigned meta value.
+     *
+     * @throws MassAssignmentException
+     * @return File
+     */
     public function assigned(): self
     {
-        $this->update(['meta' => null]);
+        $meta = $this->meta;
+        $meta['type'] = self::META_TYPE_ASSIGNED;
+        $this->update(['meta' => $meta]);
 
         return $this;
     }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html class="govuk-template" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
 	<meta charset="utf-8">
@@ -18,7 +18,7 @@
 	@yield('css')
 </head>
 
-<body>
+<body class="govuk-template__body js-enabled govuk-frontend-supported">
 	<header class="govuk-header" role="banner" data-module="header">
 		<div class="govuk-header__container govuk-width-container">
 
@@ -50,7 +50,17 @@
 		</main>
 	</div>
 
+	<footer class="govuk-footer" role="contentinfo">
+		<div class="govuk-width-container">
+			<div class="govuk-footer__meta">
+				<div class="govuk-footer__meta-item">
+					Powered by
+					<a class="govuk-footer__link" href="https://ayup.agency/">Ayup Connect</a>
+				</div>
+			</div>
+		</div>
+	</footer>
+
 	@yield('js')
 </body>
-
 </html>

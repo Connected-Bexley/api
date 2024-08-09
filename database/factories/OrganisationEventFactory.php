@@ -6,6 +6,7 @@ use App\Models\File;
 use App\Models\Location;
 use App\Models\Organisation;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 class OrganisationEventFactory extends Factory
 {
@@ -17,9 +18,11 @@ class OrganisationEventFactory extends Factory
         $date = $this->faker->dateTimeBetween('+1 week', '+6 weeks');
         $endtime = $this->faker->time('H:i:s');
         $starttime = $this->faker->time('H:i:s', $endtime);
+        $title = $this->faker->unique()->words(3, true);
 
         return [
-            'title' => 'Organisation Event Title',
+            'title' => $title,
+            'slug' => Str::slug($title),
             'start_date' => $date->format('Y-m-d'),
             'end_date' => $date->format('Y-m-d'),
             'start_time' => $starttime,

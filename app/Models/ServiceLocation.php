@@ -10,7 +10,6 @@ use App\Models\Scopes\ServiceLocationScopes;
 use App\Rules\FileIsMimeType;
 use App\Support\Time;
 use App\UpdateRequest\UpdateRequests;
-use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Http\Response;
@@ -37,17 +36,17 @@ class ServiceLocation extends Model implements AppliesUpdateRequests
 
         // If holiday opening hours found, then return them.
         if ($hasHolidayHoursOpenNow !== null) {
-            return $hasHolidayHoursOpenNow;
+            return (bool)$hasHolidayHoursOpenNow;
         }
 
         // If no holiday hours found, then resort to regular opening hours.
-        return $this->hasRegularHoursOpenNow();
+        return (bool)$this->hasRegularHoursOpenNow();
     }
 
     /**
-     * Returns true if open, false if closed, or null if not specified.
+     * Returns HolidayOpeningHour::class if open, false if closed, or null if not specified.
      */
-    protected function hasHolidayHoursOpenNow(): ?bool
+    protected function hasHolidayHoursOpenNow(): HolidayOpeningHour|bool|null
     {
         // Get the holiday opening hours that today falls within.
         $holidayOpeningHour = $this->holidayOpeningHours()
@@ -60,63 +59,65 @@ class ServiceLocation extends Model implements AppliesUpdateRequests
             return null;
         }
 
-        // If closed, opening and closing time are redundant, so just return false.
-        if ($holidayOpeningHour->is_closed) {
-            return false;
-        }
-
-        // Return if the current time falls within the opening and closing time.
-        return Time::now()->between($holidayOpeningHour->opens_at, $holidayOpeningHour->closes_at);
+        return $holidayOpeningHour->isOpenNow() ? $holidayOpeningHour : false;
     }
 
-    protected function hasRegularHoursOpenNow(): bool
+    /**
+     * Get the RegularOpeningHour that is open now.
+     *
+     * @return RegularOpeningHour
+     */
+    protected function hasRegularHoursOpenNow(): RegularOpeningHour|bool
     {
         // Loop through each opening hour.
         foreach ($this->regularOpeningHours as $regularOpeningHour) {
-            // Check if the current time falls within the opening hours.
-            $isOpenNow = Time::now()->between($regularOpeningHour->opens_at, $regularOpeningHour->closes_at);
-
-            // If not, then continue to the next opening hour.
-            if (!$isOpenNow) {
-                continue;
-            }
-
-            // Use a different algorithm for each frequency type.
-            switch ($regularOpeningHour->frequency) {
-                // If weekly then check that the weekday is the same as today.
-                case RegularOpeningHour::FREQUENCY_WEEKLY:
-                    if (Date::today()->dayOfWeek === $regularOpeningHour->weekday) {
-                        return true;
-                    }
-                    break;
-                    // If monthly then check that the day of the month is the same as today.
-                case RegularOpeningHour::FREQUENCY_MONTHLY:
-                    if (Date::today()->day === $regularOpeningHour->day_of_month) {
-                        return true;
-                    }
-                    break;
-                    // If fortnightly then check that today falls directly on a multiple of 2 weeks.
-                case RegularOpeningHour::FREQUENCY_FORTNIGHTLY:
-                    if (fmod(Date::today()->diffInDays($regularOpeningHour->starts_at) / CarbonImmutable::DAYS_PER_WEEK, 2) === 0.0) {
-                        return true;
-                    }
-                    break;
-                    // If nth occurrence of month then check today is the same occurrence.
-                case RegularOpeningHour::FREQUENCY_NTH_OCCURRENCE_OF_MONTH:
-                    $occurrence = occurrence($regularOpeningHour->occurrence_of_month);
-                    $weekday = weekday($regularOpeningHour->weekday);
-                    $month = month(Date::today()->month);
-                    $year = Date::today()->year;
-                    $dateString = "$occurrence $weekday of $month $year";
-                    $date = Date::createFromTimestamp(strtotime($dateString));
-                    if (Date::today()->equalTo($date)) {
-                        return true;
-                    }
-                    break;
+            if ($regularOpeningHour->isOpenNow()) {
+                return $regularOpeningHour;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Get the next opening time of all the regular opening hours.
+     *
+     * @return Illumiinate\Suppport\Collection
+     */
+    public function nextOccurs()
+    {
+        $dates = collect([]);
+        foreach ($this->regularOpeningHours as $regularOpeningHour) {
+            $nextOpenDate = $regularOpeningHour->nextOpenDate();
+            $holidayOpeningHour = $this->holidayOpeningHours()
+                ->where('starts_at', '<=', $nextOpenDate)
+                ->where('ends_at', '>=', $nextOpenDate)
+                ->first();
+            if ($holidayOpeningHour) {
+                if ($holidayOpeningHour->is_closed) {
+                    $nextOpenDate = $regularOpeningHour->nextOpenDate($holidayOpeningHour->ends_at);
+                    $dates->push([
+                        'date' => $nextOpenDate->toDateString(),
+                        'start_time' => $regularOpeningHour->opens_at->toString(),
+                        'end_time' => $regularOpeningHour->closes_at->toString(),
+                    ]);
+                } else {
+                    $dates->push([
+                        'date' => $nextOpenDate->toDateString(),
+                        'start_time' => $holidayOpeningHour->opens_at->toString(),
+                        'end_time' => $holidayOpeningHour->closes_at->toString(),
+                    ]);
+                }
+            } else {
+                $dates->push([
+                    'date' => $nextOpenDate->toDateString(),
+                    'start_time' => $regularOpeningHour->opens_at->toString(),
+                    'end_time' => $regularOpeningHour->closes_at->toString(),
+                ]);
+            }
+        }
+
+        return $dates->sortBy('date')->first();
     }
 
     /**
@@ -211,7 +212,7 @@ class ServiceLocation extends Model implements AppliesUpdateRequests
 
     /**
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException|\InvalidArgumentException
-     * @return \App\Models\File|\Illuminate\Http\Response|\Illuminate\Contracts\Support\Responsable
+     * @return File|Response|\Illuminate\Contracts\Support\Responsable
      */
     public static function placeholderImage(int $maxDimension = null)
     {

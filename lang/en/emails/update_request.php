@@ -9,7 +9,7 @@ return [
     |
     | The following language lines are used during update requests
     |
-    */
+     */
     'received' => [
         'notify_global_admin' => [
             'subject' => 'Update Request Submitted',
@@ -60,7 +60,9 @@ The :APP_NAME Team
             'content' => '
 Hi :SUBMITTER_NAME,
 
-Your update request for the :RESOURCE_NAME :(RESOURCE_TYPE) on :REQUEST_DATE has been rejected.
+Your update request for the :RESOURCE_NAME :(RESOURCE_TYPE) on :REQUEST_DATE has been rejected for the following reason(s):
+
+:REJECTION_MESSAGE
 
 If you have any questions, please contact us at :CONTACT_EMAIL
 

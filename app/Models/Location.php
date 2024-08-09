@@ -45,7 +45,7 @@ class Location extends Model implements AppliesUpdateRequests
     public function updateCoordinate(): self
     {
         /**
-         * @var \App\Contracts\Geocoder
+         * @var Geocoder
          */
         $geocoder = resolve(Geocoder::class);
         $coordinate = $geocoder->geocode($this->toAddress());
@@ -134,7 +134,7 @@ class Location extends Model implements AppliesUpdateRequests
 
     /**
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException|\InvalidArgumentException
-     * @return \App\Models\File|\Illuminate\Http\Response|\Illuminate\Contracts\Support\Responsable
+     * @return File|Response|\Illuminate\Contracts\Support\Responsable
      */
     public static function placeholderImage(int $maxDimension = null)
     {

@@ -53,6 +53,17 @@ trait OrganisationEventScopes
         });
     }
 
+    public function scopeHasAccessibleToilet(Builder $query, bool $required): Builder
+    {
+        return $query->whereExists(function ($query) use ($required) {
+            $locationsTable = (new Location())->getTable();
+            $query->select(DB::raw(1))
+                ->from($locationsTable)
+                ->whereRaw("$locationsTable.id = {$this->getTable()}.location_id")
+                ->where("$locationsTable.has_accessible_toilet", (bool)$required);
+        });
+    }
+
     /**
      * @param bool $required
      */

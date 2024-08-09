@@ -16,7 +16,7 @@ class Info extends BaseInfo
             ->version('v1')
             ->contact(
                 Contact::create()
-                    ->name('Ayup Digital')
+                    ->name('Ayup Connect')
                     ->url('https://ayup.agency')
             );
     }

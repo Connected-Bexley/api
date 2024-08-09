@@ -2,15 +2,24 @@
 
 namespace App\Models\Mutators;
 
+use App\Models\File;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+
 trait CollectionMutators
 {
-    public function getMetaAttribute(string $meta): array
+    /**
+     * Get the related image File.
+     *
+     * @return App\Models\File
+     */
+    protected function image(): Attribute
     {
-        return json_decode($meta, true);
-    }
+        return Attribute::make(
+            get: function (mixed $value, array $attributes) {
+                $meta = json_decode($attributes['meta']);
 
-    public function setMetaAttribute(array $meta)
-    {
-        $this->attributes['meta'] = json_encode($meta);
+                return isset($meta->image_file_id) ? File::find($meta->image_file_id) : null;
+            }
+        );
     }
 }

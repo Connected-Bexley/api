@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Page;
+use App\Models\UpdateRequest;
 
 class PageObserver
 {
@@ -17,6 +18,12 @@ class PageObserver
                 'image_file_id' => null,
             ]);
             $image->delete();
+        }
+
+        if ($page->updateRequests->isNotEmpty()) {
+            $page->updateRequests->each(function (UpdateRequest $updateRequest) {
+                $updateRequest->delete();
+            });
         }
     }
 }

@@ -156,7 +156,7 @@ class CreateScheduledReportsCommand extends Command
 
             // Increment successful.
             $this->successful++;
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             // Output error message.
             $this->error("Failed to generate report for report schedule [$reportSchedule->id]");
 

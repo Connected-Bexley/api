@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\File;
 use App\Models\Service;
 use App\Models\SocialMedia;
 use App\Models\Taxonomy;
@@ -26,8 +27,8 @@ class ServiceFactory extends Factory
             'name' => $name,
             'type' => Service::TYPE_SERVICE,
             'status' => Service::STATUS_ACTIVE,
-            'intro' => 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit.',
-            'description' => 'Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium.',
+            'intro' => mb_substr($this->faker->paragraph(2), 0, 149),
+            'description' => $this->faker->paragraph(5),
             'is_free' => true,
             'url' => $this->faker->url(),
             'contact_name' => $this->faker->name(),
@@ -47,6 +48,24 @@ class ServiceFactory extends Factory
         return $this->state(function () {
             return [
                 'score' => $this->faker->numberBetween(1, 5),
+            ];
+        });
+    }
+
+    public function withJpgLogo()
+    {
+        return $this->state(function () {
+            return [
+                'logo_file_id' => File::factory()->imageJpg()->create(),
+            ];
+        });
+    }
+
+    public function withPngLogo()
+    {
+        return $this->state(function () {
+            return [
+                'logo_file_id' => File::factory()->imagePng()->create(),
             ];
         });
     }

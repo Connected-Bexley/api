@@ -9,7 +9,7 @@ use Illuminate\View\View;
 class DocsController extends Controller
 {
     /**
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return \Illuminate\Contracts\View\Factory|View
      */
     public function index(): View
     {

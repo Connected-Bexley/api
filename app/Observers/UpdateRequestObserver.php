@@ -70,13 +70,20 @@ class UpdateRequestObserver
 
         $data = Arr::dot($updateRequest->data);
         $dataKeys = array_keys($data);
+
         foreach ($dataKeys as &$dataKey) {
             // Delete entire arrays if provided.
             $dataKey = preg_replace('/\.([0-9]+)(.*)$/', '', $dataKey);
 
+            // If a page content item is updated, then all other content updates on this page should be removed
+            if ($updateRequest->updateable_type === 'pages' && str_ends_with($dataKey, '.content')) {
+                $dataKey = 'content';
+            }
+
             // Format for MySQL.
             $dataKey = "\"$.{$dataKey}\"";
         }
+
         $dataKeys = array_unique($dataKeys);
         $implodedDataKeys = implode(', ', $dataKeys);
 

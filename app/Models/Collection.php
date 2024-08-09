@@ -31,6 +31,7 @@ class Collection extends Model
     protected $casts = [
         'enabled' => 'boolean',
         'homepage' => 'boolean',
+        'meta' => 'array',
     ];
 
     /**
@@ -84,7 +85,7 @@ class Collection extends Model
 
     /**
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException|\InvalidArgumentException
-     * @return \App\Models\File|\Illuminate\Http\Response|\Illuminate\Contracts\Support\Responsable
+     * @return File|Response|\Illuminate\Contracts\Support\Responsable
      */
     public static function personaPlaceholderLogo(int $maxDimension = null)
     {
@@ -101,7 +102,7 @@ class Collection extends Model
 
     /**
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException|\InvalidArgumentException
-     * @return \App\Models\File|\Illuminate\Http\Response|\Illuminate\Contracts\Support\Responsable
+     * @return File|Response|\Illuminate\Contracts\Support\Responsable
      */
     public static function categoryPlaceholderLogo(int $maxDimension = null)
     {
@@ -118,7 +119,7 @@ class Collection extends Model
 
     /**
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException|\InvalidArgumentException
-     * @return \App\Models\File|\Illuminate\Http\Response|\Illuminate\Contracts\Support\Responsable
+     * @return File|Response|\Illuminate\Contracts\Support\Responsable
      */
     public static function organisationEventPlaceholderLogo(int $maxDimension = null)
     {

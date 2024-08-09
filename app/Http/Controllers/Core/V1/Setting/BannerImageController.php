@@ -12,7 +12,7 @@ use Illuminate\Http\Response;
 class BannerImageController extends Controller
 {
     /**
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function __invoke(ShowRequest $request)
     {
@@ -27,7 +27,7 @@ class BannerImageController extends Controller
         );
 
         // Get the logo file associated.
-        /** @var \App\Models\File $file */
+        /** @var File $file */
         $file = File::query()->findOrFail($buttonImageFileId);
 
         // Return the file.

@@ -32,7 +32,7 @@ class LogoController extends Controller
                 ->firstOrFail()
                 ->data['logo_file_id'];
 
-            /** @var \App\Models\File $file */
+            /** @var File $file */
             $file = File::findOrFail($logoFileId);
         }
 

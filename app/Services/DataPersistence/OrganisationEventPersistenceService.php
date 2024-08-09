@@ -3,6 +3,7 @@
 namespace App\Services\DataPersistence;
 
 use App\Contracts\DataPersistenceService;
+use App\Generators\UniqueSlugGenerator;
 use App\Models\Model;
 use App\Models\OrganisationEvent;
 use App\Models\Taxonomy;
@@ -13,11 +14,24 @@ use Illuminate\Support\Facades\DB;
 class OrganisationEventPersistenceService implements DataPersistenceService
 {
     use ResizesImages;
+    use HasUniqueSlug;
+
+    /**
+     * Unique Slug Generator.
+     *
+     * @var UniqueSlugGenerator
+     */
+    protected $slugGenerator;
+
+    public function __construct(UniqueSlugGenerator $slugGenerator)
+    {
+        $this->slugGenerator = $slugGenerator;
+    }
 
     /**
      * Store the model.
      *
-     * @return \App\Models\UpdateRequest|\App\Models\OrganisationEvent
+     * @return UpdateRequestModel|OrganisationEvent
      */
     public function store(FormRequest $request)
     {
@@ -43,6 +57,7 @@ class OrganisationEventPersistenceService implements DataPersistenceService
             // Create the OrganisationEvent.
             $organisationEvent = OrganisationEvent::create([
                 'title' => $request->title,
+                'slug' => $this->uniqueSlug($request->input('slug', $request->input('title')), (new OrganisationEvent())),
                 'start_date' => $request->start_date,
                 'end_date' => $request->end_date,
                 'start_time' => $request->start_time,
@@ -86,11 +101,12 @@ class OrganisationEventPersistenceService implements DataPersistenceService
     /**
      * Process the requested changes and either update the model or store an update request.
      */
-    public function processAsUpdateRequest(FormRequest $request, ?OrganisationEvent $event): UpdateRequestModel
+    public function processAsUpdateRequest(FormRequest $request, ?OrganisationEvent $event = null): UpdateRequestModel
     {
         return DB::transaction(function () use ($request, $event) {
             $data = array_filter_missing([
                 'title' => $request->missingValue('title'),
+                'slug' => $request->missingValue('slug'),
                 'start_date' => $request->missingValue('start_date'),
                 'end_date' => $request->missingValue('end_date'),
                 'start_time' => $request->missingValue('start_time'),
@@ -127,7 +143,7 @@ class OrganisationEventPersistenceService implements DataPersistenceService
             if (!$event) {
                 $updateableType = UpdateRequestModel::NEW_TYPE_ORGANISATION_EVENT;
             }
-            /** @var \App\Models\UpdateRequest $updateRequest */
+            /** @var UpdateRequestModel $updateRequest */
             $updateRequest = new UpdateRequestModel([
                 'updateable_type' => $updateableType,
                 'updateable_id' => $event->id ?? null,

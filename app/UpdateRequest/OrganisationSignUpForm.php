@@ -44,7 +44,7 @@ class OrganisationSignUpForm implements AppliesUpdateRequests
     {
         $data = $updateRequest->data;
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = User::create([
             'first_name' => Arr::get($data, 'user.first_name'),
             'last_name' => Arr::get($data, 'user.last_name'),
@@ -53,7 +53,7 @@ class OrganisationSignUpForm implements AppliesUpdateRequests
             'password' => Arr::get($data, 'user.password'),
         ]);
 
-        /** @var \App\Models\Organisation $organisation */
+        /** @var Organisation $organisation */
         $organisationId = Arr::get($data, 'organisation.id', null);
         $organisation = $organisationId ? Organisation::find($organisationId) : Organisation::create([
             'slug' => Arr::get($data, 'organisation.slug'),
@@ -67,7 +67,7 @@ class OrganisationSignUpForm implements AppliesUpdateRequests
         ]);
 
         if (Arr::get($data, 'service.name', null)) {
-            /** @var \App\Models\Service $service */
+            /** @var Service $service */
             $service = Service::create([
                 'organisation_id' => $organisation->id,
                 'slug' => Arr::get($data, 'service.slug'),

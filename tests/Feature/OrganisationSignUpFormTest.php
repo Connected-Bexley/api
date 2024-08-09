@@ -2,17 +2,17 @@
 
 namespace Tests\Feature;
 
-use App\Events\EndpointHit;
-use App\Models\Audit;
-use App\Models\Organisation;
-use App\Models\Service;
-use App\Models\SocialMedia;
-use App\Models\UpdateRequest;
-use App\Models\User;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Event;
-use Laravel\Passport\Passport;
 use Tests\TestCase;
+use App\Models\User;
+use App\Models\Audit;
+use App\Models\Service;
+use App\Events\EndpointHit;
+use App\Models\SocialMedia;
+use App\Models\Organisation;
+use App\Models\UpdateRequest;
+use Illuminate\Http\Response;
+use Laravel\Passport\Passport;
+use Illuminate\Support\Facades\Event;
 
 class OrganisationSignUpFormTest extends TestCase
 {
@@ -77,9 +77,9 @@ class OrganisationSignUpFormTest extends TestCase
         $response->assertStatus(Response::HTTP_CREATED);
     }
 
-    public function test_guest_can_create_one_with_single_form_of_contact(): void
+    public function test_guest_can_create_one_with_no_form_of_contact(): void
     {
-        $response = $this->json('POST', '/core/v1/organisation-sign-up-forms', [
+        $payload = [
             'user' => [
                 'first_name' => $this->faker->firstName(),
                 'last_name' => $this->faker->lastName(),
@@ -91,8 +91,8 @@ class OrganisationSignUpFormTest extends TestCase
                 'slug' => 'test-org',
                 'name' => 'Test Org',
                 'description' => 'Test description',
-                'url' => 'http://test-org.example.com',
-                'email' => 'info@test-org.example.com',
+                'url' => null,
+                'email' => null,
                 'phone' => null,
             ],
             'service' => [
@@ -107,9 +107,9 @@ class OrganisationSignUpFormTest extends TestCase
                 'fees_url' => null,
                 'testimonial' => null,
                 'video_embed' => null,
-                'url' => $this->faker->url(),
-                'contact_name' => $this->faker->name(),
-                'contact_phone' => random_uk_mobile_phone(),
+                'url' => null,
+                'contact_name' => null,
+                'contact_phone' => null,
                 'contact_email' => null,
                 'useful_infos' => [
                     [
@@ -131,9 +131,39 @@ class OrganisationSignUpFormTest extends TestCase
                     ],
                 ],
             ],
-        ]);
+        ];
+
+        $response = $this->json('POST', '/core/v1/organisation-sign-up-forms', $payload);
 
         $response->assertStatus(Response::HTTP_CREATED);
+
+        $updateRequest = UpdateRequest::find($response->json('id'));
+
+        Passport::actingAs(User::factory()->create()->makeSuperAdmin());
+
+        $response = $this->json('PUT', "/core/v1/update-requests/{$updateRequest->id}/approve");
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $this->assertDatabaseHas('organisations', $payload['organisation']);
+
+        $this->assertDatabaseHas('services', [
+            'slug' => 'test-service',
+            'name' => 'Test Service',
+            'type' => Service::TYPE_SERVICE,
+            'intro' => 'This is a test intro',
+            'description' => 'Lorem ipsum',
+            'wait_time' => null,
+            'is_free' => true,
+            'fees_text' => null,
+            'fees_url' => null,
+            'testimonial' => null,
+            'video_embed' => null,
+            'url' => null,
+            'contact_name' => null,
+            'contact_phone' => null,
+            'contact_email' => null,
+        ]);
     }
 
     /**

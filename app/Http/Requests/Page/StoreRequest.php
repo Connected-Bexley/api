@@ -84,4 +84,17 @@ class StoreRequest extends FormRequest
             'collections.*' => ['sometimes', 'exists:collections,id'],
         ];
     }
+
+    /**
+     * Custom error messages.
+     *
+     * @return array
+     */
+    public function messages()
+    {
+        return [
+            'content.info_pages.title.required_if' => 'The Information Pages Title field is required on a Landing Page',
+            'content.collections.title.required_if' => 'The Collections Title field is required on a Landing Page',
+        ];
+    }
 }

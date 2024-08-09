@@ -11,7 +11,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 class CanAssignRoleToUser implements ValidationRule
 {
     /**
-     * @var \App\Models\User
+     * @var User
      */
     protected $user;
 

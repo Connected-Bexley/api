@@ -2,15 +2,16 @@
 
 namespace Tests\Feature\Search;
 
+use Carbon\Carbon;
+use Tests\TestCase;
+use App\Models\Service;
+use App\Models\Taxonomy;
 use App\Models\Collection;
 use App\Models\Organisation;
-use App\Models\Service;
-use App\Models\ServiceLocation;
-use App\Models\Taxonomy;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
-use Tests\TestCase;
 use Tests\UsesElasticsearch;
+use Illuminate\Http\Response;
+use App\Models\ServiceLocation;
+use Illuminate\Support\Facades\DB;
 
 class ServiceTest extends TestCase implements UsesElasticsearch
 {
@@ -32,7 +33,10 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
     public function test_guest_can_search(): void
     {
-        Service::factory()->create(['name' => 'This is a test']);
+        $service = Service::factory()->create(['name' => 'This is a test']);
+        $serviceLocation = ServiceLocation::factory()->create([
+            'service_id' => $service->id,
+        ]);
 
         sleep(1);
 
@@ -92,7 +96,11 @@ class ServiceTest extends TestCase implements UsesElasticsearch
                     'last_modified_at',
                     'created_at',
                     'updated_at',
-                    'service_locations',
+                    'service_locations' => [
+                        [
+                            'location',
+                        ],
+                    ],
                     'cqc_location_id',
                 ],
             ],
@@ -103,68 +111,70 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
     public function test_query_matches_service_name(): void
     {
-        $service1 = Service::factory()->create(['name' => 'This is a test']);
-        $service2 = Service::factory()->create(['name' => 'Should not match']);
+        $service = Service::factory()->create([
+            'name' => 'hunt remind voice',
+        ]);
+        Service::factory()->count(5)->create();
 
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'This is a test',
+            'query' => 'hunt remind voice',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonCount(1, 'data');
         $response->assertJsonFragment([
-            'id' => $service1->id,
+            'id' => $service->id,
         ]);
+        $this->assertEquals($service->id, $this->getResponseContent($response)['data'][0]['id']);
 
         // Fuzzy match
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'test those',
+            'query' => 'voice hunted',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonCount(1, 'data');
         $response->assertJsonFragment([
-            'id' => $service1->id,
+            'id' => $service->id,
         ]);
+        $this->assertEquals($service->id, $this->getResponseContent($response)['data'][0]['id']);
     }
 
     public function test_query_matches_service_description(): void
     {
-        $service1 = Service::factory()->create(['description' => 'This is a test']);
-        $service2 = Service::factory()->create(['description' => 'Should not match']);
+        $service = Service::factory()->create(['description' => $this->textContainingPhrases(['rods game sleeps'], 500)]);
+        Service::factory()->count(5)->create();
 
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'This is a test',
+            'query' => 'rods game sleeps',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonCount(1, 'data');
         $response->assertJsonFragment([
-            'id' => $service1->id,
+            'id' => $service->id,
         ]);
+        $this->assertEquals($service->id, $this->getResponseContent($response)['data'][0]['id']);
 
         // Fuzzy match
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'test those',
+            'query' => 'sleep games',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonCount(1, 'data');
         $response->assertJsonFragment([
-            'id' => $service1->id,
+            'id' => $service->id,
         ]);
+        $this->assertEquals($service->id, $this->getResponseContent($response)['data'][0]['id']);
     }
 
     public function test_query_matches_taxonomy_name(): void
     {
         $service1 = Service::factory()->create();
         $taxonomy = Taxonomy::category()->children()->create([
-            'slug' => 'this-is-a-test',
-            'name' => 'This is a test',
+            'slug' => 'singer-tonic-brings',
+            'name' => 'Singer Tonic Brings',
             'order' => 1,
             'depth' => 1,
         ]);
@@ -172,8 +182,8 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
         $service2 = Service::factory()->create();
         $taxonomy = Taxonomy::category()->children()->create([
-            'slug' => 'should-not-match',
-            'name' => 'Should not match',
+            'slug' => 'inches-translated-brief',
+            'name' => 'Inches Translated Brief',
             'order' => 1,
             'depth' => 1,
         ]);
@@ -182,29 +192,29 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'This is a test',
+            'query' => 'singer tonic brings',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonCount(1, 'data');
         $response->assertJsonFragment(['id' => $service1->id]);
+        $this->assertEquals($service1->id, $this->getResponseContent($response)['data'][0]['id']);
 
         // Fuzzy
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'test these',
+            'query' => 'bring a song',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonCount(1, 'data');
         $response->assertJsonFragment(['id' => $service1->id]);
+        $this->assertEquals($service1->id, $this->getResponseContent($response)['data'][0]['id']);
     }
 
     public function test_query_matches_partial_taxonomy_name(): void
     {
         $service1 = Service::factory()->create();
         $taxonomy = Taxonomy::category()->children()->create([
-            'slug' => 'phpunit-taxonomy',
-            'name' => 'PHPUnit Taxonomy',
+            'slug' => 'blocks-grain-taps',
+            'name' => 'Blocks Grain Taps',
             'order' => 1,
             'depth' => 1,
         ]);
@@ -212,8 +222,8 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
         $service2 = Service::factory()->create();
         $taxonomy = Taxonomy::category()->children()->create([
-            'slug' => 'should-not-match',
-            'name' => 'Should not match',
+            'slug' => 'cool-extra-reveal',
+            'name' => 'Cool Extra Reveal',
             'order' => 1,
             'depth' => 1,
         ]);
@@ -222,98 +232,85 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'PHPUnit',
+            'query' => 'grain',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonCount(1, 'data');
         $response->assertJsonFragment(['id' => $service1->id]);
+        $this->assertEquals($service1->id, $this->getResponseContent($response)['data'][0]['id']);
 
         // Fuzzy
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'HPHUnit',
+            'query' => 'block',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonCount(1, 'data');
         $response->assertJsonFragment(['id' => $service1->id]);
+        $this->assertEquals($service1->id, $this->getResponseContent($response)['data'][0]['id']);
     }
 
     public function test_query_matches_organisation_name(): void
     {
-        $organisation1 = Organisation::factory()->create(['name' => 'This is a test']);
-        $organisation2 = Organisation::factory()->create(['name' => 'Should not match']);
-        $service1 = Service::factory()->create(['organisation_id' => $organisation1->id]);
-        $service2 = Service::factory()->create(['organisation_id' => $organisation2->id]);
+        $organisation1 = Organisation::factory()->create(['name' => 'Riches Resist Envy']);
+        $organisation2 = Organisation::factory()->create();
+        $service = Service::factory()->create(['organisation_id' => $organisation1->id]);
+        Service::factory()->count(5)->create(['organisation_id' => $organisation2->id]);
 
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'This is a test',
+            'query' => 'riches resist envy',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonCount(1, 'data');
         $response->assertJsonFragment([
-            'id' => $service1->id,
+            'id' => $service->id,
         ]);
+        $this->assertEquals($service->id, $this->getResponseContent($response)['data'][0]['id']);
 
         // Fuzzy
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'test those',
+            'query' => 'envy rich',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonCount(1, 'data');
-        $response->assertJsonFragment(['id' => $service1->id]);
+        $response->assertJsonFragment(['id' => $service->id]);
+        $this->assertEquals($service->id, $this->getResponseContent($response)['data'][0]['id']);
     }
 
     public function test_query_ranks_service_name_equivalent_to_organisation_name(): void
     {
-        $organisation = Organisation::factory()->create(['name' => 'This is a test']);
+        $organisation = Organisation::factory()->create(['name' => 'Hammer Play Swim']);
         $serviceWithRelevantOrganisationName = Service::factory()->create([
             'name' => 'Relevant Organisation',
-            'intro' => 'Service Intro',
-            'description' => 'Service description',
             'organisation_id' => $organisation->id,
         ]);
-        $serviceWithRelevantOrganisationName->save();
         $serviceWithRelevantServiceName = Service::factory()->create([
-            'name' => 'This is a test',
-            'intro' => 'Service Intro',
-            'description' => 'Service description',
+            'name' => 'Hammer Play Swim',
         ]);
-        $serviceWithRelevantServiceName->save();
         $serviceWithRelevantIntro = Service::factory()->create([
             'name' => 'Relevant Intro',
-            'intro' => 'This is a test',
-            'description' => 'Service description',
+            'intro' => 'Hammer Play Swim',
         ]);
-        $serviceWithRelevantIntro->save();
         $serviceWithRelevantDescription = Service::factory()->create([
             'name' => 'Relevant Description',
-            'intro' => 'Service Intro',
-            'description' => 'This is a test',
+            'description' => 'Hammer Play Swim',
         ]);
-        $serviceWithRelevantDescription->save();
         $serviceWithRelevantTaxonomy = Service::factory()->create([
             'name' => 'Relevant Taxonomy',
-            'intro' => 'Service Intro',
-            'description' => 'Service description',
         ]);
         $taxonomy = Taxonomy::category()->children()->create([
-            'slug' => 'this-is-a-test',
-            'name' => 'This is a test',
+            'slug' => 'hammer-play-swim',
+            'name' => 'Hammer Play Swim',
             'order' => 1,
             'depth' => 1,
         ]);
         $serviceWithRelevantTaxonomy->serviceTaxonomies()->create(['taxonomy_id' => $taxonomy->id]);
-        $serviceWithRelevantTaxonomy->save();
 
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'This is a test',
+            'query' => 'hammer play swim',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
@@ -326,13 +323,13 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
     public function test_query_ranks_perfect_match_above_fuzzy_match(): void
     {
-        $service1 = Service::factory()->create(['name' => 'This is a test']);
-        $service2 = Service::factory()->create(['name' => 'These tests']);
+        $service1 = Service::factory()->create(['name' => 'Could Avoid Plans']);
+        $service2 = Service::factory()->create(['name' => 'Plan Avoids']);
 
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'This is a test',
+            'query' => 'could avoid plans',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
@@ -352,48 +349,46 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
     public function test_query_matches_service_intro(): void
     {
-        $service1 = Service::factory()->create([
-            'intro' => 'This is a service that helps the homeless find temporary housing.',
+        $service = Service::factory()->create([
+            'intro' => $this->textContainingPhrases(['glaze mild chats']),
         ]);
 
-        $service2 = Service::factory()->create([
-            'intro' => 'This is a service that helps provide food.',
-        ]);
+        Service::factory()->count(5)->create();
 
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'housing',
+            'query' => 'glaze mild chats',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonCount(1, 'data');
         $response->assertJsonFragment([
-            'id' => $service1->id,
+            'id' => $service->id,
         ]);
+        $this->assertEquals($service->id, $this->getResponseContent($response)['data'][0]['id']);
 
         // Fuzzy
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'housign',
+            'query' => 'chat mild',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonCount(1, 'data');
         $response->assertJsonFragment([
-            'id' => $service1->id,
+            'id' => $service->id,
         ]);
+        $this->assertEquals($service->id, $this->getResponseContent($response)['data'][0]['id']);
     }
 
     public function test_query_matches_single_word_from_service_description(): void
     {
         $service = Service::factory()->create([
-            'description' => 'This is a service that helps to homeless find temporary housing.',
+            'description' => $this->textContainingPhrases(['accent'], 500),
         ]);
 
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'homeless',
+            'query' => 'accent',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
@@ -402,32 +397,30 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
     public function test_query_matches_multiple_words_from_service_description(): void
     {
-        $service1 = Service::factory()->create([
-            'description' => 'This is a service that helps to homeless find temporary housing.',
+        $service = Service::factory()->create([
+            'description' => $this->textContainingPhrases(['hurls star humans']),
         ]);
 
-        $service2 = Service::factory()->create([
-            'intro' => 'This is a service that helps provide food.',
-        ]);
+        Service::factory()->create();
 
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'temporary housing',
+            'query' => 'hurls star humans',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonCount(1, 'data');
-        $response->assertJsonFragment(['id' => $service1->id]);
+        $response->assertJsonFragment(['id' => $service->id]);
+        $this->assertEquals($service->id, $this->getResponseContent($response)['data'][0]['id']);
 
         // Fuzzy
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'temprary housign',
+            'query' => 'human stars',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonCount(1, 'data');
-        $response->assertJsonFragment(['id' => $service1->id]);
+        $response->assertJsonFragment(['id' => $service->id]);
+        $this->assertEquals($service->id, $this->getResponseContent($response)['data'][0]['id']);
     }
 
     public function test_filter_by_wait_time_works(): void
@@ -502,7 +495,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
     public function test_query_and_filter_works(): void
     {
-        $service = Service::factory()->create(['name' => 'Ayup Digital']);
+        $service = Service::factory()->create(['name' => 'Crass Tall Films']);
         $collection = Collection::create([
             'type' => Collection::TYPE_CATEGORY,
             'slug' => 'self-help',
@@ -520,7 +513,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $service->serviceTaxonomies()->create(['taxonomy_id' => $taxonomy->id]);
         $service->save();
 
-        $differentService = Service::factory()->create(['name' => 'Ayup Digital']);
+        $differentService = Service::factory()->create(['name' => 'Crass Tall Films']);
         $differentCollection = Collection::create([
             'type' => Collection::TYPE_PERSONA,
             'slug' => 'refugees',
@@ -541,7 +534,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'Ayup Digital',
+            'query' => 'crass tall films',
             'category' => 'self-help',
         ]);
 
@@ -552,7 +545,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
     public function test_query_and_filter_works_when_query_does_not_match(): void
     {
-        $service = Service::factory()->create(['name' => 'Ayup Digital']);
+        $service = Service::factory()->create(['name' => 'Richer Value Term']);
         $collection = Collection::create([
             'type' => Collection::TYPE_CATEGORY,
             'slug' => 'self-help',
@@ -570,7 +563,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $service->serviceTaxonomies()->create(['taxonomy_id' => $taxonomy->id]);
         $service->save();
 
-        $differentService = Service::factory()->create(['name' => 'Ayup Digital']);
+        $differentService = Service::factory()->create(['name' => 'Richer Value Term']);
         $differentCollection = Collection::create([
             'type' => Collection::TYPE_PERSONA,
             'slug' => 'refugees',
@@ -591,7 +584,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'asfkjbadsflksbdafklhasdbflkbs',
+            'query' => 'affair uses loud',
             'category' => 'self-help',
         ]);
 
@@ -602,18 +595,18 @@ class ServiceTest extends TestCase implements UsesElasticsearch
     public function test_only_active_services_returned(): void
     {
         $activeService = Service::factory()->create([
-            'name' => 'Testing Service',
+            'name' => 'Sobs Short Hosts',
             'status' => Service::STATUS_ACTIVE,
         ]);
         $inactiveService = Service::factory()->create([
-            'name' => 'Testing Service',
+            'name' => 'Sobs Short Hosts',
             'status' => Service::STATUS_INACTIVE,
         ]);
 
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'Testing Service',
+            'query' => 'Sobs Short Hosts',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
@@ -698,12 +691,12 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         DB::table('locations')->where('id', $serviceLocation->location->id)->update(['lat' => 0, 'lon' => 0]);
         $service1->save();
 
-        $service2 = Service::factory()->create(['name' => 'Test Name']);
+        $service2 = Service::factory()->create(['name' => 'Copper Pipe Lace']);
         $serviceLocation2 = ServiceLocation::factory()->create(['service_id' => $service2->id]);
         DB::table('locations')->where('id', $serviceLocation2->location->id)->update(['lat' => 45.01, 'lon' => 90.01]);
         $service2->save();
 
-        $organisation3 = Organisation::factory()->create(['name' => 'Test Name']);
+        $organisation3 = Organisation::factory()->create(['name' => 'Copper Pipe Lace']);
         $service3 = Service::factory()->create(['organisation_id' => $organisation3->id]);
         $serviceLocation3 = ServiceLocation::factory()->create(['service_id' => $service3->id]);
         DB::table('locations')->where('id', $serviceLocation3->location->id)->update(['lat' => 45, 'lon' => 90]);
@@ -717,7 +710,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'Test Name',
+            'query' => 'copper pipe lace',
             'order' => 'relevance',
             'location' => [
                 'lat' => 45,
@@ -746,20 +739,20 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $service1->save();
 
         // Relevant < 1 mile
-        $service2 = Service::factory()->create(['intro' => 'This is a test']);
+        $service2 = Service::factory()->create(['intro' => 'Unable Regard Festivity']);
         $serviceLocation2 = ServiceLocation::factory()->create(['service_id' => $service2->id]);
         DB::table('locations')->where('id', $serviceLocation2->location->id)->update(['lat' => 51.46813624630186, 'lon' => -0.38543053111827796]);
         $service2->save();
 
         // Relevant < 1 mile
-        $organisation3 = Organisation::factory()->create(['name' => 'This is a test']);
+        $organisation3 = Organisation::factory()->create(['name' => 'Unable Regard Festivity']);
         $service3 = Service::factory()->create(['organisation_id' => $organisation3->id]);
         $serviceLocation3 = ServiceLocation::factory()->create(['service_id' => $service3->id]);
         DB::table('locations')->where('id', $serviceLocation3->location->id)->update(['lat' => 51.46933926508632, 'lon' => -0.3745729484111921]);
         $service3->save();
 
         // Relevant > 1 mile
-        $service4 = Service::factory()->create(['name' => 'This is a test']);
+        $service4 = Service::factory()->create(['name' => 'Unable Regard Festivity']);
         $serviceLocation4 = ServiceLocation::factory()->create(['service_id' => $service4->id]);
         DB::table('locations')->where('id', $serviceLocation4->location->id)->update(['lat' => 51.46741441979822, 'lon' => -0.40152378521657234]);
         $service4->save();
@@ -767,7 +760,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'This is a test',
+            'query' => 'unable regard festivity',
             'order' => 'relevance',
             'distance' => 1,
             'location' => [
@@ -836,29 +829,29 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $collection3->collectionTaxonomies()->create(['taxonomy_id' => $taxonomy3->id]);
 
         // Service 1 is in Collection 1
-        $service1 = Service::factory()->create(['name' => 'Foo Bar']);
+        $service1 = Service::factory()->create(['name' => 'Learns Snows Incomes']);
         $service1->serviceTaxonomies()->create(['taxonomy_id' => $taxonomy1->id]);
         $service1->save();
 
         // Service 2 is in Collection 2
-        $service2 = Service::factory()->create(['name' => 'Foo Bim']);
+        $service2 = Service::factory()->create(['name' => 'Snaps Snow Focus']);
         $service2->serviceTaxonomies()->create(['taxonomy_id' => $taxonomy2->id]);
         $service2->save();
 
         // Service 3 is in Collection 2
-        $service3 = Service::factory()->create(['name' => 'Foo Foo']);
+        $service3 = Service::factory()->create(['name' => 'Former Snow Bond']);
         $service3->serviceTaxonomies()->create(['taxonomy_id' => $taxonomy2->id]);
         $service3->save();
 
         // Service 4 is in Collection 3
-        $service4 = Service::factory()->create(['name' => 'Foo Baz']);
+        $service4 = Service::factory()->create(['name' => 'Grades Snow Foster']);
         $service4->serviceTaxonomies()->create(['taxonomy_id' => $taxonomy3->id]);
         $service4->save();
 
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'Foo',
+            'query' => 'Snow',
             'category' => implode(',', [$collection2->slug, $collection3->slug]),
         ]);
 
@@ -987,14 +980,14 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $collection3->collectionTaxonomies()->create(['taxonomy_id' => $taxonomy3->id]);
 
         // Service 1 is in Collection 1
-        $service1 = Service::factory()->create(['name' => 'Service 1 Bar']);
+        $service1 = Service::factory()->create(['name' => 'Snow Forgot Dare']);
         $service1->serviceTaxonomies()->create(['taxonomy_id' => $taxonomy1->id]);
         $serviceLocation1 = ServiceLocation::factory()->create(['service_id' => $service1->id]);
         DB::table('locations')->where('id', $serviceLocation1->location->id)->update(['lat' => 041.9374814, 'lon' => -8.8643883]);
         $service1->save();
 
         // Service 2 is in Collection 2
-        $service2 = Service::factory()->create(['name' => 'Service 2 Baz']);
+        $service2 = Service::factory()->create(['name' => 'Grace Vanish Organs']);
         $service2->serviceTaxonomies()->create(['taxonomy_id' => $taxonomy2->id]);
         $service2->serviceTaxonomies()->create(['taxonomy_id' => $taxonomy3->id]);
         $serviceLocation2 = ServiceLocation::factory()->create(['service_id' => $service2->id]);
@@ -1002,14 +995,14 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $service2->save();
 
         // Service 3 is in Collection 2
-        $service3 = Service::factory()->create(['name' => 'Service 3 Foo']);
+        $service3 = Service::factory()->create(['name' => 'Mouth Score Limp']);
         $service3->serviceTaxonomies()->create(['taxonomy_id' => $taxonomy2->id]);
         $serviceLocation3 = ServiceLocation::factory()->create(['service_id' => $service3->id]);
         DB::table('locations')->where('id', $serviceLocation3->location->id)->update(['lat' => 90, 'lon' => 90]);
         $service3->save();
 
         // Service 4 is in Collection 3
-        $service4 = Service::factory()->create(['name' => 'Service 4 Baz']);
+        $service4 = Service::factory()->create(['name' => 'Logo Vanish Froth']);
         $service4->serviceTaxonomies()->create(['taxonomy_id' => $taxonomy3->id]);
         $serviceLocation4 = ServiceLocation::factory()->create(['service_id' => $service4->id]);
         DB::table('locations')->where('id', $serviceLocation4->location->id)->update(['lat' => 041.9374814, 'lon' => -8.8643883]);
@@ -1018,7 +1011,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'Baz',
+            'query' => 'vanish',
             'persona' => implode(',', [$collection3->slug]),
             'location' => [
                 'lat' => 041.9374814,
@@ -1128,13 +1121,13 @@ class ServiceTest extends TestCase implements UsesElasticsearch
     {
         $serviceEligibility1 = Taxonomy::where('name', '12 - 15 years')->firstOrFail();
         $serviceEligibility2 = Taxonomy::where('name', '16 - 18 years')->firstOrFail();
-        $service1 = Service::factory()->create(['name' => 'This is a test']);
-        $service2 = Service::factory()->create(['intro' => 'This is a test']);
-        $service3 = Service::factory()->create(['description' => 'This is a test']);
+        $service1 = Service::factory()->create(['name' => 'Closer Tries Rust']);
+        $service2 = Service::factory()->create(['intro' => $this->textContainingPhrases(['closer tries rust'])]);
+        $service3 = Service::factory()->create(['description' => $this->textContainingPhrases(['closer tries rust'], 500)]);
         $service4 = Service::factory()->create();
         $taxonomy = Taxonomy::category()->children()->create([
-            'slug' => 'this-is-a-test',
-            'name' => 'This is a test',
+            'slug' => 'closer-tries-rust',
+            'name' => 'Closer Tries Rust',
             'order' => 1,
             'depth' => 1,
         ]);
@@ -1159,14 +1152,14 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'This is a test',
+            'query' => 'closer tries rust',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonCount(4, 'data');
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'This is a test',
+            'query' => 'closer tries rust',
             'eligibilities' => [
                 '12 - 15 years'],
         ]);
@@ -1305,10 +1298,10 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
         $this->assertEquals(4, count($data));
 
-        $this->assertEquals($serviceA->id, $data[0]['id']);
-        $this->assertEquals($serviceB->id, $data[1]['id']);
-        $this->assertEquals($serviceC->id, $data[2]['id']);
-        $this->assertEquals($serviceD->id, $data[3]['id']);
+        $this->assertTrue(in_array($serviceA->id, [$data[0]['id'], $data[1]['id']]));
+        $this->assertTrue(in_array($serviceB->id, [$data[0]['id'], $data[1]['id'], $data[2]['id']]));
+        $this->assertTrue(in_array($serviceC->id, [$data[1]['id'], $data[2]['id'], $data[3]['id']]));
+        $this->assertTrue(in_array($serviceD->id, [$data[2]['id'], $data[3]['id']]));
     }
 
     public function test_search_ranking_given_more_relevant_matches_versus_less_hits_or_no_eligibilities_attached(): void
@@ -1412,9 +1405,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $organisation = \App\Models\Organisation::factory()->create();
         $serviceParams = [
             'organisation_id' => $organisation->id,
-            'name' => 'Testing Service',
-            'intro' => 'Service Intro',
-            'description' => 'Service description',
+            'name' => 'Royal Organs Hike',
         ];
         $service3 = Service::factory()->create(array_merge($serviceParams, ['score' => 3]));
         $service5 = Service::factory()->create(array_merge($serviceParams, ['score' => 5]));
@@ -1423,7 +1414,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'Testing Service',
+            'query' => 'royal organs hike',
         ]);
 
         $response->assertStatus(Response::HTTP_OK);
@@ -1439,9 +1430,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         $organisation = \App\Models\Organisation::factory()->create();
         $serviceParams = [
             'organisation_id' => $organisation->id,
-            'name' => 'Testing Service',
-            'intro' => 'Service Intro',
-            'description' => 'Service description',
+            'name' => 'Stars Serve Remain',
         ];
 
         $service5 = Service::factory()->create(array_merge($serviceParams, ['score' => 5]));
@@ -1457,7 +1446,7 @@ class ServiceTest extends TestCase implements UsesElasticsearch
         sleep(1);
 
         $response = $this->json('POST', '/core/v1/search', [
-            'query' => 'Testing Service',
+            'query' => 'stars serve remain',
             'order' => 'distance',
             'location' => [
                 'lat' => 45,
@@ -1470,5 +1459,69 @@ class ServiceTest extends TestCase implements UsesElasticsearch
 
         $this->assertEquals($service0->id, $data[0]['id']);
         $this->assertEquals($service5->id, $data[1]['id']);
+    }
+
+    /**
+     * @test
+     */
+    public function freshnessOfServiceDoesNotAffectSearchResult()
+    {
+        $organisation = \App\Models\Organisation::factory()->create();
+        $serviceParams = [
+            'organisation_id' => $organisation->id,
+            'name' => 'Royal Organs Hike',
+        ];
+        $service5 = Service::factory()->create(array_merge($serviceParams, [
+            'score' => 5,
+            'created_at' => Carbon::now()->subMonths(24),
+            'updated_at' => Carbon::now()->subMonths(24),
+            'last_modified_at' => Carbon::now()->subMonths(24),
+        ]));
+        $service4 = Service::factory()->create(array_merge($serviceParams, [
+            'score' => 4,
+            'created_at' => Carbon::now()->subMonths(12),
+            'updated_at' => Carbon::now()->subMonths(12),
+            'last_modified_at' => Carbon::now()->subMonths(12),
+        ]));
+        $service3 = Service::factory()->create(array_merge($serviceParams, [
+            'score' => 3,
+            'created_at' => Carbon::now()->subMonths(6),
+            'updated_at' => Carbon::now()->subMonths(6),
+            'last_modified_at' => Carbon::now()->subMonths(6),
+        ]));
+        $service2 = Service::factory()->create(array_merge($serviceParams, [
+            'score' => 2,
+            'created_at' => Carbon::now()->subMonths(3),
+            'updated_at' => Carbon::now()->subMonths(3),
+            'last_modified_at' => Carbon::now()->subMonths(3),
+        ]));
+        $service1 = Service::factory()->create(array_merge($serviceParams, [
+            'score' => 1,
+            'created_at' => Carbon::now()->subMonths(1),
+            'updated_at' => Carbon::now()->subMonths(1),
+            'last_modified_at' => Carbon::now()->subMonths(1),
+        ]));
+        $service0 = Service::factory()->create(array_merge($serviceParams, [
+            'score' => 0,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+            'last_modified_at' => Carbon::now(),
+        ]));
+
+        sleep(1);
+
+        $response = $this->json('POST', '/core/v1/search', [
+            'query' => 'royal organs hike',
+        ]);
+
+        $response->assertStatus(Response::HTTP_OK);
+        $data = $this->getResponseContent($response)['data'];
+
+        $this->assertEquals($service5->id, $data[0]['id']);
+        $this->assertEquals($service4->id, $data[1]['id']);
+        $this->assertEquals($service3->id, $data[2]['id']);
+        $this->assertEquals($service2->id, $data[3]['id']);
+        $this->assertEquals($service1->id, $data[4]['id']);
+        $this->assertEquals($service0->id, $data[5]['id']);
     }
 }

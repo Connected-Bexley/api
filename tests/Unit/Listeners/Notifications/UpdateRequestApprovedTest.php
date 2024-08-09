@@ -2,15 +2,15 @@
 
 namespace Tests\Unit\Listeners\Notifications;
 
-use App\Events\EndpointHit;
-use App\Listeners\Notifications\UpdateRequestApproved;
-use App\Models\Organisation;
-use App\Models\Service;
-use App\Models\UpdateRequest;
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
+use App\Models\User;
+use App\Models\Service;
+use App\Events\EndpointHit;
+use App\Models\Organisation;
+use Illuminate\Http\Request;
+use App\Models\UpdateRequest;
+use Illuminate\Support\Facades\Queue;
+use App\Listeners\Notifications\UpdateRequestApproved;
 
 class UpdateRequestApprovedTest extends TestCase
 {
@@ -100,6 +100,7 @@ class UpdateRequestApprovedTest extends TestCase
                     'contact_email' => $this->faker->safeEmail(),
                     'useful_infos' => [],
                     'offerings' => [],
+                    'social_medias' => [],
                 ],
             ],
         ]);

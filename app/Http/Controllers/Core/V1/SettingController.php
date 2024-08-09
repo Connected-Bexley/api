@@ -99,7 +99,7 @@ class SettingController extends Controller
                 ]);
 
             if ($request->filled('cms.frontend.banner.image_file_id')) {
-                /** @var \App\Models\File $file */
+                /** @var File $file */
                 $file = File::query()
                     ->findOrFail($request->input('cms.frontend.banner.image_file_id'))
                     ->assigned();

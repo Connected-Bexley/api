@@ -17,6 +17,10 @@ class FileResource extends JsonResource
             'id' => $this->id,
             'mime_type' => $this->mime_type,
             'is_private' => $this->is_private,
+            'alt_text' => $this->meta['alt_text'] ?? null,
+            'max_dimension' => $this->meta['max_dimension'] ?? null,
+            'src' => 'data:' . $this->mime_type . ';base64,' . base64_encode($this->getContent()),
+            'url' => $this->url(),
             'created_at' => $this->created_at->format(CarbonImmutable::ISO8601),
             'updated_at' => $this->updated_at->format(CarbonImmutable::ISO8601),
         ];

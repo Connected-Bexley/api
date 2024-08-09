@@ -44,7 +44,7 @@ class PagesTest extends TestCase
                     'id',
                     'slug',
                     'title',
-                    'content',
+                    'excerpt',
                     'order',
                     'enabled',
                     'page_type',
@@ -546,7 +546,7 @@ class PagesTest extends TestCase
                     'id',
                     'slug',
                     'title',
-                    'content',
+                    'excerpt',
                     'order',
                     'enabled',
                     'page_type',
@@ -574,7 +574,7 @@ class PagesTest extends TestCase
                     'id',
                     'slug',
                     'title',
-                    'content',
+                    'excerpt',
                     'order',
                     'enabled',
                     'page_type',
@@ -602,7 +602,7 @@ class PagesTest extends TestCase
                     'id',
                     'slug',
                     'title',
-                    'content',
+                    'excerpt',
                     'order',
                     'enabled',
                     'page_type',
@@ -612,13 +612,9 @@ class PagesTest extends TestCase
                             'id',
                             'slug',
                             'title',
-                            'image',
-                            'content',
                             'order',
                             'enabled',
                             'page_type',
-                            'created_at',
-                            'updated_at',
                         ],
                     ],
                     'created_at',
@@ -648,7 +644,7 @@ class PagesTest extends TestCase
                     'id',
                     'slug',
                     'title',
-                    'content',
+                    'excerpt',
                     'order',
                     'enabled',
                     'page_type',
@@ -703,7 +699,7 @@ class PagesTest extends TestCase
         $data = [
             'title' => 'A New Page',
             'slug' => 'a-new-page',
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -736,7 +732,7 @@ class PagesTest extends TestCase
         $data = [
             'title' => 'A New Page',
             'slug' => 'a-new-page',
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -769,7 +765,7 @@ class PagesTest extends TestCase
         $data = [
             'title' => 'A New Page',
             'slug' => 'a-new-page',
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -802,7 +798,7 @@ class PagesTest extends TestCase
         $data = [
             'title' => 'A New Page',
             'slug' => 'a-new-page',
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -834,7 +830,7 @@ class PagesTest extends TestCase
         $data = [
             'title' => 'A New Page',
             'slug' => 'a-new-page',
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -870,7 +866,7 @@ class PagesTest extends TestCase
 
         $data = [
             'title' => 'A New Page',
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -895,13 +891,8 @@ class PagesTest extends TestCase
             'updateable_id' => null,
         ]);
 
-        $updateRequest = UpdateRequest::query()
-            ->where('updateable_type', UpdateRequest::NEW_TYPE_PAGE)
-            ->where('updateable_id', null)
-            ->where('user_id', $user->id)
-            ->firstOrFail();
+        $updateRequest = UpdateRequest::find($response->json('id'));
 
-        // $data['slug'] = Str::slug($data['title']);
         $data['page_type'] = Page::PAGE_TYPE_INFORMATION;
         $this->assertEquals($data, $updateRequest->data);
 
@@ -932,7 +923,7 @@ class PagesTest extends TestCase
 
         $data = [
             'title' => 'A New Page',
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -962,6 +953,7 @@ class PagesTest extends TestCase
             'landing_page',
             'parent',
             'children',
+            'ancestors',
             'collection_categories',
             'collection_personas',
             'created_at',
@@ -1099,7 +1091,7 @@ class PagesTest extends TestCase
 
         $data = [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -1177,10 +1169,26 @@ class PagesTest extends TestCase
             ],
         ])->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
+        // Exceeds max characters for 'copy' content type
+        $this->json('POST', '/core/v1/pages', [
+            'title' => $this->faker->sentence(),
+            'excerpt' => str_pad($this->faker->paragraph(2), 151, 'words '),
+            'content' => [
+                'introduction' => [
+                    'content' => [
+                        [
+                            'type' => 'copy',
+                            'value' => implode(' ', array_fill(0, config('local.page_copy_max_chars') + 1, 'test')),
+                        ],
+                    ],
+                ],
+            ],
+        ])->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+
         // Invalid parent id
         $this->json('POST', '/core/v1/pages', [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -1197,7 +1205,7 @@ class PagesTest extends TestCase
         // Unknown parent id
         $this->json('POST', '/core/v1/pages', [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -1214,7 +1222,7 @@ class PagesTest extends TestCase
         // Invalid content stucture for landing page
         $this->json('POST', '/core/v1/pages', [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -1233,7 +1241,7 @@ class PagesTest extends TestCase
         // Invalid order
         $this->json('POST', '/core/v1/pages', [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -1251,7 +1259,7 @@ class PagesTest extends TestCase
         // Invalid order
         $this->json('POST', '/core/v1/pages', [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -1269,7 +1277,7 @@ class PagesTest extends TestCase
         // Landing page cannot have parent
         $this->json('POST', '/core/v1/pages', [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -1292,7 +1300,7 @@ class PagesTest extends TestCase
 
         $this->json('POST', '/core/v1/pages', [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -1326,7 +1334,7 @@ class PagesTest extends TestCase
 
         $data = [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -1385,7 +1393,7 @@ class PagesTest extends TestCase
 
         $data = [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -1444,7 +1452,7 @@ class PagesTest extends TestCase
 
         $data = [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -1505,7 +1513,7 @@ class PagesTest extends TestCase
 
         $data = [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -1601,7 +1609,7 @@ class PagesTest extends TestCase
 
         $data = [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -1663,7 +1671,7 @@ class PagesTest extends TestCase
 
         $data = [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -1733,7 +1741,7 @@ class PagesTest extends TestCase
 
         $data = [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -1804,7 +1812,7 @@ class PagesTest extends TestCase
 
         $data = [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -1836,6 +1844,7 @@ class PagesTest extends TestCase
             ->firstOrFail();
 
         $data['page_type'] = Page::PAGE_TYPE_INFORMATION;
+        $data['excerpt'] = trim($data['excerpt']);
         $this->assertEquals($data, $updateRequest->data);
 
         $this->approveUpdateRequest($updateRequest->id);
@@ -1875,7 +1884,7 @@ class PagesTest extends TestCase
 
         $data = [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -1939,7 +1948,7 @@ class PagesTest extends TestCase
 
         $data = [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -1976,7 +1985,7 @@ class PagesTest extends TestCase
 
         $data = [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -2084,9 +2093,10 @@ class PagesTest extends TestCase
 
         $parentPage = Page::factory()->create();
 
+        // Missing title
         $data = [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -2111,9 +2121,10 @@ class PagesTest extends TestCase
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
+        // Missing description
         $data = [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -2138,9 +2149,10 @@ class PagesTest extends TestCase
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
+        // Missing button text
         $data = [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -2165,9 +2177,10 @@ class PagesTest extends TestCase
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
+        // Invalid URL
         $data = [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -2210,7 +2223,7 @@ class PagesTest extends TestCase
 
         $data = [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -2239,6 +2252,49 @@ class PagesTest extends TestCase
     /**
      * @test
      */
+    public function createInformationPageWithVideoAsContentAdmin200(): void
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeContentAdmin();
+
+        Passport::actingAs($user);
+
+        $parentPage = Page::factory()->create();
+
+        $data = [
+            'title' => $this->faker->sentence(),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
+            'content' => [
+                'introduction' => [
+                    'content' => [
+                        [
+                            'type' => 'copy',
+                            'value' => $this->faker->realText(),
+                        ],
+                        [
+                            'type' => 'video',
+                            'title' => $this->faker->sentence(),
+                            'url' => 'https://www.youtube.com/watch?v=dummy_id',
+                        ],
+                    ],
+                ],
+            ],
+            'parent_id' => $parentPage->id,
+            'page_type' => 'information',
+        ];
+        $response = $this->json('POST', '/core/v1/pages', $data);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $response->assertJsonFragment($data);
+    }
+
+    /**
+     * @test
+     */
     public function createLandingPageWithCallToActionsAsContentAdmin200(): void
     {
         /**
@@ -2251,7 +2307,7 @@ class PagesTest extends TestCase
 
         $data = [
             'title' => $this->faker->sentence(),
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -2323,6 +2379,86 @@ class PagesTest extends TestCase
     /**
      * @test
      */
+    public function createLandingPageWithVideosAsContentAdmin200(): void
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeContentAdmin();
+
+        Passport::actingAs($user);
+
+        $data = [
+            'title' => $this->faker->sentence(),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
+            'content' => [
+                'introduction' => [
+                    'content' => [
+                        [
+                            'type' => 'copy',
+                            'value' => $this->faker->realText(),
+                        ],
+                        [
+                            'type' => 'video',
+                            'title' => $this->faker->sentence(),
+                            'url' => 'https://www.youtube.com/watch?v=dummy_id',
+                        ],
+                    ],
+                ],
+                'about' => [
+                    'content' => [
+                        [
+                            'type' => 'copy',
+                            'value' => $this->faker->realText(),
+                        ],
+                        [
+                            'type' => 'video',
+                            'title' => $this->faker->sentence(),
+                            'url' => 'https://www.youtube.com/watch?v=dummy_id',
+                        ],
+                        [
+                            'type' => 'copy',
+                            'value' => $this->faker->realText(),
+                        ],
+                    ],
+                ],
+                'info_pages' => [
+                    'title' => $this->faker->sentence(),
+                    'content' => [
+                        [
+                            'type' => 'copy',
+                            'value' => $this->faker->realText(),
+                        ],
+                        [
+                            'type' => 'video',
+                            'title' => $this->faker->sentence(),
+                            'url' => 'https://www.youtube.com/watch?v=dummy_id',
+                        ],
+                    ],
+                ],
+                'collections' => [
+                    'title' => $this->faker->sentence(),
+                    'content' => [
+                        [
+                            'type' => 'copy',
+                            'value' => $this->faker->realText(),
+                        ],
+                    ],
+                ],
+            ],
+            'page_type' => Page::PAGE_TYPE_LANDING,
+        ];
+        $response = $this->json('POST', '/core/v1/pages', $data);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $response->assertJsonFragment($data);
+    }
+
+    /**
+     * @test
+     */
     public function createPageWithSameTitleAsExistingPageIncrementsSlugAsContentAdmin200(): void
     {
         /**
@@ -2343,7 +2479,7 @@ class PagesTest extends TestCase
 
         $data = [
             'title' => 'Test Page Title',
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -2361,11 +2497,7 @@ class PagesTest extends TestCase
 
         $response->assertStatus(Response::HTTP_OK);
 
-        $updateRequest = UpdateRequest::query()
-            ->where('updateable_type', UpdateRequest::NEW_TYPE_PAGE)
-            ->where('updateable_id', null)
-            ->where('user_id', $user->id)
-            ->firstOrFail();
+        $updateRequest = UpdateRequest::find($response->json('id'));
 
         $this->approveUpdateRequest($updateRequest->id);
 
@@ -2412,7 +2544,7 @@ class PagesTest extends TestCase
         $data = [
             'title' => 'Test Page Title',
             'slug' => 'different-slug',
-            'excerpt' => substr($this->faker->paragraph(2), 0, 149),
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
             'content' => [
                 'introduction' => [
                     'content' => [
@@ -2445,6 +2577,64 @@ class PagesTest extends TestCase
     }
 
     /**
+     * @test
+     */
+    public function createMultiplePagesWithSameSlugAsContentAdmin201(): void
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeContentAdmin();
+
+        Passport::actingAs($user);
+
+        $parentPage = Page::factory()->create();
+
+        $data = [
+            'title' => 'Test Page Title',
+            'slug' => 'page-slug',
+            'excerpt' => trim(substr($this->faker->paragraph(2), 0, 149)),
+            'content' => [
+                'introduction' => [
+                    'content' => [
+                        [
+                            'type' => 'copy',
+                            'value' => $this->faker->realText(),
+                        ],
+                    ],
+                ],
+            ],
+            'parent_id' => $parentPage->id,
+        ];
+
+        $response = $this->json('POST', '/core/v1/pages', $data);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $updateRequest1 = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals('page-slug', $updateRequest1->data['slug']);
+
+        $response = $this->json('POST', '/core/v1/pages', $data);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $updateRequest2 = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals('page-slug', $updateRequest2->data['slug']);
+
+        $response = $this->approveUpdateRequest($updateRequest1->id);
+
+        $this->assertDatabaseHas((new Page())->getTable(), [
+            'id' => $response['updateable_id'],
+            'slug' => 'page-slug',
+        ]);
+
+        $response = $this->approveUpdateRequest($updateRequest2->id);
+    }
+
+    /**
      * Get a single page
      */
 
@@ -2469,34 +2659,30 @@ class PagesTest extends TestCase
             'image' => [
                 'id',
                 'mime_type',
-                'created_at',
-                'updated_at',
+                'alt_text',
+                'url',
             ],
             'landing_page',
-            'parent' => [
-                'id',
-                'slug',
-                'title',
-                'image',
-                'content',
-                'order',
-                'enabled',
-                'page_type',
-                'created_at',
-                'updated_at',
-            ],
             'children' => [
                 '*' => [
                     'id',
                     'slug',
                     'title',
-                    'image',
-                    'content',
-                    'order',
-                    'enabled',
+                    'excerpt',
                     'page_type',
-                    'created_at',
-                    'updated_at',
+                    'enabled',
+                    'order',
+                ],
+            ],
+            'ancestors' => [
+                '*' => [
+                    'id',
+                    'slug',
+                    'title',
+                    'excerpt',
+                    'page_type',
+                    'enabled',
+                    'order',
                 ],
             ],
             'created_at',
@@ -2525,8 +2711,8 @@ class PagesTest extends TestCase
             'image' => [
                 'id',
                 'mime_type',
-                'created_at',
-                'updated_at',
+                'alt_text',
+                'url',
             ],
             'landing_page',
             'parent',
@@ -2535,15 +2721,13 @@ class PagesTest extends TestCase
                     'id',
                     'slug',
                     'title',
-                    'image',
-                    'content',
-                    'order',
-                    'enabled',
+                    'excerpt',
                     'page_type',
-                    'created_at',
-                    'updated_at',
+                    'enabled',
+                    'order',
                 ],
             ],
+            'ancestors',
             'created_at',
             'updated_at',
         ]);
@@ -2566,18 +2750,23 @@ class PagesTest extends TestCase
     /**
      * @test
      */
-    public function getEnabledInformationPageWithLandingPageAncestorAsGuest200(): void
+    public function getEnabledInformationPageWithAncestorsAsGuest200(): void
     {
         $page = Page::factory()->withImage()->withChildren()->create();
-        $parent = Page::factory()->create();
+        $parent = Page::factory()->create([
+            'title' => 'Parent',
+        ]);
         $parent->appendNode($page);
-        $landingPage = Page::factory()->landingPage()->create();
+        $landingPage = Page::factory()->landingPage()->create([
+            'title' => 'Landing Page',
+        ]);
         $landingPage->appendNode($parent);
 
         $response = $this->json('GET', '/core/v1/pages/' . $page->id);
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonResource([
             'id',
+            'slug',
             'title',
             'excerpt',
             'content',
@@ -2587,55 +2776,37 @@ class PagesTest extends TestCase
             'image' => [
                 'id',
                 'mime_type',
-                'created_at',
-                'updated_at',
-            ],
-            'landing_page' => [
-                'id',
-                'title',
-                'image',
-                'content',
-                'order',
-                'enabled',
-                'page_type',
-                'created_at',
-                'updated_at',
-            ],
-            'parent' => [
-                'id',
-                'title',
-                'image',
-                'content',
-                'order',
-                'enabled',
-                'page_type',
-                'created_at',
-                'updated_at',
+                'alt_text',
+                'url',
             ],
             'children' => [
                 '*' => [
                     'id',
+                    'slug',
                     'title',
-                    'image',
-                    'content',
-                    'order',
-                    'enabled',
+                    'excerpt',
                     'page_type',
-                    'created_at',
-                    'updated_at',
+                    'enabled',
+                    'order',
+                ],
+            ],
+            'ancestors' => [
+                '*' => [
+                    'id',
+                    'slug',
+                    'title',
+                    'excerpt',
+                    'page_type',
+                    'enabled',
+                    'order',
                 ],
             ],
             'created_at',
             'updated_at',
         ]);
 
-        $response->assertJson([
-            'data' => [
-                'landing_page' => [
-                    'id' => $landingPage->id,
-                ],
-            ],
-        ]);
+        $this->assertEquals($landingPage->id, $response->json('data')['ancestors'][0]['id']);
+        $this->assertEquals($parent->id, $response->json('data')['ancestors'][1]['id']);
     }
 
     /**
@@ -2698,34 +2869,30 @@ class PagesTest extends TestCase
             'image' => [
                 'id',
                 'mime_type',
-                'created_at',
-                'updated_at',
+                'alt_text',
+                'url',
             ],
             'landing_page',
-            'parent' => [
-                'id',
-                'slug',
-                'title',
-                'image',
-                'content',
-                'order',
-                'enabled',
-                'page_type',
-                'created_at',
-                'updated_at',
-            ],
             'children' => [
                 '*' => [
                     'id',
                     'slug',
                     'title',
-                    'image',
-                    'content',
-                    'order',
-                    'enabled',
+                    'excerpt',
                     'page_type',
-                    'created_at',
-                    'updated_at',
+                    'enabled',
+                    'order',
+                ],
+            ],
+            'ancestors' => [
+                '*' => [
+                    'id',
+                    'slug',
+                    'title',
+                    'excerpt',
+                    'page_type',
+                    'enabled',
+                    'order',
                 ],
             ],
             'created_at',
@@ -2738,16 +2905,7 @@ class PagesTest extends TestCase
      */
     public function getEnabledPageImagePNGAsGuest200(): void
     {
-        $parentPage = Page::factory()->create();
-
-        $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random() . '.png',
-            'mime_type' => 'image/png',
-        ]);
-
-        $base64Image = 'data:image/png;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.png'));
-
-        $image->uploadBase64EncodedFile($base64Image);
+        $image = File::factory()->imagePng()->create();
 
         $page = Page::factory()->create([
             'image_file_id' => $image->id,
@@ -2755,7 +2913,7 @@ class PagesTest extends TestCase
 
         $response = $this->json('GET', '/core/v1/pages/' . $page->id . '/image.png');
         $response->assertStatus(Response::HTTP_OK);
-        $this->assertEquals($base64Image, 'data:image/png;base64,' . base64_encode($response->content()));
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.png'), $response->content());
     }
 
     /**
@@ -2763,16 +2921,7 @@ class PagesTest extends TestCase
      */
     public function getEnabledPageImageJPGAsGuest200(): void
     {
-        $parentPage = Page::factory()->create();
-
-        $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random() . '.jpg',
-            'mime_type' => 'image/jepg',
-        ]);
-
-        $base64Image = 'data:image/jpeg;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.jpg'));
-
-        $image->uploadBase64EncodedFile($base64Image);
+        $image = File::factory()->imageJpg()->create();
 
         $page = Page::factory()->create([
             'image_file_id' => $image->id,
@@ -2780,24 +2929,15 @@ class PagesTest extends TestCase
 
         $response = $this->json('GET', '/core/v1/pages/' . $page->id . '/image.jpg');
         $response->assertStatus(Response::HTTP_OK);
-        $this->assertEquals($base64Image, 'data:image/jpeg;base64,' . base64_encode($response->content()));
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.jpg'), $response->content());
     }
 
     /**
      * @test
      */
-    public function getEnabledPageImageSVGAsGuest200(): void
+    public function getEnabledPageImageSvgAsGuest200(): void
     {
-        $parentPage = Page::factory()->create();
-
-        $image = File::factory()->pendingAssignment()->create([
-            'filename' => Str::random() . '.svg',
-            'mime_type' => 'image/svg+xml',
-        ]);
-
-        $base64Image = 'data:image/svg+xml;base64,' . base64_encode(Storage::disk('local')->get('/test-data/image.svg'));
-
-        $image->uploadBase64EncodedFile($base64Image);
+        $image = File::factory()->imageSvg()->create();
 
         $page = Page::factory()->create([
             'image_file_id' => $image->id,
@@ -2805,7 +2945,7 @@ class PagesTest extends TestCase
 
         $response = $this->json('GET', '/core/v1/pages/' . $page->id . '/image.svg');
         $response->assertStatus(Response::HTTP_OK);
-        $this->assertEquals($base64Image, 'data:image/svg+xml;base64,' . base64_encode($response->content()));
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.svg'), $response->content());
     }
 
     /**
@@ -2930,6 +3070,28 @@ class PagesTest extends TestCase
         $data = [
             'title' => 'New Title',
             'enabled' => true,
+            'content' => [
+                'introduction' => [
+                    'content' => [
+                        [
+                            'type' => 'copy',
+                            'value' => $this->faker->realText(),
+                        ],
+                        [
+                            'type' => 'cta',
+                            'title' => $this->faker->sentence(),
+                            'description' => $this->faker->realText(),
+                            'url' => $this->faker->url(),
+                            'buttonText' => $this->faker->words(3, true),
+                        ],
+                        [
+                            'type' => 'video',
+                            'title' => $this->faker->sentence(),
+                            'url' => 'https://www.youtube.com/watch?v=dummy_id',
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
@@ -2964,6 +3126,10 @@ class PagesTest extends TestCase
             'title' => 'New Title',
             'enabled' => true,
         ]);
+
+        $response = $this->json('GET', '/core/v1/pages/' . $page->id);
+
+        $response->assertJsonFragment($data);
     }
 
     /**
@@ -3770,17 +3936,21 @@ class PagesTest extends TestCase
 
         Passport::actingAs($user);
 
-        $page = Page::factory()->withImage()->withParent()->withChildren()->disabled()
-            ->create([
-                'title' => 'Test Page Title',
-                'slug' => 'test-page-title',
-            ]);
+        $page1 = Page::factory()->create([
+            'slug' => 'page-slug',
+        ]);
+        $page2 = Page::factory()->create([
+            'slug' => 'page-slug-1',
+        ]);
+        $page3 = Page::factory()->create([
+            'slug' => 'other-slug',
+        ]);
 
         $data = [
-            'title' => 'New Title',
+            'slug' => 'page-slug',
         ];
 
-        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
+        $response = $this->json('PUT', '/core/v1/pages/' . $page3->id, $data);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -3791,16 +3961,15 @@ class PagesTest extends TestCase
         $this->approveUpdateRequest($updateRequest->id);
 
         $this->assertDatabaseHas(table(Page::class), [
-            'id' => $page->id,
-            'title' => 'New Title',
-            'slug' => 'test-page-title',
+            'id' => $page3->id,
+            'slug' => 'page-slug-2',
         ]);
 
         $data = [
-            'slug' => 'new-title',
+            'slug' => 'page-slug',
         ];
 
-        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
+        $response = $this->json('PUT', '/core/v1/pages/' . $page2->id, $data);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -3811,27 +3980,101 @@ class PagesTest extends TestCase
         $this->approveUpdateRequest($updateRequest->id);
 
         $this->assertDatabaseHas(table(Page::class), [
-            'id' => $page->id,
-            'title' => 'New Title',
-            'slug' => 'new-title',
+            'id' => $page2->id,
+            'slug' => 'page-slug-1',
         ]);
+    }
 
-        $response->assertJsonFragment([
-        ]);
+    /**
+     * @test
+     */
+    public function updatePageWithConflictingUpdateRequestsAsContentAdmin200(): void
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create()->makeContentAdmin();
 
-        Page::factory()->withImage()->withParent()->withChildren()->disabled()
-            ->create([
-                'title' => 'Existing Page',
-                'slug' => 'existing-page',
-            ]);
+        Passport::actingAs($user);
 
-        $data = [
-            'slug' => 'existing-page',
+        $page = Page::factory()->create();
+
+        $data1 = [
+            'content' => [
+                'introduction' => [
+                    'content' => [
+                        [
+                            'type' => 'copy',
+                            'value' => 'Updated text 1',
+                        ],
+                    ],
+                ],
+            ],
         ];
 
-        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
+        $response1 = $this->json('PUT', '/core/v1/pages/' . $page->id, $data1);
 
-        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+        $response1->assertStatus(Response::HTTP_OK);
+
+        $updateRequest1 = UpdateRequest::find($response1->json()['id']);
+
+        $this->assertEquals($data1, $updateRequest1->data);
+
+        $data2 = [
+            'title' => 'New page title',
+            'content' => [
+                'introduction' => [
+                    'content' => [
+                        [
+                            'type' => 'video',
+                            'title' => 'Updated video title',
+                            'url' => 'https://www.youtube.com/watch?v=dummy_id',
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $response2 = $this->json('PUT', '/core/v1/pages/' . $page->id, $data2);
+
+        $response2->assertStatus(Response::HTTP_OK);
+
+        $updateRequest2 = UpdateRequest::find($response2->json()['id']);
+
+        $this->assertEquals($data2, $updateRequest2->data);
+
+        $data3 = [
+            'content' => [
+                'introduction' => [
+                    'content' => [
+                        [
+                            'type' => 'copy',
+                            'value' => 'Updated text 3',
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $response3 = $this->json('PUT', '/core/v1/pages/' . $page->id, $data3);
+
+        $response3->assertStatus(Response::HTTP_OK);
+
+        $updateRequest3 = UpdateRequest::find($response3->json()['id']);
+
+        $this->assertEquals($data3, $updateRequest3->data);
+
+        $updateRequest1->refresh();
+
+        $this->assertTrue($updateRequest1->trashed());
+
+        $updateRequest2->refresh();
+
+        $this->assertEquals(['title' => 'New page title'], $updateRequest2->data);
+
+        $updateRequest3->refresh();
+
+        $this->assertEquals($data3, $updateRequest3->data);
     }
 
     /**
@@ -4127,5 +4370,50 @@ class PagesTest extends TestCase
 
         $this->assertDatabaseMissing('pages', ['id' => $page->id]);
         $this->assertDatabaseMissing('files', ['id' => $imageId]);
+    }
+
+    /**
+     * @test
+     */
+    public function deletePageWithUpdateRequestsAsSuperAdmin200(): void
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create()->makeContentAdmin();
+
+        Passport::actingAs($user);
+
+        $page = Page::factory()->create();
+
+        $data = [
+            'content' => [
+                'introduction' => [
+                    'content' => [
+                        [
+                            'type' => 'copy',
+                            'value' => 'Updated text',
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $response = $this->json('PUT', '/core/v1/pages/' . $page->id, $data);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $updateRequest = UpdateRequest::find($response->json()['id']);
+
+        $this->assertEquals($data, $updateRequest->data);
+
+        Passport::actingAs(User::factory()->create()->makeSuperAdmin());
+
+        $response = $this->json('DELETE', '/core/v1/pages/' . $page->id);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $this->assertDatabaseMissing('pages', ['id' => $page->id]);
+        $this->assertDatabaseMissing('update_requests', ['id' => $updateRequest->id, 'deleted_at' => null]);
     }
 }

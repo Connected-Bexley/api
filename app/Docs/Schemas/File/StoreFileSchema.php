@@ -18,6 +18,7 @@ class StoreFileSchema extends Schema
             ->required(
                 'is_private',
                 'mime_type',
+                'alt_text',
                 'file'
             )
             ->properties(
@@ -29,6 +30,7 @@ class StoreFileSchema extends Schema
                         File::MIME_TYPE_JPEG,
                         File::MIME_TYPE_SVG
                     ),
+                Schema::string('alt_text'),
                 Schema::string('file')
                     ->format(static::FORMAT_BINARY)
                     ->description('Base64 encoded string of the image')

@@ -12,15 +12,19 @@ class SocialMedia extends Model
     use SocialMediaRelationships;
     use SocialMediaScopes;
 
-    const TYPE_TWITTER = 'twitter';
-
     const TYPE_FACEBOOK = 'facebook';
 
     const TYPE_INSTAGRAM = 'instagram';
 
-    const TYPE_YOUTUBE = 'youtube';
-
     const TYPE_OTHER = 'other';
+
+    const TYPE_TIKTOK = 'tiktok';
+
+    const TYPE_TWITTER = 'twitter';
+
+    const TYPE_SNAPCHAT = 'snapchat';
+
+    const TYPE_YOUTUBE = 'youtube';
 
     /**
      * The table associated with the model.
