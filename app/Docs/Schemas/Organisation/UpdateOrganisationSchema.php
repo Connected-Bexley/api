@@ -19,7 +19,6 @@ class UpdateOrganisationSchema extends Schema
                 'name',
                 'slug',
                 'description',
-                'url'
             )
             ->properties(
                 Schema::string('name'),

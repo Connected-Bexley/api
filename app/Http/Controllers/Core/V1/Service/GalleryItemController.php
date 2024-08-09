@@ -16,7 +16,7 @@ class GalleryItemController extends Controller
     /**
      * GalleryItemController the specified resource.
      *
-     * @return \App\Models\File|\Illuminate\Http\Response
+     * @return File|Response
      */
     public function __invoke(ShowRequest $request, Service $service, File $file)
     {

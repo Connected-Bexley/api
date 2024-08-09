@@ -7,14 +7,14 @@ use Illuminate\Support\Facades\Storage;
 
 return new class() extends Migration {
     /**
-     * @var \Carbon\CarbonImmutable
+     * @var Carbon\CarbonImmutable
      */
     protected $now;
 
     /**
      * Run the migrations.
      *
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     * @throws Illuminate\Contracts\Filesystem\FileNotFoundException
      */
     public function up(): void
     {
@@ -36,7 +36,7 @@ return new class() extends Migration {
     /**
      * Load the Open Eligibility taxonomies into an array.
      *
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     * @throws Illuminate\Contracts\Filesystem\FileNotFoundException
      */
     protected function loadOpenEligibilityTaxonomies(): array
     {

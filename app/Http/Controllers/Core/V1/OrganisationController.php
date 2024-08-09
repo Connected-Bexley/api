@@ -92,7 +92,7 @@ class OrganisationController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \app\Services\DataPersistence\OrganisationPersistenceService
+     * @param OrganisationPersistenceService
      * @return \Illuminate\Http\Response
      */
     public function update(UpdateRequest $request, Organisation $organisation, OrganisationPersistenceService $persistenceService)

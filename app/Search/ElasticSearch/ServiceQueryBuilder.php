@@ -27,10 +27,10 @@ class ServiceQueryBuilder extends ElasticsearchQueryBuilder implements QueryBuil
                 ],
                 'functions' => [
                     [
-                        'field_value_factor' => [
-                            'field' => 'score',
-                            'missing' => 1,
-                            'modifier' => 'ln1p',
+                        'script_score' => [
+                            'script' => [
+                                'source' => "doc['score'].size() == 0 ? 1 : ((doc['score'].value + 1) * 0.1) + 1",
+                            ],
                         ],
                     ],
                 ],
@@ -95,21 +95,21 @@ class ServiceQueryBuilder extends ElasticsearchQueryBuilder implements QueryBuil
 
     protected function applyQuery(string $query): void
     {
-        $this->addMatch('name', $query, $this->shouldPath, 2);
-        $this->addMatch('name', $query, $this->shouldPath, 2.5, 'AUTO', 'AND');
-        $this->addMatchPhrase('name', $query, $this->shouldPath, 3);
-        $this->addMatch('organisation_name', $query, $this->shouldPath, 2);
-        $this->addMatch('organisation_name', $query, $this->shouldPath, 2.5, 'AUTO', 'AND');
-        $this->addMatchPhrase('organisation_name', $query, $this->shouldPath, 3);
+        $this->addMatch('name', $query, $this->shouldPath, 3);
+        $this->addMatch('name', $query, $this->shouldPath, 4, 'AUTO', 'AND');
+        $this->addMatchPhrase('name', $query, $this->shouldPath, 6);
+        $this->addMatch('organisation_name', $query, $this->shouldPath, 3);
+        $this->addMatch('organisation_name', $query, $this->shouldPath, 4, 'AUTO', 'AND');
+        $this->addMatchPhrase('organisation_name', $query, $this->shouldPath, 6);
         $this->addMatch('intro', $query, $this->shouldPath);
-        $this->addMatch('intro', $query, $this->shouldPath, 1.5, 'AUTO', 'AND');
-        $this->addMatchPhrase('intro', $query, $this->shouldPath, 2);
+        $this->addMatch('intro', $query, $this->shouldPath, 2, 'AUTO', 'AND');
+        $this->addMatchPhrase('intro', $query, $this->shouldPath, 3);
         $this->addMatch('description', $query, $this->shouldPath);
         $this->addMatch('description', $query, $this->shouldPath, 1.5, 'AUTO', 'AND');
         $this->addMatchPhrase('description', $query, $this->shouldPath, 2);
         $this->addMatch('taxonomy_categories', $query, $this->shouldPath);
-        $this->addMatch('taxonomy_categories', $query, $this->shouldPath, 1, 'AUTO', 'AND');
-        $this->addMatchPhrase('taxonomy_categories', $query, $this->shouldPath, 1.5);
+        $this->addMatch('taxonomy_categories', $query, $this->shouldPath, 2, 'AUTO', 'AND');
+        $this->addMatchPhrase('taxonomy_categories', $query, $this->shouldPath, 3);
 
         $this->addMinimumShouldMatch();
     }

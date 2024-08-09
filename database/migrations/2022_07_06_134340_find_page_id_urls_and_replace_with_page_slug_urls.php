@@ -57,7 +57,7 @@ return new class() extends Migration {
             foreach ($usefulInfos as $usefulInfo) {
                 if (preg_match_all($uuidRegex, $usefulInfo->description, $matches)) {
                     $description = $usefulInfo->description;
-                    $matchingUsefulInfos = DB::table((new usefulInfo())->getTable())
+                    $matchingUsefulInfos = DB::table((new UsefulInfo())->getTable())
                         ->whereIn('id', $matches[1])
                         ->pluck('slug', 'id');
                     foreach ($matchingUsefulInfos as $id => $slug) {

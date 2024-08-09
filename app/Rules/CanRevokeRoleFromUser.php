@@ -11,12 +11,12 @@ use Illuminate\Contracts\Validation\ValidationRule;
 class CanRevokeRoleFromUser implements ValidationRule
 {
     /**
-     * @var \App\Models\User
+     * @var User
      */
     protected $user;
 
     /**
-     * @var \App\Models\User
+     * @var User
      */
     protected $subject;
 

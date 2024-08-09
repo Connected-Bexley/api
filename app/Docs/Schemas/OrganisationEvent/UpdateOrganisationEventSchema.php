@@ -17,6 +17,7 @@ class UpdateOrganisationEventSchema extends Schema
             ->required('title', 'intro', 'description', 'start_date', 'end_date', 'start_time', 'end_time', 'is_free', 'is_virtual')
             ->properties(
                 Schema::string('title'),
+                Schema::string('slug'),
                 Schema::string('intro'),
                 Schema::string('description'),
                 Schema::string('start_date')

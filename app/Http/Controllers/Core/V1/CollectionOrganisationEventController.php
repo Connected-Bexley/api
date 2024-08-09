@@ -73,7 +73,7 @@ class CollectionOrganisationEventController extends Controller
             // Create the collection record.
             $organisationEventCollection = Collection::create([
                 'type' => Collection::TYPE_ORGANISATION_EVENT,
-                'slug' => $slugGenerator->generate($request->name, table(Collection::class)),
+                'slug' => $slugGenerator->generate($request->name, (new Collection())),
                 'name' => $request->name,
                 'meta' => [
                     'intro' => $request->intro,
@@ -136,16 +136,14 @@ class CollectionOrganisationEventController extends Controller
 
             // Update the collection record.
             $collection->update([
-                'slug' => $slugGenerator->compareEquals($request->name, $collection->slug)
-                    ? $collection->slug
-                    : $slugGenerator->generate($request->name, table(Collection::class)),
+                'slug' => $slugGenerator->generate($request->name, $collection),
                 'name' => $request->name,
                 'meta' => [
                     'intro' => $request->intro,
                     'subtitle' => $request->subtitle,
                     'image_file_id' => $request->has('image_file_id')
-                        ? $request->image_file_id
-                        : $collection->meta['image_file_id'] ?? null,
+                    ? $request->image_file_id
+                    : $collection->meta['image_file_id'] ?? null,
                     'sideboxes' => $sideboxes,
                 ],
                 'order' => $request->order,

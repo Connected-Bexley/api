@@ -4,13 +4,13 @@ namespace App\Http\Requests\Organisation;
 
 use App\Http\Requests\HasMissingValues;
 use App\Models\File;
-use App\Models\Organisation;
 use App\Models\SocialMedia;
 use App\Models\Taxonomy;
 use App\Rules\CanUpdateCategoryTaxonomyRelationships;
 use App\Rules\FileIsMimeType;
 use App\Rules\FileIsPendingAssignment;
-use App\Rules\NullableIf;
+use App\Rules\MarkdownMaxLength;
+use App\Rules\MarkdownMinLength;
 use App\Rules\RootTaxonomyIs;
 use App\Rules\Slug;
 use App\Rules\UkPhoneNumber;
@@ -43,29 +43,25 @@ class UpdateRequest extends FormRequest
                 'string',
                 'min:1',
                 'max:255',
-                Rule::unique(table(Organisation::class), 'slug')
-                    ->ignoreModel($this->organisation),
                 new Slug(),
             ],
             'name' => ['string', 'min:1', 'max:255'],
-            'description' => ['string', 'min:1', 'max:10000'],
+            'description' => [
+                'string',
+                new MarkdownMinLength(1),
+                new MarkdownMaxLength(config('local.organisation_description_max_chars'), 'Description tab - The long description must be ' . config('local.organisation_description_max_chars') . ' characters or fewer.'),
+            ],
             'url' => [
-                new NullableIf(function () {
-                    return $this->user()->isGlobalAdmin();
-                }),
+                'nullable',
                 'url',
                 'max:255'],
             'email' => [
-                new NullableIf(function () {
-                    return $this->user()->isGlobalAdmin() || $this->input('phone', $this->organisation->phone) !== null;
-                }),
+                'nullable',
                 'email',
                 'max:255',
             ],
             'phone' => [
-                new NullableIf(function () {
-                    return $this->user()->isGlobalAdmin() || $this->input('email', $this->organisation->email) !== null;
-                }),
+                'nullable',
                 'string',
                 'min:1',
                 'max:255',
@@ -82,11 +78,13 @@ class UpdateRequest extends FormRequest
             'social_medias.*.type' => [
                 'required_with:social_medias.*',
                 Rule::in([
-                    SocialMedia::TYPE_TWITTER,
                     SocialMedia::TYPE_FACEBOOK,
                     SocialMedia::TYPE_INSTAGRAM,
-                    SocialMedia::TYPE_YOUTUBE,
                     SocialMedia::TYPE_OTHER,
+                    SocialMedia::TYPE_TIKTOK,
+                    SocialMedia::TYPE_TWITTER,
+                    SocialMedia::TYPE_SNAPCHAT,
+                    SocialMedia::TYPE_YOUTUBE,
                 ]),
             ],
             'social_medias.*.url' => ['required_with:social_medias.*', 'url', 'max:255'],

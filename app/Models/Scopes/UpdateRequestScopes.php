@@ -138,12 +138,7 @@ CASE `update_requests`.`updateable_type`
         ), `update_requests`.`data`->>"$.organisation.name")
     )
     WHEN "{$newOrganisationGlobalAdmin}" THEN (
-        IF(`update_requests`.`data`->>"$.organisation.id", (
-            SELECT `organisations`.`name`
-            FROM `organisations`
-            WHERE `update_requests`.`data`->>"$.organisation.id" = `organisations`.`id`
-            LIMIT 1
-        ), `update_requests`.`data`->>"$.organisation.name")
+        `update_requests`.`data`->>"$.name"
     )
     WHEN "{$organisationEvents}" THEN (
         SELECT `organisation_events`.`title`

@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Collection;
 use App\Models\Organisation;
+use App\Models\OrganisationEvent;
 use App\Models\Page;
 use App\Models\Service;
 use App\Models\Taxonomy;
@@ -35,6 +36,11 @@ class RouteServiceProvider extends ServiceProvider
         // Resolve by ID first, then resort to slug.
         Route::bind('organisation', function ($value) {
             return Organisation::query()->find($value) ?? Organisation::query()->where('slug', '=', $value)->first() ?? abort(Response::HTTP_NOT_FOUND);
+        });
+
+        // Resolve by ID first, then resort to slug.
+        Route::bind('organisation_event', function ($value) {
+            return OrganisationEvent::query()->find($value) ?? OrganisationEvent::query()->where('slug', '=', $value)->first() ?? abort(Response::HTTP_NOT_FOUND);
         });
 
         // Resolve by ID first, then resort to slug.

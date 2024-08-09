@@ -23,7 +23,7 @@ class OrganisationSignUpFormController extends Controller
     }
 
     /**
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function store(StoreRequest $request)
     {
@@ -107,7 +107,7 @@ class OrganisationSignUpFormController extends Controller
                 ];
             }
 
-            /** @var \App\Models\UpdateRequest $updateRequest */
+            /** @var UpdateRequest $updateRequest */
             $updateRequest = UpdateRequest::create([
                 'updateable_type' => UpdateRequest::NEW_TYPE_ORGANISATION_SIGN_UP_FORM,
                 'data' => $updateData,

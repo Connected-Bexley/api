@@ -140,7 +140,7 @@ class ImportController extends Controller
                     ),
                 ],
                 'intro' => ['required', 'string', 'min:1', 'max:300'],
-                'description' => ['required', 'string', new MarkdownMinLength(1), new MarkdownMaxLength(1600)],
+                'description' => ['required', 'string', new MarkdownMinLength(1), new MarkdownMaxLength(config('local.service_description_max_chars'))],
                 'wait_time' => ['present', 'nullable', Rule::in([
                     Service::WAIT_TIME_ONE_WEEK,
                     Service::WAIT_TIME_TWO_WEEKS,

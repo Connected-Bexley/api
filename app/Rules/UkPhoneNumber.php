@@ -32,7 +32,7 @@ class UkPhoneNumber implements ValidationRule
             $fail(__('validation.string'));
         }
 
-        if (preg_match('/^0([1-6][0-9]{8,10}|7[0-9]{9})$/', $value) !== 1) {
+        if (preg_match('/^0([1-6][0-9]{8,10}|7[0-9]{9}|8[0-9]{9})$/', $value) !== 1) {
             $fail($this->message());
         }
     }

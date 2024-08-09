@@ -52,12 +52,12 @@ class TaxonomyServiceEligibilityController extends Controller
     {
         return DB::transaction(function () use ($request, $slugGenerator) {
             $parent = $request->filled('parent_id')
-                ? Taxonomy::query()->findOrFail($request->parent_id)
-                : Taxonomy::serviceEligibility();
+            ? Taxonomy::query()->findOrFail($request->parent_id)
+            : Taxonomy::serviceEligibility();
 
             $serviceEligibility = Taxonomy::create([
                 'parent_id' => $parent->id,
-                'slug' => $slugGenerator->generate($request->name, table(Taxonomy::class)),
+                'slug' => $slugGenerator->generate($request->name, (new Taxonomy())),
                 'name' => $request->name,
                 'order' => $request->order,
                 'depth' => 0, // Placeholder
@@ -96,14 +96,12 @@ class TaxonomyServiceEligibilityController extends Controller
     {
         return DB::transaction(function () use ($request, $slugGenerator, $taxonomy) {
             $parent = $request->filled('parent_id')
-                ? Taxonomy::query()->findOrFail($request->parent_id)
-                : Taxonomy::serviceEligibility();
+            ? Taxonomy::query()->findOrFail($request->parent_id)
+            : Taxonomy::serviceEligibility();
 
             $taxonomy->update([
                 'parent_id' => $parent->id,
-                'slug' => $slugGenerator->compareEquals($request->name, $taxonomy->slug)
-                    ? $taxonomy->slug
-                    : $slugGenerator->generate($request->name, table(Taxonomy::class)),
+                'slug' => $slugGenerator->generate($request->name, $taxonomy),
                 'name' => $request->name,
                 'order' => $request->order,
                 'depth' => 0, // Placeholder

@@ -59,10 +59,10 @@ EOT;
 
         $bindings = [
             Role::superAdmin()->id,
+            Role::globalAdmin()->id,
             Role::organisationAdmin()->id,
             Role::serviceAdmin()->id,
             Role::serviceWorker()->id,
-            Role::globalAdmin()->id,
             Role::contentAdmin()->id,
         ];
 

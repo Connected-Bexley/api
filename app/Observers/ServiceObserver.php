@@ -12,10 +12,11 @@ use App\Models\UserRole;
 class ServiceObserver
 {
     /**
-     * Handle the organisation "created" event.
+     * Handle the service "created" event.
      */
     public function created(Service $service): void
     {
+        // Add service admin roles to all service->organisation->admins
         UserRole::query()
             ->with('user')
             ->where('role_id', Role::organisationAdmin()->id)
@@ -27,7 +28,7 @@ class ServiceObserver
     }
 
     /**
-     * Handle the organisation "updated" event.
+     * Handle the service "updated" event.
      */
     public function updated(Service $service): void
     {
@@ -81,7 +82,7 @@ class ServiceObserver
     }
 
     /**
-     * Handle the organisation "deleting" event.
+     * Handle the service "deleting" event.
      */
     public function deleting(Service $service)
     {

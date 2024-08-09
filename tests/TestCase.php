@@ -2,24 +2,24 @@
 
 namespace Tests;
 
-use App\Models\Collection;
-use App\Models\OrganisationEvent;
 use App\Models\Page;
+use App\Models\User;
 use App\Models\Service;
 use App\Models\Taxonomy;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Http\Response;
+use App\Models\Collection;
 use Illuminate\Support\Arr;
+use Illuminate\Http\Response;
+use Laravel\Passport\Passport;
+use App\Models\OrganisationEvent;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
-use Laravel\Passport\Passport;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -132,7 +132,7 @@ abstract class TestCase extends BaseTestCase
      */
     protected function clearLog()
     {
-        if (! static::$testLogCleared) {
+        if (!static::$testLogCleared) {
             file_put_contents(config('logging.channels.testing.path'), '');
             static::$testLogCleared = true;
         }
@@ -143,19 +143,20 @@ abstract class TestCase extends BaseTestCase
      */
     protected function setUpElasticsearch()
     {
-        if (! $this instanceof UsesElasticsearch) {
+        if (!$this instanceof UsesElasticsearch) {
             Service::disableSearchSyncing();
             OrganisationEvent::disableSearchSyncing();
             Page::disableSearchSyncing();
 
             return;
         } else {
+            config(['elastic.scout_driver.refresh_documents' => true]);
             Service::enableSearchSyncing();
             OrganisationEvent::enableSearchSyncing();
             Page::enableSearchSyncing();
         }
 
-        if (! static::$elasticsearchInitialised) {
+        if (!static::$elasticsearchInitialised) {
             $this->artisan('ck:reindex-elasticsearch');
             static::$elasticsearchInitialised = true;
         }
@@ -166,13 +167,14 @@ abstract class TestCase extends BaseTestCase
      */
     protected function tearDownElasticsearch()
     {
-        if (! $this instanceof UsesElasticsearch) {
+        if (!$this instanceof UsesElasticsearch) {
             Service::disableSearchSyncing();
             OrganisationEvent::disableSearchSyncing();
             Page::disableSearchSyncing();
 
             return;
         } else {
+            config(['elastic.scout_driver.refresh_documents' => false]);
             Service::enableSearchSyncing();
             OrganisationEvent::enableSearchSyncing();
             Page::enableSearchSyncing();
@@ -235,5 +237,22 @@ abstract class TestCase extends BaseTestCase
         Passport::actingAs($user);
 
         return $response->json();
+    }
+
+    /**
+     * Return a lorem ipsum string with the given text inserted randomly into it
+     *
+     * @param array $phrases
+     * @param int $words
+     * @return str
+     **/
+    public function textContainingPhrases(mixed $phrases, int $wordCount = 200): string
+    {
+        $words = explode(' ', $this->faker->text($wordCount));
+        foreach ($phrases as $phrase) {
+            $offset = random_int(0, count($words));
+            array_splice($words, $offset, 0, $phrase);
+        }
+        return implode(' ', $words);
     }
 }

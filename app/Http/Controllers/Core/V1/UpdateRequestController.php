@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Core\V1;
 use App\Events\EndpointHit;
 use App\Http\Controllers\Controller;
 use App\Http\Filters\UpdateRequest\EntryFilter;
+use App\Http\Filters\UpdateRequest\TypeFilter;
 use App\Http\Requests\UpdateRequest\DestroyRequest;
 use App\Http\Requests\UpdateRequest\IndexRequest;
 use App\Http\Requests\UpdateRequest\ShowRequest;
@@ -44,6 +45,7 @@ class UpdateRequestController extends Controller
                 AllowedFilter::scope('location_id'),
                 AllowedFilter::scope('organisation_id'),
                 AllowedFilter::custom('entry', new EntryFilter()),
+                AllowedFilter::custom('type', new TypeFilter()),
             ])
             ->allowedIncludes(['user'])
             ->allowedSorts([
@@ -84,6 +86,9 @@ class UpdateRequestController extends Controller
     public function destroy(DestroyRequest $request, UpdateRequest $updateRequest)
     {
         return DB::transaction(function () use ($request, $updateRequest) {
+            $updateRequest->update([
+                'rejection_message' => $request->input('message'),
+            ]);
             event(EndpointHit::onDelete($request, "Deleted update request [{$updateRequest->id}]", $updateRequest));
 
             $updateRequest->delete($request->user('api'));

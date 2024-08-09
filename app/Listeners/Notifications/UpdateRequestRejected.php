@@ -8,6 +8,7 @@ use App\Models\Audit;
 use App\Models\Location;
 use App\Models\Notification;
 use App\Models\Organisation;
+use App\Models\Page;
 use App\Models\Service;
 use App\Models\ServiceLocation;
 use App\Models\UpdateRequest;
@@ -28,7 +29,7 @@ class UpdateRequestRejected
             return;
         }
 
-        /** @var \App\Models\UpdateRequest $updateRequest */
+        /** @var UpdateRequest $updateRequest */
         $updateRequest = $event->getModel();
 
         if ($updateRequest->isExisting()) {
@@ -59,6 +60,9 @@ class UpdateRequestRejected
         } elseif ($updateRequest->getUpdateable() instanceof Organisation) {
             $resourceName = $updateRequest->getUpdateable()->name;
             $resourceType = 'organisation';
+        } elseif ($updateRequest->getUpdateable() instanceof Page) {
+            $resourceName = $updateRequest->getUpdateable()->title;
+            $resourceType = 'page';
         }
 
         $updateRequest->user->sendEmail(new NotifySubmitterEmail($updateRequest->user->email, [
@@ -66,6 +70,7 @@ class UpdateRequestRejected
             'RESOURCE_NAME' => $resourceName,
             'RESOURCE_TYPE' => $resourceType,
             'REQUEST_DATE' => $updateRequest->created_at->format('j/n/Y'),
+            'REJECTION_MESSAGE' => $updateRequest->rejection_message,
         ]));
     }
 
@@ -83,6 +88,7 @@ class UpdateRequestRejected
                         'ORGANISATION_NAME' => Arr::get($updateRequest->data, 'organisation.name'),
                         'REQUEST_DATE' => $updateRequest->created_at->format('j/n/Y'),
                         'TANDC_URL' => config('local.tandc_uri'),
+                        'REJECTION_MESSAGE' => $updateRequest->rejection_message,
                     ]
                 )
             );

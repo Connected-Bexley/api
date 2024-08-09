@@ -8,6 +8,7 @@ use App\Models\Mutators\OrganisationMutators;
 use App\Models\Relationships\OrganisationRelationships;
 use App\Models\Scopes\OrganisationScopes;
 use App\Rules\FileIsMimeType;
+use App\Services\DataPersistence\HasUniqueSlug;
 use App\TaxonomyRelationships\HasTaxonomyRelationships;
 use App\TaxonomyRelationships\UpdateTaxonomyRelationships;
 use App\UpdateRequest\UpdateRequests;
@@ -27,6 +28,7 @@ class Organisation extends Model implements AppliesUpdateRequests, HasTaxonomyRe
     use OrganisationScopes;
     use UpdateRequests;
     use UpdateTaxonomyRelationships;
+    use HasUniqueSlug;
 
     /**
      * Return the OrganisationTaxonomy relationship.
@@ -66,7 +68,7 @@ class Organisation extends Model implements AppliesUpdateRequests, HasTaxonomyRe
         $data = $updateRequest->data;
 
         $this->update([
-            'slug' => Arr::get($data, 'slug', $this->slug),
+            'slug' => $this->uniqueSlug(Arr::get($data, 'slug', $this->slug), $this),
             'name' => Arr::get($data, 'name', $this->name),
             'description' => sanitize_markdown(Arr::get($data, 'description', $this->description)),
             'url' => Arr::get($data, 'url', $this->url),
@@ -128,7 +130,7 @@ class Organisation extends Model implements AppliesUpdateRequests, HasTaxonomyRe
 
     /**
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException|\InvalidArgumentException
-     * @return \App\Models\File|\Illuminate\Http\Response|\Illuminate\Contracts\Support\Responsable
+     * @return File|Response|\Illuminate\Contracts\Support\Responsable
      */
     public static function placeholderLogo(int $maxDimension = null)
     {

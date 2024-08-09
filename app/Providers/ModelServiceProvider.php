@@ -21,6 +21,7 @@ use App\Observers\CollectionObserver;
 use App\Observers\CollectionTaxonomyObserver;
 use App\Observers\FileObserver;
 use App\Observers\LocationObserver;
+use App\Observers\OrganisationEventObserver;
 use App\Observers\OrganisationObserver;
 use App\Observers\PageObserver;
 use App\Observers\ReferralObserver;
@@ -46,6 +47,7 @@ class ModelServiceProvider extends ServiceProvider
         Page::observe(PageObserver::class);
         Location::observe(LocationObserver::class);
         Organisation::observe(OrganisationObserver::class);
+        OrganisationEvent::observe(OrganisationEventObserver::class);
         Referral::observe(ReferralObserver::class);
         Report::observe(ReportObserver::class);
         ServiceLocation::observe(ServiceLocationObserver::class);

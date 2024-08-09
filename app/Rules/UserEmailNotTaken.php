@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 class UserEmailNotTaken implements ValidationRule
 {
     /**
-     * @var \App\Models\User|null
+     * @var User|null
      */
     protected $excludedUser;
 

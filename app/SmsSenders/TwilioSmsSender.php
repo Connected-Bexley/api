@@ -32,7 +32,7 @@ class TwilioSmsSender implements SmsSender
             array_merge($this->globalValues, $sms->values)
         );
 
-        /** @var \Twilio\Rest\Client $client */
+        /** @var Client $client */
         $client = resolve(Client::class);
 
         $message = $client->messages->create($this->ukToInternationalNumber($sms->to), [

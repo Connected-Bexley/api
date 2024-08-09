@@ -24,7 +24,7 @@ class GovNotifySmsSender implements SmsSender
 
     public function send(Sms $sms)
     {
-        /** @var \Alphagov\Notifications\Client $client */
+        /** @var Client $client */
         $client = resolve(Client::class);
 
         $response = $client->sendSms(

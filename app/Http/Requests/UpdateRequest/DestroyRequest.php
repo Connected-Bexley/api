@@ -24,7 +24,12 @@ class DestroyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'message' => [
+                'required',
+                'string',
+                'min:1',
+                'max:1000',
+            ],
         ];
     }
 }

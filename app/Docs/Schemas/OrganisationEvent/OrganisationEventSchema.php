@@ -15,11 +15,20 @@ class OrganisationEventSchema extends Schema
             ->properties(
                 Schema::string('id')
                     ->format(Schema::FORMAT_UUID),
+                Schema::string('slug'),
                 Schema::string('organisation_id')
                     ->format(Schema::FORMAT_UUID),
                 Schema::string('title'),
                 Schema::string('intro'),
                 Schema::string('description'),
+                Schema::object('image')
+                    ->properties(
+                        Schema::string('id'),
+                        Schema::string('mime_type'),
+                        Schema::string('alt_text'),
+                        Schema::string('url')
+                    )
+                    ->nullable(),
                 Schema::string('start_date')
                     ->format(Schema::FORMAT_DATE),
                 Schema::string('end_date')

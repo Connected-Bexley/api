@@ -50,14 +50,14 @@ class StillUnactionedReferralsCommand extends Command
     protected function sendEmail(Referral $referral)
     {
         try {
-            /** @var \Illuminate\Database\Eloquent\Collection $organisationAdmins */
+            /** @var Collection $organisationAdmins */
             $organisationAdmins = $referral->service->users
                 ->unique('id')
                 ->filter(function (User $user) {
                     return $user->isGlobalAdmin();
                 });
 
-            /** @var \Illuminate\Database\Eloquent\Collection $serviceAdmins */
+            /** @var Collection $serviceAdmins */
             $serviceAdmins = $referral->service->users
                 ->unique('id')
                 ->filter(function (User $user) use ($referral) {
@@ -65,7 +65,7 @@ class StillUnactionedReferralsCommand extends Command
                         && !$user->isGlobalAdmin();
                 });
 
-            /** @var \Illuminate\Database\Eloquent\Collection $serviceWorkers */
+            /** @var Collection $serviceWorkers */
             $serviceWorkers = $referral->service->users
                 ->unique('id')
                 ->filter(function (User $user) use ($referral) {

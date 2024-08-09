@@ -20,6 +20,7 @@ class PageFactory extends Factory
         return [
             'title' => $title,
             'slug' => Str::slug($title),
+            'excerpt' => $this->faker->sentence,
             'content' => [
                 'introduction' => [
                     'content' => [

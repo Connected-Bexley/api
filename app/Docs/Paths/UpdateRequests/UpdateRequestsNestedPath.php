@@ -2,7 +2,6 @@
 
 namespace App\Docs\Paths\UpdateRequests;
 
-use App\Docs\Operations\UpdateRequests\DestroyUpdateRequestOperation;
 use App\Docs\Operations\UpdateRequests\ShowUpdateRequestOperation;
 use GoldSpecDigital\ObjectOrientedOAS\Objects\BaseObject;
 use GoldSpecDigital\ObjectOrientedOAS\Objects\Parameter;
@@ -26,8 +25,7 @@ class UpdateRequestsNestedPath extends PathItem
                     ->schema(Schema::string()->format(Schema::FORMAT_UUID))
             )
             ->operations(
-                ShowUpdateRequestOperation::create(),
-                DestroyUpdateRequestOperation::create()
+                ShowUpdateRequestOperation::create()
             );
     }
 }

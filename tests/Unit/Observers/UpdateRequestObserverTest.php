@@ -2,12 +2,12 @@
 
 namespace Tests\Unit\Observers;
 
-use App\Models\Organisation;
-use App\Models\Service;
-use App\Models\UpdateRequest;
-use App\Models\User;
-use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
+use App\Models\User;
+use App\Models\Service;
+use App\Models\Organisation;
+use App\Models\UpdateRequest;
+use Illuminate\Support\Facades\Queue;
 
 class UpdateRequestObserverTest extends TestCase
 {
@@ -100,6 +100,7 @@ class UpdateRequestObserverTest extends TestCase
                     'contact_email' => $this->faker->safeEmail(),
                     'useful_infos' => [],
                     'offerings' => [],
+                    'social_medias' => [],
                 ],
             ],
         ]);

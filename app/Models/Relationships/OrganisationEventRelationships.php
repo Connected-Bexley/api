@@ -2,6 +2,7 @@
 
 namespace App\Models\Relationships;
 
+use App\Models\File;
 use App\Models\Location;
 use App\Models\Organisation;
 use App\Models\OrganisationEventTaxonomy;
@@ -38,5 +39,15 @@ trait OrganisationEventRelationships
     public function taxonomyRelationship(): HasMany
     {
         return $this->organisationEventTaxonomies();
+    }
+
+    /**
+     * Return the image relationship.
+     *
+     * @return BelongsTo
+     */
+    public function imageFile(): BelongsTo
+    {
+        return $this->belongsTo(File::class, 'image_file_id');
     }
 }

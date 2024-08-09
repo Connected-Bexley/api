@@ -55,6 +55,7 @@ class OrganisationEventController extends Controller
                 AllowedFilter::scope('ends_after'),
                 AllowedFilter::scope('has_wheelchair_access', 'hasWheelchairAccess'),
                 AllowedFilter::scope('has_induction_loop', 'hasInductionLoop'),
+                AllowedFilter::scope('has_accessible_toilet', 'hasAccessibleToilet'),
                 AllowedFilter::scope('collections', 'inCollections'),
                 AllowedFilter::custom('has_permission', new HasPermissionFilter()),
             ])

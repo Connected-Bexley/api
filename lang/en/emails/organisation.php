@@ -67,7 +67,9 @@ Hi :SUBMITTER_NAME,
 
 Thank you for submitting your request to have :ORGANISATION_NAME listed on :APP_NAME.
 
-Unfortunately, your request to list :ORGANISATION_NAME on :APP_NAME on :REQUEST_DATE has been rejected. This is due to the organisation/service not meeting the terms and conditions of being listed on :APP_NAME.
+Unfortunately, your request to list :ORGANISATION_NAME on :APP_NAME on :REQUEST_DATE has been rejected for the following reason(s):
+
+:REJECTION_MESSAGE
 
 You can read more about our terms and conditions: :TANDC_URL
 

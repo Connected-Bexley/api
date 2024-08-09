@@ -29,7 +29,7 @@ class CreateUserCommand extends Command
     protected $description = 'Creates a new user with Super Admin privileges';
 
     /**
-     * @var \Illuminate\Database\DatabaseManager
+     * @var DatabaseManager
      */
     protected $db;
 

@@ -37,7 +37,7 @@ class SpreadsheetParser
     /**
      * The imported header row.
      *
-     * @var \array
+     * @var array
      */
     public $headers = [];
 

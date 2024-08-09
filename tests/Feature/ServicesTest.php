@@ -104,7 +104,7 @@ class ServicesTest extends TestCase
     public function guest_can_list_them(): void
     {
         /** @var \App\Models\Service $service */
-        $service = Service::factory()->create();
+        $service = Service::factory()->withPngLogo()->create();
         $service->usefulInfos()->create([
             'title' => 'Did You Know?',
             'description' => 'This is a test description',
@@ -135,6 +135,12 @@ class ServicesTest extends TestCase
             'status' => $service->status,
             'intro' => $service->intro,
             'description' => $service->description,
+            'image' => [
+                'id' => $service->logoFile->id,
+                'mime_type' => $service->logoFile->mime_type,
+                'alt_text' => $service->logoFile->altText,
+                'url' => $service->logoFile->url(),
+            ],
             'wait_time' => $service->wait_time,
             'is_free' => $service->is_free,
             'fees_text' => $service->fees_text,
@@ -165,7 +171,13 @@ class ServicesTest extends TestCase
                     'order' => 1,
                 ],
             ],
+            'social_medias' => [
 
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
             'gallery_items' => [],
             'category_taxonomies' => [
                 [
@@ -479,6 +491,13 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
             'gallery_items' => [],
             'category_taxonomies' => [],
             'eligibility_types' => [
@@ -575,6 +594,13 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
             'gallery_items' => [],
             'category_taxonomies' => [],
             'eligibility_types' => [
@@ -669,6 +695,13 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
             'gallery_items' => [],
             'category_taxonomies' => [Taxonomy::category()->children()->firstOrFail()->id],
             'eligibility_types' => [
@@ -771,6 +804,13 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
             'gallery_items' => [],
             'category_taxonomies' => [Taxonomy::category()->children()->firstOrFail()->id],
         ];
@@ -792,7 +832,72 @@ class ServicesTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_can_create_one_with_single_form_of_contact(): void
+    public function organisation_admin_can_create_one_with_no_form_of_contact(): void
+    {
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
+
+        Passport::actingAs($user);
+
+        $payload = [
+            'organisation_id' => $organisation->id,
+            'slug' => 'test-service',
+            'name' => 'Test Service',
+            'type' => Service::TYPE_SERVICE,
+            'status' => Service::STATUS_INACTIVE,
+            'intro' => 'This is a test intro',
+            'description' => 'Lorem ipsum',
+            'wait_time' => null,
+            'is_free' => true,
+            'fees_text' => null,
+            'fees_url' => null,
+            'testimonial' => null,
+            'video_embed' => null,
+            'url' => null,
+            'contact_name' => $this->faker->name(),
+            'contact_phone' => null,
+            'contact_email' => null,
+            'show_referral_disclaimer' => false,
+            'referral_method' => Service::REFERRAL_METHOD_NONE,
+            'referral_button_text' => null,
+            'referral_email' => null,
+            'referral_url' => null,
+            'cqc_location_id' => $this->faker->numerify('#-#########'),
+            'ends_at' => null,
+            'useful_infos' => [
+                [
+                    'title' => 'Did you know?',
+                    'description' => 'Lorem ipsum',
+                    'order' => 1,
+                ],
+            ],
+            'offerings' => [
+                [
+                    'offering' => 'Weekly club',
+                    'order' => 1,
+                ],
+            ],
+            'tags' => [],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
+            'gallery_items' => [],
+            'category_taxonomies' => [],
+        ];
+        $response = $this->json('POST', '/core/v1/services', $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonFragment($payload);
+    }
+
+    /**
+     * @test
+     */
+    public function organisation_admin_is_made_a_service_admin_when_they_create_one(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -838,6 +943,13 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
             'gallery_items' => [],
             'category_taxonomies' => [],
         ];
@@ -845,6 +957,18 @@ class ServicesTest extends TestCase
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonFragment($payload);
+
+        $response->assertJsonFragment(['data' => $payload]);
+
+        $updateRequest = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
+        $service = Service::where('slug', 'test-service-1')->first();
+
+        $this->assertTrue($user->isServiceAdmin($service));
     }
 
     /**
@@ -896,6 +1020,13 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
             'gallery_items' => [],
             'category_taxonomies' => [],
         ];
@@ -954,6 +1085,13 @@ class ServicesTest extends TestCase
                     'order' => 1,
                 ],
             ],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
             'gallery_items' => [],
             'category_taxonomies' => [],
         ];
@@ -962,6 +1100,72 @@ class ServicesTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
         config(['flags.service_tags' => false]);
+
+        $response = $this->json('POST', '/core/v1/services', $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonFragment($payload);
+    }
+
+    /**
+     * @test
+     */
+    public function organisation_admin_can_create_one_without_offerings_field_if_offerings_flag_is_false(): void
+    {
+        config(['flags.offerings' => true]);
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
+
+        Passport::actingAs($user);
+
+        $payload = [
+            'organisation_id' => $organisation->id,
+            'slug' => 'test-service',
+            'name' => 'Test Service',
+            'type' => Service::TYPE_SERVICE,
+            'status' => Service::STATUS_INACTIVE,
+            'intro' => 'This is a test intro',
+            'description' => 'Lorem ipsum',
+            'wait_time' => null,
+            'is_free' => true,
+            'fees_text' => null,
+            'fees_url' => null,
+            'testimonial' => null,
+            'video_embed' => null,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
+            'contact_phone' => null,
+            'contact_email' => $this->faker->safeEmail(),
+            'show_referral_disclaimer' => false,
+            'referral_method' => Service::REFERRAL_METHOD_NONE,
+            'referral_button_text' => null,
+            'referral_email' => null,
+            'referral_url' => null,
+            'cqc_location_id' => $this->faker->numerify('#-#########'),
+            'ends_at' => null,
+            'useful_infos' => [
+                [
+                    'title' => 'Did you know?',
+                    'description' => 'Lorem ipsum',
+                    'order' => 1,
+                ],
+            ],
+            'tags' => [],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
+            'gallery_items' => [],
+            'category_taxonomies' => [],
+        ];
+        $response = $this->json('POST', '/core/v1/services', $payload);
+
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        config(['flags.offerings' => false]);
 
         $response = $this->json('POST', '/core/v1/services', $payload);
 
@@ -1018,12 +1222,114 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
             'gallery_items' => [],
             'category_taxonomies' => [],
         ];
         $response = $this->json('POST', '/core/v1/services', $payload);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    /**
+     * @test
+     */
+    public function createServiceWithSlugClashAsOrganisationAdmin200()
+    {
+        $now = Date::now();
+        Date::setTestNow($now);
+
+        $organisation = Organisation::factory()->create();
+
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
+        Passport::actingAs($user);
+
+        $service1 = Service::factory()->create([
+            'organisation_id' => $organisation->id,
+            'slug' => 'test-slug',
+        ]);
+
+        $payload = [
+            'organisation_id' => $organisation->id,
+            'slug' => 'test-slug',
+            'name' => 'Test Service',
+            'type' => Service::TYPE_SERVICE,
+            'status' => Service::STATUS_INACTIVE,
+            'intro' => 'This is a test intro',
+            'description' => 'Lorem ipsum',
+            'wait_time' => null,
+            'is_free' => true,
+            'fees_text' => null,
+            'fees_url' => null,
+            'testimonial' => null,
+            'video_embed' => null,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
+            'contact_phone' => random_uk_phone(),
+            'contact_email' => $this->faker->safeEmail(),
+            'cqc_location_id' => $this->faker->numerify('#-#########'),
+            'show_referral_disclaimer' => false,
+            'referral_method' => Service::REFERRAL_METHOD_NONE,
+            'referral_button_text' => null,
+            'referral_email' => null,
+            'referral_url' => null,
+            'ends_at' => null,
+            'useful_infos' => [
+                [
+                    'title' => 'Did you know?',
+                    'description' => 'Lorem ipsum',
+                    'order' => 1,
+                ],
+            ],
+            'offerings' => [
+                [
+                    'offering' => 'Weekly club',
+                    'order' => 1,
+                ],
+            ],
+            'logo_file_id' => null,
+            'social_medias' => [],
+            'gallery_items' => [],
+            'tags' => [],
+            'category_taxonomies' => [],
+        ];
+
+        //When they create a service
+        $response = $this->json('POST', '/core/v1/services', $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $updateRequest1 = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals('test-slug', $updateRequest1->data['slug']);
+
+        $response = $this->json('POST', '/core/v1/services', $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $updateRequest2 = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals('test-slug', $updateRequest2->data['slug']);
+
+        $updateData = $this->approveUpdateRequest($updateRequest1->id);
+
+        $this->assertDatabaseHas('services', [
+            'id' => $updateData['updateable_id'],
+            'slug' => 'test-slug-1',
+        ]);
+
+        $updateData = $this->approveUpdateRequest($updateRequest2->id);
+
+        $this->assertDatabaseHas('services', [
+            'id' => $updateData['updateable_id'],
+            'slug' => 'test-slug-2',
+        ]);
     }
 
     /**
@@ -1075,6 +1381,13 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
             'gallery_items' => [],
             'category_taxonomies' => [],
         ];
@@ -1149,6 +1462,13 @@ class ServicesTest extends TestCase
                     'label' => $tag3->label,
                 ],
             ],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
             'gallery_items' => [],
             'category_taxonomies' => [],
         ];
@@ -1162,14 +1482,23 @@ class ServicesTest extends TestCase
      */
     public function organisation_admin_can_create_one_with_gallery_items(): void
     {
+        // Set the max number of gallery images to 2
+        config(['local.max_gallery_images' => 2]);
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
+
+        // SVG
+        $imageSvg = File::factory()->pendingAssignment()->imageSvg()->create();
+        // PNG
+        $imagePng = File::factory()->pendingAssignment()->imagePng()->create();
+        // JPG
+        $imageJpg = File::factory()->pendingAssignment()->imageJpg()->create();
 
         Passport::actingAs($user);
 
         $payload = [
             'organisation_id' => $organisation->id,
-            'slug' => 'test-service-1',
+            'slug' => 'test-service',
             'name' => 'Test Service',
             'type' => Service::TYPE_SERVICE,
             'status' => Service::STATUS_INACTIVE,
@@ -1206,26 +1535,164 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
-            'gallery_items' => [],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
+            'gallery_items' => [
+                [
+                    'file_id' => $imageSvg->id,
+                ],
+                [
+                    'file_id' => $imagePng->id,
+                ],
+                [
+                    'file_id' => $imageJpg->id,
+                ],
+            ],
             'category_taxonomies' => [],
         ];
 
-        // SVG
-        $imageSvg = File::factory()->pendingAssignment()->imageSvg()->create();
-        // PNG
-        $imagePng = File::factory()->pendingAssignment()->imagePng()->create();
-        // JPG
-        $imageJpg = File::factory()->pendingAssignment()->imageJpg()->create();
+        $response = $this->json('POST', '/core/v1/services', $payload);
 
-        $payload['gallery_items'] = [
-            [
-                'file_id' => $imageSvg->id,
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        // Set the max number of gallery images to 5
+        config(['local.max_gallery_images' => 5]);
+
+        $response = $this->json('POST', '/core/v1/services', $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $response->assertJsonFragment(['data' => $payload]);
+
+        $updateRequest = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals($updateRequest->data, $payload);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
+        $response = $this->json('GET', '/core/v1/services/test-service');
+
+        $response->assertJsonFragment([
+            'file_id' => $imageSvg->id,
+            'url' => url("core/v1/services/{$response->json('data.id')}/gallery-items/$imageSvg->id"),
+            'mime_type' => $imageSvg->mime_type,
+            'alt_text' => $imageSvg->meta['alt_text'],
+        ]);
+        $response->assertJsonFragment([
+            'file_id' => $imagePng->id,
+            'url' => url("core/v1/services/{$response->json('data.id')}/gallery-items/$imagePng->id"),
+            'mime_type' => $imagePng->mime_type,
+            'alt_text' => $imagePng->meta['alt_text'],
+        ]);
+        $response->assertJsonFragment([
+            'file_id' => $imageJpg->id,
+            'url' => url("core/v1/services/{$response->json('data.id')}/gallery-items/$imageJpg->id"),
+            'mime_type' => $imageJpg->mime_type,
+            'alt_text' => $imageJpg->meta['alt_text'],
+        ]);
+
+        // Get the gallery images for the service
+        $contentSvg = $this->get("/core/v1/services/test-service/gallery-items/$imageSvg->id")->content();
+
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.svg'), $contentSvg);
+
+        $contentPng = $this->get("/core/v1/services/test-service/gallery-items/$imagePng->id")->content();
+
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.png'), $contentPng);
+
+        $contentJpg = $this->get("/core/v1/services/test-service/gallery-items/$imageJpg->id")->content();
+
+        $this->assertEquals(Storage::disk('local')->get('/test-data/image.jpg'), $contentJpg);
+    }
+
+    /**
+     * @test
+     */
+    public function organisation_admin_can_create_one_with_elegibility_fields(): void
+    {
+        $organisation = Organisation::factory()->create();
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
+
+        $taxonomyIds = Taxonomy::serviceEligibility()
+            ->children
+            ->map(function ($taxonomy) {
+                return $taxonomy
+                    ->children()
+                    ->inRandomOrder()
+                    ->pluck('id')
+                    ->first();
+            })
+            ->toArray();
+
+        sort($taxonomyIds, SORT_STRING);
+
+        Passport::actingAs($user);
+
+        $payload = [
+            'organisation_id' => $organisation->id,
+            'slug' => 'test-service',
+            'name' => 'Test Service',
+            'type' => Service::TYPE_SERVICE,
+            'status' => Service::STATUS_INACTIVE,
+            'intro' => 'This is a test intro',
+            'description' => 'Lorem ipsum',
+            'wait_time' => null,
+            'is_free' => true,
+            'fees_text' => null,
+            'fees_url' => null,
+            'testimonial' => null,
+            'video_embed' => null,
+            'url' => $this->faker->url(),
+            'contact_name' => $this->faker->name(),
+            'contact_phone' => random_uk_phone(),
+            'contact_email' => $this->faker->safeEmail(),
+            'show_referral_disclaimer' => false,
+            'referral_method' => Service::REFERRAL_METHOD_NONE,
+            'referral_button_text' => null,
+            'referral_email' => null,
+            'referral_url' => null,
+            'cqc_location_id' => $this->faker->numerify('#-#########'),
+            'ends_at' => null,
+            'useful_infos' => [
+                [
+                    'title' => 'Did you know?',
+                    'description' => 'Lorem ipsum',
+                    'order' => 1,
+                ],
             ],
-            [
-                'file_id' => $imagePng->id,
+            'offerings' => [
+                [
+                    'offering' => 'Weekly club',
+                    'order' => 1,
+                ],
             ],
-            [
-                'file_id' => $imageJpg->id,
+            'tags' => [],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
+            'gallery_items' => [],
+            'category_taxonomies' => [],
+            'eligibility_types' => [
+                'custom' => [
+                    'age_group' => 'created with custom age group',
+                    'disability' => 'created with custom disability',
+                    'ethnicity' => 'created with custom ethnicity',
+                    'gender' => 'created with custom gender',
+                    'income' => 'created with custom income',
+                    'language' => 'created with custom language',
+                    'housing' => 'created with custom housing',
+                    'other' => 'created with custom other',
+                ],
+                'taxonomies' => $taxonomyIds,
             ],
         ];
 
@@ -1241,18 +1708,26 @@ class ServicesTest extends TestCase
 
         $this->approveUpdateRequest($updateRequest->id);
 
-        // Get the gallery images for the service
-        $contentSvg = $this->get("/core/v1/services/test-service-1/gallery-items/$imageSvg->id")->content();
+        $service = Service::where('slug', 'test-service')->first();
 
-        $this->assertEquals(Storage::disk('local')->get('/test-data/image.svg'), $contentSvg);
+        $this->assertDatabaseHas('services', [
+            'id' => $service->id,
+            'eligibility_age_group_custom' => 'created with custom age group',
+            'eligibility_disability_custom' => 'created with custom disability',
+            'eligibility_ethnicity_custom' => 'created with custom ethnicity',
+            'eligibility_gender_custom' => 'created with custom gender',
+            'eligibility_income_custom' => 'created with custom income',
+            'eligibility_language_custom' => 'created with custom language',
+            'eligibility_housing_custom' => 'created with custom housing',
+            'eligibility_other_custom' => 'created with custom other',
+        ]);
 
-        $contentPng = $this->get("/core/v1/services/test-service-1/gallery-items/$imagePng->id")->content();
-
-        $this->assertEquals(Storage::disk('local')->get('/test-data/image.png'), $contentPng);
-
-        $contentJpg = $this->get("/core/v1/services/test-service-1/gallery-items/$imageJpg->id")->content();
-
-        $this->assertEquals(Storage::disk('local')->get('/test-data/image.jpg'), $contentJpg);
+        foreach ($taxonomyIds as $taxonomyId) {
+            $this->assertDatabaseHas('service_eligibilities', [
+                'service_id' => $service->id,
+                'taxonomy_id' => $taxonomyId,
+            ]);
+        }
     }
 
     /**
@@ -1306,6 +1781,13 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
             'gallery_items' => [],
             'category_taxonomies' => [$taxonomy->id],
         ];
@@ -1362,6 +1844,7 @@ class ServicesTest extends TestCase
             'useful_infos' => [],
             'offerings' => [],
             'tags' => [],
+            'social_medias' => [],
             'gallery_items' => [],
             'category_taxonomies' => [Taxonomy::category()->children()->firstOrFail()->id],
         ];
@@ -1421,6 +1904,13 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
             'gallery_items' => [],
             'category_taxonomies' => [Taxonomy::category()->children()->firstOrFail()->id],
         ]);
@@ -1481,6 +1971,13 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
             'gallery_items' => [],
             'category_taxonomies' => [Taxonomy::category()->children()->firstOrFail()->id],
         ];
@@ -1540,6 +2037,13 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
             'gallery_items' => [],
             'category_taxonomies' => [Taxonomy::category()->children()->firstOrFail()->id],
         ];
@@ -1610,6 +2114,13 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
             'gallery_items' => [],
             'category_taxonomies' => [$taxonomy->id],
         ];
@@ -1669,6 +2180,13 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
             'gallery_items' => [],
             'category_taxonomies' => [],
         ];
@@ -1732,6 +2250,13 @@ class ServicesTest extends TestCase
                 [
                     'slug' => $tag1->slug,
                     'label' => $tag1->label,
+                ],
+            ],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
                 ],
             ],
             'gallery_items' => [],
@@ -1805,6 +2330,7 @@ class ServicesTest extends TestCase
                     'label' => 'Tag One',
                 ],
             ],
+            'social_medias' => [],
             'gallery_items' => [],
             'category_taxonomies' => [
                 $taxonomy->id,
@@ -1884,6 +2410,13 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [
+
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital/',
+                ],
+            ],
             'gallery_items' => [],
             'category_taxonomies' => [
                 $taxonomy->id,
@@ -1948,6 +2481,7 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [],
             'gallery_items' => [],
             'category_taxonomies' => [$taxonomy->id],
         ];
@@ -2072,6 +2606,7 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [],
             'gallery_items' => [],
             'category_taxonomies' => [],
         ];
@@ -2163,6 +2698,7 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [],
             'gallery_items' => [],
             'category_taxonomies' => [
                 $taxonomy->id,
@@ -2281,6 +2817,7 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [],
             'gallery_items' => [],
             'category_taxonomies' => [Taxonomy::category()->children()->firstOrFail()->id],
         ];
@@ -2357,6 +2894,7 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [],
             'gallery_items' => [],
             'category_taxonomies' => [Taxonomy::category()->children()->firstOrFail()->id],
         ];
@@ -2446,6 +2984,7 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [],
             'gallery_items' => [],
             'category_taxonomies' => [Taxonomy::category()->children()->firstOrFail()->id],
         ];
@@ -2567,6 +3106,7 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [],
             'gallery_items' => [],
             'category_taxonomies' => [Taxonomy::category()->children()->firstOrFail()->id],
         ];
@@ -2597,7 +3137,7 @@ class ServicesTest extends TestCase
     /**
      * @test
      */
-    public function service_creation_rejected_if_social_medias_field_is_populated(): void
+    public function CreateServiceWithSocialMediasAsGlobalAdmin200(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeGlobalAdmin();
@@ -2627,6 +3167,7 @@ class ServicesTest extends TestCase
             'referral_button_text' => null,
             'referral_email' => null,
             'referral_url' => null,
+            'cqc_location_id' => null,
             'ends_at' => null,
             'useful_infos' => [
                 [
@@ -2641,6 +3182,7 @@ class ServicesTest extends TestCase
                     'order' => 1,
                 ],
             ],
+            'tags' => [],
             'social_medias' => [
                 [
                     'type' => SocialMedia::TYPE_INSTAGRAM,
@@ -2651,9 +3193,14 @@ class ServicesTest extends TestCase
             'category_taxonomies' => [Taxonomy::category()->children()->firstOrFail()->id],
         ];
         $response = $this->json('POST', '/core/v1/services', $payload);
-
-        $response->assertStatus(422);
-        $response->assertJsonFragment(['social_medias' => ['This field is no longer accepted for services and should be set in the Organisation.']]);
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonFragment(['social_medias' => [
+            [
+                'type' => SocialMedia::TYPE_INSTAGRAM,
+                'url' => 'https://www.instagram.com/ayupdigital',
+            ],
+        ],
+        ]);
     }
 
     /*
@@ -2680,7 +3227,7 @@ class ServicesTest extends TestCase
         ]);
         $service->socialMedias()->create([
             'type' => SocialMedia::TYPE_INSTAGRAM,
-            'url' => 'https://www.instagram.com/ayupdigital/',
+            'url' => 'https://www.instagram.com/ayupdigital',
         ]);
         $service->serviceTaxonomies()->create([
             'taxonomy_id' => $taxonomy->id,
@@ -2752,6 +3299,12 @@ class ServicesTest extends TestCase
                     'updated_at' => $tag1->updated_at->format(CarbonImmutable::ISO8601),
                 ],
             ],
+            'social_medias' => [
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital',
+                ],
+            ],
             'gallery_items' => [],
             'last_modified_at' => $service->last_modified_at->format(CarbonImmutable::ISO8601),
             'created_at' => $service->created_at->format(CarbonImmutable::ISO8601),
@@ -2776,7 +3329,7 @@ class ServicesTest extends TestCase
         ]);
         $service->socialMedias()->create([
             'type' => SocialMedia::TYPE_INSTAGRAM,
-            'url' => 'https://www.instagram.com/ayupdigital/',
+            'url' => 'https://www.instagram.com/ayupdigital',
         ]);
         $service->serviceTaxonomies()->create([
             'taxonomy_id' => $taxonomy->id,
@@ -2833,6 +3386,12 @@ class ServicesTest extends TestCase
                     'name' => $taxonomy->name,
                     'created_at' => $taxonomy->created_at->format(CarbonImmutable::ISO8601),
                     'updated_at' => $taxonomy->updated_at->format(CarbonImmutable::ISO8601),
+                ],
+            ],
+            'social_medias' => [
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital',
                 ],
             ],
             'gallery_items' => [],
@@ -3173,7 +3732,12 @@ class ServicesTest extends TestCase
                     'order' => 1,
                 ],
             ],
-
+            'social_medias' => [
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital',
+                ],
+            ],
             'category_taxonomies' => [
                 $taxonomy->id,
                 $taxonomy->parent_id,
@@ -3192,7 +3756,7 @@ class ServicesTest extends TestCase
     /**
      * @test
      */
-    public function service_admin_can_update_one_with_single_form_of_contact(): void
+    public function service_admin_can_update_one_with_no_form_of_contact(): void
     {
         $service = Service::factory()->create([
             'slug' => 'test-service',
@@ -3217,10 +3781,10 @@ class ServicesTest extends TestCase
             'fees_url' => null,
             'testimonial' => null,
             'video_embed' => null,
-            'url' => $this->faker->url(),
+            'url' => null,
             'contact_name' => $this->faker->name(),
             'contact_phone' => null,
-            'contact_email' => $this->faker->safeEmail(),
+            'contact_email' => null,
             'show_referral_disclaimer' => false,
             'referral_method' => Service::REFERRAL_METHOD_NONE,
             'referral_button_text' => null,
@@ -3241,7 +3805,12 @@ class ServicesTest extends TestCase
                     'order' => 1,
                 ],
             ],
-
+            'social_medias' => [
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital',
+                ],
+            ],
             'category_taxonomies' => [
                 $taxonomy->id,
                 $taxonomy->parent_id,
@@ -3311,6 +3880,12 @@ class ServicesTest extends TestCase
                 [
                     'slug' => 'tag-1',
                     'label' => 'Tag One',
+                ],
+            ],
+            'social_medias' => [
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital',
                 ],
             ],
             'category_taxonomies' => [
@@ -3386,6 +3961,12 @@ class ServicesTest extends TestCase
                     'label' => $tag1->label,
                 ],
             ],
+            'social_medias' => [
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital',
+                ],
+            ],
             'gallery_items' => [],
             'category_taxonomies' => [
                 $taxonomy->id,
@@ -3457,7 +4038,12 @@ class ServicesTest extends TestCase
                     'order' => 1,
                 ],
             ],
-
+            'social_medias' => [
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital',
+                ],
+            ],
             'gallery_items' => [],
             'category_taxonomies' => [
                 $taxonomy->id,
@@ -3523,7 +4109,12 @@ class ServicesTest extends TestCase
                     'order' => 1,
                 ],
             ],
-
+            'social_medias' => [
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital',
+                ],
+            ],
             'category_taxonomies' => [
                 $taxonomy->id,
             ],
@@ -3586,7 +4177,12 @@ class ServicesTest extends TestCase
                     'order' => 1,
                 ],
             ],
-
+            'social_medias' => [
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital',
+                ],
+            ],
             'category_taxonomies' => [
                 $taxonomy->id,
                 $taxonomy->parent_id,
@@ -3653,7 +4249,12 @@ class ServicesTest extends TestCase
                     'order' => 1,
                 ],
             ],
-
+            'social_medias' => [
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital',
+                ],
+            ],
             'category_taxonomies' => [
                 $taxonomy->id,
                 $newTaxonomy->id,
@@ -3717,7 +4318,12 @@ class ServicesTest extends TestCase
                     'order' => 1,
                 ],
             ],
-
+            'social_medias' => [
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital',
+                ],
+            ],
             'category_taxonomies' => [
                 $taxonomy->id,
                 $newTaxonomy->id,
@@ -3771,7 +4377,12 @@ class ServicesTest extends TestCase
             'cqc_location_id' => $cqcLocationId,
             'useful_infos' => [],
             'offerings' => [],
-
+            'social_medias' => [
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital',
+                ],
+            ],
             'category_taxonomies' => [
                 $taxonomy->id,
                 $taxonomy->parent_id,
@@ -3829,7 +4440,12 @@ class ServicesTest extends TestCase
             'ends_at' => null,
             'useful_infos' => [],
             'offerings' => [],
-
+            'social_medias' => [
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital',
+                ],
+            ],
             'category_taxonomies' => [
                 $taxonomy->id,
             ],
@@ -3880,7 +4496,12 @@ class ServicesTest extends TestCase
             'ends_at' => null,
             'useful_infos' => [],
             'offerings' => [],
-
+            'social_medias' => [
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital',
+                ],
+            ],
             'category_taxonomies' => [
                 $taxonomy->id,
             ],
@@ -3888,6 +4509,43 @@ class ServicesTest extends TestCase
         $response = $this->json('PUT', "/core/v1/services/{$service->id}", $payload);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    /**
+     * @test
+     */
+    public function service_admin_can_update_logo(): void
+    {
+        $user = User::factory()->create()->makeGlobalAdmin();
+        $service = Service::factory()->create([
+            'slug' => 'test-service',
+        ]);
+        $taxonomy = Taxonomy::factory()->create();
+        $service->syncTaxonomyRelationships(new Collection([$taxonomy]));
+
+        $image = File::factory()->pendingAssignment()->imagePng()->create();
+
+        Passport::actingAs($user);
+
+        $payload = [
+            'logo_file_id' => $image->id,
+        ];
+        $response = $this->json('PUT', "/core/v1/services/{$service->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $this->approveUpdateRequest($response->json()['id']);
+
+        $response = $this->json('GET', "/core/v1/services/{$service->id}");
+
+        $response->assertJsonFragment([
+            'image' => [
+                'id' => $image->id,
+                'mime_type' => $image->mime_type,
+                'alt_text' => $image->meta['alt_text'],
+                'url' => $image->url(),
+            ],
+        ]);
     }
 
     /**
@@ -3931,7 +4589,12 @@ class ServicesTest extends TestCase
             'ends_at' => null,
             'useful_infos' => [],
             'offerings' => [],
-
+            'social_medias' => [
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital',
+                ],
+            ],
             'category_taxonomies' => [
                 $taxonomy->id,
             ],
@@ -3982,7 +4645,12 @@ class ServicesTest extends TestCase
             'ends_at' => null,
             'useful_infos' => [],
             'offerings' => [],
-
+            'social_medias' => [
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital',
+                ],
+            ],
             'category_taxonomies' => [
                 $taxonomy->id,
             ],
@@ -3990,6 +4658,55 @@ class ServicesTest extends TestCase
         $response = $this->json('PUT', "/core/v1/services/{$service->id}", $payload);
 
         $response->assertStatus(Response::HTTP_OK);
+    }
+
+    /**
+     * @test
+     */
+    public function updateServiceWithSlugClashAsGlobalAdmin200()
+    {
+        $now = Date::now();
+        Date::setTestNow($now);
+
+        $organisation = Organisation::factory()->create();
+
+        $user = User::factory()->create()->makeGlobalAdmin();
+        Passport::actingAs($user);
+
+        $service1 = Service::factory()->create([
+            'organisation_id' => $organisation->id,
+            'slug' => 'test-slug',
+        ]);
+        $service1->serviceTaxonomies()->create([
+            'taxonomy_id' => Taxonomy::category()->children()->firstOrFail()->id,
+        ]);
+
+        $service2 = Service::factory()->create([
+            'organisation_id' => $organisation->id,
+            'slug' => 'other-slug',
+        ]);
+        $service2->serviceTaxonomies()->create([
+            'taxonomy_id' => Taxonomy::category()->children()->firstOrFail()->id,
+        ]);
+
+        $payload = [
+            'slug' => 'test-slug',
+        ];
+
+        $response = $this->json('PUT', "/core/v1/services/{$service2->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $updateRequest = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals('test-slug', $updateRequest->data['slug']);
+
+        $this->approveUpdateRequest($updateRequest->id);
+
+        $this->assertDatabaseHas('services', [
+            'id' => $service2->id,
+            'slug' => 'test-slug-1',
+        ]);
     }
 
     /**
@@ -4048,6 +4765,7 @@ class ServicesTest extends TestCase
                     'label' => 'Tag One',
                 ],
             ],
+            'social_medias' => [],
             'gallery_items' => [],
             'category_taxonomies' => [
                 $taxonomy->id,
@@ -4114,7 +4832,7 @@ class ServicesTest extends TestCase
             'ends_at' => null,
             'useful_infos' => [],
             'offerings' => [],
-
+            'social_medias' => [],
             'category_taxonomies' => [
                 $taxonomy->id,
             ],
@@ -4167,7 +4885,7 @@ class ServicesTest extends TestCase
             'ends_at' => null,
             'useful_infos' => [],
             'offerings' => [],
-
+            'social_medias' => [],
             'category_taxonomies' => [
                 $taxonomy->id,
                 $taxonomy->parent_id,
@@ -4223,7 +4941,12 @@ class ServicesTest extends TestCase
             'ends_at' => null,
             'useful_infos' => [],
             'offerings' => [],
-
+            'social_medias' => [
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital',
+                ],
+            ],
             'category_taxonomies' => [
                 $taxonomy->id,
             ],
@@ -4478,12 +5201,8 @@ class ServicesTest extends TestCase
     /**
      * @test
      */
-    public function service_update_rejected_if_social_medias_field_is_populated(): void
+    public function UpdateSocialMediasAsServiceAdmin200(): void
     {
-        // Given a global admin is logged in
-        $globalAdmin = User::factory()->create()->makeGlobalAdmin();
-
-        // And a pending update request exists for a service with changes to the social medias
         $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
@@ -4505,8 +5224,14 @@ class ServicesTest extends TestCase
 
         // Create the update request as service admin
         $response = $this->json('PUT', "/core/v1/services/{$service->id}", $payload);
-        $response->assertStatus(422);
-        $response->assertJsonFragment(['social_medias' => ['This field is no longer accepted for services and should be set in the Organisation.']]);
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonFragment(['social_medias' => [
+            [
+                'type' => SocialMedia::TYPE_FACEBOOK,
+                'url' => 'https://www.facebook.com/randomPerson',
+            ],
+        ],
+        ]);
     }
 
     /*
@@ -4522,9 +5247,7 @@ class ServicesTest extends TestCase
          * @var \App\Models\User $user
          */
         $user = User::factory()->create();
-        $service = Service::factory()->create([
-            'logo_file_id' => File::factory()->create()->id,
-        ]);
+        $service = Service::factory()->withPngLogo()->create();
         $user->makeServiceAdmin($service);
         $payload = [
             'slug' => $service->slug,
@@ -4569,6 +5292,8 @@ class ServicesTest extends TestCase
      */
     public function service_admin_can_update_gallery_items(): void
     {
+        // Set the max number of gallery images to 2
+        config(['local.max_gallery_images' => 2]);
         $service = Service::factory()->create([
             'slug' => 'test-service',
             'status' => Service::STATUS_ACTIVE,
@@ -4582,15 +5307,32 @@ class ServicesTest extends TestCase
         Passport::actingAs($user);
 
         // SVG
-        $image = File::factory()->pendingAssignment()->imageSvg()->create();
+        $imageSvg = File::factory()->pendingAssignment()->imageSvg()->create();
+        // PNG
+        $imagePng = File::factory()->pendingAssignment()->imagePng()->create();
+        // JPG
+        $imageJpg = File::factory()->pendingAssignment()->imageJpg()->create();
 
         $payload = [
             'gallery_items' => [
                 [
-                    'file_id' => $image->id,
+                    'file_id' => $imageSvg->id,
+                ],
+                [
+                    'file_id' => $imagePng->id,
+                ],
+                [
+                    'file_id' => $imageJpg->id,
                 ],
             ],
         ];
+
+        $response = $this->json('PUT', "/core/v1/services/{$service->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        // Set the max number of gallery images to 5
+        config(['local.max_gallery_images' => 5]);
 
         $response = $this->json('PUT', "/core/v1/services/{$service->id}", $payload);
 
@@ -4604,64 +5346,41 @@ class ServicesTest extends TestCase
 
         $this->approveUpdateRequest($updateRequest->id);
 
-        // Get the event image for the service location
-        $content = $this->get("/core/v1/services/$service->slug/gallery-items/$image->id")->content();
+        $response = $this->json('GET', '/core/v1/services/test-service');
+
+        $response->assertJsonFragment([
+            'file_id' => $imageSvg->id,
+            'url' => url("core/v1/services/$service->id/gallery-items/$imageSvg->id"),
+            'mime_type' => $imageSvg->mime_type,
+            'alt_text' => $imageSvg->meta['alt_text'],
+        ]);
+
+        // Get the gallery item image
+        $content = $this->get("/core/v1/services/$service->slug/gallery-items/$imageSvg->id")->content();
 
         $this->assertEquals(Storage::disk('local')->get('/test-data/image.svg'), $content);
 
-        // PNG
-        $image = File::factory()->pendingAssignment()->imagePng()->create();
+        $response->assertJsonFragment([
+            'file_id' => $imagePng->id,
+            'url' => url("core/v1/services/$service->id/gallery-items/$imagePng->id"),
+            'mime_type' => $imagePng->mime_type,
+            'alt_text' => $imagePng->meta['alt_text'],
+        ]);
 
-        $payload = [
-            'gallery_items' => [
-                [
-                    'file_id' => $image->id,
-                ],
-            ],
-        ];
-
-        $response = $this->json('PUT', "/core/v1/services/{$service->id}", $payload);
-
-        $response->assertStatus(Response::HTTP_OK);
-
-        $response->assertJsonFragment(['data' => $payload]);
-
-        $updateRequest = UpdateRequest::find($response->json('id'));
-
-        $this->assertEquals($updateRequest->data, $payload);
-
-        $this->approveUpdateRequest($updateRequest->id);
-
-        // Get the event image for the service location
-        $content = $this->get("/core/v1/services/$service->slug/gallery-items/$image->id")->content();
+        // Get the gallery item image
+        $content = $this->get("/core/v1/services/$service->slug/gallery-items/$imagePng->id")->content();
 
         $this->assertEquals(Storage::disk('local')->get('/test-data/image.png'), $content);
 
-        // JPG
-        $image = File::factory()->pendingAssignment()->imageJpg()->create();
+        $response->assertJsonFragment([
+            'file_id' => $imageJpg->id,
+            'url' => url("core/v1/services/$service->id/gallery-items/$imageJpg->id"),
+            'mime_type' => $imageJpg->mime_type,
+            'alt_text' => $imageJpg->meta['alt_text'],
+        ]);
 
-        $payload = [
-            'gallery_items' => [
-                [
-                    'file_id' => $image->id,
-                ],
-            ],
-        ];
-
-        $response = $this->json('PUT', "/core/v1/services/{$service->id}", $payload);
-
-        $response->assertStatus(Response::HTTP_OK);
-
-        $response->assertJsonFragment(['data' => $payload]);
-
-        $updateRequest = UpdateRequest::find($response->json('id'));
-
-        $this->assertEquals($updateRequest->data, $payload);
-
-        $this->approveUpdateRequest($updateRequest->id);
-
-        // Get the event image for the service location
-        $content = $this->get("/core/v1/services/$service->slug/gallery-items/$image->id")->content();
+        // Get the gallery item image
+        $content = $this->get("/core/v1/services/$service->slug/gallery-items/$imageJpg->id")->content();
 
         $this->assertEquals(Storage::disk('local')->get('/test-data/image.jpg'), $content);
     }
@@ -4826,7 +5545,7 @@ class ServicesTest extends TestCase
         $response = $this->json('PUT', "/core/v1/services/{$service->id}", $payload);
 
         $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonFragment(['data' => $payload]);
+        $response->assertJsonFragment($payload);
 
         $updateRequestId = $response->json()['id'];
 
@@ -4881,7 +5600,8 @@ class ServicesTest extends TestCase
         ));
 
         $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonFragment(['id' => null, 'data' => $payload]);
+        $response->assertJsonFragment(['id' => null]);
+        $response->assertJsonFragment($payload);
     }
 
     /**
@@ -4905,7 +5625,7 @@ class ServicesTest extends TestCase
         $response = $this->json('PUT', "/core/v1/services/{$service->id}", $payload);
 
         $response->assertStatus(Response::HTTP_OK);
-        $response->assertJsonFragment(['data' => $payload]);
+        $response->assertJsonFragment($payload);
 
         $data = UpdateRequest::query()
             ->where('updateable_type', UpdateRequest::EXISTING_TYPE_SERVICE)
@@ -4934,7 +5654,7 @@ class ServicesTest extends TestCase
     /**
      * @test
      */
-    public function service_update_request_approval_rejected_if_social_medias_field_is_populated(): void
+    public function UpdateSocialMediasFieldAsSuperAdmin200(): void
     {
         $now = Date::now();
         Date::setTestNow($now);
@@ -4985,8 +5705,13 @@ class ServicesTest extends TestCase
 
         $response = $this->json('PUT', "/core/v1/update-requests/{$updateRequest->id}/approve");
 
-        $response->assertStatus(422);
-        $response->assertJsonFragment(['social_medias' => ['This field is no longer accepted for services and should be set in the Organisation.']]);
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonFragment(['social_medias' => [
+            [
+                'type' => SocialMedia::TYPE_INSTAGRAM,
+                'url' => 'https://www.instagram.com/ayupdigital/',
+            ],
+        ]]);
     }
 
     /*
@@ -5063,24 +5788,6 @@ class ServicesTest extends TestCase
         $response = $this->json('DELETE', "/core/v1/services/{$service->id}");
 
         $response->assertStatus(Response::HTTP_FORBIDDEN);
-
-        // $this->assertDatabaseHas((new Service())->getTable(), ['id' => $service->id]);
-
-        // //Then an update request should be created for the new service
-        // $updateRequest = UpdateRequest::query()
-        //     ->where('updateable_type', UpdateRequest::DESTROY_TYPE_SERVICE_GLOBAL_ADMIN)
-        //     ->where('updateable_id', $service->id)
-        //     ->firstOrFail();
-
-        // // Simulate frontend check by making call with UpdateRequest ID.
-
-        // Passport::actingAs(User::factory()->create()->makeSuperAdmin());
-
-        // $response = $this->json('PUT', "/core/v1/update-requests/{$updateRequest->id}/approve");
-
-        // $response->assertStatus(Response::HTTP_OK);
-
-        // $this->assertDatabaseMissing((new Service())->getTable(), ['id' => $service->id]);
     }
 
     /**
@@ -5538,15 +6245,9 @@ class ServicesTest extends TestCase
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create();
         $user->makeOrganisationAdmin($organisation);
-        $image = Storage::disk('local')->get('/test-data/image.png');
+        $image = File::factory()->pendingAssignment()->imagePng()->create();
 
         Passport::actingAs($user);
-
-        $imageResponse = $this->json('POST', '/core/v1/files', [
-            'is_private' => false,
-            'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,' . base64_encode($image),
-        ]);
 
         $payload = [
             'organisation_id' => $organisation->id,
@@ -5587,9 +6288,10 @@ class ServicesTest extends TestCase
                 ],
             ],
             'tags' => [],
+            'social_medias' => [],
             'gallery_items' => [],
             'category_taxonomies' => [],
-            'logo_file_id' => $this->getResponseContent($imageResponse, 'data.id'),
+            'logo_file_id' => $image->id,
         ];
 
         $response = $this->json('POST', '/core/v1/services', $payload);
@@ -5602,7 +6304,7 @@ class ServicesTest extends TestCase
             'updateable_id' => null,
         ]);
         $updateRequest = UpdateRequest::where('id', $updateRequestId)->firstOrFail();
-        $this->assertEquals($this->getResponseContent($imageResponse, 'data.id'), $updateRequest->data['logo_file_id']);
+        $this->assertEquals($image->id, $updateRequest->data['logo_file_id']);
 
         Passport::actingAs(User::factory()->create()->makeSuperAdmin());
 
@@ -5612,7 +6314,7 @@ class ServicesTest extends TestCase
         // Get the event image for the update request
         $response = $this->get("/core/v1/services/new/logo.png?update_request_id=$updateRequestId");
 
-        $this->assertEquals($image, $response->content());
+        $this->assertEquals($image->getContent(), $response->content());
 
         $serviceApproveResponse = $this->put(
             route(
@@ -5625,11 +6327,23 @@ class ServicesTest extends TestCase
 
         unset($payload['useful_infos']);
         unset($payload['offerings']);
+        unset($payload['social_medias']);
         unset($payload['gallery_items']);
         unset($payload['category_taxonomies']);
         unset($payload['tags']);
 
         $this->assertDatabaseHas('services', $payload);
+
+        $response = $this->json('GET', "/core/v1/services/test-service");
+
+        $response->assertJsonFragment([
+            'image' => [
+                'id' => $image->id,
+                'mime_type' => $image->mime_type,
+                'alt_text' => $image->meta['alt_text'],
+                'url' => $image->url(),
+            ],
+        ]);
     }
 
     /*
@@ -5642,12 +6356,7 @@ class ServicesTest extends TestCase
     public function guest_can_view_gallery_item(): void
     {
         /** @var \App\Models\File $file */
-        $file = File::factory()->create([
-            'filename' => 'random-name.png',
-            'mime_type' => 'image/png',
-        ])->upload(
-            Storage::disk('local')->get('/test-data/image.png')
-        );
+        $file = File::factory()->pendingAssignment()->imagePng()->create();
 
         /** @var \App\Models\Service $service */
         $service = Service::factory()->create();

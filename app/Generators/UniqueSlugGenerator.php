@@ -2,13 +2,16 @@
 
 namespace App\Generators;
 
+use App\Models\Model;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
+use RuntimeException;
 
 class UniqueSlugGenerator
 {
     /**
-     * @var \Illuminate\Database\DatabaseManager
+     * @var DatabaseManager
      */
     protected $db;
 
@@ -23,17 +26,33 @@ class UniqueSlugGenerator
     /**
      * @param string $string The string to slugify
      */
-    public function generate(string $string, string $table, string $column = 'slug', int $index = 0): string
+    /**
+     * Find the first unique slug for the model using the provided slug
+     * Unique slugs are created with a '-n' suffix.
+     *
+     * @param string $string
+     * @param Model $model
+     * @param string $column
+     * @param int $index
+     * @throws InvalidArgumentException
+     * @throws RuntimeException
+     * @return string
+     */
+    public function generate(string $string, Model $model, string $column = 'slug', int $index = 0): string
     {
         $slug = $this->slugify($string);
-        $slug .= $index === 0 ? '' : "-{$index}";
+        $baseSlug = preg_replace('|\-\d$|', '', $slug);
+        $slug = $index === 0 ? $baseSlug : "$baseSlug-{$index}";
 
-        $slugAlreadyUsed = $this->db->table($table)
+        $slugAlreadyUsed = $this->db->table($model->getTable())
             ->where($column, '=', $slug)
+            ->when($model->id, function ($query, $modelId) {
+                $query->where('id', '!=', $modelId);
+            })
             ->exists();
 
         if ($slugAlreadyUsed) {
-            return $this->generate($string, $table, $column, $index + 1);
+            return $this->generate($string, $model, $column, $index + 1);
         }
 
         return $slug;

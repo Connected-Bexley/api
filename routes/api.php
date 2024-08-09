@@ -81,8 +81,10 @@ Route::prefix('/core/v1')
                 ->name('collection-personas.image');
 
             // Files.
+            Route::get('/images/{filename}', [Core\V1\FileController::class, 'display'])
+                ->name('image.display');
             Route::apiResource('/files', Core\V1\FileController::class)
-                ->only('store');
+                ->only('store', 'show');
 
             // Locations.
             Route::match(['GET', 'POST'], '/locations/index', [Core\V1\LocationController::class, 'index']);
@@ -254,9 +256,11 @@ Route::prefix('/core/v1')
             // Update Requests.
             Route::match(['GET', 'POST'], '/update-requests/index', [Core\V1\UpdateRequestController::class, 'index']);
             Route::apiResource('/update-requests', Core\V1\UpdateRequestController::class)
-                ->only('index', 'show', 'destroy');
+                ->only('index', 'show');
             Route::put('/update-requests/{update_request}/approve', [Core\V1\UpdateRequest\ApproveController::class, 'update'])
                 ->name('update-requests.approve');
+            Route::put('/update-requests/{update_request}/reject', [Core\V1\UpdateRequestController::class, 'destroy'])
+                ->name('update-requests.reject');
 
             // Users.
             Route::match(['GET', 'POST'], '/users/index', [Core\V1\UserController::class, 'index']);

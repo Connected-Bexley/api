@@ -3,19 +3,20 @@ import json
 from template import create_template
 
 from parameters import create_uuid_parameter, create_environment_parameter, create_certificate_arn_parameter, \
-    create_vpc_parameter, create_cname_parameter, create_database_username_parameter,\
+    create_vpc_parameter, create_cname_parameter, create_database_username_parameter, \
     create_subnets_parameter, create_database_password_parameter, create_database_class_parameter, \
     create_database_allocated_storage_parameter, create_redis_node_class_parameter, create_redis_nodes_count_parameter, \
     create_api_instance_class_parameter, create_api_instance_count_parameter, create_api_task_count_parameter, \
     create_scheduler_task_count_parameter, create_queue_worker_task_count_parameter, \
-    create_elasticsearch_instance_class_parameter, create_elasticsearch_instance_count_parameter
+    create_elasticsearch_instance_class_parameter, create_elasticsearch_instance_count_parameter, \
+    create_fortinet_managed_rules_all_rules_group_parameter, create_aws_managed_rules_common_rules_group_parameter
 
 from variables import create_default_queue_name_variable, create_notifications_queue_name_variable, \
     create_search_queue_name_variable, create_uploads_bucket_name_variable, create_api_launch_template_name_variable, \
     create_docker_repository_name_variable, create_api_log_group_name_variable, create_queue_worker_log_group_name_variable, \
     create_scheduler_log_group_name_variable, create_elasticsearch_log_group_name_variable, create_api_task_definition_family_variable, \
     create_queue_worker_task_definition_family_variable, create_scheduler_task_definition_family_variable, \
-    create_api_user_name_variable, create_ci_user_name_variable, create_api_name_variable, create_elasticsearch_domain_name_variable, create_elasticsearch_log_access_policy_lambda_name_variable
+    create_api_user_name_variable, create_ci_user_name_variable, create_api_name_variable, create_elasticsearch_domain_name_variable, create_elasticsearch_log_access_policy_lambda_name_variable, create_fortinet_waf_log_group_name_variable, create_fortinet_metric_name_variable, create_aws_metric_name_variable, create_aws_waf_log_group_name_variable
 
 from resources import create_load_balancer_security_group_resource, create_api_security_group_resource, \
     create_database_security_group_resource, create_redis_security_group_resource, create_database_subnet_group_resource, \
@@ -30,7 +31,11 @@ from resources import create_load_balancer_security_group_resource, create_api_s
     create_autoscaling_group_resource, create_api_user_resource, create_ci_user_resource, \
     create_elasticsearch_security_group_resource, create_elasticsearch_lambda_execution_role_resource, \
     create_elasticsearch_lambda_log_group_policy_function_resource, create_elasticsearch_log_group_policy_custom_resource, \
-    create_elasticsearch_service_linked_role_resource, create_elasticsearch_resource
+    create_elasticsearch_service_linked_role_resource, create_elasticsearch_resource, \
+    create_fortinet_web_acl_log_group_resource, create_fortinet_web_acl_resource, create_fortinet_web_acl_association_resource, \
+    create_aws_web_acl_log_group_resource, create_aws_web_acl_resource, create_aws_web_acl_association_resource
+
+from conditions import create_fortinet_managed_rules_all_rules_group_condition, create_aws_managed_rules_common_rules_group_condition
 
 from outputs import create_database_name_output, create_database_username_output, create_database_host_output, \
     create_database_port_output, create_redis_host_output, create_redis_port_output, create_default_queue_url_output, \
@@ -70,6 +75,10 @@ elasticsearch_instance_class_parameter = create_elasticsearch_instance_class_par
     template)
 elasticsearch_instance_count_parameter = create_elasticsearch_instance_count_parameter(
     template)
+fortinet_managed_rules_all_rules_group_parameter = create_fortinet_managed_rules_all_rules_group_parameter(
+    template)
+aws_managed_rules_common_rules_group_parameter = create_aws_managed_rules_common_rules_group_parameter(
+    template)
 
 # Variables.
 default_queue_name_variable = create_default_queue_name_variable(
@@ -104,6 +113,20 @@ elasticsearch_domain_name_variable = create_elasticsearch_domain_name_variable(
     environment_parameter)
 elasticsearch_log_access_policy_lambda_name_variable = create_elasticsearch_log_access_policy_lambda_name_variable(
     environment_parameter)
+fortinet_log_group_name_variable = create_fortinet_waf_log_group_name_variable(
+    environment_parameter)
+fortinet_metric_name_variable = create_fortinet_metric_name_variable(
+    environment_parameter)
+aws_waf_log_group_name_variable = create_aws_waf_log_group_name_variable(
+    environment_parameter)
+aws_metric_name_variable = create_aws_metric_name_variable(
+    environment_parameter)
+
+# Conditions
+fortinet_managed_rules_all_rules_group_condition = create_fortinet_managed_rules_all_rules_group_condition(
+    template, fortinet_managed_rules_all_rules_group_parameter)
+aws_managed_rules_common_rules_group_condition = create_aws_managed_rules_common_rules_group_condition(
+    template, aws_managed_rules_common_rules_group_parameter)
 
 # Resources.
 
@@ -173,6 +196,10 @@ elasticsearch_log_group_resource = create_elasticsearch_log_group_resource(
     template, elasticsearch_log_group_name_variable)
 elasticsearch_lambda_log_group_resource = create_elasticsearch_lambda_log_group_resource(
     template, elasticsearch_log_access_policy_lambda_name_variable)
+fortinet_web_acl_log_group_resource = create_fortinet_web_acl_log_group_resource(
+    template, fortinet_log_group_name_variable, fortinet_managed_rules_all_rules_group_condition)
+aws_web_acl_log_group_resource = create_aws_web_acl_log_group_resource(
+    template, aws_waf_log_group_name_variable, aws_managed_rules_common_rules_group_condition)
 
 # ECS Task Definitions
 api_task_definition_resource = create_api_task_definition_resource(template, api_task_definition_family_variable,
@@ -194,9 +221,8 @@ load_balancer_resource = create_load_balancer_resource(
     template, load_balancer_security_group_resource, subnets_parameter)
 api_target_group_resource = create_api_target_group_resource(
     template, vpc_parameter, load_balancer_resource)
-load_balancer_listener_resource = create_load_balancer_listener_resource(template, load_balancer_resource,
-                                                                         api_target_group_resource,
-                                                                         certificate_arn_parameter)
+load_balancer_listener_resource = create_load_balancer_listener_resource(
+    template, load_balancer_resource, api_target_group_resource, certificate_arn_parameter)
 
 # ECS Services
 ecs_service_role_resource = create_ecs_service_role_resource(template)
@@ -226,12 +252,24 @@ elasticsearch_lambda_log_group_policy_function_resource = create_elasticsearch_l
     template, elasticsearch_log_access_policy_lambda_name_variable, elasticsearch_lambda_log_group_resource, elasticsearch_lambda_execution_role_resource)
 elasticsearch_log_group_policy_custom_resource = create_elasticsearch_log_group_policy_custom_resource(
     template, elasticsearch_lambda_log_group_policy_function_resource, elasticsearch_log_group_name_variable, elasticsearch_log_group_resource)
-elasticsearch_service_linked_role_resource = create_elasticsearch_service_linked_role_resource(template)
+elasticsearch_service_linked_role_resource = create_elasticsearch_service_linked_role_resource(
+    template)
 elasticsearch_resource = create_elasticsearch_resource(template, elasticsearch_domain_name_variable,
                                                        elasticsearch_instance_count_parameter,
                                                        elasticsearch_instance_class_parameter,
                                                        elasticsearch_security_group_resource,
                                                        subnets_parameter)
+
+# Firewall
+fortinet_web_acl_resource = create_fortinet_web_acl_resource(
+    template, fortinet_metric_name_variable, fortinet_managed_rules_all_rules_group_condition)
+fortinet_web_acl_association_resource = create_fortinet_web_acl_association_resource(
+    template,  fortinet_managed_rules_all_rules_group_condition, load_balancer_resource, fortinet_web_acl_resource)
+aws_web_acl_resource = create_aws_web_acl_resource(
+    template, aws_metric_name_variable, aws_managed_rules_common_rules_group_condition)
+aws_web_acl_association_resource = create_aws_web_acl_association_resource(
+    template,  aws_managed_rules_common_rules_group_condition, load_balancer_resource, aws_web_acl_resource)
+
 
 # Outputs.
 create_database_name_output(template, database_username_parameter)
@@ -244,7 +282,8 @@ create_default_queue_url_output(template, default_queue_resource)
 create_default_queue_output(template, default_queue_name_variable)
 create_notifications_queue_output(template, notifications_queue_name_variable)
 create_load_balancer_domain_output(template, load_balancer_resource)
-create_elasticsearch_service_linked_role_id_output(template, elasticsearch_service_linked_role_resource)
+create_elasticsearch_service_linked_role_id_output(
+    template, elasticsearch_service_linked_role_resource)
 create_elasticsearch_host_output(template, elasticsearch_resource)
 create_docker_repository_uri_output(template, docker_repository_resource)
 create_docker_cluster_name_output(template, ecs_cluster_resource)

@@ -2,10 +2,11 @@
 
 namespace Tests\Unit\Generators;
 
+use Tests\TestCase;
+use App\Models\Model;
+use Illuminate\Database\Query\Builder;
 use App\Generators\UniqueSlugGenerator;
 use Illuminate\Database\DatabaseManager;
-use Illuminate\Database\Query\Builder;
-use Tests\TestCase;
 
 class UniqueSlugGeneratorTest extends TestCase
 {
@@ -21,6 +22,9 @@ class UniqueSlugGeneratorTest extends TestCase
             ->method('where')
             ->willReturn($builderMock);
         $builderMock->expects($this->once())
+            ->method('when')
+            ->willReturn($builderMock);
+        $builderMock->expects($this->once())
             ->method('exists')
             ->willReturn(false);
 
@@ -30,8 +34,13 @@ class UniqueSlugGeneratorTest extends TestCase
             ->with('table', ['test-table'])
             ->willReturn($builderMock);
 
+        $modelMock = $this->createMock(Model::class);
+        $modelMock->expects($this->once())
+            ->method('getTable')
+            ->willReturn('test-table');
+
         $generator = new UniqueSlugGenerator($dbMock);
-        $result = $generator->generate($string, 'test-table');
+        $result = $generator->generate($string, $modelMock);
 
         $this->assertEquals($expected, $result);
     }
@@ -48,6 +57,9 @@ class UniqueSlugGeneratorTest extends TestCase
             ->method('where')
             ->willReturn($builderMock);
         $builderMock->expects($this->exactly($usedCount + 1))
+            ->method('when')
+            ->willReturn($builderMock);
+        $builderMock->expects($this->exactly($usedCount + 1))
             ->method('exists')
             ->willReturnOnConsecutiveCalls(
                 ...array_map(function ($value) use ($usedCount) {
@@ -61,8 +73,13 @@ class UniqueSlugGeneratorTest extends TestCase
             ->with('table', ['test-table'])
             ->willReturn($builderMock);
 
+        $modelMock = $this->createMock(Model::class);
+        $modelMock->expects($this->exactly($usedCount + 1))
+            ->method('getTable')
+            ->willReturn('test-table');
+
         $generator = new UniqueSlugGenerator($dbMock);
-        $result = $generator->generate($string, 'test-table');
+        $result = $generator->generate($string, $modelMock);
 
         $this->assertEquals($expected, $result);
     }

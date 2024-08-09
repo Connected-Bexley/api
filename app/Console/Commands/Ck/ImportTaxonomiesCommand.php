@@ -58,7 +58,7 @@ class ImportTaxonomiesCommand extends Command
     /**
      * The taxonomy which will be used as the root.
      *
-     * @var \App\Models\Taxonomy
+     * @var Taxonomy
      */
     protected $rootTaxonomy;
 

@@ -14,7 +14,7 @@ class HasPermissionFilter implements Filter
 {
     public function __invoke(Builder $query, $value, string $property): Builder
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = request()->user('api');
 
         // If super admin then apply no filter.

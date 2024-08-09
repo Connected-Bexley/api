@@ -18,6 +18,7 @@ use Illuminate\Support\Str;
 class ServicePersistenceService implements DataPersistenceService
 {
     use ResizesImages;
+    use HasUniqueSlug;
 
     public function store(FormRequest $request)
     {
@@ -31,7 +32,14 @@ class ServicePersistenceService implements DataPersistenceService
         return $this->processAsUpdateRequest($request, $model);
     }
 
-    private function processAsUpdateRequest(FormRequest $request, $service = null)
+    /**
+     * Create an update request to update or create a Service using the data from the request.
+     *
+     * @param Illuminate\Foundation\Http\FormRequest $request
+     * @param Service $service
+     * @return UpdateRequestModel
+     */
+    private function processAsUpdateRequest(FormRequest $request, ?Service $service = null): UpdateRequestModel
     {
         return DB::transaction(function () use ($request, $service) {
             // Initialise the data array
@@ -63,6 +71,7 @@ class ServicePersistenceService implements DataPersistenceService
                 'referral_url' => $request->missingValue('referral_url'),
                 'useful_infos' => $request->has('useful_infos') ? [] : new MissingValue(),
                 'offerings' => $request->has('offerings') ? [] : new MissingValue(),
+                'social_medias' => $request->has('social_medias') ? [] : new MissingValue(),
                 'gallery_items' => $request->has('gallery_items') ? [] : new MissingValue(),
                 'tags' => $request->has('tags') ? [] : new MissingValue(),
                 'category_taxonomies' => $request->missingValue('category_taxonomies'),
@@ -82,10 +91,20 @@ class ServicePersistenceService implements DataPersistenceService
             }
 
             // Loop through each offering.
-            foreach ($request->input('offerings', []) as $offering) {
-                $data['offerings'][] = [
-                    'offering' => $offering['offering'],
-                    'order' => $offering['order'],
+            if (config('flags.offerings')) {
+                foreach ($request->input('offerings', []) as $offering) {
+                    $data['offerings'][] = [
+                        'offering' => $offering['offering'],
+                        'order' => $offering['order'],
+                    ];
+                }
+            }
+
+            // Loop through each social media.
+            foreach ($request->input('social_medias', []) as $socialMedia) {
+                $data['social_medias'][] = [
+                    'type' => $socialMedia['type'],
+                    'url' => $socialMedia['url'],
                 ];
             }
 
@@ -97,11 +116,13 @@ class ServicePersistenceService implements DataPersistenceService
             }
 
             // Loop through each tag.
-            foreach ($request->input('tags', []) as $tag) {
-                $data['tags'][] = [
-                    'slug' => Str::slug($tag['slug']),
-                    'label' => $tag['label'],
-                ];
+            if (config('flags.service_tags')) {
+                foreach ($request->input('tags', []) as $tag) {
+                    $data['tags'][] = [
+                        'slug' => Str::slug($tag['slug']),
+                        'label' => $tag['label'],
+                    ];
+                }
             }
 
             $updateableType = UpdateRequestModel::EXISTING_TYPE_SERVICE;
@@ -130,12 +151,18 @@ class ServicePersistenceService implements DataPersistenceService
         });
     }
 
-    private function processAsNewEntity(FormRequest $request)
+    /**
+     * Create a new service using the data from the request.
+     *
+     * @param Illuminate\Foundation\Http\FormRequest $request
+     * @return App\Models\Service
+     */
+    private function processAsNewEntity(FormRequest $request): Service
     {
         return DB::transaction(function () use ($request) {
             $initialCreateData = [
                 'organisation_id' => $request->organisation_id,
-                'slug' => $this->uniqueSlug($request->slug),
+                'slug' => $this->uniqueSlug($request->input('slug', $request->input('title')), (new Service())),
                 'name' => $request->name,
                 'type' => $request->type,
                 'status' => $request->status,
@@ -171,7 +198,7 @@ class ServicePersistenceService implements DataPersistenceService
             }
 
             // Create the service record.
-            /** @var \App\Models\Service $service */
+            /** @var Service $service */
             $service = Service::create($initialCreateData);
 
             if ($request->filled('gallery_items')) {
@@ -194,10 +221,20 @@ class ServicePersistenceService implements DataPersistenceService
             }
 
             // Create the offering records.
-            foreach ($request->offerings as $offering) {
-                $service->offerings()->create([
-                    'offering' => $offering['offering'],
-                    'order' => $offering['order'],
+            if (config('flags.offerings')) {
+                foreach ($request->offerings as $offering) {
+                    $service->offerings()->create([
+                        'offering' => $offering['offering'],
+                        'order' => $offering['order'],
+                    ]);
+                }
+            }
+
+            // Create the social media records.
+            foreach ($request->social_medias as $socialMedia) {
+                $service->socialMedias()->create([
+                    'type' => $socialMedia['type'],
+                    'url' => $socialMedia['url'],
                 ]);
             }
 
@@ -235,23 +272,5 @@ class ServicePersistenceService implements DataPersistenceService
 
             return $service;
         });
-    }
-
-    /**
-     * Return a unique version of the proposed slug.
-     */
-    public function uniqueSlug(string $slug): string
-    {
-        $uniqueSlug = $baseSlug = preg_replace('|\-\d$|', '', $slug);
-        $suffix = 1;
-        do {
-            $exists = DB::table((new Service())->getTable())->where('slug', $uniqueSlug)->exists();
-            if ($exists) {
-                $uniqueSlug = $baseSlug . '-' . $suffix;
-            }
-            $suffix++;
-        } while ($exists);
-
-        return $uniqueSlug;
     }
 }

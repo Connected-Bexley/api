@@ -60,7 +60,14 @@ class UpdateRequest extends Model
 
     public function isNew(): bool
     {
-        return $this->updateable_id === null;
+        return in_array($this->updateable_type, [
+            static::NEW_TYPE_ORGANISATION_EVENT,
+            static::NEW_TYPE_ORGANISATION_GLOBAL_ADMIN,
+            static::NEW_TYPE_ORGANISATION_SIGN_UP_FORM,
+            static::NEW_TYPE_PAGE,
+            static::NEW_TYPE_SERVICE_GLOBAL_ADMIN,
+            static::NEW_TYPE_SERVICE_ORG_ADMIN,
+        ]);
     }
 
     public function isExisting(): bool

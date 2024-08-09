@@ -21,7 +21,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 class BatchUploader
 {
     /**
-     * @var \PhpOffice\PhpSpreadsheet\Reader\Xlsx
+     * @var XlsxReader
      */
     protected $reader;
 
@@ -38,7 +38,7 @@ class BatchUploader
      * Validates and then uploads the file.
      *
      * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
-     * @throws \Exception
+     * @throws Exception
      */
     public function upload(string $filePath)
     {

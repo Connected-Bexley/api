@@ -18,12 +18,12 @@ class EndpointHit
     use SerializesModels;
 
     /**
-     * @var \App\Models\User|null
+     * @var User|null
      */
     protected $user;
 
     /**
-     * @var \Laravel\Passport\Client|null
+     * @var Client|null
      */
     protected $oauthClient;
 
@@ -48,7 +48,7 @@ class EndpointHit
     protected $userAgent;
 
     /**
-     * @var \Carbon\CarbonImmutable
+     * @var CarbonImmutable
      */
     protected $createdAt;
 

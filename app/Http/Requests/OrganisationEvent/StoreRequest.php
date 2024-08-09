@@ -14,6 +14,7 @@ use App\Rules\FileIsPendingAssignment;
 use App\Rules\MarkdownMaxLength;
 use App\Rules\MarkdownMinLength;
 use App\Rules\RootTaxonomyIs;
+use App\Rules\Slug;
 use App\Rules\UkPhoneNumber;
 use App\Rules\UserHasRole;
 use Illuminate\Foundation\Http\FormRequest;
@@ -51,8 +52,9 @@ class StoreRequest extends FormRequest
                 },
             ],
             'title' => ['required', 'string', 'min:1', 'max:255'],
-            'start_date' => ['required', 'date_format:Y-m-d', 'after:today', new DateSanity($this)],
-            'end_date' => ['required', 'date_format:Y-m-d', new DateSanity($this)],
+            'slug' => ['string', 'min:1', 'max:255', new Slug()],
+            'start_date' => ['required', 'date_format:Y-m-d', new DateSanity($this)],
+            'end_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:today', new DateSanity($this)],
             'start_time' => ['required', 'date_format:H:i:s', new DateSanity($this)],
             'end_time' => ['required', 'date_format:H:i:s', new DateSanity($this)],
             'intro' => ['required', 'string', 'min:1', 'max:300'],
@@ -60,7 +62,7 @@ class StoreRequest extends FormRequest
                 'required',
                 'string',
                 new MarkdownMinLength(1),
-                new MarkdownMaxLength(3000, 'Description tab - The long description must be 3000 characters or fewer.'),
+                new MarkdownMaxLength(config('local.event_description_max_chars'), 'Description tab - The long description must be ' . config('local.event_description_max_chars') . ' characters or fewer.'),
             ],
             'is_free' => ['required', 'boolean'],
             'fees_text' => [
@@ -160,7 +162,7 @@ class StoreRequest extends FormRequest
             'image_file_id' => [
                 'nullable',
                 'exists:files,id',
-                new FileIsMimeType(File::MIME_TYPE_PNG, File::MIME_TYPE_JPG, File::MIME_TYPE_SVG),
+                new FileIsMimeType(File::MIME_TYPE_PNG, File::MIME_TYPE_JPG, File::MIME_TYPE_JPEG, File::MIME_TYPE_SVG),
                 new FileIsPendingAssignment(),
             ],
             'category_taxonomies' => [

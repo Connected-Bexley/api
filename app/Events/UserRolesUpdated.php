@@ -13,17 +13,17 @@ class UserRolesUpdated
     use SerializesModels;
 
     /**
-     * @var \App\Models\User
+     * @var User
      */
     public $user;
 
     /**
-     * @var \Illuminate\Database\Eloquent\Collection
+     * @var Collection
      */
     public $oldRoles;
 
     /**
-     * @var \Illuminate\Database\Eloquent\Collection
+     * @var Collection
      */
     public $newRoles;
 

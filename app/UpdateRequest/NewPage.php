@@ -3,28 +3,18 @@
 namespace App\UpdateRequest;
 
 use App\Contracts\AppliesUpdateRequests;
-use App\Generators\UniqueSlugGenerator;
 use App\Http\Requests\Page\StoreRequest;
 use App\Models\File;
 use App\Models\Page;
 use App\Models\UpdateRequest;
 use App\Rules\FileIsMimeType;
+use App\Services\DataPersistence\HasUniqueSlug;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Support\Facades\Validator as ValidatorFacade;
 
 class NewPage implements AppliesUpdateRequests
 {
-    /**
-     * Unique Slug Generator.
-     *
-     * @var \App\Generators\UniqueSlugGenerator
-     */
-    protected $slugGenerator;
-
-    public function __construct(UniqueSlugGenerator $slugGenerator)
-    {
-        $this->slugGenerator = $slugGenerator;
-    }
+    use HasUniqueSlug;
 
     /**
      * Check if the update request is valid.
@@ -58,7 +48,7 @@ class NewPage implements AppliesUpdateRequests
 
         $page = Page::make([
             'title' => $data->get('title'),
-            'slug' => $this->slugGenerator->generate($data->get('slug', $data->get('title')), table(Page::class)),
+            'slug' => $this->uniqueSlug($data->get('slug', $data->get('title')), (new Page())),
             'excerpt' => $data->get('excerpt'),
             'page_type' => $data->get('page_type', Page::PAGE_TYPE_INFORMATION),
             'content' => $data->get('content', []),
@@ -91,6 +81,8 @@ class NewPage implements AppliesUpdateRequests
         if ($data->has('collections')) {
             $page->updateCollections($data['collections']);
         }
+
+        $updateRequest->updateable_id = $page->id;
 
         return $updateRequest;
     }

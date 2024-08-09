@@ -2,21 +2,21 @@
 
 namespace Tests\Feature;
 
-use App\Events\EndpointHit;
-use App\Models\Audit;
-use App\Models\Collection;
-use App\Models\CollectionTaxonomy;
+use Tests\TestCase;
 use App\Models\File;
-use App\Models\Organisation;
+use App\Models\User;
+use App\Models\Audit;
 use App\Models\Service;
 use App\Models\Taxonomy;
-use App\Models\User;
+use App\Models\Collection;
+use App\Events\EndpointHit;
 use Carbon\CarbonImmutable;
+use App\Models\Organisation;
 use Illuminate\Http\Response;
+use Laravel\Passport\Passport;
+use App\Models\CollectionTaxonomy;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
-use Laravel\Passport\Passport;
-use Tests\TestCase;
 
 class CollectionPersonasTest extends TestCase
 {
@@ -47,6 +47,7 @@ class CollectionPersonasTest extends TestCase
                     'content',
                 ],
             ],
+            'image',
             'category_taxonomies' => [
                 '*' => [
                     'id',
@@ -91,6 +92,7 @@ class CollectionPersonasTest extends TestCase
                             'content',
                         ],
                     ],
+                    'image',
                     'category_taxonomies' => [
                         '*' => [
                             'id',
@@ -768,6 +770,54 @@ class CollectionPersonasTest extends TestCase
                 ($event->getUser()->id === $user->id) &&
                 ($event->getModel()->id === $this->getResponseContent($response)['data']['id']);
         });
+    }
+
+    /**
+     * @test
+     */
+    public function createCollectionWithUniqueSlugAsSuperAdmin201(): void
+    {
+        $user = User::factory()->create();
+        $user->makeSuperAdmin();
+        Passport::actingAs($user);
+
+        $response = $this->json('POST', '/core/v1/collections/personas', [
+            'name' => 'Test Persona',
+            'intro' => 'Lorem ipsum',
+            'subtitle' => 'Subtitle here',
+            'order' => 1,
+            'enabled' => true,
+            'homepage' => false,
+            'sideboxes' => [],
+            'category_taxonomies' => [Taxonomy::category()->children()->inRandomOrder()->firstOrFail()->id],
+        ]);
+
+        $response->assertStatus(Response::HTTP_CREATED);
+
+        $this->assertDatabaseHas('collections', [
+            'id' => $response->json('data.id'),
+            'type' => Collection::TYPE_PERSONA,
+            'slug' => 'test-persona',
+        ]);
+
+        $response = $this->json('POST', '/core/v1/collections/personas', [
+            'name' => 'Test Persona',
+            'intro' => 'Lorem ipsum',
+            'subtitle' => 'Subtitle here',
+            'order' => 2,
+            'enabled' => true,
+            'homepage' => false,
+            'sideboxes' => [],
+            'category_taxonomies' => [Taxonomy::category()->children()->inRandomOrder()->firstOrFail()->id],
+        ]);
+
+        $response->assertStatus(Response::HTTP_CREATED);
+
+        $this->assertDatabaseHas('collections', [
+            'id' => $response->json('data.id'),
+            'type' => Collection::TYPE_PERSONA,
+            'slug' => 'test-persona-1',
+        ]);
     }
 
     /*
@@ -1547,6 +1597,41 @@ class CollectionPersonasTest extends TestCase
         });
     }
 
+    /**
+     * @test
+     */
+    public function updateCollectionWithUniqueSlugAsSuperAdmin200(): void
+    {
+        $user = User::factory()->create();
+        $user->makeSuperAdmin();
+        $persona1 = Collection::factory()->typePersona()->create([
+            'name' => 'Test Persona',
+            'slug' => 'test-persona',
+        ]);
+        $persona2 = Collection::factory()->typePersona()->create([
+            'name' => 'Other Persona',
+            'slug' => 'other-persona',
+        ]);
+
+        Passport::actingAs($user);
+
+        $this->json('PUT', "/core/v1/collections/personas/{$persona2->id}", [
+            'name' => 'Test Persona',
+            'intro' => $persona2->meta['intro'],
+            'order' => $persona2->order,
+            'subtitle' => 'Subtitle here',
+            'enabled' => true,
+            'homepage' => false,
+            'sideboxes' => [],
+            'category_taxonomies' => [],
+        ]);
+
+        $this->assertDatabaseHas('collections', [
+            'id' => $persona2->id,
+            'slug' => 'test-persona-1',
+        ]);
+    }
+
     /*
      * Delete a specific persona collection.
      */
@@ -1936,8 +2021,12 @@ class CollectionPersonasTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
-            'file' => 'data:image/png;base64,'.base64_encode($image),
+            'alt_text' => 'image description',
+            'file' => 'data:image/png;base64,' . base64_encode($image),
         ]);
+        $imageResponse->assertStatus(Response::HTTP_CREATED);
+
+        $file = File::find($this->getResponseContent($imageResponse, 'data.id'));
 
         $response = $this->json('POST', '/core/v1/collections/personas', [
             'name' => 'Test Persona',
@@ -1948,10 +2037,19 @@ class CollectionPersonasTest extends TestCase
             'homepage' => false,
             'sideboxes' => [],
             'category_taxonomies' => [$randomCategory->id],
-            'image_file_id' => $this->getResponseContent($imageResponse, 'data.id'),
+            'image_file_id' => $file->id,
         ]);
 
         $response->assertStatus(Response::HTTP_CREATED);
+
+        $response->assertJsonFragment([
+            'image' => [
+                'id' => $file->id,
+                'mime_type' => 'image/png',
+                'alt_text' => 'image description',
+                'url' => $file->url(),
+            ],
+        ]);
         $collectionArray = $this->getResponseContent($response)['data'];
         $content = $this->get("/core/v1/collections/personas/{$collectionArray['id']}/image.png")->content();
         $this->assertEquals($image, $content);

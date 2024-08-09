@@ -2,18 +2,18 @@
 
 namespace Tests\Feature;
 
-use App\Events\EndpointHit;
-use App\Models\Audit;
-use App\Models\Organisation;
-use App\Models\Service;
-use App\Models\ServiceEligibility;
-use App\Models\Taxonomy;
-use App\Models\User;
-use Carbon\CarbonImmutable;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Event;
-use Laravel\Passport\Passport;
 use Tests\TestCase;
+use App\Models\User;
+use App\Models\Audit;
+use App\Models\Service;
+use App\Models\Taxonomy;
+use App\Events\EndpointHit;
+use Carbon\CarbonImmutable;
+use App\Models\Organisation;
+use Illuminate\Http\Response;
+use Laravel\Passport\Passport;
+use App\Models\ServiceEligibility;
+use Illuminate\Support\Facades\Event;
 
 class TaxonomyServiceEligibilityTest extends TestCase
 {
@@ -323,6 +323,41 @@ class TaxonomyServiceEligibilityTest extends TestCase
         $response = $this->json('POST', '/core/v1/taxonomies/service-eligibilities', $payload);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    /**
+     * @test
+     */
+    public function createTaxonomyServiceEligibilityWithUniqueSlugAsSuperAdmin201(): void
+    {
+        $user = User::factory()->create()->makeSuperAdmin();
+        $siblingCount = Taxonomy::serviceEligibility()->children()->count();
+        $payload = [
+            'parent_id' => null,
+            'name' => 'Taxonomy Slug Test',
+            'order' => $siblingCount + 1,
+        ];
+
+        Passport::actingAs($user);
+        $response = $this->json('POST', '/core/v1/taxonomies/service-eligibilities', $payload);
+
+        $response->assertStatus(Response::HTTP_CREATED);
+        $this->assertDatabaseHas('taxonomies', [
+            'id' => $response->json('data.id'),
+            'name' => 'Taxonomy Slug Test',
+            'slug' => 'taxonomy-slug-test',
+        ]);
+
+        $payload['order']++;
+
+        $response = $this->json('POST', '/core/v1/taxonomies/service-eligibilities', $payload);
+
+        $response->assertStatus(Response::HTTP_CREATED);
+        $this->assertDatabaseHas('taxonomies', [
+            'id' => $response->json('data.id'),
+            'name' => 'Taxonomy Slug Test',
+            'slug' => 'taxonomy-slug-test-1',
+        ]);
     }
 
     /**
@@ -985,6 +1020,47 @@ class TaxonomyServiceEligibilityTest extends TestCase
         ]);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    /**
+     * @test
+     */
+    public function updateTaxonomyServiceEligibilityWithUniqueSlugAsSuperAdmin200(): void
+    {
+        $user = User::factory()->create()->makeSuperAdmin();
+        $category1 = Taxonomy::factory()->create([
+            'parent_id' => $this->testserviceEligibilityType->id,
+            'name' => 'Taxonomy Slug Test',
+            'slug' => 'taxonomy-slug-test',
+            'order' => 1,
+        ]);
+        $category2 = Taxonomy::factory()->create([
+            'parent_id' => $this->testserviceEligibilityType->id,
+            'name' => 'Other Taxonomy',
+            'slug' => 'other-taxonomy',
+            'order' => 2,
+        ]);
+        $payload = [
+            'parent_id' => $this->testserviceEligibilityType->id,
+            'name' => 'Taxonomy Slug Test',
+            'order' => 2,
+        ];
+
+        $this->assertDatabaseHas('taxonomies', [
+            'id' => $category1->id,
+            'name' => 'Taxonomy Slug Test',
+            'slug' => 'taxonomy-slug-test',
+        ]);
+
+        Passport::actingAs($user);
+        $response = $this->json('PUT', "/core/v1/taxonomies/service-eligibilities/{$category2->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+        $this->assertDatabaseHas('taxonomies', [
+            'id' => $category2->id,
+            'name' => 'Taxonomy Slug Test',
+            'slug' => 'taxonomy-slug-test-1',
+        ]);
     }
 
     /**

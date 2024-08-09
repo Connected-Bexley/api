@@ -11,7 +11,7 @@ trait ResizesImages
      */
     public function resizeImageFile(string $imageFileId)
     {
-        /** @var \App\Models\File $file */
+        /** @var File $file */
         $file = File::findOrFail($imageFileId)->assigned();
 
         // Create resized version for common dimensions.

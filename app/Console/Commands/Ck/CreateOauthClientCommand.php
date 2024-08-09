@@ -27,7 +27,7 @@ class CreateOauthClientCommand extends Command
     protected $description = 'Create an OAuth 2.0 client';
 
     /**
-     * @var \Laravel\Passport\ClientRepository
+     * @var ClientRepository
      */
     protected $clients;
 

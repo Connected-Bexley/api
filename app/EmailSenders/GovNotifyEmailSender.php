@@ -24,7 +24,7 @@ class GovNotifyEmailSender implements EmailSender
 
     public function send(Email $email)
     {
-        /** @var \Alphagov\Notifications\Client $client */
+        /** @var Client $client */
         $client = resolve(Client::class);
 
         $response = $client->sendEmail(

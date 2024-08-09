@@ -39,6 +39,8 @@ class OpenApi extends BaseOpenApi implements Responsable
                 Paths\Collections\OrganisationEvents\CollectionOrganisationEventsNestedPath::create(),
                 Paths\Collections\OrganisationEvents\CollectionOrganisationEventsImagePath::create(),
                 Paths\Files\FilesRootPath::create(),
+                Paths\Files\FilesNestedPath::create(),
+                Paths\Files\ImagesNestedPath::create(),
                 Paths\Locations\LocationsRootPath::create(),
                 Paths\Locations\LocationsIndexPath::create(),
                 Paths\Locations\LocationsNestedPath::create(),
@@ -114,6 +116,7 @@ class OpenApi extends BaseOpenApi implements Responsable
                 Paths\UpdateRequests\UpdateRequestsIndexPath::create(),
                 Paths\UpdateRequests\UpdateRequestsNestedPath::create(),
                 Paths\UpdateRequests\UpdateRequestsApprovePath::create(),
+                Paths\UpdateRequests\UpdateRequestsRejectPath::create(),
                 Paths\Users\UsersRootPath::create(),
                 Paths\Users\UsersIndexPath::create(),
                 Paths\Users\UsersNestedPath::create(),
@@ -147,8 +150,7 @@ class OpenApi extends BaseOpenApi implements Responsable
                 Tags\TaxonomyOrganisationsTag::create(),
                 Tags\UpdateRequestsTag::create(),
                 Tags\UsersTag::create()
-            )
-            ->externalDocs(ExternalDocs::create());
+            );
     }
 
     /**

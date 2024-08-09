@@ -5,12 +5,14 @@ namespace App\Models;
 use App\Contracts\AppliesUpdateRequests;
 use App\Emails\Email;
 use App\Http\Requests\Service\UpdateRequest as UpdateServiceRequest;
+use App\Http\Resources\OrganisationResource;
 use App\Models\Mutators\ServiceMutators;
 use App\Models\Relationships\ServiceRelationships;
 use App\Models\Scopes\ServiceScopes;
 use App\Notifications\Notifiable;
 use App\Notifications\Notifications;
 use App\Rules\FileIsMimeType;
+use App\Services\DataPersistence\HasUniqueSlug;
 use App\Sms\Sms;
 use App\TaxonomyRelationships\HasTaxonomyRelationships;
 use App\TaxonomyRelationships\UpdateServiceEligibilityTaxonomyRelationships;
@@ -32,6 +34,7 @@ use Illuminate\Support\Str;
 class Service extends Model implements AppliesUpdateRequests, Notifiable, HasTaxonomyRelationships
 {
     use HasFactory;
+    use HasUniqueSlug;
     use DispatchesJobs;
     use Notifications;
     use Searchable;
@@ -111,14 +114,14 @@ class Service extends Model implements AppliesUpdateRequests, Notifiable, HasTax
 
         return [
             'id' => $this->id,
-            'name' => $this->onlyAlphaNumeric($this->name),
-            'intro' => $this->onlyAlphaNumeric($this->intro),
-            'description' => $this->onlyAlphaNumeric($this->description),
+            'name' => $this->makeSearchable($this->name),
+            'intro' => $this->makeSearchable($this->intro),
+            'description' => $this->makeSearchable($this->description),
             'wait_time' => $this->wait_time,
             'is_free' => $this->is_free,
             'status' => $this->status,
             'score' => $this->score,
-            'organisation_name' => $this->onlyAlphaNumeric($this->organisation->name),
+            'organisation_name' => $this->makeSearchable($this->organisation->name),
             'taxonomy_categories' => $this->taxonomies()->pluck('name')->toArray(),
             'collection_categories' => static::collections($this)->where('type', Collection::TYPE_CATEGORY)->pluck('name')->toArray(),
             'collection_personas' => static::collections($this)->where('type', Collection::TYPE_PERSONA)->pluck('name')->toArray(),
@@ -183,7 +186,7 @@ class Service extends Model implements AppliesUpdateRequests, Notifiable, HasTax
 
         // Update the Logo File entity if new
         if (Arr::get($data, 'logo_file_id', $this->logo_file_id) !== $this->logo_file_id && !empty($data['logo_file_id'])) {
-            /** @var \App\Models\File $file */
+            /** @var File $file */
             $file = File::findOrFail($data['logo_file_id'])->assigned();
 
             // Create resized version for common dimensions.
@@ -195,7 +198,7 @@ class Service extends Model implements AppliesUpdateRequests, Notifiable, HasTax
         // Update the service record.
         $this->update([
             'organisation_id' => Arr::get($data, 'organisation_id', $this->organisation_id),
-            'slug' => Arr::get($data, 'slug', $this->slug),
+            'slug' => $this->uniqueSlug(Arr::get($data, 'slug', $this->slug), $this),
             'name' => Arr::get($data, 'name', $this->name),
             'type' => Arr::get($data, 'type', $this->type),
             'status' => Arr::get($data, 'status', $this->status),
@@ -281,11 +284,22 @@ class Service extends Model implements AppliesUpdateRequests, Notifiable, HasTax
             $this->tags()->sync($tagIds);
         }
 
+        // Update the social media records.
+        if (array_key_exists('social_medias', $updateRequest->data)) {
+            $this->socialMedias()->delete();
+            foreach ($data['social_medias'] as $socialMedia) {
+                $this->socialMedias()->create([
+                    'type' => $socialMedia['type'],
+                    'url' => $socialMedia['url'],
+                ]);
+            }
+        }
+
         // Update the gallery item records.
         if (array_key_exists('gallery_items', $data)) {
             $this->serviceGalleryItems()->delete();
             foreach ($data['gallery_items'] as $galleryItem) {
-                /** @var \App\Models\File $file */
+                /** @var File $file */
                 $file = File::findOrFail($galleryItem['file_id'])->assigned();
 
                 // Create resized version for common dimensions.
@@ -312,6 +326,9 @@ class Service extends Model implements AppliesUpdateRequests, Notifiable, HasTax
             }
         }
 
+        // Update the search index
+        $this->save();
+
         // Ensure conditional fields are reset if needed.
         $this->resetConditionalFields();
 
@@ -324,6 +341,10 @@ class Service extends Model implements AppliesUpdateRequests, Notifiable, HasTax
      */
     public function getData(array $data): array
     {
+        if (isset($data['organisation_id'])) {
+            $data['organisation'] = new OrganisationResource(Organisation::find($data['organisation_id']));
+        }
+
         return $data;
     }
 
@@ -387,7 +408,7 @@ class Service extends Model implements AppliesUpdateRequests, Notifiable, HasTax
 
     /**
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException|\InvalidArgumentException
-     * @return \App\Models\File|\Illuminate\Http\Response|\Illuminate\Contracts\Support\Responsable
+     * @return File|Response|\Illuminate\Contracts\Support\Responsable
      */
     public static function placeholderLogo(int $maxDimension = null)
     {

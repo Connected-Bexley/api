@@ -19,7 +19,6 @@ class PageListItemSchema extends Schema
                 Schema::string('slug'),
                 Schema::string('title'),
                 Schema::string('excerpt'),
-                Schema::string('content'),
                 Schema::integer('order'),
                 Schema::boolean('enabled'),
                 Schema::string('page_type')

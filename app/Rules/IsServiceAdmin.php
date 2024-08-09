@@ -9,7 +9,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 class IsServiceAdmin implements ValidationRule
 {
     /**
-     * @var \App\Models\User
+     * @var User
      */
     protected $user;
 

@@ -39,5 +39,6 @@ class OrganisationObserver
         $organisation->userRoles->each->delete();
         $organisation->updateRequests->each->delete();
         $organisation->services->each->delete();
+        $organisation->syncTaxonomyRelationships(collect([]));
     }
 }

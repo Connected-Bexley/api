@@ -17,7 +17,7 @@ class InformationPageCannotHaveCollection implements ValidationRule
     /**
      * Create a new rule instance.
      *
-     * @param \App\Models\Page $page
+     * @param Page $page
      * @param mixed $pageId
      * @param mixed $pageType
      */

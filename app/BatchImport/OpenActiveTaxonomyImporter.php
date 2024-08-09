@@ -81,7 +81,7 @@ class OpenActiveTaxonomyImporter
     /**
      * Import the formatted taxonomies into the database.
      *
-     * @param \App\Models\Taxonomy $rootTaxonomy
+     * @param Taxonomy $rootTaxonomy
      */
     public function importTaxonomies(Taxonomy $openActiveCategory, array $taxonomyImports)
     {
@@ -144,7 +144,7 @@ class OpenActiveTaxonomyImporter
         ];
 
         if (Schema::hasColumn('taxonomies', 'slug')) {
-            $modelData['slug'] = $this->slugGenerator->generate($taxonomyData['prefLabel'], 'taxonomies');
+            $modelData['slug'] = $this->slugGenerator->generate($taxonomyData['prefLabel'], (new Taxonomy()));
         }
 
         return $modelData;

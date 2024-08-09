@@ -23,6 +23,17 @@ class FileSchema extends Schema
                         File::MIME_TYPE_JPEG,
                         File::MIME_TYPE_SVG
                     ),
+                Schema::string('alt_text')
+                    ->nullable(),
+                Schema::string('max_dimension')
+                    ->format(Schema::FORMAT_INT32)
+                    ->nullable(),
+                Schema::string('src')
+                    ->format(static::FORMAT_BINARY)
+                    ->description('Base64 encoded string of the image'),
+                Schema::string('url')
+                    ->format(Schema::TYPE_STRING)
+                    ->description('The URL of the image file'),
                 Schema::string('created_at')
                     ->format(Schema::FORMAT_DATE_TIME)
                     ->nullable(),

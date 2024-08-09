@@ -25,6 +25,12 @@ class LocationResource extends JsonResource
             'country' => $this->country,
             'lat' => $this->lat,
             'lon' => $this->lon,
+            'image' => $this->imageFile ? [
+                'id' => $this->imageFile->id,
+                'url' => $this->imageFile->url(),
+                'mime_type' => $this->imageFile->mime_type,
+                'alt_text' => $this->imageFile->altText,
+            ] : null,
             'accessibility_info' => $this->accessibility_info,
             'has_wheelchair_access' => $this->has_wheelchair_access,
             'has_induction_loop' => $this->has_induction_loop,

@@ -16,6 +16,7 @@ use App\Rules\UserEmailNotInPendingSignupRequest;
 use App\Rules\UserEmailNotTaken;
 use App\Rules\VideoEmbed;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class StoreRequest extends FormRequest
@@ -76,17 +77,23 @@ class StoreRequest extends FormRequest
                 new Slug(),
             ],
             'organisation.name' => ['required_without:organisation.id', 'nullable', 'string', 'min:1', 'max:255'],
-            'organisation.description' => ['required_without:organisation.id', 'nullable', 'string', 'min:1', 'max:10000'],
-            'organisation.url' => ['required_without:organisation.id', 'nullable', 'url', 'max:255'],
-            'organisation.email' => [
+            'organisation.description' => [
+                'required_without:organisation.id',
                 'nullable',
-                'required_without_all:organisation.id,organisation.phone',
+                'string',
+                new MarkdownMinLength(1),
+                new MarkdownMaxLength(config('local.organisation_description_max_chars'), 'Description tab - The long description must be ' . config('local.organisation_description_max_chars') . ' characters or fewer.'),
+            ],
+            'organisation.url' => ['sometimes', 'nullable', 'url', 'max:255'],
+            'organisation.email' => [
+                'sometimes',
+                'nullable',
                 'email',
                 'max:255',
             ],
             'organisation.phone' => [
+                'sometimes',
                 'nullable',
-                'required_without_all:organisation.id,organisation.email',
                 'string',
                 'min:1',
                 'max:255',
@@ -120,7 +127,7 @@ class StoreRequest extends FormRequest
                 'required',
                 'string',
                 new MarkdownMinLength(1),
-                new MarkdownMaxLength(3000),
+                new MarkdownMaxLength(config('local.service_description_max_chars'), 'Description tab - The long description must be ' . config('local.service_description_max_chars') . ' characters or fewer.'),
             ],
             'service.wait_time' => ['sometimes', 'present', 'nullable', Rule::in([
                 Service::WAIT_TIME_ONE_WEEK,
@@ -134,7 +141,7 @@ class StoreRequest extends FormRequest
             'service.fees_url' => ['sometimes', 'present', 'nullable', 'url', 'max:255'],
             'service.testimonial' => ['sometimes', 'present', 'nullable', 'string', 'min:1', 'max:255'],
             'service.video_embed' => ['sometimes', 'present', 'nullable', 'url', 'max:255', new VideoEmbed()],
-            'service.url' => ['sometimes', 'required', 'url', 'max:255'],
+            'service.url' => ['sometimes', 'present', 'nullable', 'url', 'max:255'],
             'service.contact_name' => ['sometimes', 'present', 'nullable', 'string', 'min:1', 'max:255'],
             'service.contact_phone' => ['sometimes', 'present', 'nullable', 'string', 'min:1', 'max:255'],
             'service.contact_email' => ['sometimes', 'present', 'nullable', 'email', 'max:255'],
@@ -150,7 +157,7 @@ class StoreRequest extends FormRequest
                 'required_with:service.useful_infos.*',
                 'string',
                 new MarkdownMinLength(1),
-                new MarkdownMaxLength(10000),
+                new MarkdownMaxLength(config('local.useful_info_description_max_chars')),
             ],
             'service.useful_infos.*.order' => [
                 'required_with:service.useful_infos.*',
@@ -209,10 +216,7 @@ class StoreRequest extends FormRequest
             'organisation.slug.unique' => '3. Organisation - The organisation is already listed. Please contact us for help logging in ' . config('local.global_admin.email') . '.',
             'organisation.name.required' => '3. Organisation - Please enter the organisation name.',
             'organisation.description.required' => '3. Organisation - Please enter a one-line summary of the organisation.',
-            'organisation.url.required' => '3. Organisation - Please enter a valid web address in the correct format (starting with https:// or http://).',
             'organisation.url.url' => '3. Organisation - Please enter a valid web address in the correct format (starting with https:// or http://).',
-            'organisation.email.required_without' => '3. Organisation - Please enter a public email address and/or a public phone number.',
-            'organisation.phone.required_without' => '3. Organisation - Please enter a public phone number and/or public email address.',
             'organisation.email.email' => '3. Organisation - Please enter the email for your organisation (eg. name@example.com).',
 
             'service.slug.required' => "4. Service, Details tab - Please enter the name of your {$type}.",
@@ -220,9 +224,27 @@ class StoreRequest extends FormRequest
             'service.video_embed.url' => '4. Service, Additional info tab - Please enter a valid video link (eg. https://www.youtube.com/watch?v=JyHR_qQLsLM).',
             'service.intro.required' => "4. Service, Description tab - Please enter a brief description of the {$type}.",
             'service.description.required' => "4. Service, Description tab - Please enter all the information someone should know about your {$type}.",
-            'service.url.required' => "4. Service, Details tab - Please provide the web address for your {$type}.",
             'service.url.url' => '4. Service, Details tab - Please enter a valid web address in the correct format (starting with https:// or http://).',
             'service.contact_email.email' => "4. Service, Additional Info tab - Please enter an email address users can use to contact your {$type} (eg. name@example.com).",
         ];
+    }
+
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        $user = $this->user;
+        $user['phone'] = Str::remove(' ', $user['phone']);
+
+        $organisation = $this->organisation;
+        if ($organisation['phone'] ?? false) {
+            $organisation['phone'] = Str::remove(' ', $organisation['phone']);
+        }
+
+        $this->merge([
+            'user' => $user,
+            'organisation' => $organisation,
+        ]);
     }
 }

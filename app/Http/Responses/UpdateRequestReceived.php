@@ -10,7 +10,7 @@ use Illuminate\Http\Response;
 class UpdateRequestReceived implements Responsable
 {
     /**
-     * @var \App\Models\UpdateRequest
+     * @var UpdateRequest
      */
     protected $updateRequest;
 

@@ -61,7 +61,7 @@ class OrganisationsTest extends TestCase
      */
     public function guest_can_list_them(): void
     {
-        $organisation = Organisation::factory()->create();
+        $organisation = Organisation::factory()->withPngLogo()->create();
 
         $response = $this->json('GET', '/core/v1/organisations');
 
@@ -73,6 +73,12 @@ class OrganisationsTest extends TestCase
                 'slug' => $organisation->slug,
                 'name' => $organisation->name,
                 'description' => $organisation->description,
+                'image' => [
+                    'id' => $organisation->logoFile->id,
+                    'mime_type' => $organisation->logoFile->mime_type,
+                    'alt_text' => $organisation->logoFile->altText,
+                    'url' => $organisation->logoFile->url(),
+                ],
                 'url' => $organisation->url,
                 'email' => $organisation->email,
                 'phone' => $organisation->phone,
@@ -254,6 +260,146 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
+    public function createOrganisationWithUniqueSlugAsGlobalAdmin200(): void
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeGlobalAdmin();
+        $payload = [
+            'slug' => 'test-org',
+            'name' => 'Test Org',
+            'description' => 'Test description',
+            'url' => 'http://test-org.example.com',
+            'email' => 'info@test-org.example.com',
+            'phone' => '07700000000',
+            'social_medias' => [
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital',
+                ],
+            ],
+            'category_taxonomies' => [],
+        ];
+
+        Passport::actingAs($user);
+
+        $response = $this->json('POST', '/core/v1/organisations', $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $updateRequest1 = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals($payload, $updateRequest1->data);
+
+        $this->assertEquals(UpdateRequest::NEW_TYPE_ORGANISATION_GLOBAL_ADMIN, $updateRequest1->updateable_type);
+
+        $response = $this->json('POST', '/core/v1/organisations', $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $updateRequest2 = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals($payload, $updateRequest2->data);
+
+        $this->assertEquals(UpdateRequest::NEW_TYPE_ORGANISATION_GLOBAL_ADMIN, $updateRequest2->updateable_type);
+
+        $response = $this->json('POST', '/core/v1/organisations', $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $updateRequest3 = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals($payload, $updateRequest3->data);
+
+        $this->assertEquals(UpdateRequest::NEW_TYPE_ORGANISATION_GLOBAL_ADMIN, $updateRequest3->updateable_type);
+
+        $this->assertDatabaseMissing('organisations', [
+            'slug' => 'test-org',
+        ]);
+
+        $updateRequest1 = $this->approveUpdateRequest($updateRequest1->id);
+
+        $this->assertDatabaseHas('organisations', [
+            'id' => $updateRequest1['updateable_id'],
+            'slug' => 'test-org',
+        ]);
+
+        $updateRequest2 = $this->approveUpdateRequest($updateRequest2->id);
+
+        $this->assertDatabaseHas('organisations', [
+            'id' => $updateRequest2['updateable_id'],
+            'slug' => 'test-org-1',
+        ]);
+
+        $updateRequest3 = $this->approveUpdateRequest($updateRequest3->id);
+
+        $this->assertDatabaseHas('organisations', [
+            'id' => $updateRequest3['updateable_id'],
+            'slug' => 'test-org-2',
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function createOrganisationWithUniqueSlugAsSuperAdmin200(): void
+    {
+        /**
+         * @var \App\Models\User $user
+         */
+        $user = User::factory()->create();
+        $user->makeSuperAdmin();
+        $payload = [
+            'slug' => 'test-org',
+            'name' => 'Test Org',
+            'description' => 'Test description',
+            'url' => 'http://test-org.example.com',
+            'email' => 'info@test-org.example.com',
+            'phone' => '07700000000',
+            'social_medias' => [
+                [
+                    'type' => SocialMedia::TYPE_INSTAGRAM,
+                    'url' => 'https://www.instagram.com/ayupdigital',
+                ],
+            ],
+            'category_taxonomies' => [],
+        ];
+
+        Passport::actingAs($user);
+
+        $response = $this->json('POST', '/core/v1/organisations', $payload);
+
+        $response->assertStatus(Response::HTTP_CREATED);
+
+        $this->assertDatabaseHas('organisations', [
+            'id' => $response->json('data.id'),
+            'slug' => 'test-org',
+        ]);
+
+        $response = $this->json('POST', '/core/v1/organisations', $payload);
+
+        $response->assertStatus(Response::HTTP_CREATED);
+
+        $this->assertDatabaseHas('organisations', [
+            'id' => $response->json('data.id'),
+            'slug' => 'test-org-1',
+        ]);
+
+        $response = $this->json('POST', '/core/v1/organisations', $payload);
+
+        $response->assertStatus(Response::HTTP_CREATED);
+
+        $this->assertDatabaseHas('organisations', [
+            'id' => $response->json('data.id'),
+            'slug' => 'test-org-2',
+        ]);
+    }
+
+    /**
+     * @test
+     */
     public function super_admin_can_create_one(): void
     {
         /**
@@ -429,8 +575,8 @@ class OrganisationsTest extends TestCase
         $image = File::factory()->imagePng()->pendingAssignment()->create();
 
         $payload = [
-            'slug' => 'test-org-1',
-            'name' => 'Test Org 1',
+            'slug' => 'test-org-one',
+            'name' => 'Test Org One',
             'description' => 'Test description',
             'url' => 'http://test-org-1.example.com',
             'email' => 'info@test-org-1.example.com',
@@ -451,7 +597,7 @@ class OrganisationsTest extends TestCase
 
         $this->approveUpdateRequest($updateRequest->id);
 
-        $organisation = Organisation::where('slug', 'test-org-1')->firstOrFail();
+        $organisation = Organisation::where('slug', 'test-org-one')->firstOrFail();
         $this->assertEquals($image->id, $organisation->logo_file_id);
 
         // Get the image for the organisation
@@ -463,8 +609,8 @@ class OrganisationsTest extends TestCase
         $image = File::factory()->imageJpg()->pendingAssignment()->create();
 
         $payload = [
-            'slug' => 'test-org-2',
-            'name' => 'Test Org 2',
+            'slug' => 'test-org-two',
+            'name' => 'Test Org Two',
             'description' => 'Test description',
             'url' => 'http://test-org-2.example.com',
             'email' => 'info@test-org-2.example.com',
@@ -485,7 +631,7 @@ class OrganisationsTest extends TestCase
 
         $this->approveUpdateRequest($updateRequest->id);
 
-        $organisation = Organisation::where('slug', 'test-org-2')->firstOrFail();
+        $organisation = Organisation::where('slug', 'test-org-two')->firstOrFail();
         $this->assertEquals($image->id, $organisation->logo_file_id);
 
         // Get the image for the organisation
@@ -593,7 +739,7 @@ class OrganisationsTest extends TestCase
      */
     public function guest_can_view_one(): void
     {
-        $organisation = Organisation::factory()->create();
+        $organisation = Organisation::factory()->withPngLogo()->create();
 
         $organisation->socialMedias()->create([
             'type' => SocialMedia::TYPE_INSTAGRAM,
@@ -610,6 +756,12 @@ class OrganisationsTest extends TestCase
                 'slug' => $organisation->slug,
                 'name' => $organisation->name,
                 'description' => $organisation->description,
+                'image' => [
+                    'id' => $organisation->logoFile->id,
+                    'mime_type' => $organisation->logoFile->mime_type,
+                    'alt_text' => $organisation->logoFile->altText,
+                    'url' => $organisation->logoFile->url(),
+                ],
                 'url' => $organisation->url,
                 'email' => $organisation->email,
                 'phone' => $organisation->phone,
@@ -643,6 +795,7 @@ class OrganisationsTest extends TestCase
                 'slug' => $organisation->slug,
                 'name' => $organisation->name,
                 'description' => $organisation->description,
+                'image' => null,
                 'url' => $organisation->url,
                 'email' => $organisation->email,
                 'phone' => $organisation->phone,
@@ -960,7 +1113,7 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
-    public function organisation_admin_can_update_with_single_form_of_contact(): void
+    public function organisation_admin_can_update_with_no_form_of_contact(): void
     {
         $organisation = Organisation::factory()->create();
         $user = User::factory()->create()->makeOrganisationAdmin($organisation);
@@ -968,8 +1121,8 @@ class OrganisationsTest extends TestCase
             'slug' => 'test-org',
             'name' => 'Test Org',
             'description' => 'Test description',
-            'url' => 'http://test-org.example.com',
-            'email' => 'info@test-org.example.com',
+            'url' => null,
+            'email' => null,
             'phone' => null,
         ];
 
@@ -989,31 +1142,6 @@ class OrganisationsTest extends TestCase
             ->where('updateable_id', $organisation->id)
             ->firstOrFail()->data;
         $this->assertEquals($data, $payload);
-    }
-
-    /**
-     * @test
-     */
-    public function organisation_admin_cannot_update_with_no_form_of_contact(): void
-    {
-        $organisation = Organisation::factory()->create([
-            'email' => 'info@test-org.example.com',
-            'phone' => null,
-        ]);
-        $user = User::factory()->create()->makeOrganisationAdmin($organisation);
-
-        Passport::actingAs($user);
-
-        $response = $this->json('PUT', "/core/v1/organisations/{$organisation->id}", [
-            'slug' => 'test-org',
-            'name' => 'Test Org',
-            'description' => 'Test description',
-            'url' => 'http://test-org.example.com',
-            'email' => null,
-            'phone' => null,
-        ]);
-
-        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     /**
@@ -1120,6 +1248,106 @@ class OrganisationsTest extends TestCase
         $this->assertDatabaseMissing(table(OrganisationTaxonomy::class), [
             'organisation_id' => $organisation->id,
             'taxonomy_id' => $taxonomy2->id,
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function updateOrganisationWithUniqueSlugAsOrganisationAdmin200(): void
+    {
+        $organisation1 = Organisation::factory()->create([
+            'slug' => 'test-org',
+        ]);
+        $organisation2 = Organisation::factory()->create([
+            'slug' => 'other-org',
+        ]);
+        $organisation3 = Organisation::factory()->create([
+            'slug' => 'yet-another-org',
+        ]);
+        $user = User::factory()->create()->makeOrganisationAdmin($organisation2);
+        $user->makeOrganisationAdmin($organisation3);
+        $payload = [
+            'slug' => 'test-org',
+        ];
+
+        Passport::actingAs($user);
+
+        $response = $this->json('PUT', "/core/v1/organisations/{$organisation2->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $updateRequest1 = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals('test-org', $updateRequest1->data['slug']);
+        $this->assertEquals(UpdateRequest::EXISTING_TYPE_ORGANISATION, $updateRequest1->updateable_type);
+
+        $response = $this->json('PUT', "/core/v1/organisations/{$organisation3->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $updateRequest2 = UpdateRequest::find($response->json('id'));
+
+        $this->assertEquals('test-org', $updateRequest2->data['slug']);
+        $this->assertEquals(UpdateRequest::EXISTING_TYPE_ORGANISATION, $updateRequest2->updateable_type);
+
+        $this->approveUpdateRequest($updateRequest1->id);
+
+        // The organisation is updated
+        $this->assertDatabaseHas('organisations', [
+            'id' => $organisation2->id,
+            'slug' => 'test-org-1',
+        ]);
+
+        $this->approveUpdateRequest($updateRequest2->id);
+
+        // The organisation is updated
+        $this->assertDatabaseHas('organisations', [
+            'id' => $organisation3->id,
+            'slug' => 'test-org-2',
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function updateOrganisationWithUniqueSlugAsSuperAdmin200(): void
+    {
+        $organisation1 = Organisation::factory()->create([
+            'slug' => 'test-org',
+        ]);
+        $organisation2 = Organisation::factory()->create([
+            'slug' => 'other-org',
+        ]);
+        $organisation3 = Organisation::factory()->create([
+            'slug' => 'yet-another-org',
+        ]);
+        $user = User::factory()->create()->makeSuperAdmin();
+
+        $payload = [
+            'slug' => 'test-org',
+        ];
+
+        Passport::actingAs($user);
+
+        $response = $this->json('PUT', "/core/v1/organisations/{$organisation2->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        // The organisation is updated
+        $this->assertDatabaseHas('organisations', [
+            'id' => $organisation2->id,
+            'slug' => 'test-org-1',
+        ]);
+
+        $response = $this->json('PUT', "/core/v1/organisations/{$organisation3->id}", $payload);
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        // The organisation is updated
+        $this->assertDatabaseHas('organisations', [
+            'id' => $organisation3->id,
+            'slug' => 'test-org-2',
         ]);
     }
 
@@ -1493,6 +1721,62 @@ class OrganisationsTest extends TestCase
     /**
      * @test
      */
+    public function deleteOrganisationWithUpdateRequestsAsSuperAdmin200(): void
+    {
+        $organisation = Organisation::factory()->create();
+
+        $user = User::factory()->create()->makeGlobalAdmin($organisation);
+
+        Passport::actingAs($user);
+
+        $payload = [
+            'slug' => 'test-org',
+            'name' => 'Test Org',
+            'description' => 'Test description',
+            'url' => null,
+            'email' => null,
+            'phone' => null,
+        ];
+
+        $response = $this->json('PUT', "/core/v1/organisations/{$organisation->id}", $payload);
+
+        $updateRequest = UpdateRequest::findOrFail($response->json('id'));
+        $this->assertEquals($updateRequest->data, $payload);
+
+        Passport::actingAs(User::factory()->create()->makeSuperAdmin());
+
+        $response = $this->json('DELETE', "/core/v1/organisations/{$organisation->id}");
+
+        $response->assertStatus(Response::HTTP_OK);
+        $this->assertDatabaseMissing((new Organisation())->getTable(), ['id' => $organisation->id]);
+        $this->assertDatabaseMissing('update_requests', ['id' => $updateRequest->id, 'deleted_at' => null]);
+    }
+
+    /**
+     * @test
+     */
+    public function deleteOrganisationWithTaxonomiesAsSuperAdmin200(): void
+    {
+        $organisation = Organisation::factory()->create();
+        $taxonomy = Taxonomy::factory()->create();
+        $organisation->syncTaxonomyRelationships(collect([$taxonomy]));
+        $user = User::factory()->create()->makeSuperAdmin();
+
+        Passport::actingAs($user);
+
+        $response = $this->json('DELETE', "/core/v1/organisations/{$organisation->id}");
+
+        $response->assertStatus(Response::HTTP_OK);
+        $this->assertDatabaseMissing((new Organisation())->getTable(), ['id' => $organisation->id]);
+        $this->assertDatabaseMissing((new OrganisationTaxonomy())->getTable(), [
+            'organisation_id' => $organisation->id,
+            'taxonomy_id' => $taxonomy->id,
+        ]);
+    }
+
+    /**
+     * @test
+     */
     public function audit_created_when_deleted(): void
     {
         $this->fakeEvents();
@@ -1566,8 +1850,10 @@ class OrganisationsTest extends TestCase
         $imageResponse = $this->json('POST', '/core/v1/files', [
             'is_private' => false,
             'mime_type' => 'image/png',
+            'alt_text' => 'image description',
             'file' => 'data:image/png;base64,' . base64_encode($image),
         ]);
+        $imageResponse->assertStatus(Response::HTTP_CREATED);
 
         $response = $this->json('POST', '/core/v1/organisations', [
             'slug' => 'test-org',

@@ -99,7 +99,7 @@ EOT;
     }
 
     /**
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\Response|\Illuminate\Http\JsonResponse
      */
     public function otp(Request $request)
@@ -138,7 +138,7 @@ EOT;
     /**
      * Redirect the user after determining they are locked out.
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     protected function sendOtpLockoutResponse(Request $request)
     {
@@ -154,7 +154,7 @@ EOT;
     /**
      * Get the failed login response instance.
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     protected function sendFailedOtpResponse(Request $request): Response
     {

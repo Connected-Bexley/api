@@ -85,8 +85,27 @@ Entry to filter by:
 EOT
                     )
                     ->schema(Schema::string()),
+                FilterParameter::create(null, 'type')
+                    ->description(
+                        <<<'EOT'
+Type to filter by:
+* Service update: `services`
+* New Service: `new_service_created_by_global_admin`
+* Location: `locations`
+* Service location: `service_locations`
+* Organisation update: `organisations`
+* New Organisation: `new_organisation_created_by_global_admin`
+* Organisation sign up form: `organisation_sign_up_form`
+* Event update: `organisation_events`
+* New Event: `new_organisation_event_created_by_org_admin`
+* Page update: `pages`
+* New Page: `new_page`
+* Referral: `referrals`
+EOT
+                    )
+                    ->schema(Schema::string()),
                 IncludeParameter::create(null, ['user']),
-                SortParameter::create(null, ['entry', 'created_at'], '-created_at')
+                SortParameter::create(null, ['entry','created_at'], '-created_at')
             )
             ->responses(
                 Response::ok()->content(

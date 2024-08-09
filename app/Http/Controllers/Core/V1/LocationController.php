@@ -97,7 +97,7 @@ class LocationController extends Controller
             ]);
 
             if ($request->filled('image_file_id')) {
-                /** @var \App\Models\File $file */
+                /** @var File $file */
                 $file = File::findOrFail($request->image_file_id)->assigned();
 
                 // Create resized version for common dimensions.
@@ -158,7 +158,7 @@ class LocationController extends Controller
             ]);
 
             if ($request->filled('image_file_id')) {
-                /** @var \App\Models\File $file */
+                /** @var File $file */
                 $file = File::findOrFail($request->image_file_id)->assigned();
 
                 // Create resized version for common dimensions.

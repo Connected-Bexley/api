@@ -26,6 +26,15 @@ class ServiceLocationSchema extends Schema
                     ->items(RegularOpeningHourSchema::create()),
                 Schema::array('holiday_opening_hours')
                     ->items(HolidayOpeningHourSchema::create()),
+                Schema::object('next_occurs')
+                    ->properties(
+                        Schema::string('date')
+                            ->format(Schema::FORMAT_DATE),
+                        Schema::string('start_time')
+                            ->format('time'),
+                        Schema::string('end_time')
+                            ->format('time')
+                    ),
                 Schema::string('created_at')
                     ->format(Schema::FORMAT_DATE_TIME)
                     ->nullable(),

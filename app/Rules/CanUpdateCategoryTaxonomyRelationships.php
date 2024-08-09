@@ -14,12 +14,12 @@ use Illuminate\Support\Arr;
 class CanUpdateCategoryTaxonomyRelationships implements ValidationRule
 {
     /**
-     * @var \App\Models\User
+     * @var User
      */
     protected $user;
 
     /**
-     * @var \App\TaxonomyRelationships\HasTaxonomyRelationships
+     * @var HasTaxonomyRelationships
      */
     protected $model;
 

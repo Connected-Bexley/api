@@ -9,12 +9,15 @@ use App\Models\OrganisationEvent;
 use App\Models\Taxonomy;
 use App\Models\UpdateRequest;
 use App\Rules\FileIsMimeType;
+use App\Services\DataPersistence\HasUniqueSlug;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator as ValidatorFacade;
 
 class NewOrganisationEventCreatedByOrgAdmin implements AppliesUpdateRequests
 {
+    use HasUniqueSlug;
+
     /**
      * Check if the update request is valid.
      */
@@ -46,6 +49,7 @@ class NewOrganisationEventCreatedByOrgAdmin implements AppliesUpdateRequests
 
         $organisationEvent = OrganisationEvent::create([
             'title' => $data->get('title'),
+            'slug' => $this->uniqueSlug($data->get('slug', $data->get('title')), (new OrganisationEvent())),
             'start_date' => $data->get('start_date'),
             'end_date' => $data->get('end_date'),
             'start_time' => $data->get('start_time'),
@@ -73,7 +77,7 @@ class NewOrganisationEventCreatedByOrgAdmin implements AppliesUpdateRequests
         ]);
 
         if ($data->has('image_file_id') && !empty($data->get('image_file_id'))) {
-            /** @var \App\Models\File $file */
+            /** @var File $file */
             $file = File::findOrFail($data->get('image_file_id'))->assigned();
 
             // Create resized version for common dimensions.
@@ -90,6 +94,8 @@ class NewOrganisationEventCreatedByOrgAdmin implements AppliesUpdateRequests
 
         // Ensure conditional fields are reset if needed.
         $organisationEvent->resetConditionalFields();
+
+        $updateRequest->updateable_id = $organisationEvent->id;
 
         return $updateRequest;
     }

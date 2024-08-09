@@ -53,7 +53,7 @@ class TaxonomyOrganisationController extends Controller
     {
         return DB::transaction(function () use ($request, $slugGenerator) {
             $organisation = Taxonomy::organisation()->children()->create([
-                'slug' => $slugGenerator->generate($request->name, table(Taxonomy::class)),
+                'slug' => $slugGenerator->generate($request->name, (new Taxonomy())),
                 'name' => $request->name,
                 'order' => $request->order,
                 'depth' => 1,
@@ -90,9 +90,7 @@ class TaxonomyOrganisationController extends Controller
     {
         return DB::transaction(function () use ($request, $slugGenerator, $taxonomy) {
             $taxonomy->update([
-                'slug' => $slugGenerator->compareEquals($request->name, $taxonomy->slug)
-                    ? $taxonomy->slug
-                    : $slugGenerator->generate($request->name, table(Taxonomy::class)),
+                'slug' => $slugGenerator->generate($request->name, $taxonomy),
                 'name' => $request->name,
                 'order' => $request->order,
             ]);

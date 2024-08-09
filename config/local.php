@@ -34,17 +34,17 @@ return [
     /*
      * The URI for the Terms and Conditions page.
      */
-    'tandc_uri' => env('TANDC_URI', Str::finish(config('local.frontend_uri'), '/') . 'terms-and-conditions'),
+    'tandc_uri' => env('TANDC_URI', Str::finish(env('FRONTEND_URI', ''), '/') . 'terms-and-conditions'),
 
     /*
      * The URI for the Privacy page.
      */
-    'privacy_uri' => env('PRIVACY_URI', Str::finish(config('local.frontend_uri'), '/') . 'privacy-policy'),
+    'privacy_uri' => env('PRIVACY_URI', Str::finish(env('FRONTEND_URI', ''), '/') . 'privacy-policy'),
 
     /*
      * The URI for the Accessibility page.
      */
-    'accessibility_uri' => env('ACCESSIBILITY_URI', Str::finish(config('local.frontend_uri'), '/') . 'accessibility_statement'),
+    'accessibility_uri' => env('ACCESSIBILITY_URI', Str::finish(env('FRONTEND_URI', ''), '/') . 'accessibility_statement'),
 
     /*
      * The number of working days a service must respond within.
@@ -68,8 +68,39 @@ return [
         150,
         350,
     ],
+
     /**
      * The request api rate limit per minute per user / IP.
      */
     'api_rate_limit' => env('API_RATE_LIMIT', 300),
+
+    /**
+     * Organisation description character limit.
+     */
+    'organisation_description_max_chars' => env('ORG_DESCRIPTION_MAX_CHARS', 3000),
+
+    /**
+     * Service description character limit.
+     */
+    'service_description_max_chars' => env('SERVICE_DESCRIPTION_MAX_CHARS', 10000),
+
+    /**
+     * Useful Info description character limit.
+     */
+    'useful_info_description_max_chars' => env('USEFUL_INFO_DESCRIPTION_MAX_CHARS', 1000),
+
+    /**
+     * Organisation Event description character limit.
+     */
+    'event_description_max_chars' => env('EVENT_DESCRIPTION_MAX_CHARS', 10000),
+
+    /**
+     * Page copy character limit.
+     */
+    'page_copy_max_chars' => env('PAGE_COPY_MAX_CHARS', 60000),
+
+    /**
+     * Max number of gallery images per service.
+     */
+    'max_gallery_images' => env('SERVICE_MAX_GALLERY_IMAGES', 5),
 ];

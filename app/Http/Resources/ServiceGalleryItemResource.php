@@ -16,6 +16,8 @@ class ServiceGalleryItemResource extends JsonResource
         return [
             'file_id' => $this->file_id,
             'url' => $this->url(),
+            'mime_type' => $this->file->mime_type,
+            'alt_text' => $this->file->meta['alt_text'] ?? null,
             'created_at' => $this->created_at->format(CarbonImmutable::ISO8601),
             'updated_at' => $this->updated_at->format(CarbonImmutable::ISO8601),
         ];

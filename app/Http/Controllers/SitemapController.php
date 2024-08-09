@@ -16,7 +16,7 @@ class SitemapController extends Controller
     /**
      * The DomDocument that holds the xml sitemap.
      *
-     * @var DomDocument
+     * @var DOMDocument
      */
     protected $sitemap;
 

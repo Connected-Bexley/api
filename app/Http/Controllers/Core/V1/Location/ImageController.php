@@ -32,7 +32,7 @@ class ImageController extends Controller
                 ->firstOrFail()
                 ->data['image_file_id'];
 
-            /** @var \App\Models\File $file */
+            /** @var File $file */
             $file = File::findOrFail($imageFileId);
         }
 

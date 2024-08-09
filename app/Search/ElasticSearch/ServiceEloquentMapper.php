@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 
 namespace App\Search\ElasticSearch;
 
@@ -24,7 +24,7 @@ class ServiceEloquentMapper implements EloquentMapper
         $page = page($page);
         $perPage = per_page($perPage);
 
-        $esQuery->load(['serviceLocations'], Service::class);
+        $esQuery->load(['serviceLocations.location'], Service::class);
 
         $queryRequest = $esQuery->buildSearchRequest()->toArray();
 

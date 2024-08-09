@@ -9,7 +9,7 @@ use GuzzleHttp\Client;
 class GoogleGeocoder extends Geocoder
 {
     /**
-     * @var \GuzzleHttp\Client
+     * @var Client
      */
     protected $client;
 
